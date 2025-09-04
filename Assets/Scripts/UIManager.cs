@@ -13,6 +13,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI rightAnswerText; // Texto do botão Recusar
     public TextMeshProUGUI dateText;
 
+
     [Header("Barras de Atributos")]
     public Slider climateSlider;
     public Slider relationsSlider;
@@ -21,6 +22,7 @@ public class UIManager : MonoBehaviour
 
     [Header("Configurações")]
     public float animationSpeed = 2f; // Velocidade da animação das barras
+    public LeanTweenType easeType;
 
     private void Awake()
     {
@@ -43,7 +45,7 @@ public class UIManager : MonoBehaviour
         GameManager.OnGameOver += HandleGameOver;
 
         // Inicializando UI
-        dealPanel.SetActive(false);
+        //dealPanel.SetActive(false);
     }
 
     private void OnDestroy()
@@ -51,6 +53,11 @@ public class UIManager : MonoBehaviour
         GameManager.OnNewDeal -= HandleNewDeal;
         GameManager.OnChangeAttributes -= HandleUpdatedAttributes;
         GameManager.OnGameOver -= HandleGameOver;
+    }
+
+    private void Start()
+    {
+        LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
     }
 
     private void Update()
@@ -81,8 +88,8 @@ public class UIManager : MonoBehaviour
     {
         if (deal == null) return;
 
-        if (!dealPanel.activeSelf)
-            dealPanel.SetActive(true);
+        ActivatePanel();
+        LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -360, 0), 1f).setEase(easeType);
 
         descriptionText.text = deal.Description;
         rightAnswerText.text = deal.rightAnswer;
@@ -100,6 +107,7 @@ public class UIManager : MonoBehaviour
         relationsSlider.value = Mathf.Lerp(relationsSlider.value, relationsValue, animationSpeed * Time.deltaTime);
         approvalSlider.value = Mathf.Lerp(approvalSlider.value, approvalValue, animationSpeed * Time.deltaTime);
         economySlider.value = Mathf.Lerp(economySlider.value, economyValue, animationSpeed * Time.deltaTime);
+
     }
 
     public void ShowGameOver(string reason)
@@ -112,17 +120,27 @@ public class UIManager : MonoBehaviour
     public void LeftAnswerButton()
     {
         StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsLeft));
-        dealPanel.SetActive(false);
+        LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
     }
 
     public void RightAnswerButton()
     {
         StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsRight));
-        dealPanel.SetActive(false);
+        LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
     }
 
     public void UpdateDate()
     {
         dateText.text = $"{GameManager.instance.month} / {GameManager.instance.year}";
+    }
+
+    void DeactivatePanel()
+    {
+        dealPanel.SetActive(false);
+    }
+
+    void ActivatePanel()
+    {
+        dealPanel.SetActive(true);
     }
 }

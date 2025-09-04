@@ -7,15 +7,15 @@
       "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\uimanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|d:\\gamedev\\santospowerup2025\\assets\\scripts\\gamemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|D:\\GameDev\\SantosPowerUp2025\\assets\\scripts\\gamemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gamemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|d:\\gamedev\\santospowerup2025\\assets\\scripts\\attributes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|D:\\GameDev\\SantosPowerUp2025\\assets\\scripts\\attributes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\attributes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|d:\\gamedev\\santospowerup2025\\assets\\scripts\\deal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|D:\\GameDev\\SantosPowerUp2025\\assets\\scripts\\deal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\deal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -36,7 +36,7 @@
               "RelativeDocumentMoniker": "Assets\\Scripts\\UIManager.cs",
               "ToolTip": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\UIManager.cs",
               "RelativeToolTip": "Assets\\Scripts\\UIManager.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAVAAAAAAAAAA==",
+              "ViewState": "AgIAAEgAAAAAAAAAAAAUwHoAAACOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-03T22:53:10.056Z",
               "EditorCaption": ""
@@ -49,10 +49,9 @@
               "RelativeDocumentMoniker": "Assets\\Scripts\\GameManager.cs",
               "ToolTip": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\GameManager.cs",
               "RelativeToolTip": "Assets\\Scripts\\GameManager.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACcAAAAdAAAAAAAAAA==",
+              "ViewState": "AgIAADAAAAAAAAAAAAAIwCcAAAAdAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-03T22:53:08.25Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-03T22:53:08.25Z"
             },
             {
               "$type": "Document",
@@ -64,8 +63,7 @@
               "RelativeToolTip": "Assets\\Scripts\\Attributes.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-03T22:52:58.381Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-03T22:52:58.381Z"
             },
             {
               "$type": "Document",
@@ -77,8 +75,7 @@
               "RelativeToolTip": "Assets\\Scripts\\Deal.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-03T22:52:51.433Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-03T22:52:51.433Z"
             }
           ]
         }
