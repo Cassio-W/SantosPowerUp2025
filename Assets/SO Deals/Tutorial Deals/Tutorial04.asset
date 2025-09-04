@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: Tutorial04
+  m_EditorClassIdentifier: 
+  Description: "Atrav\xE9s das \xFAltimas pesquisas com a ODS 2030, chegamos \xE0
+    conclus\xE3o das 4 coisas que o pais mais precisa tomar cuidado: Clima, Rela\xE7\xF5es
+    Internacionais, Aprova\xE7\xE3o Populacional e Economia. "
+  leftAnswer: "Caramba \xE9 muita coisa"
+  rightAnswer: "Ser presidente n\xE3o \xE9 f\xE1cil"
+  impactsLeft:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: 0
+    economy: 0
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: 0
+    economy: 0
+  newDealsIfLeft: []
+  newDealsIfRight: []

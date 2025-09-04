@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using System.Linq;
 
 public class UIManager : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class UIManager : MonoBehaviour
 
     [Header("Referências de UI")]
     public GameObject dealPanel; // Painel principal da proposta
+    public GameObject datePanel;
     public TextMeshProUGUI descriptionText; // Texto da proposta
     public TextMeshProUGUI leftAnswerText; // Texto do botão Aceitar
     public TextMeshProUGUI rightAnswerText; // Texto do botão Recusar
@@ -89,7 +91,8 @@ public class UIManager : MonoBehaviour
         if (deal == null) return;
 
         ActivatePanel();
-        LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -360, 0), 1f).setEase(easeType);
+        LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -300, 0), 1f).setEase(easeType);
+        LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 451, 0), 1f).setEase(easeType);
 
         descriptionText.text = deal.Description;
         rightAnswerText.text = deal.rightAnswer;
@@ -119,14 +122,39 @@ public class UIManager : MonoBehaviour
 
     public void LeftAnswerButton()
     {
-        StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsLeft));
-        LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
+        if (!GameManager.instance.onTutorial)
+        {
+            LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
+            LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
+            StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsLeft));
+        }
+        else
+        {
+            StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.tutorialDeals[0], GameManager.instance.tutorialDeals[0].impactsLeft));
+            if (!GameManager.instance.tutorialDeals.Any())
+            {
+                LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
+                LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
+            }
+        }
     }
 
     public void RightAnswerButton()
     {
-        StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsRight));
-        LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
+        if (!GameManager.instance.onTutorial){
+            LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
+            LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
+            StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsRight));
+        }
+        else
+        {
+            StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.tutorialDeals[0], GameManager.instance.tutorialDeals[0].impactsRight));
+            if (!GameManager.instance.tutorialDeals.Any())
+            {
+                LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
+                LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
+            }
+        }
     }
 
     public void UpdateDate()

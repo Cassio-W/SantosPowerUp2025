@@ -20,6 +20,8 @@ public class GameManager : MonoBehaviour
 
     public int month;
     public int year;
+    public bool onTutorial;
+    int tutorialStep;
 
     private void Awake()
     {
@@ -28,15 +30,16 @@ public class GameManager : MonoBehaviour
 
         month = 1;
         year = 2026;
+        onTutorial = true;
     }
 
     void Start()
     {
-        ShuffleDeck();
         gameAttributes.climaticChanges = 50;
         gameAttributes.internationalRelations = 50;
         gameAttributes.populationalApproval = 50;
         gameAttributes.economy = 50;
+        ShuffleDeck();
         Invoke("GetDeal", 5);
     }
 
@@ -47,24 +50,51 @@ public class GameManager : MonoBehaviour
 
     public void ShuffleDeck()
     {
-        actualDeck.Shuffle();
+        if (!onTutorial)
+        {
+            actualDeck.Shuffle();
+        }
     }
 
     public void GetDeal()
     {
-        OnNewDeal.Invoke(actualDeck[0]);
+        if (onTutorial)
+        {
+            OnNewDeal.Invoke(tutorialDeals[0]);
+        }
+        else
+        {
+            OnNewDeal.Invoke(actualDeck[0]);
+        }
     }
 
     public IEnumerator ApplyDecision(Deal deal, Attributes impacts)
     {
         gameAttributes.ApplyChanges(impacts);
         OnChangeAttributes?.Invoke(gameAttributes);
-        CheckGameOver();
-        actualDeck.Remove(actualDeck[0]);
-        ShuffleDeck();
-        PassTime();
-        yield return new WaitForSeconds(10);
-        GetDeal();
+        if (!onTutorial)
+        {
+            CheckGameOver();
+            actualDeck.Remove(actualDeck[0]);
+            ShuffleDeck();
+            PassTime();
+            yield return new WaitForSeconds(10);
+            GetDeal();
+        }
+        else
+        {
+            tutorialDeals.Remove(tutorialDeals[0]);
+            if (!tutorialDeals.Any())
+            {
+                onTutorial = false;
+                Invoke("GetDeal", 5);
+            }
+            else
+            {
+                GetDeal();
+            }
+        }
+        
 
         foreach (Deal newDeal in deal.newDealsIfLeft)
         {

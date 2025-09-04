@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: Tutorial02
+  m_EditorClassIdentifier: 
+  Description: "Parab\xE9ns por ter vencido as elei\xE7\xF5es. Hoje \xE9 seu primeiro
+    dia de mandato e o Brasil j\xE1 est\xE1 um caos. Nosso objetivo \xE9 fazer esse
+    pa\xEDs aguentar at\xE9 2030."
+  leftAnswer: "Pois \xE9 senhor"
+  rightAnswer: "Vai ser f\xE1cil"
+  impactsLeft:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: 0
+    economy: 0
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: 0
+    economy: 0
+  newDealsIfLeft: []
+  newDealsIfRight: []
