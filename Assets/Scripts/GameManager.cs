@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -15,6 +16,7 @@ public class GameManager : MonoBehaviour
 
     public List<Deal> allDeals = new List<Deal>();
     public List<Deal> actualDeck = new List<Deal>();
+    public List<Deal> tutorialDeals = new List<Deal>();
 
     public int month;
     public int year;
@@ -35,14 +37,12 @@ public class GameManager : MonoBehaviour
         gameAttributes.internationalRelations = 50;
         gameAttributes.populationalApproval = 50;
         gameAttributes.economy = 50;
+        Invoke("GetDeal", 5);
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            GetDeal();
-        }
+
     }
 
     public void ShuffleDeck()
@@ -55,7 +55,7 @@ public class GameManager : MonoBehaviour
         OnNewDeal.Invoke(actualDeck[0]);
     }
 
-    public void ApplyDecision(Deal deal, Attributes impacts)
+    public IEnumerator ApplyDecision(Deal deal, Attributes impacts)
     {
         gameAttributes.ApplyChanges(impacts);
         OnChangeAttributes?.Invoke(gameAttributes);
@@ -63,6 +63,7 @@ public class GameManager : MonoBehaviour
         actualDeck.Remove(actualDeck[0]);
         ShuffleDeck();
         PassTime();
+        yield return new WaitForSeconds(10);
         GetDeal();
 
         foreach (Deal newDeal in deal.newDealsIfLeft)

@@ -111,12 +111,14 @@ public class UIManager : MonoBehaviour
 
     public void LeftAnswerButton()
     {
-        GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsLeft);
+        StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsLeft));
+        dealPanel.SetActive(false);
     }
 
     public void RightAnswerButton()
     {
-        GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsRight);
+        StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsRight));
+        dealPanel.SetActive(false);
     }
 
     public void UpdateDate()
