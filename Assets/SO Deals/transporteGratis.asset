@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: transporteGratis
+  m_EditorClassIdentifier: 
+  Description: "O povo quer transporte p\xFAblico gr\xE1tis. S\xF3 custa o pre\xE7o
+    de um rim."
+  leftAnswer: "Vai de gra\xE7a, mas aperta a\xED!"
+  rightAnswer: Quer moleza? Compra um carro!
+  impactsLeft:
+    climaticChanges: 35
+    internationalRelations: 0
+    populationalApproval: 40
+    economy: -30
+  impactsRight:
+    climaticChanges: -20
+    internationalRelations: 0
+    populationalApproval: -25
+    economy: 25
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 3995003932205011531, guid: 9179786054c1ca64996197a586509ff2, type: 3}

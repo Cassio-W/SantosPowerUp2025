@@ -3,7 +3,32 @@ guid: a24f71026acec1240a6ffdbecac639b2
 ModelImporter:
   serializedVersion: 21300
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: chapeu1
+    second: {fileID: 2100000, guid: 3646b9a8a205f624b98a3edbb7a76605, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pele
+    second: {fileID: 2100000, guid: 6d88c27c15b3b8d439f00c2575e7539d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pele1
+    second: {fileID: 2100000, guid: 6d88c27c15b3b8d439f00c2575e7539d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: roupa
+    second: {fileID: 2100000, guid: e56f7a6e3dd383f41927c6cdf431691e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sapato
+    second: {fileID: 2100000, guid: e56f7a6e3dd383f41927c6cdf431691e, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -88,7 +113,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 0.008
+    globalScale: 0.8
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: aquecimentoGlobal
+  m_EditorClassIdentifier: 
+  Description: Aquecimento global batendo na porta. Vamos subsidiar ar-condicionado
+    ou sombra?
+  leftAnswer: "Mais \xE1rvores, menos ventilador!"
+  rightAnswer: Distribui ar-condicionado, depois a conta vem.
+  impactsLeft:
+    climaticChanges: 20
+    internationalRelations: 0
+    populationalApproval: 20
+    economy: -25
+  impactsRight:
+    climaticChanges: -25
+    internationalRelations: 0
+    populationalApproval: 15
+    economy: 15
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 9067916053490012197, guid: 1bddbd3a1afe9314f936a7e5fde0da5c, type: 3}

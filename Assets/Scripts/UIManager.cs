@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
@@ -10,10 +11,12 @@ public class UIManager : MonoBehaviour
     [Header("Referências de UI")]
     public GameObject dealPanel; // Painel principal da proposta
     public GameObject datePanel;
+    public GameObject gameOverPanel;
     public TextMeshProUGUI descriptionText; // Texto da proposta
     public TextMeshProUGUI leftAnswerText; // Texto do botão Aceitar
     public TextMeshProUGUI rightAnswerText; // Texto do botão Recusar
     public TextMeshProUGUI dateText;
+    public TextMeshProUGUI gameOverText;
 
 
     [Header("Barras de Atributos")]
@@ -45,6 +48,7 @@ public class UIManager : MonoBehaviour
         GameManager.OnNewDeal += HandleNewDeal;
         GameManager.OnChangeAttributes += HandleUpdatedAttributes;
         GameManager.OnGameOver += HandleGameOver;
+        GameManager.OnGameWin += ShowGameWin;
 
         // Inicializando UI
         //dealPanel.SetActive(false);
@@ -55,6 +59,7 @@ public class UIManager : MonoBehaviour
         GameManager.OnNewDeal -= HandleNewDeal;
         GameManager.OnChangeAttributes -= HandleUpdatedAttributes;
         GameManager.OnGameOver -= HandleGameOver;
+        GameManager.OnGameWin -= ShowGameWin;
     }
 
     private void Start()
@@ -117,8 +122,21 @@ public class UIManager : MonoBehaviour
     public void ShowGameOver(string reason)
     {
         dealPanel.SetActive(false);
-        Debug.Log($"{reason} Game Over");
+        LeanTween.move(gameOverPanel.GetComponent<RectTransform>(), new Vector3(0, -300, 0), 1f).setEase(easeType);
+        gameOverText.text = reason;
         // Implemente sua lógica de tela de game over aqui
+    }
+
+    public void ShowGameWin(string congratulations)
+    {
+        dealPanel.SetActive(false);
+        LeanTween.move(gameOverPanel.GetComponent<RectTransform>(), new Vector3(0, -300, 0), 1f).setEase(easeType);
+        gameOverText.text = congratulations;
+    }
+
+    public void GoBack()
+    {
+        SceneManager.LoadScene(0);
     }
 
     public void LeftAnswerButton()

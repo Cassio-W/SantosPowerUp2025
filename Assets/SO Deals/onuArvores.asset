@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: onuArvores
+  m_EditorClassIdentifier: 
+  Description: "Presidente, a ONU quer que a gente vire refer\xEAncia ambiental.
+    Planta \xE1rvore at\xE9 no banheiro?"
+  leftAnswer: "Vira floresta esse pa\xEDs!"
+  rightAnswer: "Prefiro ar-condicionado a sombra de \xE1rvore."
+  impactsLeft:
+    climaticChanges: 40
+    internationalRelations: 25
+    populationalApproval: 0
+    economy: -30
+  impactsRight:
+    climaticChanges: -40
+    internationalRelations: -20
+    populationalApproval: -25
+    economy: 0
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 9067916053490012197, guid: 1bddbd3a1afe9314f936a7e5fde0da5c, type: 3}

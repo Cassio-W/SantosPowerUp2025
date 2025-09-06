@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: Oriente Tratado
+  m_EditorClassIdentifier: 
+  Description: "Senhor, o l\xEDder do Oriente gostaria de fazer um tratado de 0 impostos
+    em importa\xE7\xF5es e exporta\xE7\xF5es! O que acha?"
+  leftAnswer: "Isso \xE9 besteira"
+  rightAnswer: Chamem os diplomatas!
+  impactsLeft:
+    climaticChanges: 0
+    internationalRelations: -15
+    populationalApproval: 0
+    economy: 15
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: 15
+    populationalApproval: 0
+    economy: -10
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 7470939222124999217, guid: c774684354c0c8340acd528845103aad, type: 3}

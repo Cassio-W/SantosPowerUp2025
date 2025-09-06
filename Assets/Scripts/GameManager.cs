@@ -11,16 +11,25 @@ public class GameManager : MonoBehaviour
     public static event Action<Deal> OnNewDeal; // Disparado quando uma nova proposta é puxada
     public static event Action<Attributes> OnChangeAttributes; // Disparado quando qualquer decisão é tomada
     public static event Action<string> OnGameOver; // Disparado quando um atributo zera. O string pode ser a causa.
+    public static event Action<string> OnGameWin;
 
     public static GameManager instance;
     public Attributes gameAttributes;
 
+    [Header("Decks")]
     public List<Deal> allDeals = new List<Deal>();
     public List<Deal> actualDeck = new List<Deal>();
     public List<Deal> tutorialDeals = new List<Deal>();
-
+    
+    [Header("NPCs")]
     public NPCController actualNPC;
 
+    [Header("Animations")]
+    [SerializeField]List<string> animations = new List<string>();
+    [SerializeField] Animator anim;
+    [SerializeField] GameObject palmas;
+
+    [Header("Time")]
     public int month;
     public int year;
     public bool onTutorial;
@@ -61,18 +70,22 @@ public class GameManager : MonoBehaviour
     public IEnumerator GetDeal()
     {
         yield return new WaitForSeconds(0.1f);
-        if (onTutorial)
+        if(actualDeck.Count >= 1)
         {
-            OnNewDeal.Invoke(tutorialDeals[0]);
-        }
-        else
-        {
-            GameObject npc = Instantiate(actualDeck[0].NPC, new Vector3(5.8f, 0, 3.65f), transform.rotation);
-            actualNPC = npc.GetComponent<NPCController>();
-            npc.transform.position = actualNPC.startPosition;
-            actualNPC.MoveToTable();
-            yield return new WaitWhile(() => !actualNPC.hasReachedTarget);
-            OnNewDeal.Invoke(actualDeck[0]);
+
+            if (onTutorial)
+            {
+                OnNewDeal.Invoke(tutorialDeals[0]);
+            }
+            else
+            {
+                GameObject npc = Instantiate(actualDeck[0].NPC, new Vector3(5.8f, 0, 3.65f), transform.rotation);
+                actualNPC = npc.GetComponent<NPCController>();
+                npc.transform.position = actualNPC.startPosition;
+                actualNPC.MoveToTable();
+                yield return new WaitWhile(() => !actualNPC.hasReachedTarget);
+                OnNewDeal.Invoke(actualDeck[0]);
+            }
         }
     }
 
@@ -82,12 +95,15 @@ public class GameManager : MonoBehaviour
         OnChangeAttributes?.Invoke(gameAttributes);
         if (!onTutorial)
         {
+            DisplayProp(deal.tag);
             CheckGameOver();
             actualDeck.Remove(actualDeck[0]);
             ShuffleDeck();
             PassTime();
             actualNPC.MoveToExit();
-            yield return new WaitForSeconds(10);
+            yield return new WaitForSeconds(0.5f);
+            StartCoroutine(RandomizeAnimation());
+            yield return new WaitForSeconds(5);
             StartCoroutine(GetDeal());
         }
         else
@@ -122,8 +138,9 @@ public class GameManager : MonoBehaviour
         gameAttributes.populationalApproval <= 0 ||
         gameAttributes.economy <= 0)
         {
-            OnGameOver.Invoke("Perdeu Mané");
-            Time.timeScale = 0;
+            OnGameOver.Invoke("Olha o que você fez! Estragou tudo e agora vamos ter que te tirar da presidência. Boa sorte explicando seus erros para o povo.");
+            actualDeck.Clear();
+            StopAllCoroutines();
         }
     }
 
@@ -142,7 +159,10 @@ public class GameManager : MonoBehaviour
         if (year == 2030)
         {
             Debug.Log("Cabo o jogo");
-            Time.timeScale = 0;
+            OnGameWin.Invoke("Parabéns, chegamos em 2030 e seu mandato foi incrível, você tirou o país do lixo e impediu que o pior ocorresse. Obrigado.");
+            Instantiate(palmas, new Vector3(0, 0, 2), Quaternion.identity);
+            actualDeck.Clear();
+            StopAllCoroutines();
         }
     }
 
@@ -156,5 +176,25 @@ public class GameManager : MonoBehaviour
     {
         Volume pp = Camera.main.GetComponent<Volume>();
         LeanTween.value(1f, 0f, 2).setOnUpdate((float weight) => { pp.weight = weight; }).setEase(LeanTweenType.easeInOutQuad);
+    }
+
+    IEnumerator RandomizeAnimation()
+    {
+        int choice = UnityEngine.Random.Range(0, animations.Count());
+        anim.Play(animations[choice]);
+        yield return new WaitForSeconds(1);
+        anim.Play("None");
+    }
+
+    void DisplayProp(string tag)
+    {
+        if(tag != "")
+        {
+            GameObject[] props = GameObject.FindGameObjectsWithTag(tag);
+            foreach (GameObject obj in props)
+            {
+                LeanTween.scale(obj, transform.localScale, 1.5f);
+            }
+        }
     }
 }

@@ -29,4 +29,4 @@ MonoBehaviour:
     economy: 3
   newDealsIfLeft: []
   newDealsIfRight: []
-  NPC: {fileID: 3068970475741751055, guid: 57bbf963bfd2b30428bb800f7142a922, type: 3}
+  NPC: {fileID: 5429354218765748742, guid: d6f8590726c0fdf4d8820af07e591e5b, type: 3}

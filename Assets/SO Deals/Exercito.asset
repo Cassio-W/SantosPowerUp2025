@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: Exercito
+  m_EditorClassIdentifier: 
+  Description: "Nossos pa\xEDses vizinhos est\xE3o se mostrando perigosos! Vamos
+    investir em poder militar para mantermos uma posi\xE7\xE3o de respeito."
+  leftAnswer: "Mais 1 Bilh\xE3o pro ex\xE9rcito!"
+  rightAnswer: Deixe-os em paz
+  impactsLeft:
+    climaticChanges: 0
+    internationalRelations: 15
+    populationalApproval: 0
+    economy: -15
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: 0
+    economy: 15
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 4047350394622487709, guid: 16e4de0f62729694eb1a5ff97f31af79, type: 3}

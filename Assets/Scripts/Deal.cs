@@ -17,4 +17,6 @@ public class Deal: ScriptableObject
 
     public GameObject NPC;
 
+    public string tag;
+
 }

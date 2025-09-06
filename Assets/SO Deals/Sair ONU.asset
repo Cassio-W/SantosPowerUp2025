@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: Sair ONU
+  m_EditorClassIdentifier: 
+  Description: "Presidente, essa ONU n\xE3o est\xE1 com nada, ta okay? S\xF3 decis\xE3o
+    ruim e nossa popula\xE7\xE3o est\xE1 reclamando. Vamos sair dessa bomba?"
+  leftAnswer: "Vamos sair ent\xE3o"
+  rightAnswer: "Acho que os outros pa\xEDses n\xE3o ir\xE3o gostar"
+  impactsLeft:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: -10
+    economy: 0
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: -20
+    populationalApproval: 10
+    economy: 0
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 6040501860826345181, guid: bce69ffb460102040acb20bbea5190c3, type: 3}

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: satelite
+  m_EditorClassIdentifier: 
+  Description: "Temos uma chance de mandar um sat\xE9lite pro espa\xE7o. Custa caro,
+    mas a galera ama foguete."
+  leftAnswer: "Brasil no Espa\xE7o! Ao infinito e al\xE9m!"
+  rightAnswer: "Espa\xE7o? Mal temos \xF4nibus aqui."
+  impactsLeft:
+    climaticChanges: 0
+    internationalRelations: 25
+    populationalApproval: 25
+    economy: -35
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: -15
+    populationalApproval: -20
+    economy: 25
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 5340672492827399196, guid: e0963aa14dba98a43938b379bb1c9335, type: 3}

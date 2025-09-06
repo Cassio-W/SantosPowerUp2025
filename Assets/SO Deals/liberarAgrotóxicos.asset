@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: "liberarAgrot\xF3xicos"
+  m_EditorClassIdentifier: 
+  Description: "Presidente, liberar agrot\xF3xicos melhora a produtividade, mas o
+    alface vai brilhar no escuro..."
+  leftAnswer: Pode tacar veneno!
+  rightAnswer: "S\xF3 se o agrot\xF3xico for org\xE2nico."
+  impactsLeft:
+    climaticChanges: -40
+    internationalRelations: 0
+    populationalApproval: 0
+    economy: 25
+  impactsRight:
+    climaticChanges: 30
+    internationalRelations: 0
+    populationalApproval: 0
+    economy: -25
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 5340672492827399196, guid: e0963aa14dba98a43938b379bb1c9335, type: 3}

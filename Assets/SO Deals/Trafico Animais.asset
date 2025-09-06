@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: Trafico Animais
+  m_EditorClassIdentifier: 
+  Description: "O tr\xE1fico ilegal de animais est\xE1 crescendo na Amaz\xF4nia,
+    precisamos fazer algo."
+  leftAnswer: Prendam todos
+  rightAnswer: "Ainda n\xE3o"
+  impactsLeft:
+    climaticChanges: 10
+    internationalRelations: 0
+    populationalApproval: 15
+    economy: -15
+  impactsRight:
+    climaticChanges: -15
+    internationalRelations: 0
+    populationalApproval: -15
+    economy: 20
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 7243269876658770806, guid: aea00cd83b7045845975864cbf0caa3e, type: 3}

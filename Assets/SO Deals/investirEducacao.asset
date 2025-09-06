@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: investirEducacao
+  m_EditorClassIdentifier: 
+  Description: "Educa\xE7\xE3o de qualidade custa caro, mas uma popula\xE7\xE3o burra
+    tamb\xE9m. Qual a escolha?"
+  leftAnswer: Melhor manter o povo sem saber quem sou.
+  rightAnswer: "Investe, quero doutores at\xE9 nos a\xE7ougues!"
+  impactsLeft:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: 40
+    economy: -25
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: -40
+    economy: 25
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 6532259188457934314, guid: 0c667e5e5810e0448b52183683271385, type: 3}

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: Liberar Cassino
+  m_EditorClassIdentifier: 
+  Description: Vejo um possibilidade de lucro muito alta legalizando e taxando as
+    casas de aposta. O que acha?
+  leftAnswer: "Nossa popula\xE7\xE3o n\xE3o pode sofrer"
+  rightAnswer: Mais impostos!
+  impactsLeft:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: 15
+    economy: -15
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: -15
+    economy: 15
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 6040501860826345181, guid: bce69ffb460102040acb20bbea5190c3, type: 3}

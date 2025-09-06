@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: pesquisaCientifica
+  m_EditorClassIdentifier: 
+  Description: "Sr. Presidente, investir em pesquisa cient\xEDfica pode nos colocar
+    no mapa... ou nos levar \xE0 fal\xEAncia."
+  leftAnswer: "Investe tudo! Quero Nobel no curr\xEDculo!"
+  rightAnswer: Pesquisador que lute.
+  impactsLeft:
+    climaticChanges: 0
+    internationalRelations: 15
+    populationalApproval: 0
+    economy: -20
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: -10
+    populationalApproval: -30
+    economy: 25
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 3995003932205011531, guid: 9179786054c1ca64996197a586509ff2, type: 3}

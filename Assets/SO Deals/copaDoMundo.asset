@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: copaDoMundo
+  m_EditorClassIdentifier: 
+  Description: "Senhor presidente, a FIFA quer sediar a Copa aqui. Turismo, visibilidade
+    e... est\xE1dio novo!"
+  leftAnswer: "Chuta que \xE9 gol!"
+  rightAnswer: "Sem Copa, t\xF4 focado na novela."
+  impactsLeft:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: 30
+    economy: -15
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: -25
+    populationalApproval: 0
+    economy: 15
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 5429354218765748742, guid: d6f8590726c0fdf4d8820af07e591e5b, type: 3}
