@@ -17,15 +17,16 @@ MonoBehaviour:
   leftAnswer: "Construam uma usina ent\xE3o!"
   rightAnswer: "Jamais, isso \xE9 muito perigoso!"
   impactsLeft:
-    climaticChanges: 10
-    internationalRelations: -5
+    climaticChanges: 30
+    internationalRelations: -15
     populationalApproval: 0
-    economy: -5
+    economy: -15
   impactsRight:
-    climaticChanges: -5
+    climaticChanges: -15
     internationalRelations: 0
     populationalApproval: 0
     economy: 0
   newDealsIfLeft:
   - {fileID: 11400000, guid: cb696cd66511ec54cb54202dcd78ab81, type: 2}
   newDealsIfRight: []
+  NPC: {fileID: 3068970475741751055, guid: 57bbf963bfd2b30428bb800f7142a922, type: 3}

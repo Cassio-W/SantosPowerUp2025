@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public class GameManager : MonoBehaviour
 {
@@ -18,10 +19,11 @@ public class GameManager : MonoBehaviour
     public List<Deal> actualDeck = new List<Deal>();
     public List<Deal> tutorialDeals = new List<Deal>();
 
+    public NPCController actualNPC;
+
     public int month;
     public int year;
     public bool onTutorial;
-    int tutorialStep;
 
     private void Awake()
     {
@@ -40,7 +42,7 @@ public class GameManager : MonoBehaviour
         gameAttributes.populationalApproval = 50;
         gameAttributes.economy = 50;
         ShuffleDeck();
-        Invoke("GetDeal", 5);
+        StartCoroutine(GetDeal());
     }
 
     void Update()
@@ -56,14 +58,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void GetDeal()
+    public IEnumerator GetDeal()
     {
+        yield return new WaitForSeconds(0.1f);
         if (onTutorial)
         {
             OnNewDeal.Invoke(tutorialDeals[0]);
         }
         else
         {
+            GameObject npc = Instantiate(actualDeck[0].NPC, new Vector3(5.8f, 0, 3.65f), transform.rotation);
+            actualNPC = npc.GetComponent<NPCController>();
+            npc.transform.position = actualNPC.startPosition;
+            actualNPC.MoveToTable();
+            yield return new WaitWhile(() => !actualNPC.hasReachedTarget);
             OnNewDeal.Invoke(actualDeck[0]);
         }
     }
@@ -78,8 +86,9 @@ public class GameManager : MonoBehaviour
             actualDeck.Remove(actualDeck[0]);
             ShuffleDeck();
             PassTime();
+            actualNPC.MoveToExit();
             yield return new WaitForSeconds(10);
-            GetDeal();
+            StartCoroutine(GetDeal());
         }
         else
         {
@@ -87,11 +96,11 @@ public class GameManager : MonoBehaviour
             if (!tutorialDeals.Any())
             {
                 onTutorial = false;
-                Invoke("GetDeal", 5);
+                StartCoroutine(GetDeal());
             }
             else
             {
-                GetDeal();
+                StartCoroutine(GetDeal());
             }
         }
         
@@ -135,5 +144,17 @@ public class GameManager : MonoBehaviour
             Debug.Log("Cabo o jogo");
             Time.timeScale = 0;
         }
+    }
+
+    public void PPFocus()
+    {
+        Volume pp = Camera.main.GetComponent<Volume>();
+        LeanTween.value(0f, 1f, 2).setOnUpdate((float weight) => {pp.weight = weight;}).setEase(LeanTweenType.easeInOutQuad);
+    }
+
+    public void PPUnfocus()
+    {
+        Volume pp = Camera.main.GetComponent<Volume>();
+        LeanTween.value(1f, 0f, 2).setOnUpdate((float weight) => { pp.weight = weight; }).setEase(LeanTweenType.easeInOutQuad);
     }
 }

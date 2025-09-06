@@ -59,7 +59,7 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
+        //LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
     }
 
     private void Update()
@@ -93,6 +93,7 @@ public class UIManager : MonoBehaviour
         ActivatePanel();
         LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -300, 0), 1f).setEase(easeType);
         LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 451, 0), 1f).setEase(easeType);
+        if(!GameManager.instance.onTutorial) GameManager.instance.PPFocus();
 
         descriptionText.text = deal.Description;
         rightAnswerText.text = deal.rightAnswer;
@@ -127,6 +128,7 @@ public class UIManager : MonoBehaviour
             LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
             LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
             StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsLeft));
+            GameManager.instance.PPUnfocus();
         }
         else
         {
@@ -145,6 +147,7 @@ public class UIManager : MonoBehaviour
             LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
             LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
             StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsRight));
+            GameManager.instance.PPUnfocus();
         }
         else
         {

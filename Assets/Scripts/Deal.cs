@@ -15,4 +15,6 @@ public class Deal: ScriptableObject
     public List<Deal> newDealsIfLeft;
     public List<Deal> newDealsIfRight;
 
+    public GameObject NPC;
+
 }
