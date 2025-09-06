@@ -3,11 +3,15 @@
   "WorkspaceRootPath": "D:\\GameDev\\SantosPowerUp2025\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|D:\\GameDev\\SantosPowerUp2025\\assets\\scripts\\npccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|d:\\gamedev\\santospowerup2025\\assets\\scripts\\menuui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\menuui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|d:\\gamedev\\santospowerup2025\\assets\\scripts\\npccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\npccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|d:\\gamedev\\santospowerup2025\\assets\\scripts\\gamemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|D:\\GameDev\\SantosPowerUp2025\\assets\\scripts\\gamemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gamemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -35,6 +39,19 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "MenuUI.cs",
+              "DocumentMoniker": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\MenuUI.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\MenuUI.cs",
+              "ToolTip": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\MenuUI.cs",
+              "RelativeToolTip": "Assets\\Scripts\\MenuUI.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-06T13:44:18.054Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "NPCController.cs",
               "DocumentMoniker": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\NPCController.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\NPCController.cs",
@@ -47,7 +64,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "GameManager.cs",
               "DocumentMoniker": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\GameManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\GameManager.cs",
@@ -55,12 +72,11 @@
               "RelativeToolTip": "Assets\\Scripts\\GameManager.cs",
               "ViewState": "AgIAADsAAAAAAAAAAAAcwFgAAAAjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-03T22:53:08.25Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-03T22:53:08.25Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "UIManager.cs",
               "DocumentMoniker": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\UIManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\UIManager.cs",
@@ -68,12 +84,11 @@
               "RelativeToolTip": "Assets\\Scripts\\UIManager.cs",
               "ViewState": "AgIAAC4AAAAAAAAAAAAowD0AAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-03T22:53:10.056Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-03T22:53:10.056Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "Attributes.cs",
               "DocumentMoniker": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\Attributes.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Attributes.cs",
@@ -85,7 +100,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "Deal.cs",
               "DocumentMoniker": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\Deal.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Deal.cs",
@@ -93,8 +108,7 @@
               "RelativeToolTip": "Assets\\Scripts\\Deal.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-03T22:52:51.433Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-03T22:52:51.433Z"
             }
           ]
         }

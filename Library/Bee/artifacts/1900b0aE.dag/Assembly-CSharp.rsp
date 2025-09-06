@@ -409,6 +409,7 @@
 "Assets/LeanTween/Framework/LTDescrOptional.cs"
 "Assets/LeanTween/Framework/LTSeq.cs"
 "Assets/Scripts/Attributes.cs"
+"Assets/Scripts/CameraMenu.cs"
 "Assets/Scripts/Deal.cs"
 "Assets/Scripts/GameManager.cs"
 "Assets/Scripts/ListExtensions.cs"

@@ -7,10 +7,10 @@ using UnityEngine.UI;
 public class MenuUI : MonoBehaviour
 {
     [SerializeField] int numCenaJogar;
-    [SerializeField] GameObject painelSair;
     [SerializeField] GameObject painelCreditos;
-    bool boolPainelSair = false;
+    [SerializeField] GameObject painelMenu;
     bool boolPainelCreditos = false;
+    bool boolPainelMenu = true;
 
     void Start()
     {
@@ -27,12 +27,6 @@ public class MenuUI : MonoBehaviour
         SceneManager.LoadScene(numCenaJogar);
     }
 
-    public void PainelSair()
-    {
-        boolPainelSair = !boolPainelSair;
-        painelSair.SetActive(boolPainelSair);
-    }
-
     public void Sair()
     {
         Application.Quit();
@@ -41,5 +35,7 @@ public class MenuUI : MonoBehaviour
     {
         boolPainelCreditos = !boolPainelCreditos;
         painelCreditos.SetActive(boolPainelCreditos);
+        boolPainelMenu = !boolPainelMenu;
+        painelMenu.SetActive(boolPainelMenu);
     }
 }
