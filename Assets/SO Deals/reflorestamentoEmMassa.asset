@@ -13,18 +13,19 @@ MonoBehaviour:
   m_Name: reflorestamentoEmMassa
   m_EditorClassIdentifier: 
   Description: "Reflorestamento em massa! Mil \xE1rvores por habitante. Macacos aplaudem."
-  leftAnswer: "rvore n\xE3o paga imposto, ent\xE3o n\xE3o serve."
+  leftAnswer: "arvore n\xE3o paga imposto, ent\xE3o n\xE3o serve."
   rightAnswer: "Planta tudo! Cada CPF, um IP\xCA!"
   impactsLeft:
-    climaticChanges: 35
+    climaticChanges: -15
+    internationalRelations: -15
+    populationalApproval: 0
+    economy: 25
+  impactsRight:
+    climaticChanges: 25
     internationalRelations: 25
     populationalApproval: 0
     economy: -25
-  impactsRight:
-    climaticChanges: -30
-    internationalRelations: -25
-    populationalApproval: 0
-    economy: 25
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 7410145720240828870, guid: b126acb8a7a673f439f5ec19e17dfd59, type: 3}
+  tag: 

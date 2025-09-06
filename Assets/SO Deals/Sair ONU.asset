@@ -18,7 +18,7 @@ MonoBehaviour:
   rightAnswer: "Acho que os outros pa\xEDses n\xE3o ir\xE3o gostar"
   impactsLeft:
     climaticChanges: 0
-    internationalRelations: 0
+    internationalRelations: -20
     populationalApproval: 20
     economy: 0
   impactsRight:
