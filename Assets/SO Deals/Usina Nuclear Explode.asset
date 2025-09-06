@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Usina Nuclear Explode
   m_EditorClassIdentifier: 
   Description: Nossa usina nuclear explodiu! O que fazemos?
-  leftAnswer: "Contenha a radia\xE7\xE3o"
-  rightAnswer: Salve as pessoas
+  leftAnswer: "Foque em Conter a radia\xE7\xE3o"
+  rightAnswer: Vamos salvar os trabalhadores
   impactsLeft:
     climaticChanges: 15
     internationalRelations: 0
