@@ -19,7 +19,7 @@ MonoBehaviour:
   impactsLeft:
     climaticChanges: 0
     internationalRelations: 0
-    populationalApproval: -10
+    populationalApproval: 20
     economy: 0
   impactsRight:
     climaticChanges: 0
@@ -29,3 +29,4 @@ MonoBehaviour:
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 6040501860826345181, guid: bce69ffb460102040acb20bbea5190c3, type: 3}
+  tag: 

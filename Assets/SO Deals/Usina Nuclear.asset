@@ -30,4 +30,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: cb696cd66511ec54cb54202dcd78ab81, type: 2}
   newDealsIfRight: []
   NPC: {fileID: 9148107631748954292, guid: a71d66c2d3ba94e46b0fda843b37281e, type: 3}
-  tag: 
+  tag: Nuclear

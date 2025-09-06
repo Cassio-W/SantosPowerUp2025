@@ -18,19 +18,25 @@ public class NPCController : MonoBehaviour
     private NavMeshAgent agent;
     public bool hasReachedTarget = false;
 
+    public AudioSource audioPassos;
+    public AudioClip audioPapel;
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
+        audioPassos = GetComponent<AudioSource>();
     }
 
     public void MoveToTable()
     {
         agent.SetDestination(targetPosition);
         animator.Play(walkAnimation);
+        audioPassos.Play();
     }
     public void MoveToExit()
     {
+        audioPassos.Play();
         agent.SetDestination(startPosition);
         animator.Play(walkAnimation);
     }
@@ -56,6 +62,8 @@ public class NPCController : MonoBehaviour
 
     public void PlayDeliveryAnimation()
     {
+        audioPassos.Stop();
+        audioPassos.PlayOneShot(audioPapel);
         animator.Play(deliverAnimation);
         transform.rotation = Quaternion.Euler(0f, 180f, 0f);
         Invoke("OnDeliveryComplete", 0.75f);

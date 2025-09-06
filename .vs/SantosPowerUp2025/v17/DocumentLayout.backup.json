@@ -7,10 +7,6 @@
       "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\gamemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|D:\\GameDev\\SantosPowerUp2025\\assets\\scripts\\deal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\deal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|D:\\GameDev\\SantosPowerUp2025\\assets\\scripts\\attributes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\attributes.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -19,12 +15,16 @@
       "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\uimanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|D:\\GameDev\\SantosPowerUp2025\\assets\\scripts\\npccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\npccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|D:\\GameDev\\SantosPowerUp2025\\assets\\scripts\\deal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\deal.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|D:\\GameDev\\SantosPowerUp2025\\assets\\scripts\\menuui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\menuui.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|D:\\GameDev\\SantosPowerUp2025\\assets\\scripts\\npccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E5AE7CD9-E649-3026-FE63-DFBD41B0E64A}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\npccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -34,31 +34,20 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 1,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 4,
               "Title": "MenuUI.cs",
               "DocumentMoniker": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\MenuUI.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\MenuUI.cs",
               "ToolTip": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\MenuUI.cs",
               "RelativeToolTip": "Assets\\Scripts\\MenuUI.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAAfAAAAAAAAAA==",
+              "ViewState": "AgIAABMAAAAAAAAAAAAgwBoAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-06T13:44:18.054Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "NPCController.cs",
-              "DocumentMoniker": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\NPCController.cs",
-              "RelativeDocumentMoniker": "Assets\\Scripts\\NPCController.cs",
-              "ToolTip": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\NPCController.cs",
-              "RelativeToolTip": "Assets\\Scripts\\NPCController.cs",
-              "ViewState": "AgIAACEAAAAAAAAAAAAowC0AAABHAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-05T18:35:36.06Z"
+              "WhenOpened": "2025-09-06T13:44:18.054Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -68,46 +57,62 @@
               "RelativeDocumentMoniker": "Assets\\Scripts\\GameManager.cs",
               "ToolTip": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\GameManager.cs",
               "RelativeToolTip": "Assets\\Scripts\\GameManager.cs",
-              "ViewState": "AgIAAHUAAAAAAAAAAAAmwJcAAAAJAAAAAAAAAA==",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAQwB0AAAAOAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-03T22:53:08.25Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 2,
               "Title": "UIManager.cs",
               "DocumentMoniker": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\UIManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\UIManager.cs",
               "ToolTip": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\UIManager.cs",
               "RelativeToolTip": "Assets\\Scripts\\UIManager.cs",
-              "ViewState": "AgIAAC4AAAAAAAAAAAAowD0AAAAKAAAAAAAAAA==",
+              "ViewState": "AgIAAGAAAAAAAAAAAAAYwGsAAAA+AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-03T22:53:10.056Z"
+              "WhenOpened": "2025-09-03T22:53:10.056Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 5,
+              "Title": "NPCController.cs",
+              "DocumentMoniker": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\NPCController.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\NPCController.cs",
+              "ToolTip": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\NPCController.cs",
+              "RelativeToolTip": "Assets\\Scripts\\NPCController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAC0AAABHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-05T18:35:36.06Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "Attributes.cs",
               "DocumentMoniker": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\Attributes.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Attributes.cs",
               "ToolTip": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\Attributes.cs",
               "RelativeToolTip": "Assets\\Scripts\\Attributes.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAjAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-03T22:52:58.381Z"
+              "WhenOpened": "2025-09-03T22:52:58.381Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "Deal.cs",
               "DocumentMoniker": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\Deal.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Deal.cs",
               "ToolTip": "D:\\GameDev\\SantosPowerUp2025\\Assets\\Scripts\\Deal.cs",
               "RelativeToolTip": "Assets\\Scripts\\Deal.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAmAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-03T22:52:51.433Z"
+              "WhenOpened": "2025-09-03T22:52:51.433Z",
+              "EditorCaption": ""
             }
           ]
         }

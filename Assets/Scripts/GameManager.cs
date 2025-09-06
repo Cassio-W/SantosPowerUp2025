@@ -42,6 +42,8 @@ public class GameManager : MonoBehaviour
         month = 1;
         year = 2026;
         onTutorial = true;
+
+
     }
 
     void Start()
@@ -50,6 +52,10 @@ public class GameManager : MonoBehaviour
         gameAttributes.internationalRelations = 50;
         gameAttributes.populationalApproval = 50;
         gameAttributes.economy = 50;
+        foreach (Deal deal in allDeals)
+        {
+            actualDeck.Add(deal);
+        }
         ShuffleDeck();
         StartCoroutine(GetDeal());
     }

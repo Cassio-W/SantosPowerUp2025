@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
   m_Name: Usina Nuclear Explode
   m_EditorClassIdentifier: 
-  Description: Nossa usina nuclear explodiu! O que fazemos?
-  leftAnswer: "Contenha a radia\xE7\xE3o"
+  Description: Algumas usinas explodiram! O que fazemos?
+  leftAnswer: Contenha os estragos
   rightAnswer: Salve as pessoas
   impactsLeft:
     climaticChanges: 15
@@ -28,4 +28,4 @@ MonoBehaviour:
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 9148107631748954292, guid: a71d66c2d3ba94e46b0fda843b37281e, type: 3}
-  tag: Nuclear
+  tag: 
