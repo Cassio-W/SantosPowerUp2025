@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Security;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Deal", menuName = "SO/New Deal")]
@@ -9,6 +10,8 @@ public class Deal: ScriptableObject
     public string leftAnswer;
     public string rightAnswer;
 
+    public bool hasCorruptionMods;
+
     public Attributes impactsLeft;
     public Attributes impactsRight;
 
@@ -16,7 +19,6 @@ public class Deal: ScriptableObject
     public List<Deal> newDealsIfRight;
 
     public GameObject NPC;
-
     public string tag;
 
 }

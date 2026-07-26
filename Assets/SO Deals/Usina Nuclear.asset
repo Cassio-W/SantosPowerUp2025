@@ -21,11 +21,13 @@ MonoBehaviour:
     internationalRelations: -15
     populationalApproval: 0
     economy: -15
+    prop: {fileID: 7150650116262898621, guid: 0355a69ce37447c458b521ae5030157a, type: 3}
   impactsRight:
     climaticChanges: -15
     internationalRelations: 0
     populationalApproval: 0
     economy: 0
+    prop: {fileID: 0}
   newDealsIfLeft:
   - {fileID: 11400000, guid: cb696cd66511ec54cb54202dcd78ab81, type: 2}
   newDealsIfRight: []

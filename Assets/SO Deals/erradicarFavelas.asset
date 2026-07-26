@@ -14,18 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Description: "E se erradic\xE1ssemos todas as favelas? Plano ambicioso, tipo \u201Cextrema
     makeover urbano\u201D!"
-  leftAnswer: Desalojem, reconstruam, e vamos de drone mostrar depois!
+  leftAnswer: Reconstruam e vamos de drone mostrar depois!
   rightAnswer: Erradicar como? Bota uma lona por cima?
   impactsLeft:
     climaticChanges: -20
     internationalRelations: 0
     populationalApproval: 30
     economy: -15
+    prop: {fileID: 0}
   impactsRight:
     climaticChanges: 0
     internationalRelations: 0
     populationalApproval: -30
     economy: 20
+    prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
+  tag: 

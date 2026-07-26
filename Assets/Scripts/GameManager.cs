@@ -34,6 +34,9 @@ public class GameManager : MonoBehaviour
     public int year;
     public bool onTutorial;
 
+    [Header("Props")]
+    public GameObject city;
+
     private void Awake()
     {
         if(instance == null) instance = this; //Singleton
@@ -52,6 +55,7 @@ public class GameManager : MonoBehaviour
         gameAttributes.internationalRelations = 50;
         gameAttributes.populationalApproval = 50;
         gameAttributes.economy = 50;
+        gameAttributes.corruption = 0;
         foreach (Deal deal in allDeals)
         {
             actualDeck.Add(deal);
@@ -95,13 +99,23 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void ChooseLeft()
+    {
+
+    }
+
+    public void ChooseRight()
+    {
+
+    }
+
     public IEnumerator ApplyDecision(Deal deal, Attributes impacts)
     {
-        gameAttributes.ApplyChanges(impacts);
+        gameAttributes.ApplyChanges(impacts, deal);
         OnChangeAttributes?.Invoke(gameAttributes);
         if (!onTutorial)
         {
-            DisplayProp(deal.tag);
+            DisplayProp(impacts.prop);
             CheckGameOver();
             actualDeck.Remove(actualDeck[0]);
             ShuffleDeck();
@@ -123,6 +137,7 @@ public class GameManager : MonoBehaviour
             else
             {
                 StartCoroutine(GetDeal());
+                yield return new WaitForSeconds(0.1f);
             }
         }
         
@@ -142,7 +157,8 @@ public class GameManager : MonoBehaviour
         if (gameAttributes.climaticChanges <= 0 ||
         gameAttributes.internationalRelations <= 0 ||
         gameAttributes.populationalApproval <= 0 ||
-        gameAttributes.economy <= 0)
+        gameAttributes.economy <= 0 ||
+        gameAttributes.corruption >= 100)
         {
             OnGameOver.Invoke("Olha o que você fez! Estragou tudo e agora vamos ter que te tirar da presidência. Boa sorte explicando seus erros para o povo.");
             actualDeck.Clear();
@@ -192,15 +208,13 @@ public class GameManager : MonoBehaviour
         anim.Play("None");
     }
 
-    void DisplayProp(string tag)
+    void DisplayProp(GameObject prop)
     {
-        if(tag != "")
+        if(prop != null)
         {
-            GameObject[] props = GameObject.FindGameObjectsWithTag(tag);
-            foreach (GameObject obj in props)
-            {
-                LeanTween.scale(obj, transform.localScale, 1.5f);
-            }
+            GameObject p = Instantiate(prop, prop.transform.position, prop.transform.rotation);
+            p.transform.SetParent(city.transform, false);
+            LeanTween.scale(p, transform.localScale, 1.5f);
         }
     }
 }

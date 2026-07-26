@@ -11,7 +11,9 @@ public class UIManager : MonoBehaviour
     [Header("Referências de UI")]
     public GameObject dealPanel; // Painel principal da proposta
     public GameObject datePanel;
+    public GameObject corruptionPanel;
     public GameObject gameOverPanel;
+    public Text nameText;
     public TextMeshProUGUI descriptionText; // Texto da proposta
     public TextMeshProUGUI leftAnswerText; // Texto do botão Aceitar
     public TextMeshProUGUI rightAnswerText; // Texto do botão Recusar
@@ -24,6 +26,7 @@ public class UIManager : MonoBehaviour
     public Slider relationsSlider;
     public Slider approvalSlider;
     public Slider economySlider;
+    public Slider corruptionSlider;
 
     [Header("Configurações")]
     public float animationSpeed = 2f; // Velocidade da animação das barras
@@ -93,8 +96,10 @@ public class UIManager : MonoBehaviour
         ActivatePanel();
         LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -300, 0), 1f).setEase(easeType);
         LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 451, 0), 1f).setEase(easeType);
-        if(!GameManager.instance.onTutorial) GameManager.instance.PPFocus();
+        LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(110, -120, 0), 1f).setEase(easeType);
+        if (!GameManager.instance.onTutorial) GameManager.instance.PPFocus();
 
+        nameText.text = deal.NPC.name;
         descriptionText.text = deal.Description;
         rightAnswerText.text = deal.rightAnswer;
         leftAnswerText.text = deal.leftAnswer;
@@ -106,11 +111,13 @@ public class UIManager : MonoBehaviour
         float relationsValue = Mathf.Clamp01(currentAttributes.internationalRelations / 100f);
         float approvalValue = Mathf.Clamp01(currentAttributes.populationalApproval / 100f);
         float economyValue = Mathf.Clamp01(currentAttributes.economy / 100f);
+        float corruptionValue = Mathf.Clamp01(currentAttributes.corruption / 100f);
 
         climateSlider.value = Mathf.Lerp(climateSlider.value, climateValue, animationSpeed * Time.deltaTime);
         relationsSlider.value = Mathf.Lerp(relationsSlider.value, relationsValue, animationSpeed * Time.deltaTime);
         approvalSlider.value = Mathf.Lerp(approvalSlider.value, approvalValue, animationSpeed * Time.deltaTime);
         economySlider.value = Mathf.Lerp(economySlider.value, economyValue, animationSpeed * Time.deltaTime);
+        corruptionSlider.value = Mathf.Lerp(corruptionSlider.value, corruptionValue, animationSpeed * Time.deltaTime);
 
     }
 
@@ -140,6 +147,7 @@ public class UIManager : MonoBehaviour
         {
             LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
             LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
+            LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(-120, -120, 0), 1f).setEase(easeType);
             StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsLeft));
             GameManager.instance.PPUnfocus();
         }

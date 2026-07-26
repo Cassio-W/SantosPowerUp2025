@@ -17,15 +17,22 @@ MonoBehaviour:
     pa\xEDs aguentar at\xE9 2030."
   leftAnswer: "Pois \xE9 senhor"
   rightAnswer: "Vai ser f\xE1cil"
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 0
     internationalRelations: 0
     populationalApproval: 0
     economy: 0
+    corruption: 0
+    prop: {fileID: 0}
   impactsRight:
     climaticChanges: 0
     internationalRelations: 0
     populationalApproval: 0
     economy: 0
+    corruption: 0
+    prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  NPC: {fileID: 7410145720240828870, guid: b126acb8a7a673f439f5ec19e17dfd59, type: 3}
+  tag: 
