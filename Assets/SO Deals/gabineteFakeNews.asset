@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: gabineteFakeNews
+  m_EditorClassIdentifier: 
+  Description: "Presidente, a aprovação do governo está caindo! Que tal contratarmos uma agência para criar robôs e espalhar boatos sobre a oposição nas redes?"
+  leftAnswer: "Verba liberada! Minta que o povo gosta."
+  rightAnswer: "Não, governaremos apenas com a verdade."
+  impactsLeft:
+    climaticChanges: 0
+    internationalRelations: -15
+    populationalApproval: 25
+    economy: -10
+    corruption: 25
+    prop: {fileID: 0}
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: 10
+    populationalApproval: -15
+    economy: 0
+    corruption: -15
+    prop: {fileID: 0}
+  hasCorruptionMods: 0
+  newDealsIfLeft:
+  - {fileID: 11400000, guid: a9999999999999999999999999999999, type: 2}
+  newDealsIfRight: []
+  NPC: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
+  tag: FakeNews

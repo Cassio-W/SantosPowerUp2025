@@ -16,16 +16,20 @@ MonoBehaviour:
     alface vai brilhar no escuro..."
   leftAnswer: Pode tacar veneno!
   rightAnswer: "S\xF3 se o agrot\xF3xico for org\xE2nico."
+  hasCorruptionMods: 1
   impactsLeft:
     climaticChanges: -40
     internationalRelations: 0
     populationalApproval: 0
     economy: 25
+    corruption: 20
   impactsRight:
     climaticChanges: 30
     internationalRelations: 0
     populationalApproval: 0
     economy: -25
-  newDealsIfLeft: []
+    corruption: -5
+  newDealsIfLeft:
+  - {fileID: 11400000, guid: a6666666666666666666666666666666, type: 2}
   newDealsIfRight: []
   NPC: {fileID: 5340672492827399196, guid: e0963aa14dba98a43938b379bb1c9335, type: 3}

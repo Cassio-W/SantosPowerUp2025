@@ -10,24 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
-  m_Name: vacinasAnimais
+  m_Name: escandaloDasJoias
   m_EditorClassIdentifier: 
-  Description: Temos vacinas novas. Podemos testar nos ratos...
-  leftAnswer: "Testa nos bichinhos, \xE9 pro bem maior!"
-  rightAnswer: "Sem testes, usa direto e v\xEA no que d\xE1!"
-  hasCorruptionMods: 1
+  Description: "Presidente, a alfândega apreendeu um estojo de joias milionárias trazidas da Suíça sem declaração! A Polícia Federal quer explicacões."
+  leftAnswer: "Diga que era acervo pessoal e demita o fiscal!"
+  rightAnswer: "Devolva o presente e pague a multa com verba própria."
   impactsLeft:
     climaticChanges: 0
     internationalRelations: -15
-    populationalApproval: 25
-    economy: 0
-    corruption: 0
-  impactsRight:
-    climaticChanges: 0
-    internationalRelations: 20
     populationalApproval: -25
     economy: 0
-    corruption: 25
+    corruption: 30
+    prop: {fileID: 0}
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: 10
+    populationalApproval: 10
+    economy: -15
+    corruption: -15
+    prop: {fileID: 0}
+  hasCorruptionMods: 0
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 4047350394622487709, guid: 16e4de0f62729694eb1a5ff97f31af79, type: 3}
+  tag: Escandalo

@@ -16,16 +16,19 @@ MonoBehaviour:
     Gostari\xE1mos de iniciar uma campanha para combater isto e compra-l\xE1 de volta."
   leftAnswer: "Est\xE1 feito"
   rightAnswer: Deixem que fiquem com a mata
+  hasCorruptionMods: 1
   impactsLeft:
     climaticChanges: 30
     internationalRelations: -10
     populationalApproval: 0
     economy: -15
+    corruption: -10
   impactsRight:
     climaticChanges: -25
     internationalRelations: 15
     populationalApproval: 0
     economy: 0
+    corruption: 25
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 7410145720240828870, guid: b126acb8a7a673f439f5ec19e17dfd59, type: 3}

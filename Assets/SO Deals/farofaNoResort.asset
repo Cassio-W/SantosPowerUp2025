@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: farofaNoResort
+  m_EditorClassIdentifier: 
+  Description: "Banhistas derrubaram os muros dos resorts privatizados e fizeram um churrasco de farofa na praia VIP! Os magnatas ameaçam processar o governo."
+  leftAnswer: "Envie a segurança para proteger os resorts!"
+  rightAnswer: "Cancele a privatização e junte-se à farofa!"
+  impactsLeft:
+    climaticChanges: 0
+    internationalRelations: 15
+    populationalApproval: -30
+    economy: 15
+    corruption: 15
+    prop: {fileID: 0}
+  impactsRight:
+    climaticChanges: 10
+    internationalRelations: -20
+    populationalApproval: 30
+    economy: -15
+    corruption: -10
+    prop: {fileID: 0}
+  hasCorruptionMods: 0
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 5429354218765748742, guid: d6f8590726c0fdf4d8820af07e591e5b, type: 3}
+  tag: Praias

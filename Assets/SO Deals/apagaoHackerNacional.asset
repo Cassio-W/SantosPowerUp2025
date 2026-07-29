@@ -10,26 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
-  m_Name: Bomba Nuclear
+  m_Name: apagaoHackerNacional
   m_EditorClassIdentifier: 
-  Description: "Que tal desenvolvermos uma bomba nuclear? Assim os outros pa\xEDses
-    iriam nos respeitar mais!"
-  leftAnswer: "Isso \xE9 loucura!"
-  rightAnswer: Vejam os jornais! Brasil tem bomba nuclear
-  hasCorruptionMods: 1
+  Description: "Um grupo de hackers sequestrou o sistema em nuvem do governo! Estão exigindo resgate milionário para liberar a emissão de RG e certidões!"
+  leftAnswer: "Pague o resgate com verba secreta emergencial!"
+  rightAnswer: "Recuse o resgate e mande recriar os cadastros no papel!"
   impactsLeft:
     climaticChanges: 0
-    internationalRelations: -10
+    internationalRelations: 0
     populationalApproval: 0
-    economy: 10
-    corruption: 0
+    economy: -25
+    corruption: 25
+    prop: {fileID: 0}
   impactsRight:
     climaticChanges: 0
-    internationalRelations: 10
-    populationalApproval: 0
-    economy: -10
-    corruption: 30
+    internationalRelations: -10
+    populationalApproval: -25
+    economy: -15
+    corruption: -10
+    prop: {fileID: 0}
+  hasCorruptionMods: 0
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 7243269876658770806, guid: aea00cd83b7045845975864cbf0caa3e, type: 3}
-  tag: 
+  tag: Hacker

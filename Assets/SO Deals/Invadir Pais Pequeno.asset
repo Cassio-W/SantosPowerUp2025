@@ -15,16 +15,19 @@ MonoBehaviour:
   Description: "Senhor, a na\xE7\xE3o vizinha est\xE1 amea\xE7ando-nos com m\xEDsseis!"
   leftAnswer: Enviem um diplomata
   rightAnswer: "Eles s\xE3o menores. Vamos invadir"
+  hasCorruptionMods: 1
   impactsLeft:
     climaticChanges: 0
     internationalRelations: 20
     populationalApproval: 0
     economy: -10
+    corruption: -10
   impactsRight:
     climaticChanges: 0
     internationalRelations: -20
     populationalApproval: 15
     economy: -10
+    corruption: 30
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 7243269876658770806, guid: aea00cd83b7045845975864cbf0caa3e, type: 3}

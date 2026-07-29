@@ -16,16 +16,19 @@ MonoBehaviour:
     precisamos fazer algo."
   leftAnswer: Prendam todos
   rightAnswer: "Ainda n\xE3o"
+  hasCorruptionMods: 1
   impactsLeft:
     climaticChanges: 10
     internationalRelations: 0
     populationalApproval: 15
     economy: -15
+    corruption: -15
   impactsRight:
     climaticChanges: -15
     internationalRelations: 0
     populationalApproval: -15
     economy: 20
+    corruption: 25
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 7243269876658770806, guid: aea00cd83b7045845975864cbf0caa3e, type: 3}

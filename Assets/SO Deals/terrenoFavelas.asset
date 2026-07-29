@@ -16,16 +16,19 @@ MonoBehaviour:
     como deslizamentos, mas o custo \xE9 alto!"
   leftAnswer: Faz acontecer! Passa a conta depois.
   rightAnswer: "Reformar o qu\xEA? J\xE1 tem teto e tudo."
+  hasCorruptionMods: 1
   impactsLeft:
     climaticChanges: 20
     internationalRelations: 0
     populationalApproval: 35
     economy: -30
+    corruption: 20
   impactsRight:
     climaticChanges: -15
     internationalRelations: 0
     populationalApproval: -25
     economy: 20
+    corruption: 0
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 7470939222124999217, guid: c774684354c0c8340acd528845103aad, type: 3}

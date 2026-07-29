@@ -16,16 +16,19 @@ MonoBehaviour:
     e os empres\xE1rios?"
   leftAnswer: "Corta tudo, inclusive o meu sal\xE1rio."
   rightAnswer: "Melhor deixar como t\xE1, vai que falta caf\xE9 no cofre."
+  hasCorruptionMods: 1
   impactsLeft:
     climaticChanges: 0
     internationalRelations: 0
     populationalApproval: 40
     economy: -30
+    corruption: 15
   impactsRight:
     climaticChanges: 0
     internationalRelations: 0
     populationalApproval: -25
     economy: 30
+    corruption: 0
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 7470939222124999217, guid: c774684354c0c8340acd528845103aad, type: 3}

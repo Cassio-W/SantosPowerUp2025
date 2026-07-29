@@ -16,20 +16,20 @@ MonoBehaviour:
     E cheira a queijo velho."
   leftAnswer: "F\xE1brica \xE9 progresso, taca-lhe pau!"
   rightAnswer: "Cheiro estranho? T\xF4 fora."
-  hasCorruptionMods: 0
+  hasCorruptionMods: 1
   impactsLeft:
     climaticChanges: -30
     internationalRelations: 0
     populationalApproval: 20
     economy: 25
-    corruption: 0
+    corruption: 15
     prop: {fileID: 6216956242168988236, guid: cf777763c7be2a646820731326a31302, type: 3}
   impactsRight:
     climaticChanges: 25
     internationalRelations: 0
     populationalApproval: -15
     economy: -15
-    corruption: 0
+    corruption: -5
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []

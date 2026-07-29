@@ -26,6 +26,7 @@ MonoBehaviour:
     internationalRelations: 0
     populationalApproval: 25
     economy: -30
-  newDealsIfLeft: []
+  newDealsIfLeft:
+  - {fileID: 11400000, guid: a5555555555555555555555555555555, type: 2}
   newDealsIfRight: []
   NPC: {fileID: 5429354218765748742, guid: d6f8590726c0fdf4d8820af07e591e5b, type: 3}

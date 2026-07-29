@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
+  m_Name: embargoDaUniaoEuropeia
+  m_EditorClassIdentifier: 
+  Description: "A União Europeia decretou embargo total à nossa soja e carne alegando contaminação química! Nossos produtores rurais estão desesperados."
+  leftAnswer: "Baixe o preço e venda para países aliados sem embargo."
+  rightAnswer: "Volte atrás e proíba os venenos agrícolas!"
+  impactsLeft:
+    climaticChanges: -15
+    internationalRelations: -25
+    populationalApproval: -10
+    economy: 10
+    corruption: 10
+    prop: {fileID: 0}
+  impactsRight:
+    climaticChanges: 20
+    internationalRelations: 20
+    populationalApproval: 10
+    economy: -20
+    corruption: 0
+    prop: {fileID: 0}
+  hasCorruptionMods: 0
+  newDealsIfLeft: []
+  newDealsIfRight: []
+  NPC: {fileID: 6532259188457934314, guid: 0c667e5e5810e0448b52183683271385, type: 3}
+  tag: Agro

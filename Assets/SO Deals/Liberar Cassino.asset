@@ -16,16 +16,20 @@ MonoBehaviour:
     casas de aposta. O que acha?
   leftAnswer: "Nossa popula\xE7\xE3o n\xE3o pode sofrer"
   rightAnswer: Mais impostos!
+  hasCorruptionMods: 1
   impactsLeft:
     climaticChanges: 0
     internationalRelations: 0
     populationalApproval: 15
     economy: -15
+    corruption: -5
   impactsRight:
     climaticChanges: 0
     internationalRelations: 0
     populationalApproval: -15
     economy: 15
+    corruption: 20
   newDealsIfLeft: []
-  newDealsIfRight: []
+  newDealsIfRight:
+  - {fileID: 11400000, guid: a1111111111111111111111111111111, type: 2}
   NPC: {fileID: 6040501860826345181, guid: bce69ffb460102040acb20bbea5190c3, type: 3}

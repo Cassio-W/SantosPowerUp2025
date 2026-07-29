@@ -10,25 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
-  m_Name: verbaCultura
+  m_Name: hackNaCarteiraNacional
   m_EditorClassIdentifier: 
-  Description: "A classe art\xEDstica pede verba pra cultura. E olha que o teatro
-    vai bem nas redes sociais!"
-  leftAnswer: Nem cinema em casa eu vejo, corta tudo.
-  rightAnswer: "Solta a verba! Palco \xE9 poder!"
-  hasCorruptionMods: 1
+  Description: "Catástrofe! Hackers invadiram a carteira virtual do Banco Central e roubaram metade das reservas de Bitcoin do país!"
+  leftAnswer: "Imprima cédulas tradicionais de emergência!"
+  rightAnswer: "Crie a 'PixCoin' governamental para substituir!"
   impactsLeft:
     climaticChanges: 0
-    internationalRelations: 0
-    populationalApproval: -25
-    economy: 10
-    corruption: -5
+    internationalRelations: -15
+    populationalApproval: -15
+    economy: -30
+    corruption: 10
+    prop: {fileID: 0}
   impactsRight:
     climaticChanges: 0
-    internationalRelations: 0
-    populationalApproval: 25
+    internationalRelations: 10
+    populationalApproval: 10
     economy: -15
-    corruption: 15
+    corruption: 20
+    prop: {fileID: 0}
+  hasCorruptionMods: 0
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 6532259188457934314, guid: 0c667e5e5810e0448b52183683271385, type: 3}
+  tag: Cripto
