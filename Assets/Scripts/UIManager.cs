@@ -167,6 +167,7 @@ public class UIManager : MonoBehaviour
         if (!GameManager.instance.onTutorial){
             LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
             LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
+            LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(-120, -120, 0), 1f).setEase(easeType);
             StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsRight));
             GameManager.instance.PPUnfocus();
         }

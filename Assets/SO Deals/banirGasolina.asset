@@ -15,16 +15,22 @@ MonoBehaviour:
   Description: "Ideia radical: banir carros a gasolina. S\xF3 el\xE9tricos ou patinete."
   leftAnswer: Tira o carro do povo e vai ver o caos.
   rightAnswer: "Vruuum el\xE9trico, beb\xEA!"
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: -25
     internationalRelations: -15
     populationalApproval: 10
     economy: 30
+    corruption: 0
+    prop: {fileID: 0}
   impactsRight:
     climaticChanges: 40
     internationalRelations: 25
-    populationalApproval: -35
-    economy: -30
+    populationalApproval: -25
+    economy: -20
+    corruption: 0
+    prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 9148107631748954292, guid: a71d66c2d3ba94e46b0fda843b37281e, type: 3}
+  tag: 

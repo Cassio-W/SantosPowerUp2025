@@ -16,16 +16,22 @@ MonoBehaviour:
     2050. O planeta curte. Os empres\xE1rios, n\xE3o."
   leftAnswer: "Zero emiss\xF5es? S\xF3 se for de nota fiscal."
   rightAnswer: Fechado! Seremos o exemplo mundial!
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: -20
     internationalRelations: 0
     populationalApproval: 0
     economy: 0
+    corruption: 0
+    prop: {fileID: 0}
   impactsRight:
     climaticChanges: 35
     internationalRelations: 30
     populationalApproval: 0
-    economy: -40
+    economy: -30
+    corruption: 0
+    prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 9067916053490012197, guid: 1bddbd3a1afe9314f936a7e5fde0da5c, type: 3}
+  tag: 

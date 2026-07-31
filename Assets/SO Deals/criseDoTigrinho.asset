@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
   m_Name: criseDoTigrinho
   m_EditorClassIdentifier: 
-  Description: "Senhor Presidente, metade da população perdeu a renda no 'Jogo do Tigrinho'! O comércio local estagnou e as famílias estão endividadas."
-  leftAnswer: "Crie o programa 'Desenrola Tigrinho' com dinheiro público!"
-  rightAnswer: "Cada um que arque com seus vícios no jogo!"
+  Description: "Senhor Presidente, metade da popula\xE7\xE3o perdeu a renda no 'Jogo
+    do Tigrinho'! O com\xE9rcio local estagnou e as fam\xEDlias est\xE3o endividadas."
+  leftAnswer: Crie o programa 'Desenrola Tigrinho'!
+  rightAnswer: "Cada um que arque com seus v\xEDcios no jogo!"
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 0
     internationalRelations: 0
@@ -29,7 +31,6 @@ MonoBehaviour:
     economy: 15
     corruption: 0
     prop: {fileID: 0}
-  hasCorruptionMods: 0
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 9148107631748954292, guid: a71d66c2d3ba94e46b0fda843b37281e, type: 3}
