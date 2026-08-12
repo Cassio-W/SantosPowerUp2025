@@ -5,7 +5,7 @@ Shader "ComicVFX/ToonOutlineScreen"
         _OutlineColor ("Outline Color", Color) = (0.04, 0.04, 0.07, 1.0)
         _Thickness ("Thickness (Pixels)", Range(0.5, 5.0)) = 1.25
         _DepthThreshold ("Depth Threshold", Range(0.001, 0.2)) = 0.015
-        _DepthSensitivity ("Depth Sensitivity", Range(0.1, 10.0)) = 1.5
+        _DepthSensitivity ("Depth Sensitivity", Range(0.1, 10.0)) = 2.0
     }
     SubShader
     {
@@ -69,38 +69,28 @@ Shader "ComicVFX/ToonOutlineScreen"
                 if (texel.x == 0) texel = float2(1.0 / 1920.0, 1.0 / 1080.0);
                 texel *= _Thickness;
 
-                // Roberts Cross samples
-                float2 uv0 = input.uv + float2(-texel.x, -texel.y);
-                float2 uv1 = input.uv + float2( texel.x,  texel.y);
-                float2 uv2 = input.uv + float2( texel.x, -texel.y);
-                float2 uv3 = input.uv + float2(-texel.x,  texel.y);
+                float dCenter = SampleDepthLinear(input.uv);
 
-                float d0 = SampleDepthLinear(uv0);
-                float d1 = SampleDepthLinear(uv1);
-                float d2 = SampleDepthLinear(uv2);
-                float d3 = SampleDepthLinear(uv3);
+                // 4-point cross depth samples
+                float dL = SampleDepthLinear(input.uv - float2(texel.x, 0));
+                float dR = SampleDepthLinear(input.uv + float2(texel.x, 0));
+                float dD = SampleDepthLinear(input.uv - float2(0, texel.y));
+                float dU = SampleDepthLinear(input.uv + float2(0, texel.y));
 
-                // Calculate depth differences
-                float diff1 = d1 - d0;
-                float diff2 = d3 - d2;
-                float depthEdge = sqrt(diff1 * diff1 + diff2 * diff2);
+                // Depth Laplacian (Second Derivative): Zero on any flat or slanted surface (tables, floors), high on object edges!
+                float d2x = (dR + dL) - (2.0 * dCenter);
+                float d2y = (dU + dD) - (2.0 * dCenter);
+                float laplacian = sqrt(d2x * d2x + d2y * d2y);
 
-                float minD = min(min(d0, d1), min(d2, d3));
-                float normalizedEdge = depthEdge / max(minD, 0.0001);
+                // Normalized depth curvature ratio
+                float relativeCurvature = laplacian / max(dCenter, 0.0001);
 
-                // Compensate for surface depth slope (prevents flat surfaces like tables and floors from outlining)
-                float ddxD = ddx(d0);
-                float ddyD = ddy(d0);
-                float slope = sqrt(ddxD * ddxD + ddyD * ddyD) / max(d0, 0.0001);
+                // Smooth solid continuous ink line transition
+                float val = relativeCurvature * _DepthSensitivity;
+                float isOutline = smoothstep(_DepthThreshold, _DepthThreshold + 0.005, val);
 
-                // Dynamic threshold: scales up on slanted planes (tables, ground) to ignore surface gradient
-                float dynamicThreshold = _DepthThreshold + slope * 4.0;
-
-                // Step function for sharp comic outline
-                float isOutline = step(dynamicThreshold, normalizedEdge * _DepthSensitivity);
-
-                // Do not draw outline on skybox (depth near 1.0 in Linear01)
-                if (minD > 0.98) isOutline = 0.0;
+                // Skybox exclusion
+                if (dCenter > 0.98) isOutline = 0.0;
 
                 return lerp(color, _OutlineColor, isOutline * _OutlineColor.a);
             }
