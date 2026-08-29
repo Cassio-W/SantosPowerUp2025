@@ -18,6 +18,9 @@ public class Deal: ScriptableObject
     public List<Deal> newDealsIfLeft;
     public List<Deal> newDealsIfRight;
 
+    public Perks perkIfLeft;
+    public Perks perkIfRight;
+
     public GameObject NPC;
     public string tag;
 

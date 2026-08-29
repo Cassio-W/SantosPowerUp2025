@@ -28,6 +28,9 @@ public class UIManager : MonoBehaviour
     public Slider economySlider;
     public Slider corruptionSlider;
 
+    [Header("Perks")]
+    public Image[] perks = new Image[3];
+
     [Header("Configurações")]
     public float animationSpeed = 2f; // Velocidade da animação das barras
     public LeanTweenType easeType;
@@ -75,6 +78,7 @@ public class UIManager : MonoBehaviour
 
     private void HandleNewDeal(Deal deal)
     {
+        UpdatePerks();
         UpdateDate();
         ShowDeal(deal);
     }
@@ -179,6 +183,19 @@ public class UIManager : MonoBehaviour
                 LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
                 LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
             }
+        }
+    }
+
+    public void UpdatePerks()
+    {
+        for(int i = 0; i < 3; i++)
+        {
+            if (GameManager.instance.activePerks[i] != null)
+            {
+                perks[i].gameObject.SetActive(true);
+                perks[i].sprite = GameManager.instance.activePerks[i].icon;
+            }
+            else perks[i].gameObject.SetActive(false);
         }
     }
 
