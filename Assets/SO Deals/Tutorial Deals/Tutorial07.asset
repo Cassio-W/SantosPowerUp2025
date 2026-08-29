@@ -10,27 +10,27 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
-  m_Name: criseDoTigrinho
+  m_Name: Tutorial07
   m_EditorClassIdentifier: 
-  Description: "Senhor Presidente, metade da população perdeu a renda no 'Jogo do Tigrinho'! O comércio local estagnou e as famílias estão endividadas."
-  leftAnswer: "Crie o programa 'Desenrola Tigrinho' com dinheiro público!"
-  rightAnswer: "Cada um que arque com seus vícios no jogo!"
+  Description: Boa sorte meu presidente!
+  leftAnswer: Vou precisar
+  rightAnswer: Obrigado, Vice-Presidente
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 0
     internationalRelations: 0
-    populationalApproval: 20
-    economy: -25
-    corruption: 15
+    populationalApproval: 0
+    economy: 0
+    corruption: 0
     prop: {fileID: 0}
   impactsRight:
     climaticChanges: 0
     internationalRelations: 0
-    populationalApproval: -25
-    economy: 15
+    populationalApproval: 0
+    economy: 0
     corruption: 0
     prop: {fileID: 0}
-  hasCorruptionMods: 0
   newDealsIfLeft: []
   newDealsIfRight: []
-  NPC: {fileID: 9148107631748954292, guid: a71d66c2d3ba94e46b0fda843b37281e, type: 3}
-  tag: Bets
+  NPC: {fileID: 7410145720240828870, guid: b126acb8a7a673f439f5ec19e17dfd59, type: 3}
+  tag: 

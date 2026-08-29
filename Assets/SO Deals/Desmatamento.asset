@@ -23,12 +23,15 @@ MonoBehaviour:
     populationalApproval: 0
     economy: -15
     corruption: -10
+    prop: {fileID: 0}
   impactsRight:
     climaticChanges: -25
     internationalRelations: 15
     populationalApproval: 0
     economy: 0
-    corruption: 25
+    corruption: 20
+    prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 7410145720240828870, guid: b126acb8a7a673f439f5ec19e17dfd59, type: 3}
+  tag: 

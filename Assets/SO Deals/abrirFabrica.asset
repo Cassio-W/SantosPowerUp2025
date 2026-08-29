@@ -22,7 +22,7 @@ MonoBehaviour:
     internationalRelations: 0
     populationalApproval: 20
     economy: 25
-    corruption: 15
+    corruption: 100
     prop: {fileID: 6216956242168988236, guid: cf777763c7be2a646820731326a31302, type: 3}
   impactsRight:
     climaticChanges: 25
@@ -33,5 +33,7 @@ MonoBehaviour:
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
   tag: Fabrica

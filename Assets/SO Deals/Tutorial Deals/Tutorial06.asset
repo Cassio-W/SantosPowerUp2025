@@ -12,9 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
   m_Name: Tutorial06
   m_EditorClassIdentifier: 
-  Description: Boa sorte meu presidente!
-  leftAnswer: Vou precisar
-  rightAnswer: Obrigado, Vice-Presidente
+  Description: "E se tiver que tirar algo da popula\xE7\xE3o, n\xE3o precisa pensar
+    duas vezes se \xE9 que me entende. S\xF3 toma cuidado com a Pol\xEDcia Federal."
+  leftAnswer: Err...
+  rightAnswer: "*Dar risada mal\xE9fica*"
   hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 0

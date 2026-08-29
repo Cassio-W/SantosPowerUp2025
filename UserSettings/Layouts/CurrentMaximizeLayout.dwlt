@@ -24,7 +24,7 @@ MonoBehaviour:
   m_MinSize: {x: 400, y: 112}
   m_MaxSize: {x: 32384, y: 16192}
   vertical: 0
-  controlID: 6072
+  controlID: 10811
   draggingID: 0
 --- !u!114 &2
 MonoBehaviour:
@@ -153,7 +153,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 112}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 1
-  controlID: 6073
+  controlID: 10812
   draggingID: 0
 --- !u!114 &4
 MonoBehaviour:
@@ -180,7 +180,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 56}
   m_MaxSize: {x: 24288, y: 8096}
   vertical: 0
-  controlID: 6074
+  controlID: 10813
   draggingID: 0
 --- !u!114 &5
 MonoBehaviour:
@@ -248,29 +248,20 @@ MonoBehaviour:
     m_DynamicPanelBehavior: 0
   m_SceneHierarchy:
     m_TreeViewState:
-      scrollPos: {x: 0, y: 0}
+      scrollPos: {x: 0, y: 17.399994}
       m_SelectedIDs:
-      - m_Data: 61400
+      - m_Data: -13800
       m_LastClickedID:
-        m_Data: 61400
+        m_Data: -13800
       m_ExpandedIDs:
-      - m_Data: -70820
-      - m_Data: -64812
-      - m_Data: -62546
-      - m_Data: -62334
-      - m_Data: -62332
-      - m_Data: -60052
-      - m_Data: -59754
-      - m_Data: -58422
-      - m_Data: -12380
-      - m_Data: -11432
-      - m_Data: -10180
-      - m_Data: -8922
-      - m_Data: -1288
+      - m_Data: -13548
+      - m_Data: -1294
+      - m_Data: 48058
+      - m_Data: 48232
       m_RenameOverlay:
         m_UserAcceptedRename: 0
-        m_Name: 
-        m_OriginalName: 
+        m_Name: Perk02
+        m_OriginalName: Perk02
         m_EditFieldRect:
           serializedVersion: 2
           x: 0
@@ -278,10 +269,10 @@ MonoBehaviour:
           width: 0
           height: 0
         m_UserData:
-          m_Data: 0
+          m_Data: -13730
         m_IsWaitingForDelay: 0
         m_IsRenaming: 0
-        m_OriginalEventType: 11
+        m_OriginalEventType: 0
         m_IsRenamingFilename: 0
         m_TrimLeadingAndTrailingWhitespace: 0
         m_ClientGUIView: {fileID: 5}
@@ -900,9 +891,9 @@ MonoBehaviour:
   m_AudioPlay: 0
   m_DebugDrawModesUseInteractiveLightBakingData: 0
   m_Position:
-    m_Target: {x: -1.3359365, y: 3.8334227, z: -7.2887487}
+    m_Target: {x: 1230.808, y: 394.84094, z: -61.922123}
     speed: 2
-    m_Value: {x: -1.3359365, y: 3.8334227, z: -7.2887487}
+    m_Value: {x: 1230.808, y: 394.84094, z: -61.922123}
   m_RenderMode: 0
   m_CameraMode:
     drawMode: 0
@@ -948,13 +939,13 @@ MonoBehaviour:
     m_GridAxis: 1
     m_gridOpacity: 0.5
   m_Rotation:
-    m_Target: {x: 0.039889604, y: 0.020992389, z: -0.0008382003, w: 0.9989887}
+    m_Target: {x: 0.0053905626, y: 0.0032971539, z: 0.000018701074, w: -0.99998724}
     speed: 2
-    m_Value: {x: 0.039889384, y: 0.020992273, z: -0.00083819573, w: 0.9989832}
+    m_Value: {x: 0.0053905626, y: 0.0032971536, z: 0.000018701072, w: -0.99998724}
   m_Size:
-    m_Target: 0.9723982
+    m_Target: 1171.5133
     speed: 2
-    m_Value: 0.9723982
+    m_Value: 1171.5133
   m_Ortho:
     m_Target: 0
     speed: 2
@@ -1166,9 +1157,10 @@ MonoBehaviour:
   - {fileID: 13}
   - {fileID: 14}
   - {fileID: 15}
-  m_Selected: 0
+  - {fileID: 16}
+  m_Selected: 1
   m_LastSelected: 3
---- !u!114 &12
+--- !u!114 &13
 MonoBehaviour:
   m_ObjectHideFlags: 52
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1217,7 +1209,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets
+    - Assets/SO Perks
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1227,25 +1219,23 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 71
   m_LastFolders:
-  - Assets
+  - Assets/SO Perks
   m_LastFoldersGridSize: 71
   m_LastProjectPath: D:\GITHUB\Mandato\SantosPowerUp2025
   m_LockTracker:
     m_IsLocked: 0
   m_LastLocalAssetsSearchArea: 1
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 0}
+    scrollPos: {x: 0, y: 46.80002}
     m_SelectedIDs:
-    - m_Data: 57428
+    - m_Data: 59914
     m_LastClickedID:
-      m_Data: 57428
+      m_Data: 59914
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 57236
-    - m_Data: 57238
-    - m_Data: 57240
-    - m_Data: 57436
-    - m_Data: 62212
+    - m_Data: 57244
+    - m_Data: 1000000000
+    - m_Data: 2147483647
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1278,11 +1268,9 @@ MonoBehaviour:
       m_Data: 0
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 57236
-    - m_Data: 57238
-    - m_Data: 57240
-    - m_Data: 57436
-    - m_Data: 62212
+    - m_Data: 57244
+    - m_Data: 1000000000
+    - m_Data: 2147483647
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1310,10 +1298,11 @@ MonoBehaviour:
       m_ResourceFile: 
   m_ListAreaState:
     m_SelectedInstanceIDs:
-    - m_Data: 61400
-    m_LastClickedInstanceID: 61400
+    - m_Data: -20084
+    m_LastClickedInstanceID: -20084
     m_HadKeyboardFocusLastEvent: 1
-    m_ExpandedInstanceIDs: []
+    m_ExpandedInstanceIDs:
+    - m_Data: 49122
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1392,7 +1381,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/SO Deals
+    - Assets/Sprites
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1402,25 +1391,23 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 64
   m_LastFolders:
-  - Assets/SO Deals
+  - Assets/Sprites
   m_LastFoldersGridSize: -1
   m_LastProjectPath: D:\GITHUB\Mandato\SantosPowerUp2025
   m_LockTracker:
     m_IsLocked: 0
   m_LastLocalAssetsSearchArea: 1
   m_FolderTreeState:
-    scrollPos: {x: 0, y: 119}
+    scrollPos: {x: 0, y: 139}
     m_SelectedIDs:
-    - m_Data: 57430
+    - m_Data: 57464
     m_LastClickedID:
-      m_Data: 57430
+      m_Data: 57464
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 57236
-    - m_Data: 57238
-    - m_Data: 57240
-    - m_Data: 57436
-    - m_Data: 62212
+    - m_Data: 57244
+    - m_Data: 1000000000
+    - m_Data: 2147483647
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1453,11 +1440,9 @@ MonoBehaviour:
       m_Data: 0
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 57236
-    - m_Data: 57238
-    - m_Data: 57240
-    - m_Data: 57436
-    - m_Data: 62212
+    - m_Data: 57244
+    - m_Data: 1000000000
+    - m_Data: 2147483647
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1485,10 +1470,11 @@ MonoBehaviour:
       m_ResourceFile: 
   m_ListAreaState:
     m_SelectedInstanceIDs:
-    - m_Data: 61236
-    m_LastClickedInstanceID: 61236
-    m_HadKeyboardFocusLastEvent: 0
-    m_ExpandedInstanceIDs: []
+    - m_Data: -13800
+    m_LastClickedInstanceID: -13800
+    m_HadKeyboardFocusLastEvent: 1
+    m_ExpandedInstanceIDs:
+    - m_Data: 49122
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1506,7 +1492,7 @@ MonoBehaviour:
       m_OriginalEventType: 11
       m_IsRenamingFilename: 1
       m_TrimLeadingAndTrailingWhitespace: 0
-      m_ClientGUIView: {fileID: 11}
+      m_ClientGUIView: {fileID: 12}
     m_CreateAssetUtility:
       m_EndAction: {fileID: 0}
       m_InstanceID: 0
@@ -1514,7 +1500,7 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
     m_NewAssetIndexInList: -1
-    m_ScrollPosition: {x: 0, y: 67}
+    m_ScrollPosition: {x: 0, y: 178.80002}
     m_GridSize: 64
   m_SkipHiddenPackages: 0
   m_DirectoriesAreaWidth: 207
@@ -1567,7 +1553,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/LeanTween/Examples/Scripts
+    - Assets/SO Deals/Tutorial Deals
     m_Globs: []
     m_ProductIds: 
     m_AnyWithAssetOrigin: 0
@@ -1577,7 +1563,7 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 60
   m_LastFolders:
-  - Assets/LeanTween/Examples/Scripts
+  - Assets/SO Deals/Tutorial Deals
   m_LastFoldersGridSize: 60
   m_LastProjectPath: D:\GITHUB\Mandato\SantosPowerUp2025
   m_LockTracker:
@@ -1586,16 +1572,14 @@ MonoBehaviour:
   m_FolderTreeState:
     scrollPos: {x: 0, y: 103}
     m_SelectedIDs:
-    - m_Data: 62210
+    - m_Data: 57526
     m_LastClickedID:
-      m_Data: 62210
+      m_Data: 57526
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 57236
-    - m_Data: 57238
-    - m_Data: 57240
-    - m_Data: 57436
-    - m_Data: 62212
+    - m_Data: 57244
+    - m_Data: 1000000000
+    - m_Data: 2147483647
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1628,11 +1612,9 @@ MonoBehaviour:
       m_Data: 0
     m_ExpandedIDs:
     - m_Data: 0
-    - m_Data: 57236
-    - m_Data: 57238
-    - m_Data: 57240
-    - m_Data: 57436
-    - m_Data: 62212
+    - m_Data: 57244
+    - m_Data: 1000000000
+    - m_Data: 2147483647
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -1660,9 +1642,9 @@ MonoBehaviour:
       m_ResourceFile: 
   m_ListAreaState:
     m_SelectedInstanceIDs:
-    - m_Data: 61236
-    m_LastClickedInstanceID: 61236
-    m_HadKeyboardFocusLastEvent: 0
+    - m_Data: 48190
+    m_LastClickedInstanceID: 48190
+    m_HadKeyboardFocusLastEvent: 1
     m_ExpandedInstanceIDs: []
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -1681,7 +1663,7 @@ MonoBehaviour:
       m_OriginalEventType: 11
       m_IsRenamingFilename: 1
       m_TrimLeadingAndTrailingWhitespace: 0
-      m_ClientGUIView: {fileID: 11}
+      m_ClientGUIView: {fileID: 12}
     m_CreateAssetUtility:
       m_EndAction: {fileID: 0}
       m_InstanceID: 0

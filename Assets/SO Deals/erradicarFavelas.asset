@@ -22,7 +22,7 @@ MonoBehaviour:
     internationalRelations: 0
     populationalApproval: 30
     economy: -15
-    corruption: 20
+    corruption: 5
     prop: {fileID: 0}
   impactsRight:
     climaticChanges: 0
