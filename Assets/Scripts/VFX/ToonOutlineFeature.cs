@@ -11,7 +11,7 @@ namespace ComicVFX
         public class Settings
         {
             public Material outlineMaterial = null;
-            public RenderPassEvent renderPassEvent = RenderPassEvent.AfterRenderingTransparents;
+            public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingTransparents;
             public Color outlineColor = new Color(0.04f, 0.04f, 0.07f, 1.0f);
             [Range(0.5f, 5.0f)] public float thickness = 1.25f;
             [Range(0.001f, 0.2f)] public float depthThreshold = 0.015f;

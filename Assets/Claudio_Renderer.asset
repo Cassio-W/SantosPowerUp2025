@@ -24,8 +24,9 @@ MonoBehaviour:
     probeSamplingDebugMesh: {fileID: 0}
     probeSamplingDebugTexture: {fileID: 0}
     probeVolumeBlendStatesCS: {fileID: 0}
-  m_RendererFeatures: []
-  m_RendererFeatureMap: 
+  m_RendererFeatures:
+  - {fileID: 2766686759809701691}
+  m_RendererFeatureMap: 3bd73b13f33e6526
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
@@ -54,3 +55,23 @@ MonoBehaviour:
   m_DepthTextureFormat: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 1
+--- !u!114 &2766686759809701691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7753409666bcfa4e8f4d0aaeae97eac, type: 3}
+  m_Name: ToonOutlineFeature
+  m_EditorClassIdentifier: Assembly-CSharp::ComicVFX.ToonOutlineFeature
+  m_Active: 1
+  settings:
+    outlineMaterial: {fileID: 2100000, guid: 958566940288b9d4ba6a9eb1829007bc, type: 2}
+    renderPassEvent: 450
+    outlineColor: {r: 0.04, g: 0.04, b: 0.07, a: 1}
+    thickness: 1.5
+    depthThreshold: 0.01
+    depthSensitivity: 1

@@ -7,11 +7,12 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: ToonOutlineMaterial
-  m_Shader: {fileID: 4800000, guid: 1096396a8397c4947a6ab1ac12ff3a69, type: 3}
+  m_Name: ToonSmokeMaterial
+  m_Shader: {fileID: 4800000, guid: 7c53d1029e844b2a901f4c3b2a105d8e, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
-  m_ValidKeywords: []
+  m_ValidKeywords:
+  - _ENABLE_STEPPED_TIME
   m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -22,13 +23,20 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs: []
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DepthSensitivity: 1
-    - _DepthThreshold: 0.01
-    - _Thickness: 1.5
+    - _AlphaCutoff: 0.4
+    - _CelThreshold: 0.5
+    - _EnableSteppedTime: 1
+    - _FPS: 12
+    - _OutlineWidth: 0.08
     m_Colors:
-    - _OutlineColor: {r: 0.04, g: 0.04, b: 0.07, a: 1}
+    - _BaseColor: {r: 0.9, g: 0.9, b: 0.95, a: 1}
+    - _InkOutlineColor: {r: 0.05, g: 0.05, b: 0.08, a: 1}
+    - _ShadowColor: {r: 0.4, g: 0.45, b: 0.55, a: 1}
   m_BuildTextureStacks: []
-  m_AllowLocking: 1
