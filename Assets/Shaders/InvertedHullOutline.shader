@@ -3,7 +3,7 @@ Shader "ComicVFX/InvertedHullOutline"
     Properties
     {
         _OutlineColor ("Outline Color", Color) = (0.05, 0.05, 0.08, 1.0)
-        _OutlineWidth ("Outline Width", Range(0.0, 0.1)) = 0.02
+        _OutlineWidth ("Outline Width", Range(0.0, 0.05)) = 0.008
         _ZOffset ("Z Offset", Range(-1, 1)) = -0.001
     }
     SubShader
@@ -50,11 +50,14 @@ Shader "ComicVFX/InvertedHullOutline"
             {
                 Varyings output;
 
-                // Extrude vertex position along normal in object space
-                float3 extrudedPos = input.positionOS.xyz + input.normalOS * _OutlineWidth;
+                // Transforma posicao e normal para World Space para eliminar distorcoes de escala do objeto
+                float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
+                float3 normalWS = normalize(TransformObjectToWorldNormal(input.normalOS));
+
+                // Extrusao em World Space (independente de escala do prefab ou do modelo FBX)
+                float3 extrudedPosWS = positionWS + normalWS * _OutlineWidth;
                 
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(extrudedPos);
-                output.positionCS = vertexInput.positionCS;
+                output.positionCS = TransformWorldToHClip(extrudedPosWS);
 
                 #if defined(UNITY_REVERSED_Z)
                     output.positionCS.z -= _ZOffset * output.positionCS.w;

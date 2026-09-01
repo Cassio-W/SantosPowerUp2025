@@ -6,6 +6,8 @@ Shader "ComicVFX/ToonOutlineScreen"
         _Thickness ("Thickness (Pixels)", Range(0.5, 5.0)) = 1.25
         _DepthThreshold ("Depth Threshold", Range(0.001, 0.2)) = 0.015
         _DepthSensitivity ("Depth Sensitivity", Range(0.1, 10.0)) = 2.0
+        _HighlightOutlineColor ("Highlight Outline Color", Color) = (1.0, 0.85, 0.15, 1.0)
+        _HasHighlight ("Has Highlight", Float) = 0.0
     }
     SubShader
     {
@@ -39,12 +41,17 @@ Shader "ComicVFX/ToonOutlineScreen"
             TEXTURE2D(_BlitTexture);
             SAMPLER(sampler_BlitTexture);
 
+            TEXTURE2D(_HoverMask);
+            SAMPLER(sampler_HoverMask);
+
             CBUFFER_START(UnityPerMaterial)
                 half4 _OutlineColor;
                 float _Thickness;
                 float _DepthThreshold;
                 float _DepthSensitivity;
                 float4 _BlitTexture_TexelSize;
+                half4 _HighlightOutlineColor;
+                float _HasHighlight;
             CBUFFER_END
 
             Varyings vert(uint vertexID : SV_VertexID)
@@ -92,7 +99,24 @@ Shader "ComicVFX/ToonOutlineScreen"
                 // Skybox exclusion
                 if (dCenter > 0.98) isOutline = 0.0;
 
-                return lerp(color, _OutlineColor, isOutline * _OutlineColor.a);
+                half4 targetOutlineColor = _OutlineColor;
+
+                // Se houver highlight ativo, interpola suavemente a cor do contorno para o objeto em hover
+                if (_HasHighlight > 0.001)
+                {
+                    float2 maskTexel = texel * 1.5;
+                    float mC = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv).r;
+                    float mL = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv - float2(maskTexel.x, 0)).r;
+                    float mR = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv + float2(maskTexel.x, 0)).r;
+                    float mD = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv - float2(0, maskTexel.y)).r;
+                    float mU = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv + float2(0, maskTexel.y)).r;
+
+                    float isNearHovered = max(mC, max(max(mL, mR), max(mD, mU)));
+                    half4 activeHighColor = lerp(_OutlineColor, _HighlightOutlineColor, _HasHighlight);
+                    targetOutlineColor = lerp(_OutlineColor, activeHighColor, isNearHovered);
+                }
+
+                return lerp(color, targetOutlineColor, isOutline * targetOutlineColor.a);
             }
             ENDHLSL
         }
