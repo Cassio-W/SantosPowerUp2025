@@ -8,15 +8,15 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager instance;
 
-    [Header("Referências de UI")]
+    [Header("Referï¿½ncias de UI")]
     public GameObject dealPanel; // Painel principal da proposta
     public GameObject datePanel;
     public GameObject corruptionPanel;
     public GameObject gameOverPanel;
     public Text nameText;
     public TextMeshProUGUI descriptionText; // Texto da proposta
-    public TextMeshProUGUI leftAnswerText; // Texto do botão Aceitar
-    public TextMeshProUGUI rightAnswerText; // Texto do botão Recusar
+    public TextMeshProUGUI leftAnswerText; // Texto do botï¿½o Aceitar
+    public TextMeshProUGUI rightAnswerText; // Texto do botï¿½o Recusar
     public TextMeshProUGUI dateText;
     public TextMeshProUGUI gameOverText;
 
@@ -31,8 +31,8 @@ public class UIManager : MonoBehaviour
     [Header("Perks")]
     public Image[] perks = new Image[3];
 
-    [Header("Configurações")]
-    public float animationSpeed = 2f; // Velocidade da animação das barras
+    [Header("Configuraï¿½ï¿½es")]
+    public float animationSpeed = 2f; // Velocidade da animaï¿½ï¿½o das barras
     public LeanTweenType easeType;
 
     private void Awake()
@@ -45,7 +45,7 @@ public class UIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // inscrição dos eventos
+        // inscriï¿½ï¿½o dos eventos
         GameManager.OnNewDeal += HandleNewDeal;
         GameManager.OnChangeAttributes += HandleUpdatedAttributes;
         GameManager.OnGameOver += HandleGameOver;
@@ -130,7 +130,7 @@ public class UIManager : MonoBehaviour
         dealPanel.SetActive(false);
         LeanTween.move(gameOverPanel.GetComponent<RectTransform>(), new Vector3(0, -300, 0), 1f).setEase(easeType);
         gameOverText.text = reason;
-        // Implemente sua lógica de tela de game over aqui
+        // Implemente sua lï¿½gica de tela de game over aqui
     }
 
     public void ShowGameWin(string congratulations)
@@ -188,16 +188,25 @@ public class UIManager : MonoBehaviour
 
     public void UpdatePerks()
     {
-        for(int i = 0; i < 3; i++)
+        if (perks == null || GameManager.instance == null || GameManager.instance.activePerks == null)
+            return;
+
+        for (int i = 0; i < perks.Length; i++)
         {
-            if (GameManager.instance.activePerks[i] != null)
+            if (perks[i] == null) continue;
+
+            if (i < GameManager.instance.activePerks.Length && GameManager.instance.activePerks[i] != null)
             {
                 perks[i].gameObject.SetActive(true);
                 perks[i].sprite = GameManager.instance.activePerks[i].icon;
             }
-            else perks[i].gameObject.SetActive(false);
+            else
+            {
+                perks[i].gameObject.SetActive(false);
+            }
         }
     }
+
 
     public void UpdateDate()
     {

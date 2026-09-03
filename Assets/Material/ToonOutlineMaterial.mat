@@ -27,10 +27,10 @@ Material:
     m_Floats:
     - _DepthSensitivity: 1
     - _DepthThreshold: 0.01
-    - _HasHighlight: 1
+    - _HasHighlight: 0
     - _Thickness: 1.5
     m_Colors:
-    - _HighlightOutlineColor: {r: 1, g: 0.85, b: 0.15, a: 1}
+    - _HighlightOutlineColor: {r: 2, g: 1.7, b: 0.3, a: 1}
     - _OutlineColor: {r: 0.04, g: 0.04, b: 0.07, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

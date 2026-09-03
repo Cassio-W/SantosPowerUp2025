@@ -1,0 +1,279 @@
+/* ============================================================
+   RETRO CRT MONITOR OS STYLESHEET
+   FONT: RETROTECH.ttf | CLEAN ICON + VALUE LAYOUT
+   ============================================================ */
+
+:root {
+    -unity-font: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+    -unity-font-definition: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+
+    --color-bg-dark: #03070a;
+    
+    --color-nature-solid: #22c55e;
+    --color-nature-glow: #4ade80;
+    --color-nature-bg: rgba(34, 197, 94, 0.42);
+    
+    --color-economy-solid: #eab308;
+    --color-economy-glow: #facc15;
+    --color-economy-bg: rgba(234, 179, 8, 0.42);
+    
+    --color-relations-solid: #38bdf8;
+    --color-relations-glow: #7dd3fc;
+    --color-relations-bg: rgba(56, 189, 248, 0.42);
+    
+    --color-people-solid: #f472b6;
+    --color-people-glow: #f472b6;
+    --color-people-bg: rgba(244, 114, 182, 0.42);
+    
+    --color-corruption-solid: #ef4444;
+    --color-corruption-glow: #ff2244;
+    --color-corruption-bg: rgba(220, 38, 38, 0.65);
+
+    width: 100%;
+    height: 100%;
+    background-color: var(--color-bg-dark);
+    padding: 16px;
+    box-sizing: border-box;
+    justify-content: space-between;
+}
+
+Label {
+    -unity-font: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+    -unity-font-definition: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+}
+
+/* ============================================================
+   COMPACT TOP BAR
+   ============================================================ */
+.top-compact-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(6, 16, 22, 0.95);
+    border-width: 2px;
+    border-color: #1a4454;
+    border-radius: 6px;
+    padding: 6px 18px;
+    margin-bottom: 14px;
+}
+
+.system-tag-box {
+    flex-direction: row;
+    align-items: center;
+}
+
+.system-status-led {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    background-color: #22c55e;
+    margin-right: 12px;
+    border-width: 2px;
+    border-color: #86efac;
+}
+
+.system-compact-title {
+    font-size: 20px;
+    color: #38bdf8;
+    letter-spacing: 2px;
+}
+
+.date-compact-chip {
+    font-size: 18px;
+    color: #99f6e4;
+    background-color: rgba(15, 23, 42, 0.9);
+    border-width: 1px;
+    border-color: #0284c7;
+    border-radius: 4px;
+    padding: 3px 14px;
+}
+
+/* ============================================================
+   MAIN VIEWPORT (APPS GRID + CORRUPTION PILLAR)
+   ============================================================ */
+.main-workspace {
+    flex-direction: row;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+
+/* ============================================================
+   76% APPS CONTAINER (2 ROWS OF 2 CARDS)
+   ============================================================ */
+.apps-grid-container {
+    width: 76%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.cards-row {
+    flex-direction: row;
+    width: 100%;
+    height: 48%;
+    justify-content: space-between;
+}
+
+/* ============================================================
+   GIANT CARD
+   ============================================================ */
+.giant-card {
+    width: 48.5%;
+    height: 100%;
+    position: relative;
+    background-color: rgba(8, 20, 28, 0.95);
+    border-width: 3px;
+    border-color: #1e3a4a;
+    border-radius: 12px;
+    overflow: hidden;
+    justify-content: flex-end; /* Preenchimento cresce de baixo para cima */
+    transition-property: border-color, scale;
+    transition-duration: 0.15s;
+}
+
+.giant-card:hover {
+    scale: 1.015 1.015;
+}
+
+/* Background Fill de nível */
+.card-bg-fill {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transition-property: height;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-out;
+}
+
+.fill-nature-bg {
+    background-color: var(--color-nature-bg);
+    border-top-width: 5px;
+    border-top-color: var(--color-nature-glow);
+}
+
+.fill-economy-bg {
+    background-color: var(--color-economy-bg);
+    border-top-width: 5px;
+    border-top-color: var(--color-economy-glow);
+}
+
+.fill-relations-bg {
+    background-color: var(--color-relations-bg);
+    border-top-width: 5px;
+    border-top-color: var(--color-relations-glow);
+}
+
+.fill-people-bg {
+    background-color: var(--color-people-bg);
+    border-top-width: 5px;
+    border-top-color: var(--color-people-glow);
+}
+
+/* Conteúdo sobreposto (Ícone + Porcentagem Lado a Lado) */
+.card-foreground {
+    width: 100%;
+    height: 100%;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-evenly;
+    padding: 10px 16px;
+}
+
+.giant-icon {
+    width: 130px;
+    height: 130px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.giant-value {
+    font-size: 54px;
+    color: #ffffff;
+    background-color: rgba(2, 6, 12, 0.94);
+    border-width: 2px;
+    border-radius: 10px;
+    padding: 8px 24px;
+    letter-spacing: 2px;
+}
+
+/* Cores específicas de bordas e valores */
+.card-nature { border-color: var(--color-nature-solid); }
+.card-nature .giant-value { color: var(--color-nature-glow); border-color: var(--color-nature-solid); }
+.card-nature:hover { border-color: var(--color-nature-glow); }
+
+.card-economy { border-color: var(--color-economy-solid); }
+.card-economy .giant-value { color: var(--color-economy-glow); border-color: var(--color-economy-solid); }
+.card-economy:hover { border-color: var(--color-economy-glow); }
+
+.card-relations { border-color: var(--color-relations-solid); }
+.card-relations .giant-value { color: var(--color-relations-glow); border-color: var(--color-relations-solid); }
+.card-relations:hover { border-color: var(--color-relations-glow); }
+
+.card-people { border-color: var(--color-people-solid); }
+.card-people .giant-value { color: var(--color-people-glow); border-color: var(--color-people-solid); }
+.card-people:hover { border-color: var(--color-people-glow); }
+
+/* ============================================================
+   21% VERTICAL CORRUPTION PILLAR (FULL HEIGHT)
+   ============================================================ */
+.giant-corruption-pillar {
+    width: 21%;
+    height: 100%;
+    margin-left: 18px;
+    position: relative;
+    background-color: rgba(26, 4, 8, 0.95);
+    border-width: 3px;
+    border-color: #dc2626;
+    border-radius: 12px;
+    overflow: hidden;
+    justify-content: flex-end; /* Preenchimento cresce de baixo para cima */
+}
+
+.corruption-bg-fill {
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--color-corruption-bg);
+    border-top-width: 6px;
+    border-top-color: var(--color-corruption-glow);
+    transition-property: height;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-out;
+}
+
+.corruption-foreground {
+    width: 100%;
+    height: 100%;
+    padding: 16px 10px;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.giant-corruption-value {
+    font-size: 50px;
+    color: #ff3344;
+    background-color: rgba(10, 2, 4, 0.94);
+    border-width: 2px;
+    border-color: #ef4444;
+    border-radius: 10px;
+    padding: 6px 18px;
+    margin-top: 8px;
+    letter-spacing: 2px;
+}
+
+.corruption-center-box {
+    width: 100%;
+    flex-grow: 1;
+    justify-content: center;
+    align-items: center;
+}
+
+.giant-corruption-icon {
+    width: 100px;
+    height: 100px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: #ffffff; /* Deixa o ícone totalmente branco */
+}
