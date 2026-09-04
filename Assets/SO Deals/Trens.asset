@@ -15,19 +15,24 @@ MonoBehaviour:
   Description: "O que acha de tornarnos o Brasil ferrovi\xE1rio?"
   leftAnswer: "N\xE3o rola, vai ter greve de caminhoneiros"
   rightAnswer: Adeus carretas nas estradas
+  hasCorruptionMods: 0
   impactsLeft:
-    climaticChanges: 0
-    internationalRelations: 0
-    populationalApproval: 0
-    economy: 0
-    prop: {fileID: 0}
-  impactsRight:
     climaticChanges: 20
     internationalRelations: 0
     populationalApproval: 0
     economy: -15
+    corruption: 0
+    prop: {fileID: 0}
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: 0
+    economy: 0
+    corruption: 0
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 9067916053490012197, guid: 1bddbd3a1afe9314f936a7e5fde0da5c, type: 3}
   tag: 

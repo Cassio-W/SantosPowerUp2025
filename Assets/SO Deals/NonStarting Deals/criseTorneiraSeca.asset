@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
   m_Name: criseTorneiraSeca
   m_EditorClassIdentifier: 
-  Description: "A taxa da água provocou envasamento clandestino e escassez generalizada. A população está protestando com baldes nas portas dos palácios!"
-  leftAnswer: "Revogue a taxa e subsidie o abastecimento público."
-  rightAnswer: "Mande a guarda proteger os reservatórios!"
+  Description: "A taxa da \xE1gua provocou envasamento clandestino e escassez generalizada.
+    A popula\xE7\xE3o est\xE1 protestando com baldes nas portas dos pal\xE1cios!
+    O que acha de revogar?"
+  leftAnswer: "Revogue a taxa e subsidie o abastecimento p\xFAblico."
+  rightAnswer: "Mande a guarda proteger os reservat\xF3rios!"
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 15
     internationalRelations: 0
@@ -29,8 +32,9 @@ MonoBehaviour:
     economy: 0
     corruption: 15
     prop: {fileID: 0}
-  hasCorruptionMods: 0
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 9067916053490012197, guid: 1bddbd3a1afe9314f936a7e5fde0da5c, type: 3}
   tag: Agua

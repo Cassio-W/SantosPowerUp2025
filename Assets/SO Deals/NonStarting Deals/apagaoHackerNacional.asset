@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
   m_Name: apagaoHackerNacional
   m_EditorClassIdentifier: 
-  Description: "Um grupo de hackers sequestrou o sistema em nuvem do governo! Estão exigindo resgate milionário para liberar a emissão de RG e certidões!"
-  leftAnswer: "Pague o resgate com verba secreta emergencial!"
-  rightAnswer: "Recuse o resgate e mande recriar os cadastros no papel!"
+  Description: "Um grupo de hackers sequestrou o sistema em nuvem do governo! Est\xE3o
+    exigindo resgate milion\xE1rio para liberar a emiss\xE3o de RG e certid\xF5es!
+    Devemos pagar?"
+  leftAnswer: Pague o resgate com verba secreta emergencial!
+  rightAnswer: Recuse o resgate e mande recriar os cadastros no papel!
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 0
     internationalRelations: 0
@@ -29,8 +32,9 @@ MonoBehaviour:
     economy: -15
     corruption: -10
     prop: {fileID: 0}
-  hasCorruptionMods: 0
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 7243269876658770806, guid: aea00cd83b7045845975864cbf0caa3e, type: 3}
   tag: Hacker

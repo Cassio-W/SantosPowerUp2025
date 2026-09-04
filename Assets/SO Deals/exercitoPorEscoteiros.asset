@@ -16,16 +16,24 @@ MonoBehaviour:
     menos e cheira melhor."
   leftAnswer: Nem pensar! Quero tanque desfilando no Natal!
   rightAnswer: "Escoteiros armados com lanterna e bom cora\xE7\xE3o!"
+  hasCorruptionMods: 0
   impactsLeft:
-    climaticChanges: 0
-    internationalRelations: 20
-    populationalApproval: -15
-    economy: -20
-  impactsRight:
     climaticChanges: 0
     internationalRelations: -20
     populationalApproval: 15
     economy: 15
+    corruption: 0
+    prop: {fileID: 0}
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: 20
+    populationalApproval: -15
+    economy: -20
+    corruption: 0
+    prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 4047350394622487709, guid: 16e4de0f62729694eb1a5ff97f31af79, type: 3}
+  tag: 
