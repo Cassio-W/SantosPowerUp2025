@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Player")]
     public Attributes gameAttributes;
-    public Perks[] activePerks = new Perks[3];
+    public List<Perks> activePerks = new List<Perks>(3);
 
     [Header("Decks")]
     public List<Deal> allDeals = new List<Deal>();
@@ -106,13 +106,22 @@ public class GameManager : MonoBehaviour
     public void ChooseLeft(Deal deal)
     {
         foreach (Deal newDeal in deal.newDealsIfLeft) actualDeck.Add(newDeal);
-       
+        if (deal.perkIfLeft != null)
+        {
+            deal.perkIfLeft.OnAquired();
+            activePerks.Add(deal.perkIfLeft);
+        }
+
     }
 
     public void ChooseRight(Deal deal)
     {
         foreach (Deal newDeal in deal.newDealsIfRight) actualDeck.Add(newDeal);
-        if (deal.perkIfRight != null) deal.perkIfRight.OnAquired();
+        if (deal.perkIfRight != null)
+        {
+            deal.perkIfRight.OnAquired();
+            activePerks.Add(deal.perkIfRight);
+        }
     }
 
     public IEnumerator ApplyDecision(Deal deal, Attributes impacts)
@@ -149,7 +158,6 @@ public class GameManager : MonoBehaviour
                 yield return new WaitForSeconds(0.1f);
             }
         }
-        if (deal.perkIfLeft != null) deal.perkIfLeft.OnAquired();
     }
 
     public void CheckGameOver()

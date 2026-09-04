@@ -13,22 +13,27 @@ MonoBehaviour:
   m_Name: investirEducacao
   m_EditorClassIdentifier: 
   Description: "Educa\xE7\xE3o de qualidade custa caro, mas uma popula\xE7\xE3o burra
-    tamb\xE9m. Qual a escolha?"
+    tamb\xE9m. O que acha de subirmos o n\xEDvel?"
   leftAnswer: Melhor manter o povo sem saber quem sou.
   rightAnswer: "Quero doutores at\xE9 nos a\xE7ougues!"
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 0
     internationalRelations: 0
-    populationalApproval: -40
-    economy: 25
+    populationalApproval: 30
+    economy: -20
+    corruption: 0
     prop: {fileID: 0}
   impactsRight:
     climaticChanges: 0
     internationalRelations: 0
-    populationalApproval: 40
-    economy: -25
+    populationalApproval: -30
+    economy: 20
+    corruption: 0
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
-  NPC: {fileID: 6532259188457934314, guid: 0c667e5e5810e0448b52183683271385, type: 3}
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
+  NPC: {fileID: 7410145720240828870, guid: b126acb8a7a673f439f5ec19e17dfd59, type: 3}
   tag: 

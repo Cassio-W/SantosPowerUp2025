@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: criseDoTigrinho
   m_EditorClassIdentifier: 
   Description: "Senhor Presidente, metade da popula\xE7\xE3o perdeu a renda no 'Jogo
-    do Tigrinho'! O com\xE9rcio local estagnou e as fam\xEDlias est\xE3o endividadas."
+    do Tigrinho'! O com\xE9rcio local estagnou e as fam\xEDlias est\xE3o endividadas.
+    Poder\xEDamos criar um programa do governo."
   leftAnswer: Crie o programa 'Desenrola Tigrinho'!
   rightAnswer: "Cada um que arque com seus v\xEDcios no jogo!"
   hasCorruptionMods: 0
@@ -33,5 +34,7 @@ MonoBehaviour:
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 9148107631748954292, guid: a71d66c2d3ba94e46b0fda843b37281e, type: 3}
   tag: Bets

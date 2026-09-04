@@ -4471,10 +4471,7 @@ MonoBehaviour:
     economy: 50
     corruption: 0
     prop: {fileID: 0}
-  activePerks:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  activePerks: []
   allDeals:
   - {fileID: 11400000, guid: 1dcdb27b85130d24eac5877144bc44cf, type: 2}
   - {fileID: 11400000, guid: 58dd114493a653042be6faa9e1d3083c, type: 2}

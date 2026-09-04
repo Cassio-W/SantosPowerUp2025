@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Trafico Animais
   m_EditorClassIdentifier: 
   Description: "O tr\xE1fico ilegal de animais est\xE1 crescendo na Amaz\xF4nia,
-    precisamos fazer algo."
+    precisamos fazer algo. Vamos prend\xEA-los!"
   leftAnswer: Prendam todos
   rightAnswer: "Ainda n\xE3o"
   hasCorruptionMods: 1
@@ -23,12 +23,17 @@ MonoBehaviour:
     populationalApproval: 15
     economy: -15
     corruption: -15
+    prop: {fileID: 0}
   impactsRight:
     climaticChanges: -15
     internationalRelations: 0
     populationalApproval: -15
     economy: 20
     corruption: 25
+    prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 7243269876658770806, guid: aea00cd83b7045845975864cbf0caa3e, type: 3}
+  tag: 

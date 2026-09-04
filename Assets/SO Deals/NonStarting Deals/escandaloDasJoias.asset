@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: escandaloDasJoias
   m_EditorClassIdentifier: 
   Description: "Presidente, a alf\xE2ndega apreendeu um estojo de joias milion\xE1rias
-    trazidas da Su\xED\xE7a sem declara\xE7\xE3o! A Pol\xEDcia Federal quer explicac\xF5es."
+    trazidas da Su\xED\xE7a sem declara\xE7\xE3o! A Pol\xEDcia Federal quer explicac\xF5es.
+    Acho que dever\xEDamos dar um jeitinho brasileiro."
   leftAnswer: Diga que era acervo pessoal e demita o fiscal!
   rightAnswer: "Devolva o presente e pague a multa com verba pr\xF3pria."
   hasCorruptionMods: 0
@@ -33,5 +34,7 @@ MonoBehaviour:
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 4047350394622487709, guid: 16e4de0f62729694eb1a5ff97f31af79, type: 3}
   tag: Escandalo

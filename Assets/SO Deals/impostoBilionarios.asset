@@ -19,19 +19,21 @@ MonoBehaviour:
   hasCorruptionMods: 1
   impactsLeft:
     climaticChanges: 0
-    internationalRelations: 25
-    populationalApproval: -20
-    economy: -20
-    corruption: 15
+    internationalRelations: 0
+    populationalApproval: 20
+    economy: 20
+    corruption: 0
     prop: {fileID: 0}
   impactsRight:
     climaticChanges: 0
-    internationalRelations: -25
-    populationalApproval: 30
-    economy: 30
-    corruption: -15
+    internationalRelations: 10
+    populationalApproval: -20
+    economy: 0
+    corruption: 0
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 7410145720240828870, guid: b126acb8a7a673f439f5ec19e17dfd59, type: 3}
   tag: 

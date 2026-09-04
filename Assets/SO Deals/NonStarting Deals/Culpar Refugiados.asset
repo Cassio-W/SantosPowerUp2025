@@ -13,19 +13,27 @@ MonoBehaviour:
   m_Name: Culpar Refugiados
   m_EditorClassIdentifier: 
   Description: "Existem imigrantes que est\xE3o fazendo o caos entre a popula\xE7\xE3o?
-    O que devemos fazer?"
+    O que acha de deport\xE1-los?"
   leftAnswer: Deportem todos!
   rightAnswer: Apenas prenda-os. Precisamos deles.
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 0
     internationalRelations: -15
     populationalApproval: 15
     economy: 0
+    corruption: 0
+    prop: {fileID: 0}
   impactsRight:
     climaticChanges: 0
     internationalRelations: 15
     populationalApproval: -15
     economy: 0
+    corruption: 0
+    prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 6040501860826345181, guid: bce69ffb460102040acb20bbea5190c3, type: 3}
+  tag: 

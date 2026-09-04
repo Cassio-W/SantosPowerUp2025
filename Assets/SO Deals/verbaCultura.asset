@@ -20,15 +20,20 @@ MonoBehaviour:
   impactsLeft:
     climaticChanges: 0
     internationalRelations: 0
-    populationalApproval: -25
-    economy: 10
-    corruption: -5
-  impactsRight:
-    climaticChanges: 0
-    internationalRelations: 0
     populationalApproval: 25
     economy: -15
     corruption: 15
+    prop: {fileID: 0}
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: -20
+    economy: 10
+    corruption: -5
+    prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 6532259188457934314, guid: 0c667e5e5810e0448b52183683271385, type: 3}
+  tag: 

@@ -421,37 +421,13 @@ public class UIManager : MonoBehaviour
         SceneManager.LoadScene(0);
     }
 
-    /// <summary>
-    /// Escolha de Aprovação (Opção da Esquerda).
-    /// </summary>
-    public void ApproveDeal()
+    public void LeftAnswerButton()
     {
-        if (_isProcessingDecision) return;
-        _isProcessingDecision = true;
-        _currentDeal = null;
-
-        HideDecisionButtons();
-
-        bool isTutorial = GameManager.instance != null && GameManager.instance.onTutorial;
-        bool isLastTutorialDeal = isTutorial && (GameManager.instance.tutorialDeals == null || GameManager.instance.tutorialDeals.Count <= 1);
-
-        // Durante o tutorial, não toca a animação reversa nem tira da animação de levantando o papel.
-        // Só toca ao concluir o último deal do tutorial (transição para o jogo normal com NPCs) ou se não for tutorial.
-        if (!isTutorial || isLastTutorialDeal)
+        if (!GameManager.instance.onTutorial)
         {
-            PlayPlayerDealAnimationReverse();
-
-            // Se a câmera estiver focada em algum objeto (computador ou papel), retorna suavemente para a visão geral
-            if (CameraFocusManager.Instance != null && CameraFocusManager.Instance.HasActiveFocus)
-            {
-                CameraFocusManager.Instance.Unfocus();
-            }
-        }
-
-        if (!isTutorial)
-        {
-            if (datePanel != null) LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
-            if (corruptionPanel != null) LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(-120, -120, 0), 1f).setEase(easeType);
+            LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
+            LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
+            LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(-120, -120, 0), 1f).setEase(easeType);
             StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsLeft));
         }
         else
@@ -496,6 +472,7 @@ public class UIManager : MonoBehaviour
         {
             if (datePanel != null) LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
             if (corruptionPanel != null) LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(-120, -120, 0), 1f).setEase(easeType);
+            GameManager.instance.ChooseRight(GameManager.instance.actualDeck[0]);
             StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsRight));
         }
         else
@@ -528,7 +505,7 @@ public class UIManager : MonoBehaviour
         {
             if (perks[i] == null) continue;
 
-            if (i < GameManager.instance.activePerks.Length && GameManager.instance.activePerks[i] != null)
+            if (i < GameManager.instance.activePerks.Count && GameManager.instance.activePerks[i] != null)
             {
                 perks[i].gameObject.SetActive(true);
                 perks[i].sprite = GameManager.instance.activePerks[i].icon;

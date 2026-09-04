@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
   m_Name: embargoDaUniaoEuropeia
   m_EditorClassIdentifier: 
-  Description: "A União Europeia decretou embargo total à nossa soja e carne alegando contaminação química! Nossos produtores rurais estão desesperados."
-  leftAnswer: "Baixe o preço e venda para países aliados sem embargo."
-  rightAnswer: "Volte atrás e proíba os venenos agrícolas!"
+  Description: "A Uni\xE3o Europeia decretou embargo total \xE0 nossa soja e carne
+    alegando contamina\xE7\xE3o qu\xEDmica! Nossos produtores rurais est\xE3o desesperados.
+    Devemos baixar o pre\xE7o?"
+  leftAnswer: "Baixe o pre\xE7o e venda para pa\xEDses aliados sem embargo."
+  rightAnswer: "Volte atr\xE1s e pro\xEDba os venenos agr\xEDcolas!"
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: -15
     internationalRelations: -25
@@ -29,8 +32,9 @@ MonoBehaviour:
     economy: -20
     corruption: 0
     prop: {fileID: 0}
-  hasCorruptionMods: 0
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 6532259188457934314, guid: 0c667e5e5810e0448b52183683271385, type: 3}
   tag: Agro
