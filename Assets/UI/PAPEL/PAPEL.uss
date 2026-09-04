@@ -1,0 +1,153 @@
+/* ============================================================
+   DOCUMENTO OFICIAL - PAPEL DO GABINETE
+   - Textos impressos e proposta: Nexa Bold.otf (Máxima nitidez e legibilidade)
+   - Textos manuscritos (Assinatura e Visto): Brother Signature.otf (Caneta azul tinteiro)
+   ============================================================ */
+
+:root {
+    width: 100%;
+    height: 100%;
+    background-color: #EDE2CA; /* Papiro / Bege natural */
+    padding: 24px;
+    box-sizing: border-box;
+    /* Fonte Padrão Oficial: Limpa, geométrica, nítida e de fácil leitura */
+    -unity-font: url('project://database/Assets/Sprites/Nexa%20Bold.otf?fileID=12800000&guid=72d537b9f5516f4479169baed4c45a90&type=3#Nexa Bold');
+    -unity-font-definition: url('project://database/Assets/Sprites/Nexa%20Bold.otf?fileID=12800000&guid=72d537b9f5516f4479169baed4c45a90&type=3#Nexa Bold');
+}
+
+.paper-container {
+    width: 100%;
+    height: 100%;
+    background-color: #F8F2E4; /* Folha bege clara com alto contraste para texto */
+    border-width: 5px;
+    border-color: #4A3A2C;
+    border-radius: 8px;
+    padding: 32px 36px;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
+/* ------------------------------------------------------------
+   TOPO: AUTOR / MINISTÉRIO E CARIMBO (IMPRESSO)
+   ------------------------------------------------------------ */
+.top-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom-width: 4px;
+    border-bottom-color: #4A3A2C;
+    padding-bottom: 20px;
+    margin-bottom: 16px;
+}
+
+.author-box {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.author-label {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: #6E5B4B;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+
+.deal-author {
+    font-size: 40px;
+    -unity-font-style: bold;
+    color: #1A140E; /* Preto tipográfico oficial */
+    letter-spacing: 1px;
+}
+
+.stamp-box {
+    border-width: 4px;
+    border-color: #A32A2A;
+    border-radius: 8px;
+    padding: 8px 18px;
+    background-color: rgba(163, 42, 42, 0.12);
+    rotate: -3deg;
+}
+
+.stamp-text {
+    font-size: 26px;
+    -unity-font-style: bold;
+    color: #A32A2A;
+    letter-spacing: 3px;
+}
+
+/* ------------------------------------------------------------
+   CORPO PRINCIPAL: PROPOSTA IMPRESSA (MÁXIMA LEGUIBILIDADE)
+   ------------------------------------------------------------ */
+.main-content-box {
+    flex-grow: 1;
+    background-color: #FDFBF5;
+    border-width: 3px;
+    border-color: #C8BAA3;
+    border-radius: 6px;
+    padding: 32px 30px;
+    margin-bottom: 16px;
+    justify-content: center;
+}
+
+.deal-description {
+    font-size: 44px; /* Tamanho grande e nítido */
+    -unity-font-style: bold;
+    color: #120D08; /* Tinta tipográfica preta profunda, alto contraste */
+    white-space: normal;
+    -unity-text-align: upper-left;
+    line-height: 64px; /* Linha espaçada para leitura confortável */
+    letter-spacing: 0.5px;
+    flex-grow: 1;
+}
+
+/* ------------------------------------------------------------
+   RODAPÉ: BLOCOS DE ASSINATURA E LOCAL/DATA
+   ------------------------------------------------------------ */
+.footer-bar {
+    border-top-width: 3px;
+    border-top-color: #A89884;
+    padding-top: 20px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Blocos de Assinatura Individuais */
+.signature-container {
+    align-items: center;
+    width: 82%;
+    margin-bottom: 18px;
+}
+
+.president-block {
+    margin-bottom: 6px;
+}
+
+.signature-cursive {
+    -unity-font: url('project://database/Assets/Brother%20Signature.otf?fileID=12800000&guid=5e6a9f7a8b4c3d2e1f0a9b8c7d6e5f4a&type=3#Brother Signature');
+    -unity-font-definition: url('project://database/Assets/Brother%20Signature.otf?fileID=12800000&guid=5e6a9f7a8b4c3d2e1f0a9b8c7d6e5f4a&type=3#Brother Signature');
+    font-size: 64px; /* Tamanho grande e nítido */
+    color: #142846; /* Tinta azul caneta tinteiro clássica */
+    margin-bottom: 2px;
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+}
+
+.signature-underline {
+    width: 100%;
+    height: 3px;
+    background-color: #4A3A2C;
+    margin-bottom: 6px;
+}
+
+.signature-caption {
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: #5C4A3A;
+    letter-spacing: 2px;
+    -unity-text-align: middle-center;
+}
+
+
+

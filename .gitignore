@@ -107,3 +107,6 @@ InitTestScene*.unity*
 
 # AI Agent Skills & Customizations
 .agents/
+
+# UI Toolkit auto-generated schema files
+/[Uu][Ii][Ee]lements[Ss]chema/

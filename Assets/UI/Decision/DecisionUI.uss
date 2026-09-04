@@ -1,0 +1,155 @@
+/* ==========================================================================
+   DECISION UI - ESTILO COMIC / RETRO STYLIZED PARA UI TOOLKIT
+   ========================================================================== */
+
+.decision-screen {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: flex-end;
+    align-items: flex-end;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.decision-container {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    left: auto;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    transition-property: translate, opacity;
+    transition-duration: 0.35s;
+    transition-timing-function: ease-out;
+    translate: 0 0;
+    opacity: 1;
+}
+
+/* Estado Oculto (Slide-down com Fade) */
+.decision-container.hidden {
+    translate: 0 160px;
+    opacity: 0;
+    display: none;
+}
+
+/* ==========================================================================
+   BOTÕES DE DECISÃO
+   ========================================================================== */
+
+.decision-btn {
+    width: 440px;
+    min-height: 96px;
+    background-color: rgba(18, 22, 30, 0.94);
+    border-radius: 16px;
+    border-width: 3px;
+    flex-direction: row;
+    align-items: center;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 18px;
+    padding-right: 22px;
+    transition-property: scale, border-color, background-color;
+    transition-duration: 0.16s;
+    transition-timing-function: ease-out;
+    scale: 1 1;
+}
+
+.decision-btn:hover {
+    scale: 1.04 1.04;
+}
+
+.decision-btn:active {
+    scale: 0.96 0.96;
+}
+
+/* Barra lateral indicadora de cor */
+.btn-accent-bar {
+    width: 6px;
+    height: 70%;
+    border-radius: 3px;
+    margin-right: 16px;
+}
+
+.btn-content-box {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.btn-header-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.btn-tag {
+    font-size: 15px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+}
+
+.btn-key-hint {
+    font-size: 13px;
+    color: rgba(160, 175, 200, 0.7);
+    -unity-font-style: bold;
+}
+
+.btn-text-main {
+    font-size: 22px;
+    -unity-font-style: bold;
+    color: #FFFFFF;
+    white-space: normal;
+    -unity-text-align: middle-left;
+}
+
+/* ==========================================================================
+   BOTÃO APROVAR (ESQUERDA - VERDE ESMERALDA)
+   ========================================================================== */
+
+.btn-approve {
+    border-color: #10B981;
+    margin-right: 18px;
+    margin-left: 0;
+}
+
+.btn-approve:hover {
+    border-color: #34D399;
+    background-color: rgba(16, 40, 30, 0.96);
+}
+
+.accent-approve {
+    background-color: #10B981;
+}
+
+.tag-approve {
+    color: #34D399;
+}
+
+/* ==========================================================================
+   BOTÃO REJEITAR (DIREITA - VERMELHO RUBI)
+   ========================================================================== */
+
+.btn-reject {
+    border-color: #EF4444;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.btn-reject:hover {
+    border-color: #F87171;
+    background-color: rgba(45, 18, 22, 0.96);
+}
+
+.accent-reject {
+    background-color: #EF4444;
+}
+
+.tag-reject {
+    color: #F87171;
+}

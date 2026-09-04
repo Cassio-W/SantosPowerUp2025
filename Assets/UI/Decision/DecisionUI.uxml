@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="DecisionUI.uss" />
+    <ui:VisualElement name="decision-screen" class="decision-screen" picking-mode="Ignore">
+        <ui:VisualElement name="decision-container" class="decision-container hidden" picking-mode="Ignore">
+            
+            <!-- Botão Aprovar (Opção da Esquerda) -->
+            <ui:Button name="btn-approve" class="decision-btn btn-approve" picking-mode="Position">
+                <ui:VisualElement class="btn-accent-bar accent-approve" />
+                <ui:VisualElement class="btn-content-box" picking-mode="Ignore">
+                    <ui:VisualElement class="btn-header-row" picking-mode="Ignore">
+                        <ui:Label text="APROVAR" class="btn-tag tag-approve" />
+                        <ui:Label text="[ A ]" class="btn-key-hint" />
+                    </ui:VisualElement>
+                    <ui:Label name="lbl-approve-text" text="Aprovar Proposta" class="btn-text-main" />
+                </ui:VisualElement>
+            </ui:Button>
+
+            <!-- Botão Rejeitar (Opção da Direita) -->
+            <ui:Button name="btn-reject" class="decision-btn btn-reject" picking-mode="Position">
+                <ui:VisualElement class="btn-accent-bar accent-reject" />
+                <ui:VisualElement class="btn-content-box" picking-mode="Ignore">
+                    <ui:VisualElement class="btn-header-row" picking-mode="Ignore">
+                        <ui:Label text="REJEITAR" class="btn-tag tag-reject" />
+                        <ui:Label text="[ D ]" class="btn-key-hint" />
+                    </ui:VisualElement>
+                    <ui:Label name="lbl-reject-text" text="Rejeitar Proposta" class="btn-text-main" />
+                </ui:VisualElement>
+            </ui:Button>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

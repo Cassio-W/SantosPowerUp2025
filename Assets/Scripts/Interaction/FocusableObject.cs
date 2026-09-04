@@ -23,11 +23,15 @@ public class FocusableObject : MonoBehaviour
     [Tooltip("Duracao da transicao da camera para este objeto em segundos (-1 para usar a duracao padrao do CameraFocusManager).")]
     [SerializeField] private float customTransitionDuration = -1f;
 
-    [Tooltip("Permite alterar o Campo de Visao (FOV) da camera ao focar este objeto.")]
-    [SerializeField] private bool overrideCameraFov = false;
+    [Tooltip("Valor do Campo de Visao (FOV) da camera durante o foco neste objeto (-1 para usar o FOV padrao da camera).")]
+    [SerializeField] [Range(-1f, 120f)] private float targetCameraFov = 45f;
 
-    [Tooltip("Valor do Field of View (FOV) da camera durante o foco.")]
-    [SerializeField] [Range(10f, 90f)] private float targetCameraFov = 45f;
+    [Tooltip("Se ativo, habilita o efeito de camera / pos-processamento (desfoco periferico e Volume de foco) quando este objeto entrar em foco.")]
+    [SerializeField] private bool enableCameraEffectOnFocus = true;
+
+    [Tooltip("Intensidade / peso do efeito de camera (Volume e Edge Blur) quando este objeto for focado (0 = desligado, 1 = intensidade maxima).")]
+    [Range(0f, 1f)]
+    [SerializeField] private float cameraEffectWeight = 1f;
 
     [Header("--- Configuracoes de Hover ---")]
     [Tooltip("Habilita ou desabilita animacoes de escala no hover.")]
@@ -98,8 +102,10 @@ public class FocusableObject : MonoBehaviour
     public Transform CameraFocusPoint { get => cameraFocusPoint; set => cameraFocusPoint = value; }
     public Vector3 FallbackFocusOffset => fallbackFocusOffset;
     public float CustomTransitionDuration => customTransitionDuration;
-    public bool OverrideCameraFov => overrideCameraFov;
+    public bool OverrideCameraFov => targetCameraFov > 0f;
     public float TargetCameraFov => targetCameraFov;
+    public bool EnableCameraEffectOnFocus { get => enableCameraEffectOnFocus; set => enableCameraEffectOnFocus = value; }
+    public float CameraEffectWeight { get => cameraEffectWeight; set => cameraEffectWeight = Mathf.Clamp01(value); }
     public bool AllowClickToFocus => allowClickToFocus;
     public bool UnfocusOnSecondClick => unfocusOnSecondClick;
     public bool EnableOutlineHighlight => enableOutlineHighlight;
@@ -127,20 +133,89 @@ public class FocusableObject : MonoBehaviour
             }
         }
 
-        // Garante que o objeto tenha um Collider para raycasting se nao houver nenhum
-        if (GetComponentInChildren<Collider>() == null)
+        // Garante que o objeto tenha um Collider válido para raycasting
+        EnsureCollider();
+    }
+
+    /// <summary>
+    /// Garante a existência de um Collider válido e com dimensões positivas para recepção de cliques do mouse.
+    /// </summary>
+    public void EnsureCollider()
+    {
+        // Se já possui collider no próprio GameObject, garante dimensões estritamente positivas
+        var existingCollider = GetComponent<Collider>();
+        if (existingCollider != null)
+        {
+            if (existingCollider is BoxCollider boxExisting)
+            {
+                boxExisting.size = new Vector3(Mathf.Abs(boxExisting.size.x), Mathf.Abs(boxExisting.size.y), Mathf.Abs(boxExisting.size.z));
+            }
+            return;
+        }
+
+        // Tenta usar MeshFilter do próprio GameObject se disponível
+        var meshFilter = GetComponent<MeshFilter>();
+        if (meshFilter != null && meshFilter.sharedMesh != null)
+        {
+            var meshCollider = gameObject.AddComponent<MeshCollider>();
+            meshCollider.convex = false;
+            return;
+        }
+
+        // Caso possua renderers nele mesmo ou nos filhos, gera um BoxCollider abrangente
+        if (targetRenderers != null && targetRenderers.Count > 0)
         {
             var box = gameObject.AddComponent<BoxCollider>();
-            if (targetRenderers.Count > 0)
+
+            Bounds localBounds = new Bounds(Vector3.zero, Vector3.zero);
+            bool hasBounds = false;
+
+            foreach (var rend in targetRenderers)
             {
-                Bounds b = targetRenderers[0].bounds;
-                for (int i = 1; i < targetRenderers.Count; i++)
+                if (rend == null) continue;
+
+                Bounds b = rend.bounds;
+                Vector3 minLocal = transform.InverseTransformPoint(b.min);
+                Vector3 maxLocal = transform.InverseTransformPoint(b.max);
+
+                Vector3 center = (minLocal + maxLocal) * 0.5f;
+                Vector3 size = new Vector3(
+                    Mathf.Abs(maxLocal.x - minLocal.x),
+                    Mathf.Abs(maxLocal.y - minLocal.y),
+                    Mathf.Abs(maxLocal.z - minLocal.z)
+                );
+
+                Bounds rendLocalBounds = new Bounds(center, size);
+
+                if (!hasBounds)
                 {
-                    b.Encapsulate(targetRenderers[i].bounds);
+                    localBounds = rendLocalBounds;
+                    hasBounds = true;
                 }
-                box.center = transform.InverseTransformPoint(b.center);
-                box.size = transform.InverseTransformVector(b.size);
+                else
+                {
+                    localBounds.Encapsulate(rendLocalBounds);
+                }
             }
+
+            if (hasBounds)
+            {
+                box.center = localBounds.center;
+                box.size = new Vector3(
+                    Mathf.Max(localBounds.size.x, 0.05f),
+                    Mathf.Max(localBounds.size.y, 0.05f),
+                    Mathf.Max(localBounds.size.z, 0.05f)
+                );
+            }
+            else
+            {
+                box.size = Vector3.one;
+            }
+        }
+        else if (GetComponentInChildren<Collider>() == null)
+        {
+            var box = gameObject.AddComponent<BoxCollider>();
+            box.size = Vector3.one;
         }
     }
 
@@ -370,6 +445,6 @@ public class FocusableObject : MonoBehaviour
         Gizmos.DrawWireCube(Vector3.zero, new Vector3(0.4f, 0.3f, 0.5f));
 
         Gizmos.color = new Color(0.2f, 0.8f, 1f, 0.35f);
-        Gizmos.DrawFrustum(Vector3.zero, overrideCameraFov ? targetCameraFov : 50f, 3.5f, 0.1f, 1.777f);
+        Gizmos.DrawFrustum(Vector3.zero, targetCameraFov > 0f ? targetCameraFov : 50f, 3.5f, 0.1f, 1.777f);
     }
 }

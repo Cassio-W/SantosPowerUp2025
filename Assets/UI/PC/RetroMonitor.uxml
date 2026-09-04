@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/UI/RetroMonitor.uss?fileID=7433441132597870092&amp;guid=47a98b11c430489aa2ef80275819d45a&amp;type=3#RetroMonitor" />
+    <Style src="RetroMonitor.uss" />
     <ui:VisualElement name="screen-root" class="screen-root">
         <!-- TOP COMPACT BAR -->
         <ui:VisualElement class="top-compact-bar">

@@ -54,6 +54,8 @@ Shader "ComicVFX/ToonOutlineScreen"
                 float _HasHighlight;
             CBUFFER_END
 
+            float _EdgeBlurIntensity;
+
             Varyings vert(uint vertexID : SV_VertexID)
             {
                 Varyings output;
@@ -75,6 +77,30 @@ Shader "ComicVFX/ToonOutlineScreen"
                 float2 texel = _BlitTexture_TexelSize.xy;
                 if (texel.x == 0) texel = float2(1.0 / 1920.0, 1.0 / 1080.0);
                 texel *= _Thickness;
+
+                // --- Desfoco Periférico (apenas nas bordas e cantos da câmera) ---
+                if (_EdgeBlurIntensity > 0.005)
+                {
+                    float2 uvOffset = input.uv - float2(0.5, 0.5);
+                    float aspect = _ScreenParams.x / _ScreenParams.y;
+                    float dist = length(float2(uvOffset.x * aspect, uvOffset.y));
+
+                    // Centro da tela (mesa, computador ou documento focado) é 100% nítido
+                    float edgeWeight = smoothstep(0.38, 0.85, dist) * _EdgeBlurIntensity;
+                    if (edgeWeight > 0.001)
+                    {
+                        float2 dir = dist > 0.001 ? (uvOffset / dist) : float2(0, 0);
+                        float2 blurStep = dir * (texel * (edgeWeight * 5.0));
+
+                        half4 blurred = color * 0.28;
+                        blurred += SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, input.uv + blurStep * 0.5) * 0.22;
+                        blurred += SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, input.uv - blurStep * 0.5) * 0.22;
+                        blurred += SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, input.uv + blurStep * 1.0) * 0.14;
+                        blurred += SAMPLE_TEXTURE2D(_BlitTexture, sampler_BlitTexture, input.uv - blurStep * 1.0) * 0.14;
+
+                        color = lerp(color, blurred, edgeWeight);
+                    }
+                }
 
                 float dCenter = SampleDepthLinear(input.uv);
 

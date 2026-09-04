@@ -1,8 +1,11 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
+using UnityEngine.Rendering;
+using UnityEngine.UIElements;
 
 /// <summary>
 /// Gerenciador central de foco da camera e interacoes com objetos 3D.
@@ -19,6 +22,12 @@ public class CameraFocusManager : MonoBehaviour
 
     [Tooltip("Transform que define a posicao/rotacao inicial padrao da camera. Se vazio, captura a posicao inicial da camera na cena.")]
     [SerializeField] private Transform defaultCameraAnchor;
+
+    [Tooltip("Se ativo, reduz o Near Clip Plane da camera para evitar que a mao ou objetos proximos sumam / sejam cortados.")]
+    [SerializeField] private bool autoAdjustNearClipPlane = true;
+
+    [Tooltip("Valor do Near Clip Plane aplicado automaticamente (ex: 0.02 = 2cm).")]
+    [SerializeField] [Range(0.005f, 0.3f)] private float targetNearClipPlane = 0.02f;
 
     [Header("--- Animacao e Interpolacao ---")]
     [Tooltip("Duracao da transicao da camera em segundos.")]
@@ -60,6 +69,7 @@ public class CameraFocusManager : MonoBehaviour
     private FocusableObject _currentFocusedObject;
     private FocusableObject _currentHoveredObject;
     private Coroutine _cameraMoveCoroutine;
+    private int _effectTweenId = -1;
 
     public FocusableObject CurrentFocusedObject => _currentFocusedObject;
     public FocusableObject CurrentHoveredObject => _currentHoveredObject;
@@ -91,6 +101,10 @@ public class CameraFocusManager : MonoBehaviour
         if (targetCamera != null)
         {
             _defaultFov = targetCamera.fieldOfView;
+            if (autoAdjustNearClipPlane && targetCamera.nearClipPlane > targetNearClipPlane)
+            {
+                targetCamera.nearClipPlane = targetNearClipPlane;
+            }
         }
     }
 
@@ -173,8 +187,8 @@ public class CameraFocusManager : MonoBehaviour
     {
         if (targetCamera == null) return;
 
-        // Se o mouse estiver sobre um elemento de UI, nao processa o raio na cena 3D
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        // Se o mouse estiver sobre um elemento de UI interativo real, cancela o raio 3D
+        if (IsPointerOverInteractiveUI())
         {
             ClearHover();
             return;
@@ -227,6 +241,82 @@ public class CameraFocusManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Verifica de forma precisa se o mouse está sobre um controle interativo de UI (Botão, Slider, etc.).
+    /// Evita que telas vazias, containers transparentes, imagens estáticas ou painéis de tela cheia do UI Toolkit / uGUI
+    /// bloqueiem indevidamente o raio de interação 3D com objetos do cenário (como o computador),
+    /// enquanto garante que cliques em botões de UI nunca causem desfoque acidental da câmera.
+    /// </summary>
+    public bool IsPointerOverInteractiveUI()
+    {
+        // 1. Checagem direta nos botões de decisão do UIManager
+        if (UIManager.instance != null && UIManager.instance.IsPointerOverDecisionButtons())
+        {
+            return true;
+        }
+
+        // 2. Verificação direta em todos os UIDocuments ativos de tela (UI Toolkit)
+        UIDocument[] uiDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+        foreach (var doc in uiDocs)
+        {
+            if (doc != null && doc.isActiveAndEnabled && doc.rootVisualElement != null && doc.rootVisualElement.panel != null)
+            {
+                // Se for um painel em RenderTexture / WorldSpace (ex: folha de papel física 3D ou tela do monitor),
+                // a interação ocorre via Raycast 3D no FocusableObject, então ignora aqui.
+                if (doc.panelSettings != null && doc.panelSettings.targetTexture != null)
+                {
+                    continue;
+                }
+
+                Vector2 screenPos = Input.mousePosition;
+                Vector2 panelPos = RuntimePanelUtils.ScreenToPanel(
+                    doc.rootVisualElement.panel,
+                    new Vector2(screenPos.x, Screen.height - screenPos.y)
+                );
+                var picked = doc.rootVisualElement.panel.Pick(panelPos);
+
+                if (picked != null && picked != doc.rootVisualElement)
+                {
+                    // Se for um botão, campo de texto ou botão de decisão interativo
+                    if (picked is UnityEngine.UIElements.Button ||
+                        picked.GetFirstAncestorOfType<UnityEngine.UIElements.Button>() != null ||
+                        picked is UnityEngine.UIElements.TextField ||
+                        picked.ClassListContains("decision-btn") ||
+                        picked.GetFirstAncestorOfType<VisualElement>()?.ClassListContains("decision-btn") == true)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        // 3. Verificação precisa para uGUI (Canvas) - apenas componentes interativos reais (Selectable: Buttons, Sliders, etc.)
+        if (EventSystem.current != null)
+        {
+            PointerEventData eventData = new PointerEventData(EventSystem.current)
+            {
+                position = Input.mousePosition
+            };
+
+            var results = new List<RaycastResult>();
+            EventSystem.current.RaycastAll(eventData, results);
+
+            foreach (var hit in results)
+            {
+                if (hit.gameObject != null)
+                {
+                    var selectable = hit.gameObject.GetComponentInParent<UnityEngine.UI.Selectable>();
+                    if (selectable != null && selectable.interactable && selectable.enabled)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Move a camera suavemente para focar o objeto especificado.
     /// </summary>
     public void Focus(FocusableObject target)
@@ -250,8 +340,12 @@ public class CameraFocusManager : MonoBehaviour
 
         Vector3 targetPos = target.GetCameraTargetPosition();
         Quaternion targetRot = target.GetCameraTargetRotation();
-        float targetFov = target.OverrideCameraFov ? target.TargetCameraFov : _defaultFov;
+        float targetFov = target.TargetCameraFov > 0f ? target.TargetCameraFov : _defaultFov;
         float duration = target.CustomTransitionDuration > 0f ? target.CustomTransitionDuration : transitionDuration;
+
+        // Ativa ou desativa o efeito de camera / pos-processamento baseado na flag e peso do objeto focado
+        float targetEffectWeight = target.EnableCameraEffectOnFocus ? target.CameraEffectWeight : 0f;
+        SetFocusCameraEffect(targetEffectWeight, duration);
 
         MoveCameraTo(targetPos, targetRot, targetFov, duration);
 
@@ -270,14 +364,86 @@ public class CameraFocusManager : MonoBehaviour
         _currentFocusedObject.SetFocused(false);
         _currentFocusedObject = null;
 
+        float duration = customDuration > 0f ? customDuration : transitionDuration;
+
+        // Desativa o efeito de camera / pos-processamento ao retornar para a visao geral
+        SetFocusCameraEffect(0f, duration);
+
         Vector3 targetPos = defaultCameraAnchor != null ? defaultCameraAnchor.position : _defaultPosition;
         Quaternion targetRot = defaultCameraAnchor != null ? defaultCameraAnchor.rotation : _defaultRotation;
-        float duration = customDuration > 0f ? customDuration : transitionDuration;
 
         MoveCameraTo(targetPos, targetRot, _defaultFov, duration);
 
         onFocusChanged?.Invoke(null);
         OnObjectFocusChanged?.Invoke(null);
+    }
+
+    /// <summary>
+    /// Transiciona suavemente o efeito de camera / pos-processamento (Volume e Edge Blur no ToonOutlineFeature).
+    /// </summary>
+    public void SetFocusCameraEffect(float targetWeight, float duration = 0.65f)
+    {
+        if (_effectTweenId != -1)
+        {
+            LeanTween.cancel(_effectTweenId);
+            _effectTweenId = -1;
+        }
+
+        Volume vol = GetFocusVolume();
+        float currentBlur = Shader.GetGlobalFloat("_EdgeBlurIntensity");
+        float currentVol = vol != null ? vol.weight : currentBlur;
+        float startVal = Mathf.Max(currentBlur, currentVol);
+
+        float targetVal = Mathf.Clamp01(targetWeight);
+        duration = Mathf.Max(duration, 0.05f);
+
+        if (Mathf.Abs(startVal - targetVal) < 0.001f)
+        {
+            if (vol != null) vol.weight = targetVal;
+            Shader.SetGlobalFloat("_EdgeBlurIntensity", targetVal);
+            return;
+        }
+
+        var tween = LeanTween.value(startVal, targetVal, duration)
+            .setOnUpdate((float val) => {
+                if (vol != null) vol.weight = val;
+                Shader.SetGlobalFloat("_EdgeBlurIntensity", val);
+            })
+            .setEase(LeanTweenType.easeInOutQuad);
+
+        if (useUnscaledTime)
+        {
+            tween.setIgnoreTimeScale(true);
+        }
+
+        _effectTweenId = tween.id;
+    }
+
+    /// <summary>
+    /// Sobrecarga para ativar ou desativar o efeito usando booleano (0f ou 1f).
+    /// </summary>
+    public void SetFocusCameraEffect(bool enable, float duration = 0.65f)
+    {
+        SetFocusCameraEffect(enable ? 1f : 0f, duration);
+    }
+
+    private Volume GetFocusVolume()
+    {
+        Camera cam = targetCamera != null ? targetCamera : Camera.main;
+        if (cam != null)
+        {
+            Volume[] volumes = cam.GetComponents<Volume>();
+            foreach (var v in volumes)
+            {
+                if (v != null && v.sharedProfile != null && v.sharedProfile.name.Contains("1"))
+                {
+                    return v;
+                }
+            }
+            var camVol = cam.GetComponent<Volume>();
+            if (camVol != null) return camVol;
+        }
+        return FindFirstObjectByType<Volume>();
     }
 
     /// <summary>
@@ -343,6 +509,12 @@ public class CameraFocusManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        if (_effectTweenId != -1)
+        {
+            LeanTween.cancel(_effectTweenId);
+            _effectTweenId = -1;
+        }
+
         if (Instance == this)
         {
             Instance = null;

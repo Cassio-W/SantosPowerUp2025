@@ -1,0 +1,39 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="PAPEL.uss" />
+    <ui:VisualElement name="paper-container" class="paper-container">
+        
+        <!-- TOPO: MINISTÉRIO / PROPONENTE E CARIMBO (FONTE OFICIAL IMPRESSA) -->
+        <ui:VisualElement class="top-bar">
+            <ui:VisualElement class="author-box">
+                <ui:Label text="PROPOSTA DO MINISTÉRIO:" class="author-label" />
+                <ui:Label name="deal-author" text="MINISTÉRIO DE ESTADO" class="deal-author" />
+            </ui:VisualElement>
+            <ui:VisualElement class="stamp-box">
+                <ui:Label text="URGENTE" class="stamp-text" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- CORPO PRINCIPAL: PROPOSTA IMPRESSA COM MÁXIMA LEGUIBILIDADE -->
+        <ui:VisualElement class="main-content-box">
+            <ui:Label name="deal-description" text="Texto da proposta presidencial com fonte nítida e de altíssima legibilidade..." class="deal-description" />
+        </ui:VisualElement>
+
+        <!-- RODAPÉ: LOCAL/DATA E ASSINATURA (MODELO PADRONIZADO E ESPAÇADO) -->
+        <ui:VisualElement class="footer-bar">
+            <!-- BLOCO 1: LOCAL E DATA -->
+            <ui:VisualElement class="signature-container date-block">
+                <ui:Label name="deal-date" text="Brasília - DF, Janeiro de 2026" class="signature-cursive" />
+                <ui:VisualElement class="signature-underline" />
+                <ui:Label text="LOCAL E DATA DE ASSINATURA" class="signature-caption" />
+            </ui:VisualElement>
+            
+            <!-- BLOCO 2: ASSINATURA DO PRESIDENTE -->
+            <ui:VisualElement class="signature-container president-block">
+                <ui:Label text="Presidente da República" class="signature-cursive" />
+                <ui:VisualElement class="signature-underline" />
+                <ui:Label text="DESPACHO PRESIDENCIAL" class="signature-caption" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>
