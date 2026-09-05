@@ -18,19 +18,33 @@
                 <ui:VisualElement class="cards-row">
                     <!-- APP 1: NATUREZA -->
                     <ui:VisualElement name="app-nature" class="giant-card card-nature">
+                        <!-- Fill principal -->
                         <ui:VisualElement name="fill-nature" class="card-bg-fill fill-nature-bg" style="height: 50%;" />
+                        <!-- Ghost fill (fantasma de variação) -->
+                        <ui:VisualElement name="ghost-fill-nature" class="ghost-fill ghost-nature" style="height: 50%; opacity: 0;" />
                         <ui:VisualElement class="card-foreground">
                             <ui:VisualElement name="icon-nature" class="giant-icon" style="background-image: url(&apos;project://database/Assets/Sprites/Treenew.png?fileID=21300000&amp;guid=982e87e4a34157f4eb9258069f8f341d&amp;type=3#Treenew&apos;);" />
                             <ui:Label name="value-nature" text="50%" class="giant-value" />
+                        </ui:VisualElement>
+                        <!-- Seta de variação (grande, visível de longe) -->
+                        <ui:Label name="arrow-nature" class="attr-arrow hidden" text="↑" />
+                        <!-- Overlay de atributo zerado -->
+                        <ui:VisualElement name="dead-overlay-nature" class="dead-overlay hidden">
+                            <ui:Label text="✕" class="dead-x-label" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- APP 2: ECONOMIA -->
                     <ui:VisualElement name="app-economy" class="giant-card card-economy">
                         <ui:VisualElement name="fill-economy" class="card-bg-fill fill-economy-bg" style="height: 50%;" />
+                        <ui:VisualElement name="ghost-fill-economy" class="ghost-fill ghost-economy" style="height: 50%; opacity: 0;" />
                         <ui:VisualElement class="card-foreground">
                             <ui:VisualElement name="icon-economy" class="giant-icon" style="background-image: url(&apos;project://database/Assets/Sprites/moneynew.png?fileID=21300000&amp;guid=1ff9b9ecfbad1924eb51f51a6f3863ec&amp;type=3#moneynew&apos;);" />
                             <ui:Label name="value-economy" text="50%" class="giant-value" />
+                        </ui:VisualElement>
+                        <ui:Label name="arrow-economy" class="attr-arrow hidden" text="↑" />
+                        <ui:VisualElement name="dead-overlay-economy" class="dead-overlay hidden">
+                            <ui:Label text="✕" class="dead-x-label" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -40,18 +54,28 @@
                     <!-- APP 3: RELAÇÕES INTERNACIONAIS -->
                     <ui:VisualElement name="app-relations" class="giant-card card-relations">
                         <ui:VisualElement name="fill-relations" class="card-bg-fill fill-relations-bg" style="height: 50%;" />
+                        <ui:VisualElement name="ghost-fill-relations" class="ghost-fill ghost-relations" style="height: 50%; opacity: 0;" />
                         <ui:VisualElement class="card-foreground">
                             <ui:VisualElement name="icon-relations" class="giant-icon" style="background-image: url(&apos;project://database/Assets/Sprites/peaceSlider.png?fileID=21300000&amp;guid=7de11bbadd901af438bbd94d6f311438&amp;type=3#peaceSlider&apos;);" />
                             <ui:Label name="value-relations" text="50%" class="giant-value" />
+                        </ui:VisualElement>
+                        <ui:Label name="arrow-relations" class="attr-arrow hidden" text="↑" />
+                        <ui:VisualElement name="dead-overlay-relations" class="dead-overlay hidden">
+                            <ui:Label text="✕" class="dead-x-label" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- APP 4: POPULAÇÃO -->
                     <ui:VisualElement name="app-people" class="giant-card card-people">
                         <ui:VisualElement name="fill-people" class="card-bg-fill fill-people-bg" style="height: 50%;" />
+                        <ui:VisualElement name="ghost-fill-people" class="ghost-fill ghost-people" style="height: 50%; opacity: 0;" />
                         <ui:VisualElement class="card-foreground">
                             <ui:VisualElement name="icon-people" class="giant-icon" style="background-image: url(&apos;project://database/Assets/Sprites/peopleSlider.png?fileID=1537655665&amp;guid=f498b99f7dc683646b439a837578e287&amp;type=3#peopleSlider&apos;);" />
                             <ui:Label name="value-people" text="50%" class="giant-value" />
+                        </ui:VisualElement>
+                        <ui:Label name="arrow-people" class="attr-arrow hidden" text="↑" />
+                        <ui:VisualElement name="dead-overlay-people" class="dead-overlay hidden">
+                            <ui:Label text="✕" class="dead-x-label" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -60,12 +84,16 @@
             <!-- GIANT VERTICAL CORRUPTION PILLAR -->
             <ui:VisualElement name="corruption-pillar" class="giant-corruption-pillar">
                 <ui:VisualElement name="fill-corruption" class="corruption-bg-fill" style="height: 0%;" />
+                <!-- Ghost fill do pilar de corrupção -->
+                <ui:VisualElement name="ghost-fill-corruption" class="ghost-fill ghost-corruption" style="height: 0%; opacity: 0;" />
                 <ui:VisualElement class="corruption-foreground">
                     <ui:Label name="value-corruption" text="0%" class="giant-corruption-value" />
                     <ui:VisualElement class="corruption-center-box">
-                        <ui:VisualElement name="icon-corruption" class="giant-corruption-icon" style="background-image: url(&apos;project://database/Assets/Sprites/icone_corrupcao.png?fileID=21300000&amp;guid=8403b0f3a5da6074396e7c22d5db4b6e&amp;type=3#icone_corrupcao&apos;);" />
+                        <ui:VisualElement name="icon-corruption" class="giant-corruption-icon" style="background-image: url(&apos;project://database/Assets/Sprites/corrupcao.png?fileID=21300000&amp;guid=f217d777a72a37b48880da6bf990a435&amp;type=3#corrupcao&apos;);" />
                     </ui:VisualElement>
                 </ui:VisualElement>
+                <!-- Seta de variação da corrupção -->
+                <ui:Label name="arrow-corruption" class="attr-arrow hidden" text="↑" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

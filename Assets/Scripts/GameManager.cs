@@ -28,10 +28,14 @@ public class GameManager : MonoBehaviour
     public NPCController actualNPC;
 
     [Header("Animations")]
-    [SerializeField]List<string> animations = new List<string>();
+    public List<string> animations = new List<string>();
     [SerializeField] Animator anim;
     [SerializeField] GameObject palmas;
     [SerializeField] bool playRandomReaction = false;
+
+    [Header("Timers & Delays")]
+    [Tooltip("Tempo de espera (em segundos) após o término da entrega do papel pelo NPC antes de disparar o evento da nova proposta e o jogador levantar a mão.")]
+    public float delayAfterDelivery = 0.0f;
 
     [Header("Time")]
     public int month;
@@ -43,14 +47,23 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        if(instance == null) instance = this; //Singleton
-        gameAttributes = new Attributes();
+        if (instance == null) instance = this; //Singleton
+        if (gameAttributes == null)
+        {
+            gameAttributes = new Attributes();
+        }
+        else
+        {
+            gameAttributes.climaticChanges = 50;
+            gameAttributes.internationalRelations = 50;
+            gameAttributes.populationalApproval = 50;
+            gameAttributes.economy = 50;
+            gameAttributes.corruption = 0;
+        }
 
         month = 1;
         year = 2026;
         onTutorial = true;
-
-
     }
 
     void Start()
@@ -60,6 +73,10 @@ public class GameManager : MonoBehaviour
         gameAttributes.populationalApproval = 50;
         gameAttributes.economy = 50;
         gameAttributes.corruption = 0;
+
+        // Notifica a UI e o Monitor Retrô com os valores iniciais de mandato
+        OnChangeAttributes?.Invoke(gameAttributes);
+
         foreach (Deal deal in allDeals)
         {
             actualDeck.Add(deal);
@@ -97,7 +114,19 @@ public class GameManager : MonoBehaviour
                 actualNPC = npc.GetComponent<NPCController>();
                 npc.transform.position = actualNPC.startPosition;
                 actualNPC.MoveToTable();
-                yield return new WaitWhile(() => !actualNPC.hasReachedTarget);
+
+                // 1. Aguarda o NPC caminhar e chegar até a mesa
+                yield return new WaitWhile(() => actualNPC != null && !actualNPC.hasReachedTarget);
+
+                // 2. Aguarda o NPC finalizar a animação de entrega do papel
+                yield return new WaitWhile(() => actualNPC != null && !actualNPC.isDelivered);
+
+                // 3. Delay suave pós-entrega para transição natural antes do jogador levantar a mão
+                if (delayAfterDelivery > 0f)
+                {
+                    yield return new WaitForSeconds(delayAfterDelivery);
+                }
+
                 OnNewDeal.Invoke(actualDeck[0]);
             }
         }
@@ -124,30 +153,60 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public IEnumerator ApplyDecision(Deal deal, Attributes impacts)
+    public IEnumerator ApplyDecision(Deal deal, Attributes impacts, bool isApproved = true)
     {
         gameAttributes.ApplyChanges(impacts, deal);
         OnChangeAttributes?.Invoke(gameAttributes);
         if (!onTutorial)
         {
             DisplayProp(impacts.prop);
-            CheckGameOver();
-            actualDeck.Remove(actualDeck[0]);
+
+            if (actualDeck != null && actualDeck.Count > 0)
+            {
+                actualDeck.RemoveAt(0);
+            }
+
+            if (CheckGameOver())
+            {
+                if (actualNPC != null)
+                {
+                    actualNPC.ReactAndExit(isApproved);
+                }
+                yield break;
+            }
+
             ShuffleDeck();
-            PassTime();
-            actualNPC.MoveToExit();
+
+            if (PassTime())
+            {
+                if (actualNPC != null)
+                {
+                    actualNPC.ReactAndExit(isApproved);
+                }
+                yield break;
+            }
+
+            if (actualNPC != null)
+            {
+                actualNPC.ReactAndExit(isApproved);
+            }
+
             yield return new WaitForSeconds(0.5f);
             if (playRandomReaction)
             {
                 StartCoroutine(RandomizeAnimation());
             }
-            yield return new WaitForSeconds(5);
+            yield return new WaitForSeconds(5.5f);
             StartCoroutine(GetDeal());
         }
         else
         {
-            tutorialDeals.Remove(tutorialDeals[0]);
-            if (!tutorialDeals.Any())
+            if (tutorialDeals != null && tutorialDeals.Count > 0)
+            {
+                tutorialDeals.RemoveAt(0);
+            }
+
+            if (tutorialDeals == null || !tutorialDeals.Any())
             {
                 onTutorial = false;
                 StartCoroutine(GetDeal());
@@ -160,7 +219,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void CheckGameOver()
+    public bool CheckGameOver()
     {
         if (gameAttributes.climaticChanges <= 0 ||
         gameAttributes.internationalRelations <= 0 ||
@@ -168,13 +227,14 @@ public class GameManager : MonoBehaviour
         gameAttributes.economy <= 0 ||
         gameAttributes.corruption >= 100)
         {
-            OnGameOver.Invoke("Olha o que você fez! Estragou tudo e agora vamos ter que te tirar da presidência. Boa sorte explicando seus erros para o povo.");
+            OnGameOver?.Invoke("Olha o que você fez! Estragou tudo e agora vamos ter que te tirar da presidência. Boa sorte explicando seus erros para o povo.");
             actualDeck.Clear();
-            StopAllCoroutines();
+            return true;
         }
+        return false;
     }
 
-    public void PassTime()
+    public bool PassTime()
     {
         if(month == 12)
         {
@@ -186,14 +246,18 @@ public class GameManager : MonoBehaviour
             month++;
         }
 
-        if (year == 2030)
+        if (year >= 2030)
         {
             Debug.Log("Cabo o jogo");
-            OnGameWin.Invoke("Parabéns, chegamos em 2030 e seu mandato foi incrível, você tirou o país do lixo e impediu que o pior ocorresse. Obrigado.");
-            Instantiate(palmas, new Vector3(0, 0, 2), Quaternion.identity);
+            OnGameWin?.Invoke("Parabéns, chegamos em 2030 e seu mandato foi incrível, você tirou o país do lixo e impediu que o pior ocorresse. Obrigado.");
+            if (palmas != null)
+            {
+                Instantiate(palmas, new Vector3(0, 0, 2), Quaternion.identity);
+            }
             actualDeck.Clear();
-            StopAllCoroutines();
+            return true;
         }
+        return false;
     }
 
     public void PPFocus()
@@ -246,10 +310,32 @@ public class GameManager : MonoBehaviour
 
     IEnumerator RandomizeAnimation()
     {
-        int choice = UnityEngine.Random.Range(0, animations.Count());
-        anim.Play(animations[choice]);
-        yield return new WaitForSeconds(1);
-        anim.Play("None");
+        if (anim == null && UIManager.instance != null) anim = UIManager.instance.GetPlayerAnimator();
+        if (anim == null || anim.runtimeAnimatorController == null) yield break;
+        if (animations == null || animations.Count == 0) yield break;
+
+        List<string> valid = new List<string>();
+        foreach (var a in animations)
+        {
+            if (!string.IsNullOrEmpty(a) && (anim.HasState(0, Animator.StringToHash(a)) || anim.HasState(0, Animator.StringToHash("Base Layer." + a))))
+            {
+                valid.Add(a);
+            }
+        }
+
+        if (valid.Count > 0)
+        {
+            int choice = UnityEngine.Random.Range(0, valid.Count);
+            anim.speed = 1f;
+            anim.Play(valid[choice], 0, 0f);
+            yield return new WaitForSeconds(1);
+
+            int noneHash = Animator.StringToHash("None");
+            if (anim.HasState(0, noneHash) || anim.HasState(0, Animator.StringToHash("Base Layer.None")))
+            {
+                anim.Play("None", 0, 0f);
+            }
+        }
     }
 
     void DisplayProp(GameObject prop)

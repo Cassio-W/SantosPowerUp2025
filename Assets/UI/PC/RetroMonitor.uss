@@ -142,9 +142,6 @@ Label {
     bottom: 0;
     left: 0;
     right: 0;
-    transition-property: height;
-    transition-duration: 0.3s;
-    transition-timing-function: ease-out;
 }
 
 .fill-nature-bg {
@@ -239,9 +236,6 @@ Label {
     background-color: var(--color-corruption-bg);
     border-top-width: 6px;
     border-top-color: var(--color-corruption-glow);
-    transition-property: height;
-    transition-duration: 0.3s;
-    transition-timing-function: ease-out;
 }
 
 .corruption-foreground {
@@ -276,4 +270,166 @@ Label {
     height: 100px;
     -unity-background-scale-mode: scale-to-fit;
     -unity-background-image-tint-color: #ffffff; /* Deixa o ícone totalmente branco */
+}
+
+/* ============================================================
+   FEEDBACK DE VARIAÇÃO — SETA (↑↓)
+   Grande o suficiente para ser visível à distância
+   ============================================================ */
+.attr-arrow {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 62px;
+    height: 62px;
+    border-radius: 8px;
+    background-color: rgba(6, 10, 16, 0.90);
+    border-width: 3px;
+    justify-content: center;
+    align-items: center;
+    font-size: 44px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    transition-property: opacity;
+    transition-duration: 0.4s;
+}
+
+.attr-arrow.arrow-up {
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+.attr-arrow.arrow-down {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+/* Para corrupção: ↑ = piora (vermelho), ↓ = melhora (verde) */
+.attr-arrow.arrow-up-bad {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+.attr-arrow.arrow-down-good {
+    border-color: #22c55e;
+    color: #22c55e;
+}
+
+/* ============================================================
+   GHOST FILL — preenchimento fantasma de variação
+   Posição absoluta ancorada na base, igual ao fill principal
+   Opacidade controlada totalmente por script
+   ============================================================ */
+.ghost-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    /* sem transition — altura e opacity animadas via script (MoveTowards) */
+}
+
+/* Perda: ghost mostra o nível anterior acima da barra que caiu */
+/* Ganho: ghost mostra o nível futuro antes da barra subir */
+.ghost-nature {
+    background-color: rgba(34, 197, 94, 0.22);
+    border-top-width: 4px;
+    border-top-color: rgba(74, 222, 128, 0.65);
+}
+
+.ghost-economy {
+    background-color: rgba(234, 179, 8, 0.22);
+    border-top-width: 4px;
+    border-top-color: rgba(250, 204, 21, 0.65);
+}
+
+.ghost-relations {
+    background-color: rgba(56, 189, 248, 0.22);
+    border-top-width: 4px;
+    border-top-color: rgba(125, 211, 252, 0.65);
+}
+
+.ghost-people {
+    background-color: rgba(244, 114, 182, 0.22);
+    border-top-width: 4px;
+    border-top-color: rgba(244, 114, 182, 0.65);
+}
+
+.ghost-corruption {
+    background-color: rgba(220, 38, 38, 0.22);
+    border-top-width: 4px;
+    border-top-color: rgba(255, 34, 68, 0.65);
+}
+
+/* ============================================================
+   FEEDBACK — OVERLAY DE ATRIBUTO ZERADO (✕)
+   ============================================================ */
+.dead-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.72);
+    justify-content: center;
+    align-items: center;
+}
+
+.dead-x-label {
+    font-size: 72px;
+    color: #ef4444;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    -unity-background-image-tint-color: #ef4444;
+}
+
+/* ============================================================
+   ESTADO ZERADO — card-dead
+   ============================================================ */
+.card-dead {
+    border-color: #5a0000;
+}
+
+.card-dead .card-bg-fill {
+    background-color: rgba(100, 0, 0, 0.55);
+}
+
+/* ============================================================
+   ESTADO 100% — card-full (brilho pulsante APENAS na borda)
+   Não altera cor do card nem do fundo — só a borda pulsa
+   ============================================================ */
+.card-full {
+    border-color: rgba(255, 255, 255, 0.85);
+    transition-property: border-color;
+    transition-duration: 0.6s;
+    transition-timing-function: ease-in-out;
+}
+
+/* Estado alternado do shimmer — borda diminui suavemente */
+.card-full-glow {
+    border-color: rgba(255, 255, 255, 0.25);
+    transition-property: border-color;
+    transition-duration: 0.6s;
+    transition-timing-function: ease-in-out;
+}
+
+/* ============================================================
+   HELPER — hidden
+   Usa visibility para manter position:absolute funcional
+   e permitir transição de opacidade suave
+   ============================================================ */
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+
+/* ============================================================
+   SHAKE — classe aplicada e removida via script
+   Usa translate para deslocar o card horizontalmente
+   ============================================================ */
+.card-shaking {
+    translate: 5px 0;
+    transition-property: translate;
+    transition-duration: 0.05s;
+    transition-timing-function: ease-in-out;
 }

@@ -28,6 +28,8 @@ public class UIManager : MonoBehaviour
     [Header("Papel Físico 3D (Cena)")]
     [Tooltip("Referência ao script do papel físico na cena (PhysicalPaperUI).")]
     public PhysicalPaperUI physicalPaper;
+    [Tooltip("Referência direta ao GameObject do papel 3D (se nulo, busca pelo physicalPaper ou na hierarquia).")]
+    public GameObject paperGameObject;
     [Tooltip("Texto de descrição da proposta no papel 3D (fallback).")]
     public TextMeshProUGUI paperDescriptionText;
     [Tooltip("Texto do nome/autor da proposta no papel 3D (fallback).")]
@@ -49,6 +51,16 @@ public class UIManager : MonoBehaviour
     public string defaultAnimationName = "None";
     [Tooltip("Nome do estado reverso se existir no Animator (ex: 'AbaixaMao'). Se vazio, inverte dealAnimationName via código.")]
     public string dealAnimationReverseName = "";
+    [Tooltip("Delay opcional (em segundos) antes de tocar a animação de levantar a mão do jogador.")]
+    public float dealAnimationDelay = 0.0f;
+
+    [Header("Animações Aleatórias de Mão (Reações)")]
+    [Tooltip("Se verdadeiro, toca uma animação aleatória de mão após a conclusão da animação reversa.")]
+    public bool playRandomHandAnimation = true;
+    [Tooltip("Lista de nomes dos estados de animações de mão no Animator do Player (ex: Joia, Dislike, Direita, Esquerda, Aponta). Se vazio, busca no GameManager ou usa o padrão.")]
+    public System.Collections.Generic.List<string> randomHandAnimations = new System.Collections.Generic.List<string>() { "Joia", "Dislike", "Direita", "Esquerda", "Aponta" };
+    [Tooltip("Duração padrão de espera para a animação de mão caso o clip não seja encontrado.")]
+    public float defaultRandomHandDuration = 1f;
 
     [Header("HUD Geral")]
     public GameObject datePanel;
@@ -77,13 +89,19 @@ public class UIManager : MonoBehaviour
 
     // Elementos internos do UI Toolkit
     private VisualElement _decisionContainer;
+    private VisualElement _wrapperApprove;
+    private VisualElement _wrapperReject;
+    private VisualElement _wrapperContinue;
     private UnityEngine.UIElements.Button _btnApprove;
     private UnityEngine.UIElements.Button _btnReject;
+    private UnityEngine.UIElements.Button _btnContinue;
     private Label _lblApproveText;
     private Label _lblRejectText;
+    private Label _lblContinueText;
     private bool _isProcessingDecision = false;
     private Deal _currentDeal;
     private Coroutine _dealAnimReverseCoroutine;
+    private Coroutine _dealAnimForwardCoroutine;
 
     private void Awake()
     {
@@ -156,6 +174,15 @@ public class UIManager : MonoBehaviour
         {
             decisionButtonsPanel.SetActive(false);
         }
+
+        // Garante que o papel comece desabilitado até o início de uma proposta
+        SetPaperActive(false);
+        SetPaperInteractable(false);
+
+        if (GameManager.instance != null && GameManager.instance.gameAttributes != null)
+        {
+            UpdateAttributesImmediate(GameManager.instance.gameAttributes);
+        }
     }
 
     private void Update()
@@ -165,16 +192,28 @@ public class UIManager : MonoBehaviour
             UpdateAttributes(GameManager.instance.gameAttributes);
         }
 
-        // Atalhos de Teclado [A] para Aprovar / [D] para Rejeitar
+        // Atalhos de Teclado
         if (_decisionContainer != null && !_decisionContainer.ClassListContains("hidden") && !_isProcessingDecision)
         {
-            if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+            bool isTutorial = GameManager.instance != null && GameManager.instance.onTutorial;
+            if (isTutorial)
             {
-                ApproveDeal();
+                if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) ||
+                    Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.LeftArrow))
+                {
+                    ApproveDeal();
+                }
             }
-            else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+            else
             {
-                RejectDeal();
+                if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+                {
+                    ApproveDeal();
+                }
+                else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+                {
+                    RejectDeal();
+                }
             }
         }
     }
@@ -232,10 +271,17 @@ public class UIManager : MonoBehaviour
             _decisionContainer = root.Q<VisualElement>("decision-container");
             if (_decisionContainer != null) _decisionContainer.pickingMode = PickingMode.Ignore;
 
+            _wrapperApprove = root.Q<VisualElement>("wrapper-approve");
+            _wrapperReject = root.Q<VisualElement>("wrapper-reject");
+            _wrapperContinue = root.Q<VisualElement>("wrapper-continue");
+
             _btnApprove = root.Q<UnityEngine.UIElements.Button>("btn-approve");
             _btnReject = root.Q<UnityEngine.UIElements.Button>("btn-reject");
+            _btnContinue = root.Q<UnityEngine.UIElements.Button>("btn-continue");
+
             _lblApproveText = root.Q<Label>("lbl-approve-text");
             _lblRejectText = root.Q<Label>("lbl-reject-text");
+            _lblContinueText = root.Q<Label>("lbl-continue-text");
 
             if (_btnApprove != null)
             {
@@ -247,6 +293,12 @@ public class UIManager : MonoBehaviour
             {
                 _btnReject.clicked -= RejectDeal;
                 _btnReject.clicked += RejectDeal;
+            }
+
+            if (_btnContinue != null)
+            {
+                _btnContinue.clicked -= ApproveDeal;
+                _btnContinue.clicked += ApproveDeal;
             }
 
             // Inicia oculto
@@ -304,9 +356,7 @@ public class UIManager : MonoBehaviour
     /// </summary>
     private void HandleCameraFocusChanged(FocusableObject focusedObject)
     {
-        bool isPaper = IsPaperObject(focusedObject);
-
-        if (isPaper && _currentDeal != null && !_isProcessingDecision)
+        if (_currentDeal != null && !_isProcessingDecision)
         {
             ShowDecisionButtons(_currentDeal);
         }
@@ -317,11 +367,139 @@ public class UIManager : MonoBehaviour
     }
 
     /// <summary>
+    /// Retorna o GameObject do papel físico 3D na cena.
+    /// </summary>
+    public GameObject GetPaperObject()
+    {
+        if (paperGameObject != null) return paperGameObject;
+
+        if (physicalPaper != null)
+        {
+            paperGameObject = physicalPaper.gameObject;
+            return paperGameObject;
+        }
+
+        if (PhysicalPaperUI.instance != null)
+        {
+            physicalPaper = PhysicalPaperUI.instance;
+            paperGameObject = physicalPaper.gameObject;
+            return paperGameObject;
+        }
+
+        var paperUi = FindFirstObjectByType<PhysicalPaperUI>(FindObjectsInactive.Include);
+        if (paperUi != null)
+        {
+            physicalPaper = paperUi;
+            paperGameObject = paperUi.gameObject;
+            return paperGameObject;
+        }
+
+        GameObject found = GameObject.Find("Papel") ?? GameObject.Find("Paper");
+        if (found != null)
+        {
+            paperGameObject = found;
+            if (physicalPaper == null) physicalPaper = found.GetComponent<PhysicalPaperUI>();
+            return paperGameObject;
+        }
+
+        Animator pAnim = GetPlayerAnimator();
+        if (pAnim != null)
+        {
+            var allTransforms = pAnim.GetComponentsInChildren<Transform>(true);
+            foreach (var t in allTransforms)
+            {
+                if (t != null && (t.name.IndexOf("papel", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                  t.name.IndexOf("paper", System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                  t.name.IndexOf("folha", System.StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    paperGameObject = t.gameObject;
+                    if (physicalPaper == null) physicalPaper = t.GetComponent<PhysicalPaperUI>();
+                    return paperGameObject;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Ativa ou desativa o papel físico 3D na cena.
+    /// </summary>
+    public void SetPaperActive(bool active)
+    {
+        GameObject paper = GetPaperObject();
+        if (paper != null)
+        {
+            if (!active && CameraFocusManager.Instance != null && IsPaperObject(CameraFocusManager.Instance.CurrentFocusedObject))
+            {
+                CameraFocusManager.Instance.Unfocus();
+            }
+            paper.SetActive(active);
+        }
+    }
+
+    /// <summary>
+    /// Habilita ou desabilita a capacidade de interagir/focar o papel 3D com o mouse.
+    /// Chamado para desabilitar o clique durante animações (ex: abaixar a mão / reverso) ou transições.
+    /// </summary>
+    public void SetPaperInteractable(bool interactable)
+    {
+        GameObject paper = GetPaperObject();
+        if (paper != null)
+        {
+            var focusables = paper.GetComponentsInChildren<FocusableObject>(true);
+            foreach (var fo in focusables)
+            {
+                if (fo != null)
+                {
+                    if (!interactable)
+                    {
+                        fo.NotifyHoverExit();
+                    }
+                    fo.enabled = interactable;
+                }
+            }
+
+            var colliders = paper.GetComponentsInChildren<Collider>(true);
+            foreach (var col in colliders)
+            {
+                if (col != null)
+                {
+                    col.enabled = interactable;
+                }
+            }
+
+            if (!interactable && CameraFocusManager.Instance != null)
+            {
+                if (IsPaperObject(CameraFocusManager.Instance.CurrentFocusedObject))
+                {
+                    CameraFocusManager.Instance.Unfocus();
+                }
+                if (IsPaperObject(CameraFocusManager.Instance.CurrentHoveredObject))
+                {
+                    CameraFocusManager.Instance.ClearHover();
+                }
+            }
+        }
+    }
+
+    /// <summary>
     /// Verifica se o FocusableObject corresponde ao documento/papel da proposta.
     /// </summary>
     public bool IsPaperObject(FocusableObject obj)
     {
         if (obj == null) return false;
+
+        GameObject paperObj = GetPaperObject();
+        if (paperObj != null)
+        {
+            if (obj.gameObject == paperObj ||
+                obj.transform.IsChildOf(paperObj.transform) ||
+                paperObj.transform.IsChildOf(obj.transform))
+            {
+                return true;
+            }
+        }
 
         if (physicalPaper != null)
         {
@@ -354,22 +532,15 @@ public class UIManager : MonoBehaviour
         _isProcessingDecision = false;
         _currentDeal = deal;
 
-        // Atualiza o conteúdo no papel físico 3D via UI Toolkit
+        // Ativa o papel e atualiza o conteúdo no papel físico 3D via UI Toolkit
+        SetPaperActive(true);
         UpdatePhysicalPaper(deal);
 
         // Toca a animação do player levantando o papel
         PlayPlayerDealAnimation();
 
-        // A CÂMERA PERMANECE LIVRE:
-        // Os botões só aparecem quando a câmera estiver ativamente focada no papel.
-        if (CameraFocusManager.Instance != null && IsPaperObject(CameraFocusManager.Instance.CurrentFocusedObject))
-        {
-            ShowDecisionButtons(deal);
-        }
-        else
-        {
-            HideDecisionButtons();
-        }
+        // Os botões de decisão aparecem imediatamente ao iniciar uma proposta
+        ShowDecisionButtons(deal);
 
         // Atualizações dos painéis de data e corrupção (1s com easeType original)
         if (datePanel != null)
@@ -385,23 +556,43 @@ public class UIManager : MonoBehaviour
 
     public void UpdateAttributes(Attributes currentAttributes)
     {
+        if (currentAttributes == null) return;
+
         float climateValue = Mathf.Clamp01(currentAttributes.climaticChanges / 100f);
         float relationsValue = Mathf.Clamp01(currentAttributes.internationalRelations / 100f);
         float approvalValue = Mathf.Clamp01(currentAttributes.populationalApproval / 100f);
         float economyValue = Mathf.Clamp01(currentAttributes.economy / 100f);
         float corruptionValue = Mathf.Clamp01(currentAttributes.corruption / 100f);
 
-        climateSlider.value = Mathf.Lerp(climateSlider.value, climateValue, animationSpeed * Time.deltaTime);
-        relationsSlider.value = Mathf.Lerp(relationsSlider.value, relationsValue, animationSpeed * Time.deltaTime);
-        approvalSlider.value = Mathf.Lerp(approvalSlider.value, approvalValue, animationSpeed * Time.deltaTime);
-        economySlider.value = Mathf.Lerp(economySlider.value, economyValue, animationSpeed * Time.deltaTime);
-        corruptionSlider.value = Mathf.Lerp(corruptionSlider.value, corruptionValue, animationSpeed * Time.deltaTime);
+        if (climateSlider != null) climateSlider.value = Mathf.Lerp(climateSlider.value, climateValue, animationSpeed * Time.deltaTime);
+        if (relationsSlider != null) relationsSlider.value = Mathf.Lerp(relationsSlider.value, relationsValue, animationSpeed * Time.deltaTime);
+        if (approvalSlider != null) approvalSlider.value = Mathf.Lerp(approvalSlider.value, approvalValue, animationSpeed * Time.deltaTime);
+        if (economySlider != null) economySlider.value = Mathf.Lerp(economySlider.value, economyValue, animationSpeed * Time.deltaTime);
+        if (corruptionSlider != null) corruptionSlider.value = Mathf.Lerp(corruptionSlider.value, corruptionValue, animationSpeed * Time.deltaTime);
+    }
+
+    public void UpdateAttributesImmediate(Attributes currentAttributes)
+    {
+        if (currentAttributes == null) return;
+
+        float climateValue = Mathf.Clamp01(currentAttributes.climaticChanges / 100f);
+        float relationsValue = Mathf.Clamp01(currentAttributes.internationalRelations / 100f);
+        float approvalValue = Mathf.Clamp01(currentAttributes.populationalApproval / 100f);
+        float economyValue = Mathf.Clamp01(currentAttributes.economy / 100f);
+        float corruptionValue = Mathf.Clamp01(currentAttributes.corruption / 100f);
+
+        if (climateSlider != null) climateSlider.value = climateValue;
+        if (relationsSlider != null) relationsSlider.value = relationsValue;
+        if (approvalSlider != null) approvalSlider.value = approvalValue;
+        if (economySlider != null) economySlider.value = economyValue;
+        if (corruptionSlider != null) corruptionSlider.value = corruptionValue;
     }
 
     public void ShowGameOver(string reason)
     {
         _currentDeal = null;
         HideDecisionButtons();
+        SetPaperActive(false);
         if (dealPanel != null) dealPanel.SetActive(false);
         LeanTween.move(gameOverPanel.GetComponent<RectTransform>(), new Vector3(0, -300, 0), 1f).setEase(easeType);
         gameOverText.text = reason;
@@ -411,6 +602,7 @@ public class UIManager : MonoBehaviour
     {
         _currentDeal = null;
         HideDecisionButtons();
+        SetPaperActive(false);
         if (dealPanel != null) dealPanel.SetActive(false);
         LeanTween.move(gameOverPanel.GetComponent<RectTransform>(), new Vector3(0, -300, 0), 1f).setEase(easeType);
         gameOverText.text = congratulations;
@@ -421,18 +613,60 @@ public class UIManager : MonoBehaviour
         SceneManager.LoadScene(0);
     }
 
-    public void LeftAnswerButton()
+    /// <summary>
+    /// Escolha de Aprovação (Opção da Esquerda).
+    /// </summary>
+    public void ApproveDeal()
     {
-        if (!GameManager.instance.onTutorial)
+        if (_isProcessingDecision) return;
+        _isProcessingDecision = true;
+        _currentDeal = null;
+
+        HideDecisionButtons();
+
+        bool isTutorial = GameManager.instance != null && GameManager.instance.onTutorial;
+        bool isLastTutorialDeal = isTutorial && (GameManager.instance.tutorialDeals == null || GameManager.instance.tutorialDeals.Count <= 1);
+
+        // Se NÃO for tutorial (ou se for o último deal do tutorial), desabilita a interação do papel,
+        // remove o foco do papel/câmera e toca a animação reversa (abaixando a mão).
+        if (!isTutorial || isLastTutorialDeal)
         {
-            LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -900, 0), 1f).setEase(easeType).setOnComplete(DeactivatePanel);
-            LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
-            LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(-120, -120, 0), 1f).setEase(easeType);
-            StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsLeft));
+            SetPaperInteractable(false);
+
+            if (CameraFocusManager.Instance != null && IsPaperObject(CameraFocusManager.Instance.CurrentFocusedObject))
+            {
+                CameraFocusManager.Instance.Unfocus();
+            }
+
+            PlayPlayerDealAnimationReverse();
+
+            // Se a câmera estiver focada em algum objeto (computador ou papel), retorna suavemente para a visão geral
+            if (CameraFocusManager.Instance != null && CameraFocusManager.Instance.HasActiveFocus)
+            {
+                CameraFocusManager.Instance.Unfocus();
+            }
         }
         else
         {
-            StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.tutorialDeals[0], GameManager.instance.tutorialDeals[0].impactsLeft));
+            // Durante o tutorial entre propostas: mantém o papel ativo, interativo e NÃO remove o foco da câmera do papel
+            SetPaperActive(true);
+            SetPaperInteractable(true);
+        }
+
+        if (!isTutorial)
+        {
+            if (GameManager.instance == null || GameManager.instance.actualDeck == null || GameManager.instance.actualDeck.Count == 0) return;
+            Deal deal = GameManager.instance.actualDeck[0];
+            if (datePanel != null) LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
+            if (corruptionPanel != null) LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(-120, -120, 0), 1f).setEase(easeType);
+            GameManager.instance.ChooseLeft(deal);
+            StartCoroutine(GameManager.instance.ApplyDecision(deal, deal.impactsLeft, isApproved: true));
+        }
+        else
+        {
+            if (GameManager.instance == null || GameManager.instance.tutorialDeals == null || GameManager.instance.tutorialDeals.Count == 0) return;
+            Deal deal = GameManager.instance.tutorialDeals[0];
+            StartCoroutine(GameManager.instance.ApplyDecision(deal, deal.impactsLeft, isApproved: true));
             if (!GameManager.instance.tutorialDeals.Any())
             {
                 if (datePanel != null) LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
@@ -455,10 +689,17 @@ public class UIManager : MonoBehaviour
         bool isTutorial = GameManager.instance != null && GameManager.instance.onTutorial;
         bool isLastTutorialDeal = isTutorial && (GameManager.instance.tutorialDeals == null || GameManager.instance.tutorialDeals.Count <= 1);
 
-        // Durante o tutorial, não toca a animação reversa nem tira da animação de levantando o papel.
-        // Só toca ao concluir o último deal do tutorial (transição para o jogo normal com NPCs) ou se não for tutorial.
+        // Se NÃO for tutorial (ou se for o último deal do tutorial), desabilita a interação do papel,
+        // remove o foco do papel/câmera e toca a animação reversa (abaixando a mão).
         if (!isTutorial || isLastTutorialDeal)
         {
+            SetPaperInteractable(false);
+
+            if (CameraFocusManager.Instance != null && IsPaperObject(CameraFocusManager.Instance.CurrentFocusedObject))
+            {
+                CameraFocusManager.Instance.Unfocus();
+            }
+
             PlayPlayerDealAnimationReverse();
 
             // Se a câmera estiver focada em algum objeto (computador ou papel), retorna suavemente para a visão geral
@@ -467,17 +708,27 @@ public class UIManager : MonoBehaviour
                 CameraFocusManager.Instance.Unfocus();
             }
         }
+        else
+        {
+            // Durante o tutorial entre propostas: mantém o papel ativo, interativo e NÃO remove o foco da câmera do papel
+            SetPaperActive(true);
+            SetPaperInteractable(true);
+        }
 
         if (!isTutorial)
         {
+            if (GameManager.instance == null || GameManager.instance.actualDeck == null || GameManager.instance.actualDeck.Count == 0) return;
+            Deal deal = GameManager.instance.actualDeck[0];
             if (datePanel != null) LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
             if (corruptionPanel != null) LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(-120, -120, 0), 1f).setEase(easeType);
-            GameManager.instance.ChooseRight(GameManager.instance.actualDeck[0]);
-            StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.actualDeck[0], GameManager.instance.actualDeck[0].impactsRight));
+            GameManager.instance.ChooseRight(deal);
+            StartCoroutine(GameManager.instance.ApplyDecision(deal, deal.impactsRight, isApproved: false));
         }
         else
         {
-            StartCoroutine(GameManager.instance.ApplyDecision(GameManager.instance.tutorialDeals[0], GameManager.instance.tutorialDeals[0].impactsRight));
+            if (GameManager.instance == null || GameManager.instance.tutorialDeals == null || GameManager.instance.tutorialDeals.Count == 0) return;
+            Deal deal = GameManager.instance.tutorialDeals[0];
+            StartCoroutine(GameManager.instance.ApplyDecision(deal, deal.impactsRight, isApproved: false));
             if (!GameManager.instance.tutorialDeals.Any())
             {
                 if (datePanel != null) LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
@@ -572,6 +823,39 @@ public class UIManager : MonoBehaviour
             _dealAnimReverseCoroutine = null;
         }
 
+        if (_dealAnimForwardCoroutine != null)
+        {
+            StopCoroutine(_dealAnimForwardCoroutine);
+            _dealAnimForwardCoroutine = null;
+        }
+
+        if (dealAnimationDelay > 0f)
+        {
+            _dealAnimForwardCoroutine = StartCoroutine(PlayDealAnimationDelayedCoroutine(dealAnimationDelay));
+        }
+        else
+        {
+            ExecutePlayPlayerDealAnimation();
+        }
+    }
+
+    private System.Collections.IEnumerator PlayDealAnimationDelayedCoroutine(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        ExecutePlayPlayerDealAnimation();
+        _dealAnimForwardCoroutine = null;
+    }
+
+    private void ExecutePlayPlayerDealAnimation()
+    {
+        // Habilita o papel e sua interação durante a apresentação da proposta / animação de levantar a mão
+        SetPaperActive(true);
+        SetPaperInteractable(true);
+        if (_currentDeal != null)
+        {
+            UpdatePhysicalPaper(_currentDeal);
+        }
+
         Animator anim = GetPlayerAnimator();
         if (anim == null)
         {
@@ -602,6 +886,14 @@ public class UIManager : MonoBehaviour
     /// </summary>
     public void PlayPlayerDealAnimationReverse()
     {
+        SetPaperInteractable(false);
+
+        if (_dealAnimForwardCoroutine != null)
+        {
+            StopCoroutine(_dealAnimForwardCoroutine);
+            _dealAnimForwardCoroutine = null;
+        }
+
         if (_dealAnimReverseCoroutine != null)
         {
             StopCoroutine(_dealAnimReverseCoroutine);
@@ -612,9 +904,17 @@ public class UIManager : MonoBehaviour
 
     private System.Collections.IEnumerator PlayDealAnimationReverseCoroutine()
     {
+        SetPaperInteractable(false);
+
+        if (CameraFocusManager.Instance != null && IsPaperObject(CameraFocusManager.Instance.CurrentFocusedObject))
+        {
+            CameraFocusManager.Instance.Unfocus();
+        }
+
         Animator anim = GetPlayerAnimator();
         if (anim == null)
         {
+            SetPaperActive(false);
             _dealAnimReverseCoroutine = null;
             yield break;
         }
@@ -657,7 +957,51 @@ public class UIManager : MonoBehaviour
             anim.speed = 1f;
         }
 
-        // 3. Retorna para o estado default configurado (ex: "None")
+        // Desabilita o papel após o término da animação invertida
+        SetPaperActive(false);
+
+        // 3. Após a animação invertida terminar, toca uma das animações de mão aleatórias atribuídas no Player
+        if (playRandomHandAnimation)
+        {
+            System.Collections.Generic.List<string> candidateList = null;
+            if (randomHandAnimations != null && randomHandAnimations.Count > 0)
+            {
+                candidateList = randomHandAnimations;
+            }
+            else if (GameManager.instance != null && GameManager.instance.animations != null && GameManager.instance.animations.Count > 0)
+            {
+                candidateList = GameManager.instance.animations;
+            }
+
+            if (candidateList == null || candidateList.Count == 0)
+            {
+                candidateList = new System.Collections.Generic.List<string>() { "Joia", "Dislike", "Direita", "Esquerda", "Aponta" };
+            }
+
+            System.Collections.Generic.List<string> validStates = new System.Collections.Generic.List<string>();
+            foreach (var stateName in candidateList)
+            {
+                if (!string.IsNullOrEmpty(stateName) && anim.HasState(0, Animator.StringToHash(stateName)))
+                {
+                    validStates.Add(stateName);
+                }
+            }
+
+            if (validStates.Count > 0)
+            {
+                string chosenAnim = validStates[UnityEngine.Random.Range(0, validStates.Count)];
+                anim.speed = 1f;
+                anim.Play(chosenAnim, 0, 0f);
+
+                float clipDuration = GetClipDuration(anim, chosenAnim);
+                float waitDuration = clipDuration > 0f ? clipDuration : (defaultRandomHandDuration > 0f ? defaultRandomHandDuration : 1f);
+
+                yield return new WaitForSeconds(waitDuration);
+            }
+        }
+
+        // 4. Retorna para o estado default configurado (ex: "None")
+        anim.speed = 1f;
         if (!string.IsNullOrEmpty(defaultAnimationName) && anim.HasState(0, Animator.StringToHash(defaultAnimationName)))
         {
             anim.Play(defaultAnimationName, 0, 0f);
@@ -689,7 +1033,7 @@ public class UIManager : MonoBehaviour
 
         if (physicalPaper == null)
         {
-            physicalPaper = PhysicalPaperUI.instance ?? FindFirstObjectByType<PhysicalPaperUI>();
+            physicalPaper = PhysicalPaperUI.instance ?? FindFirstObjectByType<PhysicalPaperUI>(FindObjectsInactive.Include);
         }
 
         if (physicalPaper != null)
@@ -717,14 +1061,26 @@ public class UIManager : MonoBehaviour
             SetupDecisionUIToolkit();
         }
 
+        bool isTutorial = GameManager.instance != null && GameManager.instance.onTutorial;
+
         // 1. UI Toolkit (Moderno e recomendado)
         if (_decisionContainer != null)
         {
-            string leftText = !string.IsNullOrEmpty(deal.leftAnswer) ? Deal.FormatSentenceBreaks(deal.leftAnswer) : "Aprovar";
-            string rightText = !string.IsNullOrEmpty(deal.rightAnswer) ? Deal.FormatSentenceBreaks(deal.rightAnswer) : "Rejeitar";
-
-            if (_lblApproveText != null) _lblApproveText.text = leftText;
-            if (_lblRejectText != null) _lblRejectText.text = rightText;
+            if (isTutorial)
+            {
+                if (_wrapperApprove != null) _wrapperApprove.style.display = DisplayStyle.None;
+                if (_wrapperReject != null) _wrapperReject.style.display = DisplayStyle.None;
+                if (_wrapperContinue != null) _wrapperContinue.style.display = DisplayStyle.Flex;
+                if (_lblContinueText != null) _lblContinueText.text = "Continuar";
+            }
+            else
+            {
+                if (_wrapperApprove != null) _wrapperApprove.style.display = DisplayStyle.Flex;
+                if (_wrapperReject != null) _wrapperReject.style.display = DisplayStyle.Flex;
+                if (_wrapperContinue != null) _wrapperContinue.style.display = DisplayStyle.None;
+                if (_lblApproveText != null) _lblApproveText.text = "Aceitar";
+                if (_lblRejectText != null) _lblRejectText.text = "Recusar";
+            }
 
             _decisionContainer.RemoveFromClassList("hidden");
 
@@ -740,8 +1096,20 @@ public class UIManager : MonoBehaviour
             decisionButtonsPanel.transform.localScale = Vector3.zero;
             LeanTween.scale(decisionButtonsPanel, Vector3.one, 0.35f).setEase(easeType);
 
-            if (approveButtonText != null) approveButtonText.text = !string.IsNullOrEmpty(deal.leftAnswer) ? Deal.FormatSentenceBreaks(deal.leftAnswer) : "Aprovar";
-            if (rejectButtonText != null) rejectButtonText.text = !string.IsNullOrEmpty(deal.rightAnswer) ? Deal.FormatSentenceBreaks(deal.rightAnswer) : "Rejeitar";
+            if (isTutorial)
+            {
+                if (approveButtonText != null) approveButtonText.text = "Continuar";
+                if (rejectButton != null) rejectButton.gameObject.SetActive(false);
+            }
+            else
+            {
+                if (approveButtonText != null) approveButtonText.text = "Aceitar";
+                if (rejectButton != null)
+                {
+                    rejectButton.gameObject.SetActive(true);
+                    if (rejectButtonText != null) rejectButtonText.text = "Recusar";
+                }
+            }
             return;
         }
 
@@ -757,8 +1125,20 @@ public class UIManager : MonoBehaviour
             LeanTween.move(dealPanel.GetComponent<RectTransform>(), new Vector3(0, -300, 0), 0.5f).setEase(easeType);
         }
 
-        if (leftAnswerText != null) leftAnswerText.text = !string.IsNullOrEmpty(deal.leftAnswer) ? Deal.FormatSentenceBreaks(deal.leftAnswer) : "Aprovar";
-        if (rightAnswerText != null) rightAnswerText.text = !string.IsNullOrEmpty(deal.rightAnswer) ? Deal.FormatSentenceBreaks(deal.rightAnswer) : "Rejeitar";
+        if (isTutorial)
+        {
+            if (leftAnswerText != null) leftAnswerText.text = "Continuar";
+            if (rightAnswerText != null && rightAnswerText.transform.parent != null) rightAnswerText.transform.parent.gameObject.SetActive(false);
+        }
+        else
+        {
+            if (leftAnswerText != null) leftAnswerText.text = "Aceitar";
+            if (rightAnswerText != null)
+            {
+                if (rightAnswerText.transform.parent != null) rightAnswerText.transform.parent.gameObject.SetActive(true);
+                rightAnswerText.text = "Recusar";
+            }
+        }
     }
 
     public void HideDecisionButtons()

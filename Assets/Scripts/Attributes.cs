@@ -7,14 +7,32 @@ public class Attributes
 {
 
     [Header("Atributos")]
-    public int climaticChanges;
-    public int internationalRelations;
-    public int populationalApproval;
-    public int economy;
+    public int climaticChanges = 50;
+    public int internationalRelations = 50;
+    public int populationalApproval = 50;
+    public int economy = 50;
 
-    public int corruption;
+    public int corruption = 0;
 
     public GameObject prop;
+
+    public Attributes()
+    {
+        climaticChanges = 50;
+        internationalRelations = 50;
+        populationalApproval = 50;
+        economy = 50;
+        corruption = 0;
+    }
+
+    public Attributes(int climate, int relations, int approval, int eco, int corrupt)
+    {
+        climaticChanges = climate;
+        internationalRelations = relations;
+        populationalApproval = approval;
+        economy = eco;
+        corruption = corrupt;
+    }
 
     public void ApplyChanges(Attributes impacts, Deal deal)
     {

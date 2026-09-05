@@ -80,51 +80,59 @@ namespace ComicVFX
                 outHighlightWeight = 0f;
                 outRenderers.Clear();
 
-                List<FocusableObject> activeList = FocusableObject.ActiveHighlightedObjects;
-                if (activeList == null || activeList.Count == 0)
+                // 1. Prioridade absoluta para o objeto ativamente focado pelo mouse (ActiveHighlightedObject)
+                FocusableObject active = FocusableObject.ActiveHighlightedObject;
+                if (active != null && active.enabled && active.gameObject.activeInHierarchy && active.IsHovered && !active.IsFocused && active.EnableOutlineHighlight)
                 {
-                    FocusableObject single = FocusableObject.ActiveHighlightedObject;
-                    if (single != null && single.EnableOutlineHighlight && single.TargetRenderers != null && single.TargetRenderers.Count > 0)
+                    if (active.TargetRenderers != null && active.TargetRenderers.Count > 0)
                     {
-                        outHighlightColor = single.HighlightOutlineColor;
-                        outHighlightWeight = single.CurrentHighlightWeight > 0.001f ? single.CurrentHighlightWeight : 1f;
-                        for (int i = 0; i < single.TargetRenderers.Count; i++)
+                        for (int i = 0; i < active.TargetRenderers.Count; i++)
                         {
-                            Renderer r = single.TargetRenderers[i];
+                            Renderer r = active.TargetRenderers[i];
                             if (r != null && r.enabled && r.gameObject.activeInHierarchy)
                             {
                                 outRenderers.Add(r);
                             }
                         }
-                        return outRenderers.Count > 0 && outHighlightWeight > 0.001f;
+
+                        if (outRenderers.Count > 0)
+                        {
+                            outHighlightColor = active.HighlightOutlineColor;
+                            outHighlightWeight = active.CurrentHighlightWeight > 0.001f ? active.CurrentHighlightWeight : 1f;
+                            return true;
+                        }
                     }
-                    return false;
                 }
 
-                for (int i = activeList.Count - 1; i >= 0; i--)
+                // 2. Fallback caso a lista seja usada para um único objeto em transição
+                List<FocusableObject> activeList = FocusableObject.ActiveHighlightedObjects;
+                if (activeList != null && activeList.Count > 0)
                 {
-                    FocusableObject fo = activeList[i];
-                    if (fo == null || !fo.enabled || !fo.gameObject.activeInHierarchy)
+                    for (int i = activeList.Count - 1; i >= 0; i--)
                     {
-                        activeList.RemoveAt(i);
-                        continue;
-                    }
-
-                    if (fo.CurrentHighlightWeight > 0.001f && fo.TargetRenderers != null && fo.TargetRenderers.Count > 0)
-                    {
-                        for (int r = 0; r < fo.TargetRenderers.Count; r++)
+                        FocusableObject fo = activeList[i];
+                        if (fo == null || !fo.enabled || !fo.gameObject.activeInHierarchy || !fo.IsHovered || fo.IsFocused)
                         {
-                            Renderer ren = fo.TargetRenderers[r];
-                            if (ren != null && ren.enabled && ren.gameObject.activeInHierarchy)
-                            {
-                                outRenderers.Add(ren);
-                            }
+                            activeList.RemoveAt(i);
+                            continue;
                         }
 
-                        if (fo.CurrentHighlightWeight > outHighlightWeight)
+                        if (fo.CurrentHighlightWeight > 0.001f && fo.TargetRenderers != null && fo.TargetRenderers.Count > 0)
                         {
-                            outHighlightWeight = fo.CurrentHighlightWeight;
-                            outHighlightColor = fo.HighlightOutlineColor;
+                            for (int r = 0; r < fo.TargetRenderers.Count; r++)
+                            {
+                                Renderer ren = fo.TargetRenderers[r];
+                                if (ren != null && ren.enabled && ren.gameObject.activeInHierarchy)
+                                {
+                                    outRenderers.Add(ren);
+                                }
+                            }
+
+                            if (fo.CurrentHighlightWeight > outHighlightWeight)
+                            {
+                                outHighlightWeight = fo.CurrentHighlightWeight;
+                                outHighlightColor = fo.HighlightOutlineColor;
+                            }
                         }
                     }
                 }

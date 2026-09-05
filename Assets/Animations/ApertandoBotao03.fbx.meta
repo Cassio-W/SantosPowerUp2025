@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: be9b744248ab70f43b5d365b32a906cb
+guid: bd30b1a8f5ea39d4bb2cf7893aed2c2b
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -14,7 +14,7 @@ ModelImporter:
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
-    removeConstantScaleCurves: 1
+    removeConstantScaleCurves: 0
     motionNodeName: 
     animationImportErrors: 
     animationImportWarnings: 
@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: SuperJoia
+      name: ApertandoBotaoAberto
       takeName: Take 001
       internalID: 1827226128182048838
       firstFrame: 1
-      lastFrame: 22
+      lastFrame: 6
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -62,7 +62,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 0.8
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -120,7 +120,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 0.8
+    globalScale: 0.01
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
@@ -131,7 +131,7 @@ ModelImporter:
   humanoidOversampling: 1
   avatarSetup: 0
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
-  importBlendShapeDeformPercent: 0
+  importBlendShapeDeformPercent: 1
   remapMaterialsIfMaterialImportModeIsNone: 0
   additionalBone: 0
   userData: 

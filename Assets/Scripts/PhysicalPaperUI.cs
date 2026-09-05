@@ -48,6 +48,8 @@ public class PhysicalPaperUI : MonoBehaviour
     [Tooltip("RenderTexture do papel (a mesma atribuída no PanelSettings do UI Toolkit).")]
     [SerializeField] private RenderTexture paperRenderTexture;
 
+    private Deal _currentDeal;
+
     private void Awake()
     {
         if (instance == null)
@@ -55,6 +57,33 @@ public class PhysicalPaperUI : MonoBehaviour
             instance = this;
         }
 
+        EnsureReferences();
+
+        // Se uma RenderTexture e um Renderer foram informados, garante a amarração no Material
+        if (paperRenderer != null && paperRenderTexture != null)
+        {
+            paperRenderer.material.SetTexture(texturePropertyName, paperRenderTexture);
+        }
+
+        UpdateDateDisplay();
+    }
+
+    private void OnEnable()
+    {
+        EnsureReferences();
+
+        if (_currentDeal != null)
+        {
+            ApplyContentToUI(_currentDeal);
+        }
+        else
+        {
+            UpdateDateDisplay();
+        }
+    }
+
+    private void EnsureReferences()
+    {
         if (uiDocument == null)
         {
             uiDocument = GetComponent<UIDocument>() ?? GetComponentInChildren<UIDocument>();
@@ -64,14 +93,6 @@ public class PhysicalPaperUI : MonoBehaviour
         {
             paperRenderer = GetComponent<Renderer>() ?? GetComponentInChildren<Renderer>();
         }
-
-        // Se uma RenderTexture e um Renderer foram informados, garante a amarração no Material
-        if (paperRenderer != null && paperRenderTexture != null)
-        {
-            paperRenderer.material.SetTexture(texturePropertyName, paperRenderTexture);
-        }
-
-        UpdateDateDisplay();
     }
 
     /// <summary>
@@ -94,6 +115,7 @@ public class PhysicalPaperUI : MonoBehaviour
     /// </summary>
     public void UpdateDateDisplay()
     {
+        EnsureReferences();
         string dateStr = GetFormattedDocumentDate();
 
         if (uiDocument != null && uiDocument.rootVisualElement != null)
@@ -118,8 +140,17 @@ public class PhysicalPaperUI : MonoBehaviour
     {
         if (deal == null) return;
 
+        _currentDeal = deal;
+        EnsureReferences();
+        ApplyContentToUI(deal);
+    }
+
+    private void ApplyContentToUI(Deal deal)
+    {
+        if (deal == null) return;
+
         string description = Deal.FormatSentenceBreaks(deal.Description);
-        string npcName = deal.NPC != null ? deal.NPC.name : "";
+        string npcName = deal.NPC != null ? deal.NPC.name : (!string.IsNullOrEmpty(deal.tag) ? deal.tag : "MINISTÉRIO DE ESTADO");
         string dateStr = GetFormattedDocumentDate();
 
         // 1. Atualização via UI Toolkit (UXML)
@@ -156,6 +187,8 @@ public class PhysicalPaperUI : MonoBehaviour
     /// </summary>
     public void ClearContent()
     {
+        _currentDeal = null;
+
         if (uiDocument != null && uiDocument.rootVisualElement != null)
         {
             var descLabel = uiDocument.rootVisualElement.Q<Label>(descriptionLabelName);

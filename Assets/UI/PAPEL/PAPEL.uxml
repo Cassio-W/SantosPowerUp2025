@@ -15,7 +15,7 @@
 
         <!-- CORPO PRINCIPAL: PROPOSTA IMPRESSA COM MÁXIMA LEGUIBILIDADE -->
         <ui:VisualElement class="main-content-box">
-            <ui:Label name="deal-description" text="Texto da proposta presidencial com fonte nítida e de altíssima legibilidade..." class="deal-description" />
+            <ui:Label name="deal-description" text="" class="deal-description" />
         </ui:VisualElement>
 
         <!-- RODAPÉ: LOCAL/DATA E ASSINATURA (MODELO PADRONIZADO E ESPAÇADO) -->

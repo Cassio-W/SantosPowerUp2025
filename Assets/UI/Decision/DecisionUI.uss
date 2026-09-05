@@ -1,5 +1,5 @@
 /* ==========================================================================
-   DECISION UI - ESTILO COMIC / RETRO STYLIZED PARA UI TOOLKIT
+   DECISION UI - BOTÕES CIRCULARES COMIC / RETRO STYLIZED (UI TOOLKIT)
    ========================================================================== */
 
 .decision-screen {
@@ -18,11 +18,11 @@
 .decision-container {
     position: absolute;
     bottom: 40px;
-    right: 40px;
+    right: 48px;
     left: auto;
     flex-direction: row;
     justify-content: flex-end;
-    align-items: center;
+    align-items: flex-start;
     transition-property: translate, opacity;
     transition-duration: 0.35s;
     transition-timing-function: ease-out;
@@ -38,118 +38,155 @@
 }
 
 /* ==========================================================================
-   BOTÕES DE DECISÃO
+   WRAPPER & ESTRUTURA DOS BOTÕES CIRCULARES
    ========================================================================== */
 
-.decision-btn {
-    width: 440px;
-    min-height: 96px;
-    background-color: rgba(18, 22, 30, 0.94);
-    border-radius: 16px;
-    border-width: 3px;
-    flex-direction: row;
+.decision-btn-wrapper {
+    flex-direction: column;
     align-items: center;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    padding-left: 18px;
-    padding-right: 22px;
+    position: relative;
+    margin-left: 14px;
+    margin-right: 14px;
+}
+
+.decision-btn {
+    /* Base para interoperabilidade com scripts */
+}
+
+.decision-btn-circle {
+    width: 96px;
+    height: 96px;
+    border-radius: 48px;
+    border-width: 4px;
+    justify-content: center;
+    align-items: center;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
     transition-property: scale, border-color, background-color;
     transition-duration: 0.16s;
     transition-timing-function: ease-out;
     scale: 1 1;
 }
 
-.decision-btn:hover {
-    scale: 1.04 1.04;
+.decision-btn-circle:hover {
+    scale: 1.1 1.1;
 }
 
-.decision-btn:active {
-    scale: 0.96 0.96;
-}
-
-/* Barra lateral indicadora de cor */
-.btn-accent-bar {
-    width: 6px;
-    height: 70%;
-    border-radius: 3px;
-    margin-right: 16px;
-}
-
-.btn-content-box {
-    flex-grow: 1;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.btn-header-row {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 4px;
-}
-
-.btn-tag {
-    font-size: 15px;
-    -unity-font-style: bold;
-    letter-spacing: 2px;
-}
-
-.btn-key-hint {
-    font-size: 13px;
-    color: rgba(160, 175, 200, 0.7);
-    -unity-font-style: bold;
-}
-
-.btn-text-main {
-    font-size: 22px;
-    -unity-font-style: bold;
-    color: #FFFFFF;
-    white-space: normal;
-    -unity-text-align: middle-left;
+.decision-btn-circle:active {
+    scale: 0.92 0.92;
 }
 
 /* ==========================================================================
-   BOTÃO APROVAR (ESQUERDA - VERDE ESMERALDA)
+   ÍCONES INTERNOS
+   ========================================================================== */
+
+.decision-icon {
+    width: 50px;
+    height: 50px;
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: -unity-background-image-tint-color, scale;
+    transition-duration: 0.16s;
+    transition-timing-function: ease-out;
+}
+
+/* ==========================================================================
+   BOTÃO ACEITAR (VERDE ESMERALDA / CHECKMARK)
    ========================================================================== */
 
 .btn-approve {
     border-color: #10B981;
-    margin-right: 18px;
-    margin-left: 0;
+    background-color: rgba(12, 36, 26, 0.94);
 }
 
 .btn-approve:hover {
     border-color: #34D399;
-    background-color: rgba(16, 40, 30, 0.96);
+    background-color: rgba(16, 56, 38, 0.98);
 }
 
-.accent-approve {
-    background-color: #10B981;
+.icon-approve {
+    background-image: url('project://database/Assets/Sprites/Gemini_Generated_Image_l7ja3ml7ja3ml7ja-removebg-preview.png?fileID=21300000&guid=8fe4466972b92db4b871a18536e036bd&type=3#Gemini_Generated_Image_l7ja3ml7ja3ml7ja-removebg-preview');
+    -unity-background-image-tint-color: #34D399;
 }
 
-.tag-approve {
-    color: #34D399;
+.btn-approve:hover .icon-approve {
+    -unity-background-image-tint-color: #FFFFFF;
 }
 
 /* ==========================================================================
-   BOTÃO REJEITAR (DIREITA - VERMELHO RUBI)
+   BOTÃO RECUSAR (VERMELHO RUBI / X)
    ========================================================================== */
 
 .btn-reject {
     border-color: #EF4444;
-    margin-left: 0;
-    margin-right: 0;
+    background-color: rgba(45, 14, 20, 0.94);
 }
 
 .btn-reject:hover {
     border-color: #F87171;
-    background-color: rgba(45, 18, 22, 0.96);
+    background-color: rgba(65, 18, 28, 0.98);
 }
 
-.accent-reject {
-    background-color: #EF4444;
+.icon-reject {
+    background-image: url('project://database/Assets/Sprites/Gemini_Generated_Image_elpjelpjelpjelpj-removebg-preview_1.png?fileID=21300000&guid=edca1ba3ccc5e0d49afa69481546bde0&type=3#Gemini_Generated_Image_elpjelpjelpjelpj-removebg-preview_1');
+    -unity-background-image-tint-color: #F87171;
 }
 
-.tag-reject {
+.btn-reject:hover .icon-reject {
+    -unity-background-image-tint-color: #FFFFFF;
+}
+
+/* ==========================================================================
+   LABEL INFORMATIVO / DESCRITIVO ABAIXO DO BOTÃO ("ACEITAR" / "RECUSAR")
+   ========================================================================== */
+
+.decision-btn-label {
+    font-size: 15px;
+    -unity-font-style: bold;
+    margin-top: 8px;
+    max-width: 130px;
+    white-space: normal;
+    -unity-text-align: upper-center;
+    letter-spacing: 1.5px;
+}
+
+.label-approve {
+    color: #34D399;
+}
+
+.label-reject {
     color: #F87171;
+}
+
+/* ==========================================================================
+   BOTÃO CONTINUAR (NEUTRO / SETA ESPELHADA - MODO TUTORIAL)
+   ========================================================================== */
+
+.btn-continue {
+    border-color: #94A3B8;
+    background-color: rgba(30, 41, 59, 0.94);
+}
+
+.btn-continue:hover {
+    border-color: #F8FAFC;
+    background-color: rgba(51, 65, 85, 0.98);
+}
+
+.icon-continue {
+    background-image: url('project://database/Assets/Sprites/white-arrow.png');
+    -unity-background-image-tint-color: #E2E8F0;
+    scale: -1 1; /* Espelha a seta horizontalmente para apontar para a direita */
+}
+
+.btn-continue:hover .icon-continue {
+    -unity-background-image-tint-color: #FFFFFF;
+}
+
+.label-continue {
+    color: #E2E8F0;
 }

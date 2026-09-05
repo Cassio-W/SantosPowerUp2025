@@ -260,7 +260,7 @@ public class FocusableObject : MonoBehaviour
             _currentHighlightWeight = targetHighlight;
         }
 
-        if (_currentHighlightWeight > 0.001f)
+        if (_isHovered && !_isFocused && enableOutlineHighlight && _currentHighlightWeight > 0.001f)
         {
             if (!ActiveHighlightedObjects.Contains(this))
             {
@@ -284,12 +284,28 @@ public class FocusableObject : MonoBehaviour
         if (_isHovered) return;
         _isHovered = true;
 
+        // Limpa qualquer outro objeto que possa ter ficado no estado ativo de highlight
+        for (int i = ActiveHighlightedObjects.Count - 1; i >= 0; i--)
+        {
+            var other = ActiveHighlightedObjects[i];
+            if (other != null && other != this)
+            {
+                other._isHovered = false;
+                other._currentHighlightWeight = 0f;
+                ActiveHighlightedObjects.RemoveAt(i);
+            }
+        }
+
         if (!_isFocused)
         {
             PlaySound(hoverSound, hoverSoundVolume);
             if (enableOutlineHighlight)
             {
                 ActiveHighlightedObject = this;
+                if (!ActiveHighlightedObjects.Contains(this))
+                {
+                    ActiveHighlightedObjects.Add(this);
+                }
             }
         }
 
@@ -303,6 +319,9 @@ public class FocusableObject : MonoBehaviour
     {
         if (!_isHovered) return;
         _isHovered = false;
+        _currentHighlightWeight = 0f;
+
+        ActiveHighlightedObjects.Remove(this);
 
         if (ActiveHighlightedObject == this)
         {
@@ -345,6 +364,8 @@ public class FocusableObject : MonoBehaviour
         if (focused)
         {
             PlaySound(focusSound, focusSoundVolume);
+            _currentHighlightWeight = 0f;
+            ActiveHighlightedObjects.Remove(this);
             if (ActiveHighlightedObject == this)
             {
                 ActiveHighlightedObject = null;
@@ -357,6 +378,10 @@ public class FocusableObject : MonoBehaviour
             if (_isHovered && enableOutlineHighlight)
             {
                 ActiveHighlightedObject = this;
+                if (!ActiveHighlightedObjects.Contains(this))
+                {
+                    ActiveHighlightedObjects.Add(this);
+                }
             }
             onUnfocused?.Invoke();
         }
@@ -421,6 +446,11 @@ public class FocusableObject : MonoBehaviour
         {
             ActiveHighlightedObject = null;
         }
+
+        if (_isFocused && CameraFocusManager.Instance != null && CameraFocusManager.Instance.CurrentFocusedObject == this)
+        {
+            CameraFocusManager.Instance.Unfocus();
+        }
     }
 
     private void OnDestroy()
@@ -430,6 +460,11 @@ public class FocusableObject : MonoBehaviour
         if (ActiveHighlightedObject == this)
         {
             ActiveHighlightedObject = null;
+        }
+
+        if (_isFocused && CameraFocusManager.Instance != null && CameraFocusManager.Instance.CurrentFocusedObject == this)
+        {
+            CameraFocusManager.Instance.Unfocus();
         }
     }
 

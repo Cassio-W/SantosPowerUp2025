@@ -230,7 +230,10 @@ public class CameraFocusManager : MonoBehaviour
         }
     }
 
-    private void ClearHover()
+    /// <summary>
+    /// Limpa o estado atual de hover e notifica o objeto anterior.
+    /// </summary>
+    public void ClearHover()
     {
         if (_currentHoveredObject != null)
         {
