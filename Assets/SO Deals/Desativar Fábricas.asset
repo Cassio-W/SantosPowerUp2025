@@ -16,16 +16,24 @@ MonoBehaviour:
     respiramos ferro e dinheiro."
   leftAnswer: "Voc\xEA tem raz\xE3o"
   rightAnswer: Eu discordo
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 10
     internationalRelations: 0
     populationalApproval: 10
     economy: 0
+    corruption: 0
+    prop: {fileID: 0}
   impactsRight:
     climaticChanges: -10
     internationalRelations: 0
     populationalApproval: -10
     economy: 0
+    corruption: 0
+    prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 9067916053490012197, guid: 1bddbd3a1afe9314f936a7e5fde0da5c, type: 3}
+  tag: 

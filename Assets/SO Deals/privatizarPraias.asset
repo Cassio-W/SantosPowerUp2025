@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
   m_Name: privatizarPraias
   m_EditorClassIdentifier: 
-  Description: "Uma rede de resorts internacionais quer privatizar a orla das praias tropicais para turismo exclusivo de luxo."
-  leftAnswer: "Privatize! Turista gringo traz dólares!"
-  rightAnswer: "Praia é patrimônio público e gratuito!"
+  Description: Uma rede de resorts internacionais quer privatizar a orla das praias
+    tropicais para turismo exclusivo de luxo. Vamos apoiar?
+  leftAnswer: "Privatize! Turista gringo traz d\xF3lares!"
+  rightAnswer: "Praia \xE9 patrim\xF4nio p\xFAblico e gratuito!"
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: -15
     internationalRelations: 15
@@ -29,9 +31,10 @@ MonoBehaviour:
     economy: -15
     corruption: -5
     prop: {fileID: 0}
-  hasCorruptionMods: 0
   newDealsIfLeft:
   - {fileID: 11400000, guid: b2222222222222222222222222222222, type: 2}
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 5340672492827399196, guid: e0963aa14dba98a43938b379bb1c9335, type: 3}
   tag: Praias

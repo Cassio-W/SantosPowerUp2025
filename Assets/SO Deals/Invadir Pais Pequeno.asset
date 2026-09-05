@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
   m_Name: Invadir Pais Pequeno
   m_EditorClassIdentifier: 
-  Description: "Senhor, a na\xE7\xE3o vizinha est\xE1 amea\xE7ando-nos com m\xEDsseis!"
+  Description: "Senhor, a na\xE7\xE3o vizinha est\xE1 amea\xE7ando-nos com m\xEDsseis!
+    Precisamos acionar um bom diplomata pra n\xE3o entrarmos em guerra"
   leftAnswer: Enviem um diplomata
   rightAnswer: "Eles s\xE3o menores. Vamos invadir"
   hasCorruptionMods: 1
@@ -32,5 +33,7 @@ MonoBehaviour:
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 7243269876658770806, guid: aea00cd83b7045845975864cbf0caa3e, type: 3}
   tag: 

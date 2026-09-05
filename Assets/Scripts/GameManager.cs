@@ -246,10 +246,11 @@ public class GameManager : MonoBehaviour
             month++;
         }
 
-        if (year >= 2030)
+        if (year >= 2028)
         {
             Debug.Log("Cabo o jogo");
-            OnGameWin?.Invoke("Parabéns, chegamos em 2030 e seu mandato foi incrível, você tirou o país do lixo e impediu que o pior ocorresse. Obrigado.");
+            //OnGameWin?.Invoke("Parabéns, chegamos em 2030 e seu mandato foi incrível, você tirou o país do lixo e impediu que o pior ocorresse. Obrigado.");
+            OnGameWin?.Invoke("Parabéns, chegamos em 2028 e seu mandato têm sido incrível até agora mas, a Demo chegou ao fim. Obrigado por jogar! Siga @studiomicrowave e fique por dentro das novidades!");
             if (palmas != null)
             {
                 Instantiate(palmas, new Vector3(0, 0, 2), Quaternion.identity);
