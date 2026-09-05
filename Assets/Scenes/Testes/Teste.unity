@@ -987,6 +987,9 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 893990540}
     - targetCorrespondingSourceObject: {fileID: -9181767940752134700, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1024815124}
@@ -1063,6 +1066,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!4 &407171343 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
+  m_PrefabInstance: {fileID: 372495838}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &438976841
 GameObject:
   m_ObjectHideFlags: 0
@@ -1271,8 +1279,9 @@ MonoBehaviour:
   cameraFocusPoint: {fileID: 538931456}
   fallbackFocusOffset: {x: 0, y: 0, z: 0}
   customTransitionDuration: -1
-  overrideCameraFov: 0
-  targetCameraFov: 45
+  targetCameraFov: 70
+  enableCameraEffectOnFocus: 1
+  cameraEffectWeight: 0.8
   enableHoverScale: 0
   hoverScaleMultiplier: 1.08
   hoverLiftOffset: {x: 0, y: 0, z: 0}
@@ -1288,7 +1297,7 @@ MonoBehaviour:
   unfocusSound: {fileID: 0}
   unfocusSoundVolume: 0.8
   allowClickToFocus: 1
-  unfocusOnSecondClick: 1
+  unfocusOnSecondClick: 0
   onHoverEnter:
     m_PersistentCalls:
       m_Calls: []
@@ -1342,9 +1351,12 @@ MonoBehaviour:
   uiDocument: {fileID: 0}
   descriptionLabelName: deal-description
   authorLabelName: deal-author
+  dateLabelName: deal-date
+  defaultLocation: "Bras\xEDlia - DF"
   descriptionText: {fileID: 0}
   npcNameText: {fileID: 0}
   descriptionText3D: {fileID: 0}
+  dateLocationText: {fileID: 0}
   paperRenderer: {fileID: 0}
   texturePropertyName: _BaseMap
   paperRenderTexture: {fileID: 0}
@@ -2366,6 +2378,13 @@ MonoBehaviour:
   monitorMeshRenderer: {fileID: 0}
   animationSpeed: 4
   triggerGlitchOnChanges: 1
+  arrowDuration: 3
+  ghostGainStartDelay: 0.75
+  ghostLossHoldDuration: 1
+  ghostLossFadeSpeed: 1.8
+  ghostGainFadeSpeed: 2
+  shakeCycles: 5
+  shakeInterval: 0.06
 --- !u!114 &641589243
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3020,7 +3039,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 407171343}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: eb4a7ca3713ca394b844a7238f8482b8, type: 3}
       propertyPath: m_LocalScale.x
@@ -3044,7 +3063,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: eb4a7ca3713ca394b844a7238f8482b8, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -3.55
+      value: -3.6499999
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: eb4a7ca3713ca394b844a7238f8482b8, type: 3}
       propertyPath: m_LocalRotation.w
@@ -3235,8 +3254,9 @@ MonoBehaviour:
   cameraFocusPoint: {fileID: 2058087740}
   fallbackFocusOffset: {x: 0, y: 0.5, z: -2.5}
   customTransitionDuration: -1
-  overrideCameraFov: 1
-  targetCameraFov: 90
+  targetCameraFov: 70
+  enableCameraEffectOnFocus: 1
+  cameraEffectWeight: 0.8
   enableHoverScale: 0
   hoverScaleMultiplier: 1.08
   hoverLiftOffset: {x: 0, y: 0, z: 0}
@@ -3708,8 +3728,9 @@ MonoBehaviour:
   cameraFocusPoint: {fileID: 258025044}
   fallbackFocusOffset: {x: 0, y: 0.5, z: -2.5}
   customTransitionDuration: -1
-  overrideCameraFov: 1
   targetCameraFov: 45
+  enableCameraEffectOnFocus: 1
+  cameraEffectWeight: 1
   enableHoverScale: 0
   hoverScaleMultiplier: 1.08
   hoverLiftOffset: {x: 0, y: 0, z: 0}
@@ -5637,6 +5658,7 @@ MonoBehaviour:
   anim: {fileID: 1834763903}
   palmas: {fileID: 5123698392899471338, guid: 49044ddebf152504f89869ff8be12bc1, type: 3}
   playRandomReaction: 0
+  delayAfterDelivery: 0
   month: 1
   year: 2026
   onTutorial: 0
@@ -6007,6 +6029,7 @@ MonoBehaviour:
   dealPanel: {fileID: 1404911417}
   showDescriptionPanel: 0
   physicalPaper: {fileID: 0}
+  paperGameObject: {fileID: 0}
   paperDescriptionText: {fileID: 0}
   paperNameText: {fileID: 0}
   decisionButtonsPanel: {fileID: 0}
@@ -6018,6 +6041,15 @@ MonoBehaviour:
   dealAnimationName: LevantaMao
   defaultAnimationName: None
   dealAnimationReverseName: 
+  dealAnimationDelay: 0
+  playRandomHandAnimation: 1
+  randomHandAnimations:
+  - Joia
+  - Dislike
+  - Direita
+  - Esquerda
+  - Aponta
+  defaultRandomHandDuration: 1
   datePanel: {fileID: 1755341072}
   corruptionPanel: {fileID: 598048641}
   gameOverPanel: {fileID: 438976841}
@@ -6349,7 +6381,7 @@ Transform:
   m_GameObject: {fileID: 2058087739}
   serializedVersion: 2
   m_LocalRotation: {x: -0.5352791, y: -0.5327187, z: -0.46239772, w: -0.4646239}
-  m_LocalPosition: {x: -0.0103, y: 0.0002, z: 0.0017}
+  m_LocalPosition: {x: -0.012883564, y: 0.0001228634, z: 0.0026538782}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -6606,8 +6638,9 @@ MonoBehaviour:
   cameraFocusPoint: {fileID: 258025044}
   fallbackFocusOffset: {x: 0, y: 0.5, z: -2.5}
   customTransitionDuration: -1
-  overrideCameraFov: 1
   targetCameraFov: 45
+  enableCameraEffectOnFocus: 1
+  cameraEffectWeight: 1
   enableHoverScale: 0
   hoverScaleMultiplier: 1.08
   hoverLiftOffset: {x: 0, y: 0, z: 0}
@@ -14224,4 +14257,3 @@ SceneRoots:
   - {fileID: 671685594}
   - {fileID: 1993208596}
   - {fileID: 1234727010}
-  - {fileID: 753658466}
