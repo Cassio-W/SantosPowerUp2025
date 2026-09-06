@@ -1,13 +1,13 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "AliancaJudiciario", menuName = "SO/New Perk/Aliança Judiciario")]
-public class AliancaJudiciario : Perks
+[CreateAssetMenu(fileName = "ReservaFlorestal", menuName = "SO/New Perk/Reserva Florestal")]
+public class ReservaFlorestal: Perks
 {
     public override void OnActivated(Attributes check, GameManager gm)
     {
-        if (check.corruption >= 100)
+        if (check.climaticChanges <= 0)
         {
-            check.corruption = 30;
+            check.climaticChanges = 35;
             Debug.Log("Ativou");
             UsePerk();
         }

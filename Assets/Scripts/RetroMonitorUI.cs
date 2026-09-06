@@ -303,7 +303,7 @@ public class RetroMonitorUI : MonoBehaviour
     //  HANDLERS de evento
     // ─────────────────────────────────────────────────────
 
-    private void HandleAttributesChanged(Attributes attributes)
+    private void HandleAttributesChanged(Attributes attributes, GameManager gm)
     {
         if (attributes == null) return;
 

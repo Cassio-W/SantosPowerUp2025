@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c6b44f8b430b76a4cad8b8c0546d83e7, type: 3}
+  m_Name: ReservaFlorestal
+  m_EditorClassIdentifier: Assembly-CSharp::ReservaFlorestal
+  perkName: "Reserva Amaz\xF4nica"
+  description: "Uma parte da Amaz\xF4nia est\xE1 assegurada agora. Se o atributo
+    Meio-ambiente chegar a 0 voc\xEA n\xE3o ir\xE1 perder o mandato. A reserva ser\xE1
+    utilizado para reflorestar parte do territ\xF3rio nacional, por\xE9m ela se tornar\xE1
+    desprotegida. "
+  icon: {fileID: 0}
+  isActive: 0
+  isOneTimeUse: 0
+  activationCount: 0
+  cooldownTimer: 0

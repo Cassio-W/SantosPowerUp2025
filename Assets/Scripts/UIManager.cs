@@ -341,7 +341,7 @@ public class UIManager : MonoBehaviour
         ShowDeal(deal);
     }
 
-    private void HandleUpdatedAttributes(Attributes attributes)
+    private void HandleUpdatedAttributes(Attributes attributes, GameManager gm)
     {
         UpdateAttributes(attributes);
     }

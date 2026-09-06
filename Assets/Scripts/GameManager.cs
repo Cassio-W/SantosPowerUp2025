@@ -9,7 +9,8 @@ public class GameManager : MonoBehaviour
 {
     //eventos principalmente para a UI depois
     public static event Action<Deal> OnNewDeal; // Disparado quando uma nova proposta é puxada
-    public static event Action<Attributes> OnChangeAttributes; // Disparado quando qualquer decisão é tomada
+    public static event Action<Attributes, GameManager> OnChangeAttributes; // Disparado quando qualquer decisão é tomada
+    public static event Action<Attributes, GameManager> BeforeChangeAttributes;
     public static event Action<string> OnGameOver; // Disparado quando um atributo zera. O string pode ser a causa.
     public static event Action<string> OnGameWin;
 
@@ -75,7 +76,7 @@ public class GameManager : MonoBehaviour
         gameAttributes.corruption = 0;
 
         // Notifica a UI e o Monitor Retrô com os valores iniciais de mandato
-        OnChangeAttributes?.Invoke(gameAttributes);
+        OnChangeAttributes?.Invoke(gameAttributes, instance);
 
         foreach (Deal deal in allDeals)
         {
@@ -137,7 +138,7 @@ public class GameManager : MonoBehaviour
         foreach (Deal newDeal in deal.newDealsIfLeft) actualDeck.Add(newDeal);
         if (deal.perkIfLeft != null)
         {
-            deal.perkIfLeft.OnAquired();
+            deal.perkIfLeft.OnAquired(instance);
             activePerks.Add(deal.perkIfLeft);
         }
 
@@ -148,7 +149,7 @@ public class GameManager : MonoBehaviour
         foreach (Deal newDeal in deal.newDealsIfRight) actualDeck.Add(newDeal);
         if (deal.perkIfRight != null)
         {
-            deal.perkIfRight.OnAquired();
+            deal.perkIfRight.OnAquired(instance);
             activePerks.Add(deal.perkIfRight);
         }
     }
@@ -156,7 +157,8 @@ public class GameManager : MonoBehaviour
     public IEnumerator ApplyDecision(Deal deal, Attributes impacts, bool isApproved = true)
     {
         gameAttributes.ApplyChanges(impacts, deal);
-        OnChangeAttributes?.Invoke(gameAttributes);
+        BeforeChangeAttributes?.Invoke(gameAttributes, instance);
+        OnChangeAttributes?.Invoke(gameAttributes, instance);
         if (!onTutorial)
         {
             DisplayProp(impacts.prop);
