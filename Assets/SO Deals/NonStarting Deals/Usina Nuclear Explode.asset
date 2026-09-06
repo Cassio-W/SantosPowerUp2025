@@ -12,20 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
   m_Name: Usina Nuclear Explode
   m_EditorClassIdentifier: 
-  Description: Algumas usinas explodiram! O que fazemos?
+  Description: Algumas usinas explodiram! Precisamos conter os estragos.
   leftAnswer: Contenha os estragos
   rightAnswer: Salve as pessoas
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 15
     internationalRelations: 0
     populationalApproval: -10
     economy: -5
+    corruption: 0
+    prop: {fileID: 0}
   impactsRight:
     climaticChanges: -15
     internationalRelations: 0
     populationalApproval: 10
     economy: -5
+    corruption: 0
+    prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 9148107631748954292, guid: a71d66c2d3ba94e46b0fda843b37281e, type: 3}
   tag: 

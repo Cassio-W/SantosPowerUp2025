@@ -1,6 +1,10 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="../UI/Decision/DecisionUI.uss" />
     <ui:VisualElement name="decision-screen" class="decision-screen" picking-mode="Ignore">
+        
+        <!-- Container dos Perks no Topo Direito (Empilhados Verticalmente) -->
+        <ui:VisualElement name="perks-container" class="perks-container" picking-mode="Ignore" />
+
         <ui:VisualElement name="decision-container" class="decision-container hidden" picking-mode="Ignore">
             
             <!-- Botão Aceitar (Circular Esquerda - Modo Normal) -->

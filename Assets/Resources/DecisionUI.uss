@@ -190,3 +190,118 @@
 .label-continue {
     color: #E2E8F0;
 }
+
+/* ==========================================================================
+   PERKS CONTAINER - TOPO ESQUERDO EMPILHADOS VERTICALMENTE
+   ========================================================================== */
+
+.perks-container {
+    position: absolute;
+    top: 28px;
+    left: 32px;
+    right: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.perk-item {
+    position: relative;
+    align-items: flex-start;
+}
+
+/* Card Circular/Quadrado Grande do Ícone */
+.perk-icon-card {
+    width: 78px;
+    height: 78px;
+    border-radius: 20px;
+    background-color: rgba(15, 23, 42, 0.95);
+    border-width: 3.5px;
+    border-color: #F59E0B;
+    align-items: center;
+    justify-content: center;
+    transition-property: scale, border-color, background-color;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+}
+
+.perk-item:hover .perk-icon-card {
+    scale: 1.08 1.08;
+    border-color: #FBBF24;
+    background-color: rgba(30, 41, 59, 0.98);
+}
+
+.perk-icon-large {
+    width: 56px;
+    height: 56px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+/* Modal / Tooltip abaixo do Ícone ao passar o mouse */
+.perk-modal {
+    position: absolute;
+    top: 90px;
+    left: 0;
+    right: auto;
+    width: 420px;
+    background-color: rgba(13, 20, 36, 0.98);
+    border-width: 3px;
+    border-color: #F59E0B;
+    border-radius: 18px;
+    padding: 18px 22px;
+    opacity: 0;
+    display: none;
+    translate: 0 -10px;
+    scale: 0.95 0.95;
+    transition-property: opacity, translate, scale;
+    transition-duration: 0.22s;
+    transition-timing-function: ease-out;
+}
+
+.perk-item:hover .perk-modal,
+.perk-modal.open {
+    opacity: 1;
+    display: flex;
+    translate: 0 0;
+    scale: 1 1;
+}
+
+.perk-modal-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom-width: 2px;
+    border-bottom-color: rgba(245, 158, 11, 0.35);
+}
+
+.perk-modal-title {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: #FBBF24;
+    letter-spacing: 0.5px;
+    flex-grow: 1;
+    white-space: normal;
+}
+
+.perk-modal-tag {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #34D399;
+    background-color: rgba(52, 211, 153, 0.15);
+    border-radius: 6px;
+    padding: 3px 8px;
+    margin-left: 8px;
+}
+
+.perk-modal-desc {
+    font-size: 16px;
+    color: #F8FAFC;
+    white-space: normal;
+    letter-spacing: 0.2px;
+}
+
+
+
+

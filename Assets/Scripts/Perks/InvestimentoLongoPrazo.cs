@@ -5,12 +5,13 @@ public class InvestimentoLongoPrazo : Perks
 {
     int monthWhenAquired;
     int yearWhenAquired;
+
     public override void OnActivated(Attributes check, GameManager gm)
     {
-        Debug.Log($"Mês atual: {gm.month} \nAno atual: {gm.year}");
-        if (gm.month == monthWhenAquired && gm.year == yearWhenAquired + 1)
+        Debug.Log($"Mes atual: {gm.month} \nAno atual: {gm.year}");
+        if (gm.month == monthWhenAquired && gm.year >= yearWhenAquired + 1)
         {
-            Debug.Log("Ativou!");
+            Debug.Log("Investimento Longo Prazo ativou! +20 economia.");
             check.economy += 20;
             UsePerk();
         }
@@ -18,14 +19,13 @@ public class InvestimentoLongoPrazo : Perks
 
     public override void OnAquired(GameManager gm)
     {
-        GameManager.BeforeChangeAttributes += OnActivated;
         monthWhenAquired = gm.month;
         yearWhenAquired = gm.year;
-        Debug.Log($"Registrou no mês {gm.month} e no ano {gm.year}");
+        Debug.Log($"Investimento Longo Prazo registrado no mes {gm.month} e no ano {gm.year}");
     }
 
     public override void UsePerk()
     {
-        GameManager.BeforeChangeAttributes -= OnActivated;
+        base.UsePerk();
     }
 }

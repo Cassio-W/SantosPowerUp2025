@@ -16,20 +16,25 @@ MonoBehaviour:
     uma quantidade muito maior que qualquer outra fonte!
   leftAnswer: "Construam uma usina ent\xE3o!"
   rightAnswer: "Jamais, isso \xE9 muito perigoso!"
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 30
     internationalRelations: -15
     populationalApproval: 0
     economy: -15
+    corruption: 0
     prop: {fileID: 7150650116262898621, guid: 0355a69ce37447c458b521ae5030157a, type: 3}
   impactsRight:
     climaticChanges: -15
     internationalRelations: 0
     populationalApproval: 0
     economy: 0
+    corruption: 0
     prop: {fileID: 0}
   newDealsIfLeft:
   - {fileID: 11400000, guid: cb696cd66511ec54cb54202dcd78ab81, type: 2}
   newDealsIfRight: []
+  perkIfLeft: {fileID: 11400000, guid: faa8c4b9886813542b4e2d16696970e8, type: 2}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 9148107631748954292, guid: a71d66c2d3ba94e46b0fda843b37281e, type: 3}
   tag: Nuclear

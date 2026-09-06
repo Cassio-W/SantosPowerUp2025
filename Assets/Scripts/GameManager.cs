@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     public static event Action<Attributes, GameManager> BeforeChangeAttributes;
     public static event Action<string> OnGameOver; // Disparado quando um atributo zera. O string pode ser a causa.
     public static event Action<string> OnGameWin;
+    public static event Action OnPerksChanged; // Disparado quando a lista de perks ativos muda
 
     public static GameManager instance;
 
@@ -133,15 +134,53 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void AddPerk(Perks perkTemplate)
+    {
+        if (perkTemplate == null) return;
+
+        // Cria uma instância em runtime para evitar alterar o ScriptableObject no disco
+        Perks runtimePerk = Instantiate(perkTemplate);
+        activePerks.Add(runtimePerk);
+        runtimePerk.OnAquired(this);
+        OnPerksChanged?.Invoke();
+    }
+
+    public void RemovePerk(Perks perk)
+    {
+        if (perk == null) return;
+
+        if (activePerks.Contains(perk))
+        {
+            activePerks.Remove(perk);
+            OnPerksChanged?.Invoke();
+        }
+    }
+
+    public void ClearAllPerks()
+    {
+        if (activePerks == null || activePerks.Count == 0) return;
+
+        List<Perks> perksToClear = new List<Perks>(activePerks);
+        activePerks.Clear();
+
+        foreach (Perks p in perksToClear)
+        {
+            if (p != null)
+            {
+                p.UsePerk();
+            }
+        }
+
+        OnPerksChanged?.Invoke();
+    }
+
     public void ChooseLeft(Deal deal)
     {
         foreach (Deal newDeal in deal.newDealsIfLeft) actualDeck.Add(newDeal);
         if (deal.perkIfLeft != null)
         {
-            deal.perkIfLeft.OnAquired(instance);
-            activePerks.Add(deal.perkIfLeft);
+            AddPerk(deal.perkIfLeft);
         }
-
     }
 
     public void ChooseRight(Deal deal)
@@ -149,16 +188,41 @@ public class GameManager : MonoBehaviour
         foreach (Deal newDeal in deal.newDealsIfRight) actualDeck.Add(newDeal);
         if (deal.perkIfRight != null)
         {
-            deal.perkIfRight.OnAquired(instance);
-            activePerks.Add(deal.perkIfRight);
+            AddPerk(deal.perkIfRight);
         }
     }
 
     public IEnumerator ApplyDecision(Deal deal, Attributes impacts, bool isApproved = true)
     {
-        gameAttributes.ApplyChanges(impacts, deal);
+        // 1. Dispara modificadores pré-decisão
         BeforeChangeAttributes?.Invoke(gameAttributes, instance);
+
+        // 2. Aplica os impactos da proposta aos atributos
+        gameAttributes.ApplyChanges(impacts, deal);
+
+        // 3. Avalia os perks ativos para proteção / resgate imediato
+        if (activePerks != null && activePerks.Count > 0)
+        {
+            List<Perks> perksToEvaluate = new List<Perks>(activePerks);
+            foreach (var perk in perksToEvaluate)
+            {
+                if (perk != null)
+                {
+                    perk.OnActivated(gameAttributes, instance);
+                }
+            }
+        }
+
+        // 4. Garante limites válidos [0, 100]
+        gameAttributes.climaticChanges = Mathf.Clamp(gameAttributes.climaticChanges, 0, 100);
+        gameAttributes.internationalRelations = Mathf.Clamp(gameAttributes.internationalRelations, 0, 100);
+        gameAttributes.populationalApproval = Mathf.Clamp(gameAttributes.populationalApproval, 0, 100);
+        gameAttributes.economy = Mathf.Clamp(gameAttributes.economy, 0, 100);
+        gameAttributes.corruption = Mathf.Clamp(gameAttributes.corruption, 0, 100);
+
+        // 5. Notifica o Monitor Retrô e a UI com os atributos FINAIS já devidamente resgatados
         OnChangeAttributes?.Invoke(gameAttributes, instance);
+
         if (!onTutorial)
         {
             DisplayProp(impacts.prop);
@@ -349,5 +413,11 @@ public class GameManager : MonoBehaviour
             p.transform.SetParent(city.transform, false);
             LeanTween.scale(p, transform.localScale, 1.5f);
         }
+    }
+
+    private void OnDestroy()
+    {
+        ClearAllPerks();
+        if (instance == this) instance = null;
     }
 }

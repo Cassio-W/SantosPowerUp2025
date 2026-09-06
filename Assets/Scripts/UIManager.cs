@@ -89,6 +89,7 @@ public class UIManager : MonoBehaviour
 
     // Elementos internos do UI Toolkit
     private VisualElement _decisionContainer;
+    private VisualElement _perksContainer;
     private VisualElement _wrapperApprove;
     private VisualElement _wrapperReject;
     private VisualElement _wrapperContinue;
@@ -117,6 +118,7 @@ public class UIManager : MonoBehaviour
         GameManager.OnChangeAttributes += HandleUpdatedAttributes;
         GameManager.OnGameOver += HandleGameOver;
         GameManager.OnGameWin += ShowGameWin;
+        GameManager.OnPerksChanged += UpdatePerks;
 
         if (CameraFocusManager.Instance != null)
         {
@@ -130,6 +132,7 @@ public class UIManager : MonoBehaviour
         GameManager.OnChangeAttributes -= HandleUpdatedAttributes;
         GameManager.OnGameOver -= HandleGameOver;
         GameManager.OnGameWin -= ShowGameWin;
+        GameManager.OnPerksChanged -= UpdatePerks;
 
         if (CameraFocusManager.Instance != null)
         {
@@ -175,6 +178,12 @@ public class UIManager : MonoBehaviour
             decisionButtonsPanel.SetActive(false);
         }
 
+        // Desativa o painel legado de perks do Canvas para dar lugar ao UI Toolkit
+        if (perks != null && perks.Length > 0 && perks[0] != null && perks[0].transform.parent != null)
+        {
+            perks[0].transform.parent.gameObject.SetActive(false);
+        }
+
         // Garante que o papel comece desabilitado até o início de uma proposta
         SetPaperActive(false);
         SetPaperInteractable(false);
@@ -183,6 +192,8 @@ public class UIManager : MonoBehaviour
         {
             UpdateAttributesImmediate(GameManager.instance.gameAttributes);
         }
+
+        UpdatePerks();
     }
 
     private void Update()
@@ -268,6 +279,9 @@ public class UIManager : MonoBehaviour
             var screenElem = root.Q<VisualElement>("decision-screen");
             if (screenElem != null) screenElem.pickingMode = PickingMode.Ignore;
 
+            _perksContainer = root.Q<VisualElement>("perks-container");
+            if (_perksContainer != null) _perksContainer.pickingMode = PickingMode.Ignore;
+
             _decisionContainer = root.Q<VisualElement>("decision-container");
             if (_decisionContainer != null) _decisionContainer.pickingMode = PickingMode.Ignore;
 
@@ -303,6 +317,9 @@ public class UIManager : MonoBehaviour
 
             // Inicia oculto
             _decisionContainer?.AddToClassList("hidden");
+
+            // Atualiza os perks na nova UI
+            UpdatePerks();
         }
     }
 
@@ -749,21 +766,82 @@ public class UIManager : MonoBehaviour
 
     public void UpdatePerks()
     {
-        if (perks == null || GameManager.instance == null || GameManager.instance.activePerks == null)
-            return;
-
-        for (int i = 0; i < perks.Length; i++)
+        // Renderiza no UI Toolkit (topo direito da tela, empilhados verticalmente)
+        if (_perksContainer != null)
         {
-            if (perks[i] == null) continue;
+            _perksContainer.Clear();
 
-            if (i < GameManager.instance.activePerks.Count && GameManager.instance.activePerks[i] != null)
+            if (GameManager.instance != null && GameManager.instance.activePerks != null)
             {
-                perks[i].gameObject.SetActive(true);
-                perks[i].sprite = GameManager.instance.activePerks[i].icon;
+                foreach (var perk in GameManager.instance.activePerks)
+                {
+                    if (perk == null) continue;
+
+                    var item = new VisualElement();
+                    item.AddToClassList("perk-item");
+                    item.pickingMode = PickingMode.Position;
+
+                    // Card Grande com Ícone
+                    var iconCard = new VisualElement();
+                    iconCard.AddToClassList("perk-icon-card");
+                    iconCard.pickingMode = PickingMode.Position;
+
+                    var iconLarge = new VisualElement();
+                    iconLarge.AddToClassList("perk-icon-large");
+                    iconLarge.pickingMode = PickingMode.Ignore;
+                    if (perk.icon != null)
+                    {
+                        iconLarge.style.backgroundImage = new StyleBackground(perk.icon);
+                    }
+                    iconCard.Add(iconLarge);
+
+                    // Modal / Tooltip abaixo do ícone (revelado ao passar o mouse)
+                    var modal = new VisualElement();
+                    modal.AddToClassList("perk-modal");
+                    modal.pickingMode = PickingMode.Ignore;
+
+                    var modalHeader = new VisualElement();
+                    modalHeader.AddToClassList("perk-modal-header");
+                    modalHeader.pickingMode = PickingMode.Ignore;
+
+                    string displayName = string.IsNullOrEmpty(perk.perkName) ? "Vantagem Ativa" : perk.perkName;
+                    var titleLabel = new Label(displayName);
+                    titleLabel.AddToClassList("perk-modal-title");
+                    titleLabel.pickingMode = PickingMode.Ignore;
+                    modalHeader.Add(titleLabel);
+
+                    var tagLabel = new Label("PERK");
+                    tagLabel.AddToClassList("perk-modal-tag");
+                    tagLabel.pickingMode = PickingMode.Ignore;
+                    modalHeader.Add(tagLabel);
+
+                    string desc = string.IsNullOrEmpty(perk.description) ? "Efeito ativo no seu mandato." : perk.description;
+                    var descLabel = new Label(desc);
+                    descLabel.AddToClassList("perk-modal-desc");
+                    descLabel.pickingMode = PickingMode.Ignore;
+
+                    modal.Add(modalHeader);
+                    modal.Add(descLabel);
+
+                    // Handlers para abrir/fechar o modal suavemente no hover
+                    iconCard.RegisterCallback<PointerEnterEvent>(evt => modal.AddToClassList("open"));
+                    iconCard.RegisterCallback<PointerLeaveEvent>(evt => modal.RemoveFromClassList("open"));
+
+                    item.Add(iconCard);
+                    item.Add(modal);
+                    _perksContainer.Add(item);
+                }
             }
-            else
+        }
+
+        // Desativa slots legados do Canvas caso existam na cena
+        if (perks != null)
+        {
+            for (int i = 0; i < perks.Length; i++)
             {
+                if (perks[i] == null) continue;
                 perks[i].gameObject.SetActive(false);
+                perks[i].sprite = null;
             }
         }
     }

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "AliancaJudiciario", menuName = "SO/New Perk/Aliança Judiciario")]
+[CreateAssetMenu(fileName = "AliancaJudiciario", menuName = "SO/New Perk/Alianca Judiciario")]
 public class AliancaJudiciario : Perks
 {
     public override void OnActivated(Attributes check, GameManager gm)
@@ -8,19 +8,18 @@ public class AliancaJudiciario : Perks
         if (check.corruption >= 100)
         {
             check.corruption = 30;
-            Debug.Log("Ativou");
+            Debug.Log("Alianca com Judiciario ativada! Corrupcao reduzida para 30.");
             UsePerk();
         }
     }
 
     public override void OnAquired(GameManager gm)
     {
-        GameManager.OnChangeAttributes += OnActivated;
-        Debug.Log("Registrou");
+        Debug.Log("Alianca com Judiciario registrada");
     }
 
     public override void UsePerk()
     {
-        GameManager.OnChangeAttributes -= OnActivated;
+        base.UsePerk();
     }
 }

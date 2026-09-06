@@ -13,5 +13,11 @@ public abstract class Perks: ScriptableObject
 
     public abstract void OnAquired(GameManager gm);
     public abstract void OnActivated(Attributes check, GameManager gm);
-    public abstract void UsePerk();
+    public virtual void UsePerk()
+    {
+        if (GameManager.instance != null)
+        {
+            GameManager.instance.RemovePerk(this);
+        }
+    }
 }

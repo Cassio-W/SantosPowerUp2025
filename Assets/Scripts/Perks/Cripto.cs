@@ -1,23 +1,21 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "InvestimentoALongoPrazo", menuName = "SO/New Perk/Investimento em Cripto")]
+[CreateAssetMenu(fileName = "InvestimentoCripto", menuName = "SO/New Perk/Investimento em Cripto")]
 public class Cripto : Perks
 {
     public override void OnActivated(Attributes check, GameManager gm)
     {
-        Debug.Log("Ativou!");
+        Debug.Log("Cripto ativou! +1 economia.");
         check.economy += 1;
-
     }
 
     public override void OnAquired(GameManager gm)
     {
-        GameManager.BeforeChangeAttributes += OnActivated;
-        Debug.Log($"Registrou no mês {gm.month} e no ano {gm.year}");
+        Debug.Log($"Cripto registrou no mes {gm.month} e no ano {gm.year}");
     }
 
     public override void UsePerk()
     {
-        GameManager.BeforeChangeAttributes -= OnActivated;
+        base.UsePerk();
     }
 }
