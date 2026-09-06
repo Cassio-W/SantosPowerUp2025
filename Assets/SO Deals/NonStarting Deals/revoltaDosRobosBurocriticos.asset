@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
   m_Name: revoltaDosRobosBurocriticos
   m_EditorClassIdentifier: 
-  Description: "A IA do governo deu um bug! Ela aprovou aposentadoria para 5 milhões de pets e começou a taxar o ar-condicionado em 500%!"
-  leftAnswer: "Desligue os servidores e volte à papelada!"
-  rightAnswer: "Confie no algoritmo, o robô sabe o que faz!"
+  Description: "A IA do governo deu um bug! Ela aprovou aposentadoria para 5 milh\xF5es
+    de pets e come\xE7ou a taxar o ar-condicionado em 500%! Desligamos os servidores?"
+  leftAnswer: "Desligue os servidores e volte \xE0 papelada!"
+  rightAnswer: "Confie no algoritmo, o rob\xF4 sabe o que faz!"
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 0
     internationalRelations: -10
@@ -29,8 +31,9 @@ MonoBehaviour:
     economy: 20
     corruption: -10
     prop: {fileID: 0}
-  hasCorruptionMods: 0
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
   tag: IA

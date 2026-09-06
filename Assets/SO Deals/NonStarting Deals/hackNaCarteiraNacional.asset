@@ -12,9 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
   m_Name: hackNaCarteiraNacional
   m_EditorClassIdentifier: 
-  Description: "Catástrofe! Hackers invadiram a carteira virtual do Banco Central e roubaram metade das reservas de Bitcoin do país!"
-  leftAnswer: "Imprima cédulas tradicionais de emergência!"
-  rightAnswer: "Crie a 'PixCoin' governamental para substituir!"
+  Description: "Cat\xE1strofe! Hackers invadiram a carteira virtual do Banco Central
+    e roubaram metade das reservas de Bitcoin do pa\xEDs! Devemos voltar atr\xE1s?"
+  leftAnswer: "Imprima c\xE9dulas tradicionais de emerg\xEAncia!"
+  rightAnswer: Crie a 'PixCoin' governamental para substituir!
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 0
     internationalRelations: -15
@@ -29,8 +31,9 @@ MonoBehaviour:
     economy: -15
     corruption: 20
     prop: {fileID: 0}
-  hasCorruptionMods: 0
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 6532259188457934314, guid: 0c667e5e5810e0448b52183683271385, type: 3}
   tag: Cripto

@@ -262,7 +262,7 @@ public class GameManager : MonoBehaviour
             {
                 StartCoroutine(RandomizeAnimation());
             }
-            yield return new WaitForSeconds(5.5f);
+            yield return new WaitForSeconds(3f);
             StartCoroutine(GetDeal());
         }
         else

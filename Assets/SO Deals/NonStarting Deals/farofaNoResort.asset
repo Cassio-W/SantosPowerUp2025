@@ -12,9 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
   m_Name: farofaNoResort
   m_EditorClassIdentifier: 
-  Description: "Banhistas derrubaram os muros dos resorts privatizados e fizeram um churrasco de farofa na praia VIP! Os magnatas ameaçam processar o governo."
-  leftAnswer: "Envie a segurança para proteger os resorts!"
-  rightAnswer: "Cancele a privatização e junte-se à farofa!"
+  Description: "Banhistas derrubaram os muros dos resorts privatizados e fizeram
+    um churrasco de farofa na praia VIP! Os magnatas amea\xE7am processar o governo.
+    Cancelamos a privatiza\xE7\xE3o?"
+  leftAnswer: "Envie a seguran\xE7a para proteger os resorts!"
+  rightAnswer: "Cancele a privatiza\xE7\xE3o e junte-se \xE0 farofa!"
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 0
     internationalRelations: 15
@@ -29,8 +32,9 @@ MonoBehaviour:
     economy: -15
     corruption: -10
     prop: {fileID: 0}
-  hasCorruptionMods: 0
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 5429354218765748742, guid: d6f8590726c0fdf4d8820af07e591e5b, type: 3}
   tag: Praias

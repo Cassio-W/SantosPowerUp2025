@@ -12,12 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c119a61b50a72a04ba02e9684728d887, type: 3}
   m_Name: AliancaJudiciario
   m_EditorClassIdentifier: Assembly-CSharp::AliancaJudiciario
-  perkName: "Alian\xE7a com O Poder Judici\xE1rio"
-  description: "Voc\xEA se aliou com O Poder Judici\xE1rio do seu pa\xEDs, permitindo
-    que cubram seus esc\xE2ndalos de corrup\xE7\xE3o atrav\xE9s de censuras e canetadas.
-    Ao chegar no m\xE1ximo do Atributo de Corrup\xE7\xE3o, ao inv\xE9s de perder
-    o mandato, a Corrup\xE7\xE3o retorna para 30 e perde a Alian\xE7a."
-  icon: {fileID: 21300000, guid: 046c59d7628ad3841bfd9cd2ce59bb5b, type: 3}
+  perkName: "Alian\xE7a com os EUA"
+  description: "Ao chegar no m\xE1ximo do Atributo de Corrup\xE7\xE3o, ao inv\xE9s
+    de perder o mandato, a Corrup\xE7\xE3o retorna para 30 e perde a Alian\xE7a."
+  icon: {fileID: 21300000, guid: 998aa6362a3c21e4391f3a699a33d8c9, type: 3}
   isActive: 0
   isOneTimeUse: 0
   activationCount: 0

@@ -13,11 +13,9 @@ MonoBehaviour:
   m_Name: ReservaFlorestal
   m_EditorClassIdentifier: Assembly-CSharp::ReservaFlorestal
   perkName: "Reserva Amaz\xF4nica"
-  description: "Uma parte da Amaz\xF4nia est\xE1 assegurada agora. Se o atributo
-    Meio-ambiente chegar a 0 voc\xEA n\xE3o ir\xE1 perder o mandato. A reserva ser\xE1
-    utilizado para reflorestar parte do territ\xF3rio nacional, por\xE9m ela se tornar\xE1
-    desprotegida. "
-  icon: {fileID: 0}
+  description: "Se o atributo Meio-ambiente chegar a 0 voc\xEA n\xE3o ir\xE1 perder
+    o mandato, por\xE9m perder\xE1 esta Habilidade "
+  icon: {fileID: 21300000, guid: d2a65e548c7b9264f8bd7e595f01b620, type: 3}
   isActive: 0
   isOneTimeUse: 0
   activationCount: 0

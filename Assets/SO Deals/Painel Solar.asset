@@ -16,19 +16,24 @@ MonoBehaviour:
     em your pa\xEDs. "
   leftAnswer: Mi casa es tu casa
   rightAnswer: "N\xE3o acho que \xE9 um bom investimento"
+  hasCorruptionMods: 0
   impactsLeft:
     climaticChanges: 20
     internationalRelations: 10
     populationalApproval: 15
     economy: -20
+    corruption: 0
     prop: {fileID: 5839588874061950967, guid: c790fc018f47b1e41825d5abe54fe418, type: 3}
   impactsRight:
     climaticChanges: 0
     internationalRelations: -15
     populationalApproval: 0
     economy: 15
+    corruption: 0
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
+  perkIfLeft: {fileID: 11400000, guid: dbb5c77f8b6cfb649ba9f03aef3b684f, type: 2}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 6532259188457934314, guid: 0c667e5e5810e0448b52183683271385, type: 3}
   tag: Solar

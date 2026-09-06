@@ -1853,7 +1853,26 @@ MonoBehaviour:
   walkAnimation: WalkW
   idleAnimation: IdleW
   deliverAnimation: PapelW
+  positiveReactions:
+  - SuperJoia
+  - SuperSalto
+  - Yeah
+  negativeReactions:
+  - Bravo
+  - Decepcao
+  - Espanto
+  - Morte
+  - Triste
+  - OlhandoLado
+  neutralReactions:
+  - TantoFaz
+  defaultReactionDuration: 2
+  defaultDeliveryDuration: 0.8
+  deliveryHandoverNormalizedTime: 0.5
+  deliveryPostDelay: 0
+  lookAtCameraSpeed: 5
   hasReachedTarget: 0
+  isDelivered: 0
   audioPassos: {fileID: 0}
   audioPapel: {fileID: 8300000, guid: 53c9674dec5318340af7f234afbde21e, type: 3}
 --- !u!195 &7275213631486485574
@@ -1866,7 +1885,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 6
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120

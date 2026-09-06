@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
   m_Name: Usina Nuclear Explode
   m_EditorClassIdentifier: 
-  Description: Algumas usinas explodiram! Precisamos conter os estragos.
+  Description: "Algumas usinas explodiram! Vamos salvar as pessoas ao inv\xE9s de
+    conter os estragos?"
   leftAnswer: Contenha os estragos
   rightAnswer: Salve as pessoas
   hasCorruptionMods: 0
