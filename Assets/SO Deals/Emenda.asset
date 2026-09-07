@@ -10,29 +10,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
-  m_Name: aquecimentoGlobal
-  m_EditorClassIdentifier: 
-  Description: Aquecimento global batendo na porta. Vamos replantar o que derrubamos?
-  leftAnswer: "Mais \xE1rvores, menos ventilador!"
-  rightAnswer: Distribui ar-condicionado, depois a conta vem.
+  m_Name: Emenda
+  m_EditorClassIdentifier: Assembly-CSharp::Deal
+  Description: "Tem uma regi\xE3o precisando de reformas nas estradas, manda uma
+    emenda a\xED doutor! Sabe que o povo tem pedido por isto... hehehe"
+  leftAnswer: 
+  rightAnswer: 
   hasCorruptionMods: 0
   impactsLeft:
-    climaticChanges: 20
-    internationalRelations: 0
-    populationalApproval: 20
-    economy: -15
-    corruption: 0
-    prop: {fileID: 0}
-  impactsRight:
-    climaticChanges: -25
+    climaticChanges: 0
     internationalRelations: 0
     populationalApproval: 15
-    economy: 10
+    economy: 0
+    corruption: 20
+    prop: {fileID: 0}
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: 0
+    populationalApproval: -15
+    economy: 5
     corruption: 0
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
   perkIfLeft: {fileID: 0}
   perkIfRight: {fileID: 0}
-  NPC: {fileID: 9067916053490012197, guid: 1bddbd3a1afe9314f936a7e5fde0da5c, type: 3}
+  NPC: {fileID: 4047350394622487709, guid: 16e4de0f62729694eb1a5ff97f31af79, type: 3}
   tag: 

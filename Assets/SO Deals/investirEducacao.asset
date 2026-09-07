@@ -21,15 +21,15 @@ MonoBehaviour:
     climaticChanges: 0
     internationalRelations: 0
     populationalApproval: 30
-    economy: -20
-    corruption: 0
+    economy: -15
+    corruption: 10
     prop: {fileID: 0}
   impactsRight:
     climaticChanges: 0
     internationalRelations: 0
     populationalApproval: -30
-    economy: 20
-    corruption: 0
+    economy: 15
+    corruption: -10
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []

@@ -33,7 +33,7 @@ MonoBehaviour:
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
-  perkIfLeft: {fileID: 11400000, guid: dbb5c77f8b6cfb649ba9f03aef3b684f, type: 2}
+  perkIfLeft: {fileID: 0}
   perkIfRight: {fileID: 0}
   NPC: {fileID: 6532259188457934314, guid: 0c667e5e5810e0448b52183683271385, type: 3}
   tag: Solar

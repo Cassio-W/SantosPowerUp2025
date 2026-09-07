@@ -20,14 +20,14 @@ MonoBehaviour:
     climaticChanges: 40
     internationalRelations: 25
     populationalApproval: -25
-    economy: -20
+    economy: -10
     corruption: 0
     prop: {fileID: 0}
   impactsRight:
     climaticChanges: -25
     internationalRelations: -15
     populationalApproval: 10
-    economy: 30
+    economy: 20
     corruption: 0
     prop: {fileID: 0}
   newDealsIfLeft: []

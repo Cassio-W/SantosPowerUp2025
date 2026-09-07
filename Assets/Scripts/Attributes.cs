@@ -11,8 +11,8 @@ public class Attributes
     public int internationalRelations = 50;
     public int populationalApproval = 50;
     public int economy = 50;
-
     public int corruption = 0;
+
 
     public GameObject prop;
 

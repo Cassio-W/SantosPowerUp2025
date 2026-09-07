@@ -31,7 +31,10 @@ MonoBehaviour:
     economy: 20
     corruption: 0
     prop: {fileID: 0}
-  newDealsIfLeft: []
+  newDealsIfLeft:
+  - {fileID: 11400000, guid: 69f6820e07cf58f4ba0c8c1275bc106d, type: 2}
   newDealsIfRight: []
+  perkIfLeft: {fileID: 0}
+  perkIfRight: {fileID: 0}
   NPC: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
   tag: 

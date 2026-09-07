@@ -33,7 +33,7 @@ MonoBehaviour:
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
-  perkIfLeft: {fileID: 0}
+  perkIfLeft: {fileID: 11400000, guid: 73fd3e6bc0d4ea848a0ea1b12dc82637, type: 2}
   perkIfRight: {fileID: 0}
   NPC: {fileID: 9148107631748954292, guid: a71d66c2d3ba94e46b0fda843b37281e, type: 3}
   tag: 

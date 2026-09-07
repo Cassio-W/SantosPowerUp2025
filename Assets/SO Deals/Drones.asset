@@ -10,29 +10,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 05b748ee3a556f14f85526eb4f072f42, type: 3}
-  m_Name: aquecimentoGlobal
-  m_EditorClassIdentifier: 
-  Description: Aquecimento global batendo na porta. Vamos replantar o que derrubamos?
-  leftAnswer: "Mais \xE1rvores, menos ventilador!"
-  rightAnswer: Distribui ar-condicionado, depois a conta vem.
+  m_Name: Drones
+  m_EditorClassIdentifier: Assembly-CSharp::Deal
+  Description: "Senhor Presidente! O que acha de implementar drones policiais para
+    a seguran\xE7a do cidad\xE3o?"
+  leftAnswer: 
+  rightAnswer: 
   hasCorruptionMods: 0
   impactsLeft:
-    climaticChanges: 20
+    climaticChanges: 0
     internationalRelations: 0
-    populationalApproval: 20
-    economy: -15
+    populationalApproval: 15
+    economy: -10
     corruption: 0
     prop: {fileID: 0}
   impactsRight:
-    climaticChanges: -25
+    climaticChanges: 0
     internationalRelations: 0
-    populationalApproval: 15
-    economy: 10
+    populationalApproval: -5
+    economy: 0
     corruption: 0
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
   perkIfLeft: {fileID: 0}
   perkIfRight: {fileID: 0}
-  NPC: {fileID: 9067916053490012197, guid: 1bddbd3a1afe9314f936a7e5fde0da5c, type: 3}
+  NPC: {fileID: 7243269876658770806, guid: aea00cd83b7045845975864cbf0caa3e, type: 3}
   tag: 
