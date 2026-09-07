@@ -90,6 +90,9 @@ public class UIManager : MonoBehaviour
     // Elementos internos do UI Toolkit
     private VisualElement _decisionContainer;
     private VisualElement _perksContainer;
+    private VisualElement _perkModalPopup;
+    private Label _perkModalTitle;
+    private Label _perkModalDesc;
     private VisualElement _wrapperApprove;
     private VisualElement _wrapperReject;
     private VisualElement _wrapperContinue;
@@ -251,14 +254,16 @@ public class UIManager : MonoBehaviour
         // Se ainda não existir UIDocument, configura automaticamente no próprio GameObject
         if (decisionUIDocument == null)
         {
+#if UNITY_EDITOR
             if (decisionUxmlAsset == null)
             {
-                decisionUxmlAsset = Resources.Load<VisualTreeAsset>("DecisionUI");
+                decisionUxmlAsset = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Decision/DecisionUI.uxml");
             }
             if (decisionPanelSettings == null)
             {
-                decisionPanelSettings = Resources.Load<PanelSettings>("DecisionPanelSettings");
+                decisionPanelSettings = UnityEditor.AssetDatabase.LoadAssetAtPath<PanelSettings>("Assets/UI/Decision/DecisionPanelSettings.asset");
             }
+#endif
 
             if (decisionUxmlAsset != null)
             {
@@ -281,6 +286,46 @@ public class UIManager : MonoBehaviour
 
             _perksContainer = root.Q<VisualElement>("perks-container");
             if (_perksContainer != null) _perksContainer.pickingMode = PickingMode.Ignore;
+
+            _perkModalPopup = root.Q<VisualElement>("perk-modal-popup");
+            if (_perkModalPopup == null)
+            {
+                _perkModalPopup = new VisualElement();
+                _perkModalPopup.name = "perk-modal-popup";
+                _perkModalPopup.AddToClassList("perk-modal");
+                _perkModalPopup.pickingMode = PickingMode.Ignore;
+
+                var modalHeader = new VisualElement();
+                modalHeader.AddToClassList("perk-modal-header");
+                modalHeader.pickingMode = PickingMode.Ignore;
+
+                _perkModalTitle = new Label("Vantagem Ativa");
+                _perkModalTitle.name = "perk-modal-title";
+                _perkModalTitle.AddToClassList("perk-modal-title");
+                _perkModalTitle.pickingMode = PickingMode.Ignore;
+                modalHeader.Add(_perkModalTitle);
+
+                var tagLabel = new Label("PERK");
+                tagLabel.AddToClassList("perk-modal-tag");
+                tagLabel.pickingMode = PickingMode.Ignore;
+                modalHeader.Add(tagLabel);
+
+                _perkModalDesc = new Label("Efeito ativo no seu mandato.");
+                _perkModalDesc.name = "perk-modal-desc";
+                _perkModalDesc.AddToClassList("perk-modal-desc");
+                _perkModalDesc.pickingMode = PickingMode.Ignore;
+
+                _perkModalPopup.Add(modalHeader);
+                _perkModalPopup.Add(_perkModalDesc);
+
+                root.Add(_perkModalPopup);
+            }
+            else
+            {
+                _perkModalPopup.pickingMode = PickingMode.Ignore;
+                _perkModalTitle = _perkModalPopup.Q<Label>("perk-modal-title");
+                _perkModalDesc = _perkModalPopup.Q<Label>("perk-modal-desc");
+            }
 
             _decisionContainer = root.Q<VisualElement>("decision-container");
             if (_decisionContainer != null) _decisionContainer.pickingMode = PickingMode.Ignore;
@@ -766,16 +811,23 @@ public class UIManager : MonoBehaviour
 
     public void UpdatePerks()
     {
-        // Renderiza no UI Toolkit (topo direito da tela, empilhados verticalmente)
+        // Oculta o modal flutuante ao reconstruir os slots
+        _perkModalPopup?.RemoveFromClassList("open");
+
+        // Renderiza no UI Toolkit (topo esquerdo da tela, empilhados verticalmente)
         if (_perksContainer != null)
         {
             _perksContainer.Clear();
 
             if (GameManager.instance != null && GameManager.instance.activePerks != null)
             {
-                foreach (var perk in GameManager.instance.activePerks)
+                for (int i = 0; i < GameManager.instance.activePerks.Count; i++)
                 {
+                    var perk = GameManager.instance.activePerks[i];
                     if (perk == null) continue;
+
+                    int perkIndex = i;
+                    var currentPerk = perk;
 
                     var item = new VisualElement();
                     item.AddToClassList("perk-item");
@@ -789,46 +841,40 @@ public class UIManager : MonoBehaviour
                     var iconLarge = new VisualElement();
                     iconLarge.AddToClassList("perk-icon-large");
                     iconLarge.pickingMode = PickingMode.Ignore;
-                    if (perk.icon != null)
+                    if (currentPerk.icon != null)
                     {
-                        iconLarge.style.backgroundImage = new StyleBackground(perk.icon);
+                        iconLarge.style.backgroundImage = new StyleBackground(currentPerk.icon);
                     }
                     iconCard.Add(iconLarge);
 
-                    // Modal / Tooltip abaixo do ícone (revelado ao passar o mouse)
-                    var modal = new VisualElement();
-                    modal.AddToClassList("perk-modal");
-                    modal.pickingMode = PickingMode.Ignore;
+                    // Handlers para abrir/fechar o modal global SEMPRE na frente de todos os cards
+                    iconCard.RegisterCallback<PointerEnterEvent>(evt =>
+                    {
+                        if (_perkModalPopup == null) return;
 
-                    var modalHeader = new VisualElement();
-                    modalHeader.AddToClassList("perk-modal-header");
-                    modalHeader.pickingMode = PickingMode.Ignore;
+                        if (_perkModalTitle != null)
+                        {
+                            _perkModalTitle.text = string.IsNullOrEmpty(currentPerk.perkName) ? "Vantagem Ativa" : currentPerk.perkName;
+                        }
+                        if (_perkModalDesc != null)
+                        {
+                            _perkModalDesc.text = string.IsNullOrEmpty(currentPerk.description) ? "Efeito ativo no seu mandato." : currentPerk.description;
+                        }
 
-                    string displayName = string.IsNullOrEmpty(perk.perkName) ? "Vantagem Ativa" : perk.perkName;
-                    var titleLabel = new Label(displayName);
-                    titleLabel.AddToClassList("perk-modal-title");
-                    titleLabel.pickingMode = PickingMode.Ignore;
-                    modalHeader.Add(titleLabel);
+                        // Posiciona dinamicamente logo abaixo do card correspondente no topo esquerdo
+                        float topOffset = 28f + perkIndex * (78f + 14f) + 86f;
+                        _perkModalPopup.style.top = topOffset;
+                        _perkModalPopup.style.left = 32f;
+                        _perkModalPopup.BringToFront();
+                        _perkModalPopup.AddToClassList("open");
+                    });
 
-                    var tagLabel = new Label("PERK");
-                    tagLabel.AddToClassList("perk-modal-tag");
-                    tagLabel.pickingMode = PickingMode.Ignore;
-                    modalHeader.Add(tagLabel);
-
-                    string desc = string.IsNullOrEmpty(perk.description) ? "Efeito ativo no seu mandato." : perk.description;
-                    var descLabel = new Label(desc);
-                    descLabel.AddToClassList("perk-modal-desc");
-                    descLabel.pickingMode = PickingMode.Ignore;
-
-                    modal.Add(modalHeader);
-                    modal.Add(descLabel);
-
-                    // Handlers para abrir/fechar o modal suavemente no hover
-                    iconCard.RegisterCallback<PointerEnterEvent>(evt => modal.AddToClassList("open"));
-                    iconCard.RegisterCallback<PointerLeaveEvent>(evt => modal.RemoveFromClassList("open"));
+                    iconCard.RegisterCallback<PointerLeaveEvent>(evt =>
+                    {
+                        _perkModalPopup?.RemoveFromClassList("open");
+                    });
 
                     item.Add(iconCard);
-                    item.Add(modal);
                     _perksContainer.Add(item);
                 }
             }

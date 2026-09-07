@@ -2,8 +2,17 @@
     <Style src="DecisionUI.uss" />
     <ui:VisualElement name="decision-screen" class="decision-screen" picking-mode="Ignore">
         
-        <!-- Container dos Perks no Topo Direito (Empilhados Verticalmente) -->
+        <!-- Container dos Perks no Topo Esquerdo (Empilhados Verticalmente) -->
         <ui:VisualElement name="perks-container" class="perks-container" picking-mode="Ignore" />
+
+        <!-- Modal / Tooltip Flutuante dos Perks (Sempre renderizado na frente dos cards) -->
+        <ui:VisualElement name="perk-modal-popup" class="perk-modal" picking-mode="Ignore">
+            <ui:VisualElement class="perk-modal-header" picking-mode="Ignore">
+                <ui:Label name="perk-modal-title" class="perk-modal-title" text="Vantagem Ativa" picking-mode="Ignore" />
+                <ui:Label name="perk-modal-tag" class="perk-modal-tag" text="PERK" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:Label name="perk-modal-desc" class="perk-modal-desc" text="Descrição do efeito" picking-mode="Ignore" />
+        </ui:VisualElement>
 
         <ui:VisualElement name="decision-container" class="decision-container hidden" picking-mode="Ignore">
             
