@@ -19,14 +19,14 @@ MonoBehaviour:
   hasCorruptionMods: 1
   impactsLeft:
     climaticChanges: 0
-    internationalRelations: 10
+    internationalRelations: -10
     populationalApproval: 0
     economy: -10
     corruption: 0
     prop: {fileID: 0}
   impactsRight:
     climaticChanges: 0
-    internationalRelations: -10
+    internationalRelations: 10
     populationalApproval: 0
     economy: 10
     corruption: 0

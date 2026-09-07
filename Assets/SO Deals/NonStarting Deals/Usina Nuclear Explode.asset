@@ -18,16 +18,16 @@ MonoBehaviour:
   rightAnswer: Salve as pessoas
   hasCorruptionMods: 0
   impactsLeft:
-    climaticChanges: 15
+    climaticChanges: -15
     internationalRelations: 0
-    populationalApproval: -10
+    populationalApproval: 10
     economy: -5
     corruption: 0
     prop: {fileID: 0}
   impactsRight:
-    climaticChanges: -15
+    climaticChanges: 15
     internationalRelations: 0
-    populationalApproval: 10
+    populationalApproval: -10
     economy: -5
     corruption: 0
     prop: {fileID: 0}

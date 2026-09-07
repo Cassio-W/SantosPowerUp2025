@@ -18,14 +18,14 @@ MonoBehaviour:
   rightAnswer: Menos trabalho, mais churrasco!
   impactsLeft:
     climaticChanges: 0
-    internationalRelations: -20
-    populationalApproval: -25
-    economy: 30
-  impactsRight:
-    climaticChanges: 0
     internationalRelations: 20
     populationalApproval: 30
     economy: -30
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: -20
+    populationalApproval: -25
+    economy: 30
   newDealsIfLeft: []
   newDealsIfRight: []
   NPC: {fileID: 4047350394622487709, guid: 16e4de0f62729694eb1a5ff97f31af79, type: 3}

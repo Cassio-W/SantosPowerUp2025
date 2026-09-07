@@ -19,18 +19,18 @@ MonoBehaviour:
   rightAnswer: "Cancele a privatiza\xE7\xE3o e junte-se \xE0 farofa!"
   hasCorruptionMods: 0
   impactsLeft:
-    climaticChanges: 0
-    internationalRelations: 15
-    populationalApproval: -30
-    economy: 15
-    corruption: 15
-    prop: {fileID: 0}
-  impactsRight:
     climaticChanges: 10
     internationalRelations: -20
     populationalApproval: 30
     economy: -15
     corruption: -10
+    prop: {fileID: 0}
+  impactsRight:
+    climaticChanges: 0
+    internationalRelations: 15
+    populationalApproval: -30
+    economy: 15
+    corruption: 15
     prop: {fileID: 0}
   newDealsIfLeft: []
   newDealsIfRight: []
