@@ -55,6 +55,10 @@ public class CameraFocusManager : MonoBehaviour
     [Tooltip("Tecla para cancelar o foco e retornar a camera para a posicao padrao.")]
     [SerializeField] private KeyCode unfocusKey = KeyCode.Escape;
 
+    [Header("--- Pos-Processamento / Volume ---")]
+    [Tooltip("Volume responsavel pelo efeito de foco (desfoque, vignetting, etc.). Se vazio, tentara encontrar automaticamente.")]
+    [SerializeField] private Volume focusVolume;
+
     [Header("--- Eventos Globais ---")]
     public UnityEvent<FocusableObject> onFocusChanged = new UnityEvent<FocusableObject>();
 
@@ -432,6 +436,8 @@ public class CameraFocusManager : MonoBehaviour
 
     private Volume GetFocusVolume()
     {
+        if (focusVolume != null) return focusVolume;
+
         Camera cam = targetCamera != null ? targetCamera : Camera.main;
         if (cam != null)
         {
@@ -440,13 +446,36 @@ public class CameraFocusManager : MonoBehaviour
             {
                 if (v != null && v.sharedProfile != null && v.sharedProfile.name.Contains("1"))
                 {
-                    return v;
+                    focusVolume = v;
+                    return focusVolume;
                 }
             }
             var camVol = cam.GetComponent<Volume>();
-            if (camVol != null) return camVol;
+            if (camVol != null)
+            {
+                focusVolume = camVol;
+                return focusVolume;
+            }
         }
-        return FindFirstObjectByType<Volume>();
+
+        // Tenta encontrar um Volume cujo nome de GameObject ou de Profile contenha "focus" ou "foco"
+        var allVolumes = FindObjectsByType<Volume>(FindObjectsSortMode.None);
+        foreach (var v in allVolumes)
+        {
+            if (v != null)
+            {
+                string objName = v.name.ToLower();
+                string profName = v.sharedProfile != null ? v.sharedProfile.name.ToLower() : "";
+                if (objName.Contains("focus") || objName.Contains("foco") || profName.Contains("focus") || profName.Contains("foco"))
+                {
+                    focusVolume = v;
+                    return focusVolume;
+                }
+            }
+        }
+
+        focusVolume = FindFirstObjectByType<Volume>();
+        return focusVolume;
     }
 
     /// <summary>

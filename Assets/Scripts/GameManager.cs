@@ -363,16 +363,35 @@ public class GameManager : MonoBehaviour
     private Volume GetFocusVolume()
     {
         Camera cam = Camera.main;
-        if (cam == null) return null;
-        Volume[] volumes = cam.GetComponents<Volume>();
-        foreach (var v in volumes)
+        if (cam != null)
         {
-            if (v != null && v.sharedProfile != null && v.sharedProfile.name.Contains("1"))
+            Volume[] volumes = cam.GetComponents<Volume>();
+            foreach (var v in volumes)
             {
-                return v;
+                if (v != null && v.sharedProfile != null && v.sharedProfile.name.Contains("1"))
+                {
+                    return v;
+                }
+            }
+            var camVol = cam.GetComponent<Volume>();
+            if (camVol != null) return camVol;
+        }
+
+        var allVolumes = FindObjectsByType<Volume>(FindObjectsSortMode.None);
+        foreach (var v in allVolumes)
+        {
+            if (v != null)
+            {
+                string objName = v.name.ToLower();
+                string profName = v.sharedProfile != null ? v.sharedProfile.name.ToLower() : "";
+                if (objName.Contains("focus") || objName.Contains("foco") || profName.Contains("focus") || profName.Contains("foco"))
+                {
+                    return v;
+                }
             }
         }
-        return cam.GetComponent<Volume>();
+
+        return FindFirstObjectByType<Volume>();
     }
 
     IEnumerator RandomizeAnimation()
