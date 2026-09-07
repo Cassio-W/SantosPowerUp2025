@@ -197,6 +197,17 @@ public class UIManager : MonoBehaviour
         }
 
         UpdatePerks();
+        UpdateDate();
+
+        if (datePanel != null)
+        {
+            datePanel.SetActive(true);
+            var rect = datePanel.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                rect.anchoredPosition = new Vector2(710, 451);
+            }
+        }
     }
 
     private void Update()
@@ -604,9 +615,16 @@ public class UIManager : MonoBehaviour
         // Os botões de decisão aparecem imediatamente ao iniciar uma proposta
         ShowDecisionButtons(deal);
 
-        // Atualizações dos painéis de data e corrupção (1s com easeType original)
+        // Atualizações dos painéis de data e corrupção
         if (datePanel != null)
-            LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 451, 0), 1f).setEase(easeType);
+        {
+            datePanel.SetActive(true);
+            var rect = datePanel.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                rect.anchoredPosition = new Vector2(710, 451);
+            }
+        }
         if (corruptionPanel != null)
             LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(110, -120, 0), 1f).setEase(easeType);
 
@@ -719,7 +737,6 @@ public class UIManager : MonoBehaviour
         {
             if (GameManager.instance == null || GameManager.instance.actualDeck == null || GameManager.instance.actualDeck.Count == 0) return;
             Deal deal = GameManager.instance.actualDeck[0];
-            if (datePanel != null) LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
             if (corruptionPanel != null) LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(-120, -120, 0), 1f).setEase(easeType);
             GameManager.instance.ChooseLeft(deal);
             StartCoroutine(GameManager.instance.ApplyDecision(deal, deal.impactsLeft, isApproved: true));
@@ -731,7 +748,6 @@ public class UIManager : MonoBehaviour
             StartCoroutine(GameManager.instance.ApplyDecision(deal, deal.impactsLeft, isApproved: true));
             if (!GameManager.instance.tutorialDeals.Any())
             {
-                if (datePanel != null) LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
                 if (corruptionPanel != null) LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(-120, -120, 0), 1f).setEase(easeType);
             }
         }
@@ -781,7 +797,6 @@ public class UIManager : MonoBehaviour
         {
             if (GameManager.instance == null || GameManager.instance.actualDeck == null || GameManager.instance.actualDeck.Count == 0) return;
             Deal deal = GameManager.instance.actualDeck[0];
-            if (datePanel != null) LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
             if (corruptionPanel != null) LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(-120, -120, 0), 1f).setEase(easeType);
             GameManager.instance.ChooseRight(deal);
             StartCoroutine(GameManager.instance.ApplyDecision(deal, deal.impactsRight, isApproved: false));
@@ -793,7 +808,6 @@ public class UIManager : MonoBehaviour
             StartCoroutine(GameManager.instance.ApplyDecision(deal, deal.impactsRight, isApproved: false));
             if (!GameManager.instance.tutorialDeals.Any())
             {
-                if (datePanel != null) LeanTween.move(datePanel.GetComponent<RectTransform>(), new Vector3(710, 651, 0), 1f).setEase(easeType);
                 if (corruptionPanel != null) LeanTween.move(corruptionPanel.GetComponent<RectTransform>(), new Vector3(-120, -120, 0), 1f).setEase(easeType);
             }
         }
@@ -894,7 +908,10 @@ public class UIManager : MonoBehaviour
 
     public void UpdateDate()
     {
-        dateText.text = $"{GameManager.instance.month} / {GameManager.instance.year}";
+        if (dateText != null && GameManager.instance != null)
+        {
+            dateText.text = $"{GameManager.instance.month} / {GameManager.instance.year}";
+        }
     }
 
     void DeactivatePanel()
