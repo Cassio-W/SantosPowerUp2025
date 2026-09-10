@@ -1,0 +1,23 @@
+{
+    "name": "Mandato.Editor",
+    "rootNamespace": "Mandato.Editor",
+    "references": [
+        "Mandato.Core",
+        "Mandato.Content",
+        "Mandato.Run",
+        "Mandato.Presentation",
+        "Mandato.UI",
+        "Mandato.Infrastructure"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

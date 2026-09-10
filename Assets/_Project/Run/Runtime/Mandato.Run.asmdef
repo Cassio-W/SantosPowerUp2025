@@ -1,0 +1,17 @@
+{
+    "name": "Mandato.Run",
+    "rootNamespace": "Mandato.Run",
+    "references": [
+        "Mandato.Core",
+        "Mandato.Content"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
