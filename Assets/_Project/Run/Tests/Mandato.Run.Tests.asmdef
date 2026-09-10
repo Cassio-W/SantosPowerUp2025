@@ -4,11 +4,11 @@
     "references": [
         "Mandato.Core",
         "Mandato.Content",
-        "Mandato.Run",
-        "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "Mandato.Run"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
@@ -20,5 +20,8 @@
         "UNITY_INCLUDE_TESTS"
     ],
     "versionDefines": [],
-    "noEngineReferences": false
+    "noEngineReferences": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
 }

@@ -20,7 +20,7 @@ namespace Mandato.Core.Tests
         [Test]
         public void Clamping_DoesNotExceedBounds()
         {
-            var stats = new StatBlock(150, -30, 200, -10, 120);
+            var stats = new StatBlock(150, -30, 200, -10, 120, clamp: true);
 
             Assert.AreEqual(100, stats.climaticChanges);
             Assert.AreEqual(0, stats.internationalRelations);

@@ -2,11 +2,11 @@
     "name": "Mandato.Core.Tests",
     "rootNamespace": "Mandato.Core.Tests",
     "references": [
-        "Mandato.Core",
-        "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "Mandato.Core"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
@@ -18,5 +18,8 @@
         "UNITY_INCLUDE_TESTS"
     ],
     "versionDefines": [],
-    "noEngineReferences": false
+    "noEngineReferences": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
 }

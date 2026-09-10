@@ -40,13 +40,13 @@ namespace Mandato.Core
             ResetToDefaults();
         }
 
-        public StatBlock(int climate, int relations, int approval, int eco, int corrupt)
+        public StatBlock(int climate, int relations, int approval, int eco, int corrupt, bool clamp = false)
         {
-            climaticChanges = Clamp(climate);
-            internationalRelations = Clamp(relations);
-            popularApproval = Clamp(approval);
-            economy = Clamp(eco);
-            corruption = Clamp(corrupt);
+            climaticChanges = clamp ? Clamp(climate) : climate;
+            internationalRelations = clamp ? Clamp(relations) : relations;
+            popularApproval = clamp ? Clamp(approval) : approval;
+            economy = clamp ? Clamp(eco) : eco;
+            corruption = clamp ? Clamp(corrupt) : corrupt;
         }
 
         public void ResetToDefaults()
