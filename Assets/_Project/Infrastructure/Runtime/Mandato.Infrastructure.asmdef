@@ -4,7 +4,9 @@
     "references": [
         "Mandato.Core",
         "Mandato.Content",
-        "Mandato.Run"
+        "Mandato.Run",
+        "Mandato.Presentation",
+        "Mandato.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

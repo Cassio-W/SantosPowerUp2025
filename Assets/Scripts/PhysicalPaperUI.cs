@@ -113,10 +113,10 @@ public class PhysicalPaperUI : MonoBehaviour
     /// <summary>
     /// Atualiza apenas a data e local de assinatura no documento.
     /// </summary>
-    public void UpdateDateDisplay()
+    public void UpdateDateDisplay(string customDate = null)
     {
         EnsureReferences();
-        string dateStr = GetFormattedDocumentDate();
+        string dateStr = !string.IsNullOrEmpty(customDate) ? $"{defaultLocation}, {customDate}" : GetFormattedDocumentDate();
 
         if (uiDocument != null && uiDocument.rootVisualElement != null)
         {

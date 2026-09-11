@@ -199,12 +199,18 @@ public class CameraFocusManager : MonoBehaviour
         }
 
         Ray ray = targetCamera.ScreenPointToRay(Input.mousePosition);
-        bool hitSomething = Physics.Raycast(ray, out RaycastHit hit, raycastDistance, interactableLayers);
+        RaycastHit[] hits = Physics.RaycastAll(ray, raycastDistance, interactableLayers);
+        Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
         FocusableObject hitFocusable = null;
-        if (hitSomething)
+        foreach (var h in hits)
         {
-            hitFocusable = hit.collider.GetComponentInParent<FocusableObject>();
+            var fo = h.collider.GetComponentInParent<FocusableObject>();
+            if (fo != null && fo.enabled && fo.gameObject.activeInHierarchy)
+            {
+                hitFocusable = fo;
+                break;
+            }
         }
 
         // Atualizacao de Hover

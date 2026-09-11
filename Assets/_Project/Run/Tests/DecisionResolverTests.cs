@@ -13,19 +13,19 @@ namespace Mandato.Run.Tests
         [SetUp]
         public void Setup()
         {
-            var left = new ChoiceDefinition("Vetar", new StatBlock(0, 0, -5, 10, 0))
-            {
-                deltaPoliticalX = 2,
-                deltaPoliticalY = -1
-            };
-
-            var right = new ChoiceDefinition("Aprovar", new StatBlock(10, 5, 10, -15, 10), corruptionMods: true)
+            var left = new ChoiceDefinition("Aprovar", new StatBlock(10, 5, 10, -15, 10), corruptionMods: true)
             {
                 deltaPoliticalX = -3,
                 deltaPoliticalY = 2,
                 injectCardIds = new List<string> { "card_consequence_1" },
                 grantPerkId = "perk_reformista",
                 presentationCue = "palmas"
+            };
+
+            var right = new ChoiceDefinition("Vetar", new StatBlock(0, 0, -5, 10, 0))
+            {
+                deltaPoliticalX = 2,
+                deltaPoliticalY = -1
             };
 
             testCard = CardDefinition.CreateRuntimeInstance(
@@ -48,14 +48,19 @@ namespace Mandato.Run.Tests
             ResolutionReport report = DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 0);
 
             Assert.IsNotNull(report);
-            Assert.AreEqual("Vetar", report.choiceLabel);
+            Assert.AreEqual("Aprovar", report.choiceLabel);
             Assert.AreEqual(50, report.statsBefore.economy);
-            Assert.AreEqual(60, report.statsAfter.economy);
-            Assert.AreEqual(45, report.statsAfter.popularApproval);
+            Assert.AreEqual(35, report.statsAfter.economy);
+            Assert.AreEqual(60, report.statsAfter.popularApproval);
 
-            Assert.AreEqual(2, run.politicalAxis.x);
-            Assert.AreEqual(-1, run.politicalAxis.y);
+            Assert.AreEqual(-3, run.politicalAxis.x);
+            Assert.AreEqual(2, run.politicalAxis.y);
             Assert.AreEqual(1, run.decisionHistory.Count);
+
+            // Injeção de carta e concessão de perk
+            Assert.IsTrue(deck.drawPile.Contains("card_consequence_1"));
+            Assert.Contains("card_consequence_1", report.injectedCardIds);
+            Assert.IsTrue(run.activePerkIds.Contains("perk_reformista"));
         }
 
         [Test]
@@ -67,19 +72,12 @@ namespace Mandato.Run.Tests
             ResolutionReport report = DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 1);
 
             Assert.IsNotNull(report);
-            Assert.AreEqual("Aprovar", report.choiceLabel);
-            Assert.AreEqual("palmas", report.presentationCue);
-
-            // Injeção de carta no deck
-            Assert.IsTrue(deck.drawPile.Contains("card_consequence_1"));
-            Assert.Contains("card_consequence_1", report.injectedCardIds);
-
-            // Concessão de perk
-            Assert.IsTrue(run.activePerkIds.Contains("perk_reformista"));
+            Assert.AreEqual("Vetar", report.choiceLabel);
 
             // Eixo político
-            Assert.AreEqual(-3, run.politicalAxis.x);
-            Assert.AreEqual(2, run.politicalAxis.y);
+            Assert.AreEqual(2, run.politicalAxis.x);
+            Assert.AreEqual(-1, run.politicalAxis.y);
+            Assert.AreEqual(60, report.statsAfter.economy);
         }
 
         [Test]
@@ -96,6 +94,8 @@ namespace Mandato.Run.Tests
             bool cardPresented = false;
             ResolutionReport reportReceived = null;
 
+            var phases = new List<RunPhase>();
+            stateMachine.OnPhaseChanged += p => phases.Add(p);
             stateMachine.OnProposalReady += card => cardPresented = true;
             stateMachine.OnConsequencesReady += rep => reportReceived = rep;
 
@@ -113,7 +113,8 @@ namespace Mandato.Run.Tests
 
             // 3. Conclui apresentação visual e avança o mês
             stateMachine.CompleteTurnAndAdvance();
-            Assert.AreEqual(RunPhase.AdvancingTime, stateMachine.CurrentPhase);
+            Assert.IsTrue(phases.Contains(RunPhase.AdvancingTime));
+            Assert.AreEqual(RunPhase.PreparingRun, stateMachine.CurrentPhase);
             Assert.AreEqual(2, stateMachine.RunState.calendar.currentMonthIndex);
         }
     }

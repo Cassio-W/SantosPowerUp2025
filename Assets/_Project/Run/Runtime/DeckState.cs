@@ -16,12 +16,12 @@ namespace Mandato.Run
 
         public DeckState() { }
 
-        public DeckState(IEnumerable<string> initialCardIds, int seed = 0)
+        public DeckState(IEnumerable<string> initialCardIds, int seed = 0, IEnumerable<string> priorityCardIds = null)
         {
-            Initialize(initialCardIds, seed);
+            Initialize(initialCardIds, seed, priorityCardIds);
         }
 
-        public void Initialize(IEnumerable<string> initialCardIds, int seed = 0)
+        public void Initialize(IEnumerable<string> initialCardIds, int seed = 0, IEnumerable<string> priorityCardIds = null)
         {
             drawPile.Clear();
             discardPile.Clear();
@@ -35,6 +35,16 @@ namespace Mandato.Run
             if (seed != 0)
             {
                 Shuffle(new Random(seed));
+            }
+
+            // Insere as cartas prioritárias (ex: tutorial) garantidamente no topo na ordem correta
+            if (priorityCardIds != null)
+            {
+                var priorityList = new List<string>(priorityCardIds);
+                for (int i = priorityList.Count - 1; i >= 0; i--)
+                {
+                    drawPile.Insert(0, priorityList[i]);
+                }
             }
         }
 

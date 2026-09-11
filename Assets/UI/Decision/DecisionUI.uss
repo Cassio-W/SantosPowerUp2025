@@ -302,6 +302,10 @@
     letter-spacing: 0.2px;
 }
 
+/* ==========================================================================
+   VINHETA DE CORRUPÇÃO EM TELA CHEIA (DESATIVADA - VOLUME DA CÂMERA GERENCIA)
+   ========================================================================== */
 
-
-
+.vignette-corruption {
+    display: none;
+}

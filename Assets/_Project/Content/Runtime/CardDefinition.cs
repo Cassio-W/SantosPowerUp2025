@@ -71,11 +71,13 @@ namespace Mandato.Content
         [TextArea(3, 8)] public string description = string.Empty;
 
         public string npcId = string.Empty;
+        public GameObject npcPrefab;
+        public ScriptableObject sourceLegacyAsset;
         public string categoryTag = string.Empty;
         [Range(1, 1000)] public int baseWeight = 100;
 
-        public ChoiceDefinition leftChoice = new ChoiceDefinition("Rejeitar");
-        public ChoiceDefinition rightChoice = new ChoiceDefinition("Aprovar");
+        public ChoiceDefinition leftChoice = new ChoiceDefinition("Aceitar");
+        public ChoiceDefinition rightChoice = new ChoiceDefinition("Recusar");
 
         public List<CardCondition> conditions = new List<CardCondition>();
 
@@ -135,8 +137,8 @@ namespace Mandato.Content
             card.id = id;
             card.title = title;
             card.description = description;
-            card.leftChoice = left ?? new ChoiceDefinition("Rejeitar");
-            card.rightChoice = right ?? new ChoiceDefinition("Aprovar");
+            card.leftChoice = left ?? new ChoiceDefinition("Aceitar");
+            card.rightChoice = right ?? new ChoiceDefinition("Recusar");
             card.npcId = npcId ?? string.Empty;
             card.categoryTag = tag ?? string.Empty;
             return card;

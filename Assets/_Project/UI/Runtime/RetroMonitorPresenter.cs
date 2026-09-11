@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using Mandato.Content;
 using Mandato.Core;
 using Mandato.Run;
 using UnityEngine;
@@ -6,7 +8,6 @@ using UnityEngine.UIElements;
 
 namespace Mandato.UI
 {
-    [RequireComponent(typeof(UIDocument))]
     public class RetroMonitorPresenter : MonoBehaviour
     {
         [Header("Configurações do Monitor")]
@@ -15,9 +16,10 @@ namespace Mandato.UI
         [SerializeField] private bool triggerGlitchOnChanges = true;
 
         private UIDocument uiDocument;
+        private MonoBehaviour sceneRetroMonitorUI;
         private VisualElement root;
 
-        // Fills e Labels dos 4 Indicadores
+        // Fills e Labels dos 4 Indicadores (Fallback se RetroMonitorUI não estiver na cena)
         private VisualElement fillNature, fillEconomy, fillRelations, fillPeople;
         private Label valueNature, valueEconomy, valueRelations, valuePeople;
         private Label arrowNature, arrowEconomy, arrowRelations, arrowPeople;
@@ -31,7 +33,7 @@ namespace Mandato.UI
         // Header & Data
         private Label dateLabel;
 
-        // Valores interpolados
+        // Valores interpolados (Fallback)
         private float curNature = 50f, targetNature = 50f;
         private float curEconomy = 50f, targetEconomy = 50f;
         private float curRelations = 50f, targetRelations = 50f;
@@ -40,13 +42,31 @@ namespace Mandato.UI
 
         private void Awake()
         {
-            uiDocument = GetComponent<UIDocument>();
+            EnsureReferences();
             CacheElements();
         }
 
         private void OnEnable()
         {
+            EnsureReferences();
             CacheElements();
+        }
+
+        private void EnsureReferences()
+        {
+            if (uiDocument == null) uiDocument = GetComponent<UIDocument>() ?? GetComponentInChildren<UIDocument>();
+            if (sceneRetroMonitorUI == null)
+            {
+                var allBehaviours = FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None);
+                foreach (var b in allBehaviours)
+                {
+                    if (b != null && b.GetType().Name == "RetroMonitorUI")
+                    {
+                        sceneRetroMonitorUI = b;
+                        break;
+                    }
+                }
+            }
         }
 
         private void CacheElements()
@@ -85,13 +105,14 @@ namespace Mandato.UI
             arrowCorruption = root.Q<Label>("arrow-corruption");
 
             // Data
-            dateLabel = root.Q<Label>("date-display") ?? root.Q<Label>("monitor-date");
+            dateLabel = root.Q<Label>("date-display") ?? root.Q<Label>("monitor-date") ?? root.Q<Label>("date-label");
         }
 
         public void UpdateSnapshot(RunSnapshot snapshot, ResolutionReport lastReport = null)
         {
             if (snapshot == null) return;
 
+            EnsureReferences();
             CacheElements();
 
             targetNature = snapshot.Stats.climaticChanges;
@@ -100,20 +121,148 @@ namespace Mandato.UI
             targetPeople = snapshot.Stats.popularApproval;
             targetCorruption = snapshot.Stats.corruption;
 
-            if (dateLabel != null)
+            UpdateDateDisplay(snapshot.DisplayDate);
+
+            // Sincroniza com RetroMonitorUI da cena via reflexão segura
+            if (sceneRetroMonitorUI != null)
             {
-                dateLabel.text = snapshot.DisplayDate;
+                try
+                {
+                    Type attrType = sceneRetroMonitorUI.GetType().Assembly.GetType("Attributes");
+                    if (attrType == null)
+                    {
+                        foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                        {
+                            attrType = asm.GetType("Attributes");
+                            if (attrType != null) break;
+                        }
+                    }
+
+                    if (attrType != null)
+                    {
+                        object attrInstance = Activator.CreateInstance(attrType);
+                        attrType.GetField("climaticChanges")?.SetValue(attrInstance, snapshot.Stats.climaticChanges);
+                        attrType.GetField("economy")?.SetValue(attrInstance, snapshot.Stats.economy);
+                        attrType.GetField("internationalRelations")?.SetValue(attrInstance, snapshot.Stats.internationalRelations);
+                        attrType.GetField("populationalApproval")?.SetValue(attrInstance, snapshot.Stats.popularApproval);
+                        attrType.GetField("corruption")?.SetValue(attrInstance, snapshot.Stats.corruption);
+
+                        if (lastReport != null)
+                        {
+                            // Dispara a rotina completa de feedback visual (setas, ghost fills, tremor, glitch e log)
+                            var handleChangedMethod = sceneRetroMonitorUI.GetType().GetMethod("HandleAttributesChanged", 
+                                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                            if (handleChangedMethod != null)
+                            {
+                                handleChangedMethod.Invoke(sceneRetroMonitorUI, new object[] { attrInstance, null });
+                            }
+                        }
+                        else
+                        {
+                            var setAttrMethod = sceneRetroMonitorUI.GetType().GetMethod("SetAttributesImmediate",
+                                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                            setAttrMethod?.Invoke(sceneRetroMonitorUI, new object[] { attrInstance });
+                        }
+                    }
+                }
+                catch
+                {
+                    // Fallback silencioso
+                }
             }
 
-            if (lastReport != null)
+            if (sceneRetroMonitorUI == null && lastReport != null)
             {
                 ShowVariationArrows(lastReport);
                 if (triggerGlitchOnChanges) TriggerGlitch();
             }
         }
 
+        public void UpdateDateDisplay(string displayDate)
+        {
+            if (dateLabel != null)
+            {
+                dateLabel.text = displayDate;
+            }
+
+            if (sceneRetroMonitorUI != null)
+            {
+                try
+                {
+                    var updateDateMethod = sceneRetroMonitorUI.GetType().GetMethod("UpdateDateDisplay",
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    updateDateMethod?.Invoke(sceneRetroMonitorUI, new object[] { displayDate });
+
+                    var doc = sceneRetroMonitorUI.GetComponent<UIDocument>();
+                    if (doc != null && doc.rootVisualElement != null)
+                    {
+                        var lbl = doc.rootVisualElement.Q<Label>("date-label");
+                        if (lbl != null)
+                        {
+                            lbl.text = $"MANDATO: {displayDate}";
+                        }
+                    }
+                }
+                catch { }
+            }
+        }
+
+        public void NotifyNewProposal(CardDefinition card)
+        {
+            if (card == null || sceneRetroMonitorUI == null) return;
+
+            try
+            {
+                string title = !string.IsNullOrEmpty(card.categoryTag) ? card.categoryTag : card.title;
+
+                var notifyMethod = sceneRetroMonitorUI.GetType().GetMethod("NotifyNewProposal",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (notifyMethod != null)
+                {
+                    notifyMethod.Invoke(sceneRetroMonitorUI, new object[] { title });
+                }
+                else
+                {
+                    var addLogMethod = sceneRetroMonitorUI.GetType().GetMethod("AddLogEntry",
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var triggerGlitchMethod = sceneRetroMonitorUI.GetType().GetMethod("TriggerGlitch",
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    addLogMethod?.Invoke(sceneRetroMonitorUI, new object[] { $"> [DESPACHO] Nova proposta sob análise: \"{title}\"", "log-entry-highlight" });
+                    triggerGlitchMethod?.Invoke(sceneRetroMonitorUI, new object[] { 0.4f });
+                }
+            }
+            catch { }
+        }
+
+        public void NotifyTermination(RunTermination termination)
+        {
+            if (sceneRetroMonitorUI == null || termination.IsOngoing) return;
+
+            try
+            {
+                string reason = !string.IsNullOrEmpty(termination.reason) ? termination.reason : (termination.IsVictory ? "Mandato cumprido com êxito!" : "Mandato encerrado prematuramente.");
+
+                if (termination.IsVictory)
+                {
+                    var winMethod = sceneRetroMonitorUI.GetType().GetMethod("HandleGameWin",
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    winMethod?.Invoke(sceneRetroMonitorUI, new object[] { reason });
+                }
+                else
+                {
+                    var overMethod = sceneRetroMonitorUI.GetType().GetMethod("HandleGameOver",
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    overMethod?.Invoke(sceneRetroMonitorUI, new object[] { reason });
+                }
+            }
+            catch { }
+        }
+
         private void Update()
         {
+            // Se RetroMonitorUI está na cena, ele gerencia sua própria interpolação e efeitos de ghost
+            if (sceneRetroMonitorUI != null) return;
+
             float dt = Time.deltaTime * animationSpeed;
 
             curNature = Mathf.MoveTowards(curNature, targetNature, dt * 25f);

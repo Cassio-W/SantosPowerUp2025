@@ -142,14 +142,21 @@ public class FocusableObject : MonoBehaviour
     /// </summary>
     public void EnsureCollider()
     {
-        // Se já possui collider no próprio GameObject, garante dimensões estritamente positivas
+        // Se já possui collider no próprio GameObject, garante dimensões estritamente positivas e espessura suficiente
         var existingCollider = GetComponent<Collider>();
         if (existingCollider != null)
         {
             if (existingCollider is BoxCollider boxExisting)
             {
-                boxExisting.size = new Vector3(Mathf.Abs(boxExisting.size.x), Mathf.Abs(boxExisting.size.y), Mathf.Abs(boxExisting.size.z));
+                float lossyY = Mathf.Abs(transform.lossyScale.y);
+                float minSizeY = lossyY > 0.001f ? (0.1f / lossyY) : 1f;
+                boxExisting.size = new Vector3(
+                    Mathf.Max(Mathf.Abs(boxExisting.size.x), 0.5f),
+                    Mathf.Max(Mathf.Abs(boxExisting.size.y), minSizeY),
+                    Mathf.Max(Mathf.Abs(boxExisting.size.z), 0.5f)
+                );
             }
+            existingCollider.enabled = true;
             return;
         }
 
@@ -201,10 +208,12 @@ public class FocusableObject : MonoBehaviour
             if (hasBounds)
             {
                 box.center = localBounds.center;
+                float lossyY = Mathf.Abs(transform.lossyScale.y);
+                float minSizeY = lossyY > 0.001f ? (0.1f / lossyY) : 0.05f;
                 box.size = new Vector3(
-                    Mathf.Max(localBounds.size.x, 0.05f),
-                    Mathf.Max(localBounds.size.y, 0.05f),
-                    Mathf.Max(localBounds.size.z, 0.05f)
+                    Mathf.Max(localBounds.size.x, 0.5f),
+                    Mathf.Max(localBounds.size.y, minSizeY),
+                    Mathf.Max(localBounds.size.z, 0.5f)
                 );
             }
             else
@@ -224,6 +233,12 @@ public class FocusableObject : MonoBehaviour
         if (CameraFocusManager.Instance == null)
         {
             CameraFocusManager.EnsureExists();
+        }
+
+        if (targetRenderers == null || targetRenderers.Count == 0 || targetRenderers.TrueForAll(r => r == null))
+        {
+            targetRenderers = new List<Renderer>();
+            GetComponentsInChildren(true, targetRenderers);
         }
     }
 
@@ -272,8 +287,11 @@ public class FocusableObject : MonoBehaviour
             ActiveHighlightedObjects.Remove(this);
         }
 
-        transform.localPosition = _originalLocalPos + _currentHoverPosOffset;
-        transform.localScale = Vector3.Scale(_originalLocalScale, _currentHoverScaleMultiplier);
+        if (enableHoverScale || hoverLiftOffset.sqrMagnitude > 0.0001f)
+        {
+            transform.localPosition = _originalLocalPos + _currentHoverPosOffset;
+            transform.localScale = Vector3.Scale(_originalLocalScale, _currentHoverScaleMultiplier);
+        }
     }
 
     /// <summary>
@@ -283,6 +301,12 @@ public class FocusableObject : MonoBehaviour
     {
         if (_isHovered) return;
         _isHovered = true;
+
+        if (targetRenderers == null || targetRenderers.Count == 0 || targetRenderers.TrueForAll(r => r == null))
+        {
+            targetRenderers = new List<Renderer>();
+            GetComponentsInChildren(true, targetRenderers);
+        }
 
         // Limpa qualquer outro objeto que possa ter ficado no estado ativo de highlight
         for (int i = ActiveHighlightedObjects.Count - 1; i >= 0; i--)
@@ -339,6 +363,11 @@ public class FocusableObject : MonoBehaviour
         onClicked?.Invoke();
 
         if (!allowClickToFocus) return;
+
+        if (CameraFocusManager.Instance == null)
+        {
+            CameraFocusManager.EnsureExists();
+        }
 
         if (CameraFocusManager.Instance != null)
         {

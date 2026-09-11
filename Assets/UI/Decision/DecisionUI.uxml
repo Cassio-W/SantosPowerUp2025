@@ -2,6 +2,9 @@
     <Style src="DecisionUI.uss" />
     <ui:VisualElement name="decision-screen" class="decision-screen" picking-mode="Ignore">
         
+        <!-- Vinheta de Corrupção Reativa em Tela Cheia -->
+        <ui:VisualElement name="vignette-corruption" class="vignette-corruption" picking-mode="Ignore" />
+
         <!-- Container dos Perks no Topo Esquerdo (Empilhados Verticalmente) -->
         <ui:VisualElement name="perks-container" class="perks-container" picking-mode="Ignore" />
 

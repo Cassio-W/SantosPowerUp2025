@@ -9,8 +9,8 @@ namespace Mandato.Content.Tests
         [Test]
         public void CardCreation_PopulatesFieldsCorrectly()
         {
-            var left = new ChoiceDefinition("Rejeitar", new StatBlock(0, 0, -5, 10, 0));
-            var right = new ChoiceDefinition("Aprovar", new StatBlock(10, 5, 10, -15, 5), corruptionMods: true);
+            var left = new ChoiceDefinition("Aceitar", new StatBlock(10, 5, 10, -15, 5), corruptionMods: true);
+            var right = new ChoiceDefinition("Recusar", new StatBlock(0, 0, -5, 10, 0));
 
             var card = CardDefinition.CreateRuntimeInstance(
                 id: "card_reforma_tributaria",
@@ -26,10 +26,11 @@ namespace Mandato.Content.Tests
             Assert.AreEqual("Reforma Tributária", card.title);
             Assert.AreEqual("MinistroFazenda", card.npcId);
             Assert.AreEqual("Economia", card.categoryTag);
-            Assert.AreEqual("Rejeitar", card.leftChoice.label);
-            Assert.AreEqual(10, card.leftChoice.statImpacts.economy);
-            Assert.AreEqual("Aprovar", card.rightChoice.label);
-            Assert.IsTrue(card.rightChoice.hasCorruptionMods);
+            Assert.AreEqual("Aceitar", card.leftChoice.label);
+            Assert.AreEqual(-15, card.leftChoice.statImpacts.economy);
+            Assert.IsTrue(card.leftChoice.hasCorruptionMods);
+            Assert.AreEqual("Recusar", card.rightChoice.label);
+            Assert.AreEqual(10, card.rightChoice.statImpacts.economy);
         }
 
         [Test]

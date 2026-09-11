@@ -38,7 +38,7 @@ namespace Mandato.Run
             rng = seed != 0 ? new Random(seed) : new Random();
         }
 
-        public void StartRun(IEnumerable<string> initialDeckCardIds, int seed = 0)
+        public void StartRun(IEnumerable<string> initialDeckCardIds, int seed = 0, IEnumerable<string> priorityCardIds = null)
         {
             if (seed != 0)
             {
@@ -47,7 +47,7 @@ namespace Mandato.Run
             }
 
             RunState.Reset();
-            DeckState.Initialize(initialDeckCardIds, seed);
+            DeckState.Initialize(initialDeckCardIds, seed, priorityCardIds);
 
             SetPhase(RunPhase.PreparingRun);
         }
@@ -106,14 +106,26 @@ namespace Mandato.Run
                 return;
             }
 
-            SetPhase(RunPhase.AdvancingTime);
-            RunState.AdvanceMonth();
+            // Não avança o mês caso a proposta seja do tutorial
+            bool isTutorialCard = CurrentCard != null && (
+                CurrentCard.id.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                CurrentCard.categoryTag.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                CurrentCard.title.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0);
 
-            if (RunState.termination.IsDefeat || RunState.termination.IsVictory)
+            if (!isTutorialCard)
             {
-                SetPhase(RunPhase.Terminated);
-                OnRunTerminated?.Invoke(RunState.termination);
+                SetPhase(RunPhase.AdvancingTime);
+                RunState.AdvanceMonth();
+
+                if (RunState.termination.IsDefeat || RunState.termination.IsVictory)
+                {
+                    SetPhase(RunPhase.Terminated);
+                    OnRunTerminated?.Invoke(RunState.termination);
+                    return;
+                }
             }
+
+            SetPhase(RunPhase.PreparingRun);
         }
 
         private void SetPhase(RunPhase phase)

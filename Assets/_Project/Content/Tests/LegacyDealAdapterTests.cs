@@ -11,13 +11,13 @@ namespace Mandato.Content.Tests
         private class MockLegacyDeal : ScriptableObject
         {
             public string Description = "Proposta antiga de teste. Segunda linha.";
-            public string leftAnswer = "Não aceitar";
-            public string rightAnswer = "Aceitar tudo";
+            public string leftAnswer = "Aceitar tudo";
+            public string rightAnswer = "Não aceitar";
             public bool hasCorruptionMods = true;
             public string tag = "Ambiente";
 
-            public MockAttributes impactsLeft = new MockAttributes { climaticChanges = -10, economy = 5 };
-            public MockAttributes impactsRight = new MockAttributes { climaticChanges = 20, economy = -15, corruption = 10 };
+            public MockAttributes impactsLeft = new MockAttributes { climaticChanges = 20, economy = -15, corruption = 10 };
+            public MockAttributes impactsRight = new MockAttributes { climaticChanges = -10, economy = 5 };
         }
 
         private class MockAttributes
@@ -43,17 +43,17 @@ namespace Mandato.Content.Tests
             Assert.AreEqual("Proposta antiga de teste. Segunda linha.", converted.description);
             Assert.AreEqual("Ambiente", converted.categoryTag);
 
-            // Left choice
-            Assert.AreEqual("Não aceitar", converted.leftChoice.label);
-            Assert.AreEqual(-10, converted.leftChoice.statImpacts.climaticChanges);
-            Assert.AreEqual(5, converted.leftChoice.statImpacts.economy);
+            // Left choice (Aprovar / Aceitar)
+            Assert.AreEqual("Aceitar tudo", converted.leftChoice.label);
+            Assert.AreEqual(20, converted.leftChoice.statImpacts.climaticChanges);
+            Assert.AreEqual(-15, converted.leftChoice.statImpacts.economy);
+            Assert.AreEqual(10, converted.leftChoice.statImpacts.corruption);
             Assert.IsTrue(converted.leftChoice.hasCorruptionMods);
 
-            // Right choice
-            Assert.AreEqual("Aceitar tudo", converted.rightChoice.label);
-            Assert.AreEqual(20, converted.rightChoice.statImpacts.climaticChanges);
-            Assert.AreEqual(-15, converted.rightChoice.statImpacts.economy);
-            Assert.AreEqual(10, converted.rightChoice.statImpacts.corruption);
+            // Right choice (Recusar / Rejeitar)
+            Assert.AreEqual("Não aceitar", converted.rightChoice.label);
+            Assert.AreEqual(-10, converted.rightChoice.statImpacts.climaticChanges);
+            Assert.AreEqual(5, converted.rightChoice.statImpacts.economy);
             Assert.IsTrue(converted.rightChoice.hasCorruptionMods);
         }
 

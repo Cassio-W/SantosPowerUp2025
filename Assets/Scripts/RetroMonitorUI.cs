@@ -199,8 +199,9 @@ public class RetroMonitorUI : MonoBehaviour
     //  INICIALIZAÇÃO
     // ─────────────────────────────────────────────────────
 
-    private void InitializeUI()
+    public void InitializeUI()
     {
+        if (_uiDocument == null) _uiDocument = GetComponent<UIDocument>();
         if (_uiDocument == null) return;
         _root = _uiDocument.rootVisualElement;
         if (_root == null) return;
@@ -278,6 +279,7 @@ public class RetroMonitorUI : MonoBehaviour
     public void SetAttributesImmediate(Attributes attributes)
     {
         if (attributes == null) return;
+        if (_root == null) InitializeUI();
 
         _targetNature     = _currentNature     = attributes.climaticChanges;
         _targetEconomy    = _currentEconomy    = attributes.economy;
@@ -303,9 +305,10 @@ public class RetroMonitorUI : MonoBehaviour
     //  HANDLERS de evento
     // ─────────────────────────────────────────────────────
 
-    private void HandleAttributesChanged(Attributes attributes, GameManager gm)
+    public void HandleAttributesChanged(Attributes attributes, GameManager gm = null)
     {
         if (attributes == null) return;
+        if (_root == null) InitializeUI();
 
         // Delta em relação ao alvo anterior (inteiro, pois Attributes usa int)
         float dNature    = attributes.climaticChanges       - _targetNature;
@@ -357,27 +360,42 @@ public class RetroMonitorUI : MonoBehaviour
         }
     }
 
-    private void HandleNewDeal(Deal deal)
+    public void HandleNewDeal(Deal deal)
     {
         UpdateDateDisplay();
         if (deal != null)
         {
             string title = !string.IsNullOrEmpty(deal.tag) ? deal.tag : deal.name;
+            NotifyNewProposal(title);
+        }
+        else
+        {
+            TriggerGlitch(0.4f);
+        }
+    }
+
+    public void NotifyNewProposal(string title)
+    {
+        if (_root == null) InitializeUI();
+        if (!string.IsNullOrEmpty(title))
+        {
             AddLogEntry($"> [DESPACHO] Nova proposta sob análise: \"{title}\"", "log-entry-highlight");
             if (_tickerText != null) _tickerText.text = $"> DECISÃO PENDENTE: {title.ToUpper()}";
         }
         TriggerGlitch(0.4f);
     }
 
-    private void HandleGameOver(string reason)
+    public void HandleGameOver(string reason)
     {
+        if (_root == null) InitializeUI();
         AddLogEntry($"> [ALERTA FATAL] FIM DE MANDATO: {reason}", "log-entry-danger");
         if (_tickerText != null) _tickerText.text = "> CRITICAL FAILURE: MANDATO ENCERRADO";
         TriggerGlitch(1.2f);
     }
 
-    private void HandleGameWin(string reason)
+    public void HandleGameWin(string reason)
     {
+        if (_root == null) InitializeUI();
         string msg = !string.IsNullOrEmpty(reason) ? reason : "Mandato concluído com êxito!";
         AddLogEntry($"> [SUCESSO] {msg}", "log-entry-highlight");
         if (_tickerText != null) _tickerText.text = "> VICTORY: MANDATO CUMPRIDO COM SUCESSO";
@@ -629,10 +647,19 @@ public class RetroMonitorUI : MonoBehaviour
         if (label != null) label.text = $"{Mathf.RoundToInt(clamped)}%";
     }
 
-    private void UpdateDateDisplay()
+    public void UpdateDateDisplay(string customDate = null)
     {
-        if (GameManager.instance != null && _dateLabel != null)
+        if (_dateLabel == null && _root != null) _dateLabel = _root.Q<Label>("date-label");
+        if (_dateLabel == null) return;
+
+        if (!string.IsNullOrEmpty(customDate))
+        {
+            _dateLabel.text = $"MANDATO: {customDate}";
+        }
+        else if (GameManager.instance != null)
+        {
             _dateLabel.text = $"MANDATO: {GameManager.instance.month:00}/{GameManager.instance.year}";
+        }
     }
 
     // ─────────────────────────────────────────────────────

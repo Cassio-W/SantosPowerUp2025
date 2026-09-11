@@ -14,7 +14,7 @@ namespace Mandato.Core.Tests
             Assert.AreEqual(1, calendar.MonthInYear);
             Assert.AreEqual(2026, calendar.Year);
             Assert.AreEqual("Janeiro", calendar.MonthName);
-            Assert.AreEqual("Janeiro 2026", calendar.DisplayDate);
+            Assert.AreEqual("01/2026", calendar.DisplayDate);
             Assert.IsFalse(calendar.IsLastMonth);
             Assert.IsFalse(calendar.IsTermCompleted);
         }
@@ -26,7 +26,7 @@ namespace Mandato.Core.Tests
 
             Assert.AreEqual(12, calendar.MonthInYear);
             Assert.AreEqual(2026, calendar.Year);
-            Assert.AreEqual("Dezembro 2026", calendar.DisplayDate);
+            Assert.AreEqual("12/2026", calendar.DisplayDate);
         }
 
         [Test]
@@ -36,7 +36,7 @@ namespace Mandato.Core.Tests
 
             Assert.AreEqual(1, calendar.MonthInYear);
             Assert.AreEqual(2027, calendar.Year);
-            Assert.AreEqual("Janeiro 2027", calendar.DisplayDate);
+            Assert.AreEqual("01/2027", calendar.DisplayDate);
         }
 
         [Test]
@@ -46,7 +46,7 @@ namespace Mandato.Core.Tests
 
             Assert.AreEqual(12, calendar.MonthInYear);
             Assert.AreEqual(2029, calendar.Year);
-            Assert.AreEqual("Dezembro 2029", calendar.DisplayDate);
+            Assert.AreEqual("12/2029", calendar.DisplayDate);
             Assert.IsTrue(calendar.IsLastMonth);
             Assert.IsFalse(calendar.IsTermCompleted);
         }

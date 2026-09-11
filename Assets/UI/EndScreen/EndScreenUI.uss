@@ -1,0 +1,350 @@
+/* ==========================================================================
+   END SCREEN UI - ESTILO GAZETA / JORNAL OFICIAL RETRO (UI TOOLKIT)
+   ========================================================================== */
+
+.endscreen-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    transition-property: opacity, translate;
+    transition-duration: 0.4s;
+    transition-timing-function: ease-out;
+    opacity: 1;
+    translate: 0 0;
+}
+
+.endscreen-overlay.hidden {
+    opacity: 0;
+    translate: 0 40px;
+    display: none;
+}
+
+/* Fundo Escuro com Vinheta */
+.endscreen-backdrop {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(5, 7, 10, 0.88);
+}
+
+/* ==========================================================================
+   CARD CENTRAL DO JORNAL
+   ========================================================================== */
+
+.endscreen-container {
+    width: 820px;
+    max-width: 90%;
+    background-color: rgb(244, 239, 226); /* Papel de jornal envelhecido */
+    border-radius: 12px;
+    border-width: 4px;
+    border-color: rgb(30, 26, 22);
+    padding-top: 24px;
+    padding-bottom: 24px;
+    padding-left: 32px;
+    padding-right: 32px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+    flex-direction: column;
+}
+
+/* Cabeçalho */
+.endscreen-header {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.newspaper-name {
+    font-size: 34px;
+    -unity-font-style: bold;
+    color: rgb(20, 16, 12);
+    letter-spacing: 4px;
+    margin-bottom: 2px;
+}
+
+.newspaper-subbar {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.newspaper-meta {
+    font-size: 13px;
+    color: rgb(90, 82, 72);
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+.newspaper-meta-right {
+    -unity-text-align: middle-right;
+}
+
+/* Divisores */
+.newspaper-divider-double {
+    width: 100%;
+    height: 5px;
+    border-top-width: 2px;
+    border-bottom-width: 1px;
+    border-top-color: rgb(30, 26, 22);
+    border-bottom-color: rgb(30, 26, 22);
+    margin-top: 6px;
+    margin-bottom: 16px;
+}
+
+.newspaper-divider-single {
+    width: 100%;
+    height: 2px;
+    background-color: rgb(60, 52, 44);
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+/* ==========================================================================
+   MANCHETE & CARIMBO
+   ========================================================================== */
+
+.headline-wrapper {
+    position: relative;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.endscreen-headline {
+    font-size: 38px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    flex-grow: 1;
+    margin-right: 16px;
+}
+
+.headline-victory {
+    color: rgb(24, 134, 60);
+}
+
+.headline-defeat {
+    color: rgb(180, 28, 28);
+}
+
+/* Carimbo Rotacionado */
+.endscreen-stamp {
+    font-size: 22px;
+    -unity-font-style: bold;
+    letter-spacing: 3px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 14px;
+    padding-right: 14px;
+    border-width: 4px;
+    border-radius: 6px;
+    rotate: -10deg;
+    -unity-text-align: middle-center;
+}
+
+.stamp-victory {
+    color: rgb(24, 134, 60);
+    border-color: rgb(24, 134, 60);
+    background-color: rgba(24, 134, 60, 0.08);
+}
+
+.stamp-defeat {
+    color: rgb(190, 24, 24);
+    border-color: rgb(190, 24, 24);
+    background-color: rgba(190, 24, 24, 0.08);
+}
+
+/* Motivo / Narrativa */
+.reason-container {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.04);
+    border-radius: 6px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 14px;
+    padding-right: 14px;
+    margin-bottom: 14px;
+    border-left-width: 4px;
+    border-left-color: rgb(60, 52, 44);
+}
+
+.endscreen-reason-text {
+    font-size: 16px;
+    color: rgb(34, 28, 22);
+    white-space: normal;
+    -unity-font-style: normal;
+    line-height: 22px;
+}
+
+/* ==========================================================================
+   ESTATÍSTICAS DO MANDATO
+   ========================================================================== */
+
+.stats-card {
+    width: 100%;
+    background-color: rgb(232, 224, 206);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgb(190, 180, 160);
+    padding-top: 12px;
+    padding-bottom: 12px;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.stats-card-title {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: rgb(80, 72, 60);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    -unity-text-align: middle-center;
+}
+
+.stats-grid {
+    flex-direction: column;
+}
+
+.stat-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.stat-label {
+    width: 210px;
+    font-size: 14px;
+    color: rgb(40, 34, 28);
+    -unity-font-style: bold;
+}
+
+.stat-bar-bg {
+    flex-grow: 1;
+    height: 14px;
+    background-color: rgb(200, 192, 176);
+    border-radius: 7px;
+    border-width: 1px;
+    border-color: rgb(150, 142, 128);
+    overflow: hidden;
+    margin-left: 10px;
+    margin-right: 12px;
+}
+
+.stat-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition-property: width;
+    transition-duration: 0.5s;
+}
+
+.bar-economy { background-color: rgb(220, 160, 30); }
+.bar-approval { background-color: rgb(40, 160, 220); }
+.bar-climate { background-color: rgb(40, 180, 80); }
+.bar-relations { background-color: rgb(160, 70, 200); }
+.bar-corruption { background-color: rgb(200, 40, 40); }
+
+.stat-value {
+    width: 50px;
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(30, 24, 18);
+    -unity-text-align: middle-right;
+}
+
+.stat-row-summary {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top-width: 1px;
+    border-top-color: rgb(200, 192, 176);
+}
+
+.stat-label-bold {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: rgb(30, 24, 18);
+}
+
+.stat-quadrant-badge {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: rgb(240, 235, 225);
+    background-color: rgb(45, 52, 64);
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-left: 12px;
+    padding-right: 12px;
+    border-radius: 12px;
+}
+
+/* ==========================================================================
+   BOTÕES DE AÇÃO
+   ========================================================================== */
+
+.endscreen-buttons-container {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.btn-endscreen {
+    height: 52px;
+    padding-left: 28px;
+    padding-right: 28px;
+    font-size: 16px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    border-radius: 26px;
+    border-width: 3px;
+    margin-left: 12px;
+    margin-right: 12px;
+    transition-property: scale, background-color, border-color;
+    transition-duration: 0.16s;
+    transition-timing-function: ease-out;
+}
+
+.btn-endscreen:hover {
+    scale: 1.05 1.05;
+}
+
+.btn-endscreen:active {
+    scale: 0.96 0.96;
+}
+
+.btn-restart {
+    background-color: rgb(28, 140, 68);
+    border-color: rgb(18, 98, 46);
+    color: rgb(255, 255, 255);
+}
+
+.btn-restart:hover {
+    background-color: rgb(34, 168, 82);
+    border-color: rgb(24, 120, 58);
+}
+
+.btn-menu {
+    background-color: rgb(60, 68, 80);
+    border-color: rgb(40, 46, 56);
+    color: rgb(240, 240, 240);
+}
+
+.btn-menu:hover {
+    background-color: rgb(80, 90, 106);
+    border-color: rgb(56, 64, 76);
+}

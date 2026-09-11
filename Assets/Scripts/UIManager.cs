@@ -1,7 +1,8 @@
+using System;
+using System.Linq;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-using System.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 using Slider = UnityEngine.UI.Slider;
@@ -187,9 +188,12 @@ public class UIManager : MonoBehaviour
             perks[0].transform.parent.gameObject.SetActive(false);
         }
 
-        // Garante que o papel comece desabilitado até o início de uma proposta
-        SetPaperActive(false);
-        SetPaperInteractable(false);
+        // Garante que o papel comece desabilitado até o início de uma proposta apenas se não houver MandatoBootstrap
+        if (!IsMandatoBootstrapActive())
+        {
+            SetPaperActive(false);
+            SetPaperInteractable(false);
+        }
 
         if (GameManager.instance != null && GameManager.instance.gameAttributes != null)
         {
@@ -353,22 +357,27 @@ public class UIManager : MonoBehaviour
             _lblRejectText = root.Q<Label>("lbl-reject-text");
             _lblContinueText = root.Q<Label>("lbl-continue-text");
 
-            if (_btnApprove != null)
-            {
-                _btnApprove.clicked -= ApproveDeal;
-                _btnApprove.clicked += ApproveDeal;
-            }
+            bool bootstrapActive = IsMandatoBootstrapActive();
 
-            if (_btnReject != null)
+            if (!bootstrapActive)
             {
-                _btnReject.clicked -= RejectDeal;
-                _btnReject.clicked += RejectDeal;
-            }
+                if (_btnApprove != null)
+                {
+                    _btnApprove.clicked -= ApproveDeal;
+                    _btnApprove.clicked += ApproveDeal;
+                }
 
-            if (_btnContinue != null)
-            {
-                _btnContinue.clicked -= ApproveDeal;
-                _btnContinue.clicked += ApproveDeal;
+                if (_btnReject != null)
+                {
+                    _btnReject.clicked -= RejectDeal;
+                    _btnReject.clicked += RejectDeal;
+                }
+
+                if (_btnContinue != null)
+                {
+                    _btnContinue.clicked -= ApproveDeal;
+                    _btnContinue.clicked += ApproveDeal;
+                }
             }
 
             // Inicia oculto
@@ -377,6 +386,24 @@ public class UIManager : MonoBehaviour
             // Atualiza os perks na nova UI
             UpdatePerks();
         }
+    }
+
+    private bool IsMandatoBootstrapActive()
+    {
+        try
+        {
+            foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                var bootType = asm.GetType("Mandato.Infrastructure.MandatoBootstrap");
+                if (bootType != null)
+                {
+                    var inst = FindFirstObjectByType(bootType);
+                    if (inst != null) return true;
+                }
+            }
+        }
+        catch { }
+        return false;
     }
 
     /// <summary>
@@ -429,6 +456,9 @@ public class UIManager : MonoBehaviour
     /// </summary>
     private void HandleCameraFocusChanged(FocusableObject focusedObject)
     {
+        // Se a nova arquitetura (MandatoBootstrap) estiver ativa, não interfere no estado dos botões
+        if (IsMandatoBootstrapActive()) return;
+
         if (_currentDeal != null && !_isProcessingDecision)
         {
             ShowDecisionButtons(_currentDeal);

@@ -71,7 +71,7 @@ namespace Mandato.Run.Tests
             Assert.AreEqual(75, snapshot.Stats.economy);
             Assert.AreEqual(5, snapshot.PoliticalAxis.x);
             Assert.AreEqual(-4, snapshot.PoliticalAxis.y);
-            Assert.AreEqual("Janeiro 2026", snapshot.DisplayDate);
+            Assert.AreEqual("01/2026", snapshot.DisplayDate);
             Assert.IsTrue(snapshot.IsOngoing);
             Assert.IsFalse(snapshot.IsDefeat);
 

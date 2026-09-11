@@ -31,7 +31,7 @@ namespace Mandato.Core
 
         public string MonthName => MonthNames[MonthInYear - 1];
 
-        public string DisplayDate => $"{MonthName} {Year}";
+        public string DisplayDate => $"{MonthInYear:D2}/{Year}";
 
         public bool IsLastMonth => currentMonthIndex == totalMonths;
 

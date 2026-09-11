@@ -1,0 +1,103 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="EndScreenUI.uss" />
+    
+    <ui:VisualElement name="endscreen-overlay" class="endscreen-overlay hidden" picking-mode="Ignore">
+        
+        <!-- Vinheta de Fundo Escuro -->
+        <ui:VisualElement name="endscreen-backdrop" class="endscreen-backdrop" picking-mode="Ignore" />
+
+        <!-- Card Central da Gazeta / Fim de Jogo -->
+        <ui:VisualElement name="endscreen-container" class="endscreen-container" picking-mode="Ignore">
+            
+            <!-- Cabeçalho do Jornal -->
+            <ui:VisualElement class="endscreen-header" picking-mode="Ignore">
+                <ui:Label name="endscreen-newspaper-name" text="DIÁRIO DA REPÚBLICA" class="newspaper-name" picking-mode="Ignore" />
+                <ui:VisualElement class="newspaper-subbar" picking-mode="Ignore">
+                    <ui:Label name="endscreen-date" text="BRASÍLIA — EDIÇÃO EXTRA" class="newspaper-meta" picking-mode="Ignore" />
+                    <ui:Label name="endscreen-mandate-duration" text="MÊS 48 / 48" class="newspaper-meta newspaper-meta-right" picking-mode="Ignore" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Divisor Superior -->
+            <ui:VisualElement class="newspaper-divider-double" picking-mode="Ignore" />
+
+            <!-- Manchete Principal & Carimbo -->
+            <ui:VisualElement class="headline-wrapper" picking-mode="Ignore">
+                <ui:Label name="endscreen-title" text="MANDATO CUMPRIDO!" class="endscreen-headline headline-victory" picking-mode="Ignore" />
+                <ui:Label name="endscreen-stamp" text="REELEITO" class="endscreen-stamp stamp-victory" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <!-- Descrição e Causa da Decisão -->
+            <ui:VisualElement class="reason-container" picking-mode="Ignore">
+                <ui:Label name="endscreen-reason" text="Você governou o Brasil por 4 anos completos e conduziu a nação através de grandes reformas." class="endscreen-reason-text" picking-mode="Ignore" />
+            </ui:VisualElement>
+
+            <!-- Card de Estatísticas do Mandato -->
+            <ui:VisualElement class="stats-card" picking-mode="Ignore">
+                <ui:Label text="BALANÇO FINAL DO MANDATO" class="stats-card-title" picking-mode="Ignore" />
+                
+                <ui:VisualElement class="stats-grid" picking-mode="Ignore">
+                    
+                    <!-- Linha 1: Economia e Aprovação -->
+                    <ui:VisualElement class="stat-row" picking-mode="Ignore">
+                        <ui:Label text="Economia:" class="stat-label" picking-mode="Ignore" />
+                        <ui:VisualElement class="stat-bar-bg" picking-mode="Ignore">
+                            <ui:VisualElement name="bar-economy" class="stat-bar-fill bar-economy" style="width: 50%;" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label name="val-economy" text="50%" class="stat-value" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="stat-row" picking-mode="Ignore">
+                        <ui:Label text="Aprovação Popular:" class="stat-label" picking-mode="Ignore" />
+                        <ui:VisualElement class="stat-bar-bg" picking-mode="Ignore">
+                            <ui:VisualElement name="bar-approval" class="stat-bar-fill bar-approval" style="width: 50%;" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label name="val-approval" text="50%" class="stat-value" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <!-- Linha 2: Meio Ambiente e Relações -->
+                    <ui:VisualElement class="stat-row" picking-mode="Ignore">
+                        <ui:Label text="Meio Ambiente:" class="stat-label" picking-mode="Ignore" />
+                        <ui:VisualElement class="stat-bar-bg" picking-mode="Ignore">
+                            <ui:VisualElement name="bar-climate" class="stat-bar-fill bar-climate" style="width: 50%;" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label name="val-climate" text="50%" class="stat-value" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="stat-row" picking-mode="Ignore">
+                        <ui:Label text="Relações Internacionais:" class="stat-label" picking-mode="Ignore" />
+                        <ui:VisualElement class="stat-bar-bg" picking-mode="Ignore">
+                            <ui:VisualElement name="bar-relations" class="stat-bar-fill bar-relations" style="width: 50%;" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label name="val-relations" text="50%" class="stat-value" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <!-- Linha 3: Corrupção e Quadrante Político -->
+                    <ui:VisualElement class="stat-row" picking-mode="Ignore">
+                        <ui:Label text="Índice de Corrupção:" class="stat-label" picking-mode="Ignore" />
+                        <ui:VisualElement class="stat-bar-bg" picking-mode="Ignore">
+                            <ui:VisualElement name="bar-corruption" class="stat-bar-fill bar-corruption" style="width: 20%;" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        <ui:Label name="val-corruption" text="20%" class="stat-value" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="stat-row-summary" picking-mode="Ignore">
+                        <ui:Label text="Espectro Político:" class="stat-label-bold" picking-mode="Ignore" />
+                        <ui:Label name="val-political-quadrant" text="Centro Moderado" class="stat-quadrant-badge" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Divisor Inferior -->
+            <ui:VisualElement class="newspaper-divider-single" picking-mode="Ignore" />
+
+            <!-- Botões de Ação -->
+            <ui:VisualElement class="endscreen-buttons-container" picking-mode="Ignore">
+                <ui:Button name="btn-restart" text="JOGAR NOVAMENTE" class="btn-endscreen btn-restart" picking-mode="Position" />
+                <ui:Button name="btn-main-menu" text="MENU PRINCIPAL" class="btn-endscreen btn-menu" picking-mode="Position" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

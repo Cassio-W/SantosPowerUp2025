@@ -23,28 +23,30 @@ namespace Mandato.Content
 
             bool hasCorruption = GetFieldValue<bool>(legacyDeal, dealType, "hasCorruptionMods", false);
 
-            // NPC (GameObject -> ID por nome)
+            // NPC (GameObject e ID por nome)
             var npcObj = GetFieldValue<GameObject>(legacyDeal, dealType, "NPC", null);
             if (npcObj != null)
             {
                 card.npcId = npcObj.name;
+                card.npcPrefab = npcObj;
             }
+            card.sourceLegacyAsset = legacyDeal;
 
-            // Left Choice
-            string leftLabel = GetFieldValue<string>(legacyDeal, dealType, "leftAnswer", "Rejeitar");
+            // Left Choice (Aprovar / Aceitar)
+            string leftLabel = GetFieldValue<string>(legacyDeal, dealType, "leftAnswer", "Aceitar");
             object leftImpactsObj = GetFieldOrPropertyValue(legacyDeal, dealType, "impactsLeft");
             StatBlock leftImpacts = ExtractStatBlock(leftImpactsObj);
 
-            card.leftChoice = new ChoiceDefinition(leftLabel, leftImpacts, hasCorruption);
+            card.leftChoice = new ChoiceDefinition(string.IsNullOrEmpty(leftLabel) ? "Aceitar" : leftLabel, leftImpacts, hasCorruption);
             card.leftChoice.injectCardIds = ExtractCardNamesFromList(legacyDeal, dealType, "newDealsIfLeft");
             card.leftChoice.grantPerkId = ExtractPerkName(legacyDeal, dealType, "perkIfLeft");
 
-            // Right Choice
-            string rightLabel = GetFieldValue<string>(legacyDeal, dealType, "rightAnswer", "Aprovar");
+            // Right Choice (Recusar / Rejeitar)
+            string rightLabel = GetFieldValue<string>(legacyDeal, dealType, "rightAnswer", "Recusar");
             object rightImpactsObj = GetFieldOrPropertyValue(legacyDeal, dealType, "impactsRight");
             StatBlock rightImpacts = ExtractStatBlock(rightImpactsObj);
 
-            card.rightChoice = new ChoiceDefinition(rightLabel, rightImpacts, hasCorruption);
+            card.rightChoice = new ChoiceDefinition(string.IsNullOrEmpty(rightLabel) ? "Recusar" : rightLabel, rightImpacts, hasCorruption);
             card.rightChoice.injectCardIds = ExtractCardNamesFromList(legacyDeal, dealType, "newDealsIfRight");
             card.rightChoice.grantPerkId = ExtractPerkName(legacyDeal, dealType, "perkIfRight");
 

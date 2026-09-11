@@ -211,6 +211,16 @@ public class NPCController : MonoBehaviour
 
         if (hasReachedTarget && transform.position.x >= startPosition.x - 0.2f)
         {
+#if UNITY_EDITOR
+            if (UnityEditor.Selection.activeGameObject == gameObject || 
+                (UnityEditor.Selection.activeGameObject != null && UnityEditor.Selection.activeGameObject.transform.IsChildOf(transform)) ||
+                (UnityEditor.Selection.objects != null && System.Array.Exists(UnityEditor.Selection.objects, o => o is GameObject go && go != null && (go == gameObject || go.transform.IsChildOf(transform)))))
+            {
+                UnityEditor.Selection.objects = new UnityEngine.Object[0];
+                UnityEditor.Selection.activeGameObject = null;
+            }
+#endif
+            gameObject.SetActive(false);
             Destroy(gameObject);
         }
     }
