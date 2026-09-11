@@ -60,6 +60,13 @@ namespace Mandato.Presentation
             if (card == null) return;
 
             StopActiveRoutine();
+
+            if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
+            {
+                OnProposalOnDesk?.Invoke(card);
+                return;
+            }
+
             activePresentationRoutine = StartCoroutine(PresentProposalRoutine(card));
         }
 
@@ -185,6 +192,13 @@ namespace Mandato.Presentation
             if (report == null) return;
 
             StopActiveRoutine();
+
+            if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
+            {
+                OnConsequencesFinished?.Invoke(report);
+                return;
+            }
+
             activePresentationRoutine = StartCoroutine(PresentConsequencesRoutine(report));
         }
 

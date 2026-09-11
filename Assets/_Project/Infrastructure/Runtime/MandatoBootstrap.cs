@@ -34,6 +34,14 @@ namespace Mandato.Infrastructure
         [Tooltip("Intervalo em segundos entre a saída do NPC e a entrada do próximo.")]
         [SerializeField] private float delayBetweenProposals = 1.5f;
 
+        [Header("Controle de Fluxo entre Propostas")]
+        [Tooltip("Se verdadeiro, o próximo visitante só é chamado após o jogador pressionar a tecla de chamada (Espaço).")]
+        [SerializeField] private bool requireSpaceToCallNextNpc = true;
+        [SerializeField] private KeyCode callNextNpcKey = KeyCode.Space;
+
+        private bool isAwaitingSpaceForNextNpc = false;
+        private float pendingProposalDelay = 1.5f;
+
         [Header("Animação do Jogador (Mão)")]
         [SerializeField] private Animator playerAnimator;
         [SerializeField] private string dealAnimationName = "LevantaMao";
@@ -46,6 +54,10 @@ namespace Mandato.Infrastructure
         [SerializeField] private RetroMonitorPresenter retroMonitorPresenter;
         [SerializeField] private DecisionOverlayPresenter decisionOverlayPresenter;
         [SerializeField] private EndScreenPresenter endScreenPresenter;
+        [SerializeField] private FlipPhonePresenter flipPhonePresenter;
+
+        [Header("Flip-Phone & Ações")]
+        [SerializeField] private List<FlipPhoneActionDefinition> startingActions = new List<FlipPhoneActionDefinition>();
 
         [Header("Configuração de UI")]
         [Tooltip("Se verdadeiro, desativa os elementos visuais do Canvas legado para rodar 100% em UI Toolkit.")]
@@ -53,6 +65,7 @@ namespace Mandato.Infrastructure
 
         public RunStateMachine StateMachine { get; private set; }
         public Dictionary<string, CardDefinition> CardCatalog { get; private set; } = new Dictionary<string, CardDefinition>();
+        public Dictionary<string, FlipPhoneActionDefinition> ActionCatalog { get; private set; } = new Dictionary<string, FlipPhoneActionDefinition>();
         public ProfileState CurrentProfile { get; private set; }
 
         private List<string> tutorialCardIds = new List<string>();
@@ -91,6 +104,23 @@ namespace Mandato.Infrastructure
 
             // Puxa a primeira proposta do baralho
             DrawFirstProposal();
+        }
+
+        private void Update()
+        {
+            if (isAwaitingSpaceForNextNpc && Input.GetKeyDown(callNextNpcKey))
+            {
+                isAwaitingSpaceForNextNpc = false;
+                Debug.Log($"<color=#00ffaa>[MandatoBootstrap]</color> ⌨️ Tecla <b>[{callNextNpcKey}]</b> pressionada. Aguardando delay ({pendingProposalDelay:F1}s) e chamando próximo visitante...");
+                if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
+                {
+                    DrawNextProposalImmediate();
+                }
+                else
+                {
+                    StartCoroutine(DrawNextProposalRoutine(pendingProposalDelay));
+                }
+            }
         }
 
         private void ApplyLegacyCanvasSuppression()
@@ -209,11 +239,74 @@ namespace Mandato.Infrastructure
                     }
                 }
             }
+
+            // 7. Flip-Phone
+            if (flipPhonePresenter == null)
+            {
+                flipPhonePresenter = FindFirstObjectByType<FlipPhonePresenter>();
+                if (flipPhonePresenter == null)
+                {
+                    var phoneObj = GameObject.Find("FlipPhone") ?? GameObject.Find("Phone") ?? GameObject.Find("Celular");
+                    if (phoneObj != null)
+                    {
+                        flipPhonePresenter = phoneObj.AddComponent<FlipPhonePresenter>();
+                    }
+                    else
+                    {
+                        flipPhonePresenter = gameObject.AddComponent<FlipPhonePresenter>();
+                    }
+                }
+            }
+
+            // Conecta FocusableObject do celular 3D se presente na mesa
+            HookPhoneFocusableObject();
+        }
+
+        private void HookPhoneFocusableObject()
+        {
+            try
+            {
+                Type focusType = null;
+                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    focusType = asm.GetType("FocusableObject");
+                    if (focusType != null) break;
+                }
+
+                if (focusType != null)
+                {
+                    var phoneObj = GameObject.Find("FlipPhone") ?? GameObject.Find("Phone") ?? GameObject.Find("Celular");
+                    if (phoneObj != null)
+                    {
+                        var focusComp = phoneObj.GetComponent(focusType) as MonoBehaviour;
+                        if (focusComp != null)
+                        {
+                            var onFocusedField = focusType.GetField("onFocused");
+                            var onUnfocusedField = focusType.GetField("onUnfocused");
+
+                            if (onFocusedField?.GetValue(focusComp) is UnityEngine.Events.UnityEvent onFocused)
+                            {
+                                onFocused.RemoveListener(OpenFlipPhone);
+                                onFocused.AddListener(OpenFlipPhone);
+                            }
+                            if (onUnfocusedField?.GetValue(focusComp) is UnityEngine.Events.UnityEvent onUnfocused)
+                            {
+                                onUnfocused.RemoveListener(CloseFlipPhone);
+                                onUnfocused.AddListener(CloseFlipPhone);
+                            }
+
+                            Debug.Log($"<color=#00e5ff>[MandatoBootstrap]</color> 📱 FocusableObject do Flip-Phone conectado com sucesso em '{phoneObj.name}'.");
+                        }
+                    }
+                }
+            }
+            catch { }
         }
 
         private void BuildCatalog()
         {
             CardCatalog.Clear();
+            ActionCatalog.Clear();
             tutorialCardIds.Clear();
             mainDeckCardIds.Clear();
 
@@ -244,6 +337,62 @@ namespace Mandato.Infrastructure
                     }
                 }
             }
+
+            // 3. Processa Ações do Flip-Phone
+            if (startingActions != null && startingActions.Count > 0)
+            {
+                foreach (var act in startingActions)
+                {
+                    if (act != null && !string.IsNullOrEmpty(act.id))
+                    {
+                        ActionCatalog[act.id] = act;
+                    }
+                }
+            }
+            else
+            {
+                CreateDefaultActions();
+            }
+        }
+
+        private void CreateDefaultActions()
+        {
+            // Ação 1: Ligar para o Conselheiro
+            var callAdvisor = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_ligar_conselheiro",
+                "Ligar para o Conselheiro",
+                "Consulta a base governista para alinhar o discurso e tranquilizar a opinião pública.",
+                FlipPhoneCooldownType.Turns,
+                cooldownTurns: 2
+            );
+            callAdvisor.categoryTag = "Contatos";
+            callAdvisor.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 5, 5, 0)));
+            ActionCatalog[callAdvisor.id] = callAdvisor;
+
+            // Ação 2: Pacote de Estímulo Emergencial
+            var emergencyStimulus = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_pacote_emergencial",
+                "Decreto de Estímulo Financeiro",
+                "Injeta capital em setores estratégicos ao custo de concessões duvidosas.",
+                FlipPhoneCooldownType.Turns,
+                cooldownTurns: 3
+            );
+            emergencyStimulus.categoryTag = "Gabinete";
+            emergencyStimulus.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 15, 0, -5, 10)));
+            ActionCatalog[emergencyStimulus.id] = emergencyStimulus;
+
+            // Ação 3: Engavetar Proposta Atual
+            var dismissProposal = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_engavetar_proposta",
+                "Engavetar Documento",
+                "Recusa o trâmite do documento atual sem se comprometer publicamente.",
+                FlipPhoneCooldownType.Turns,
+                cooldownTurns: 2
+            );
+            dismissProposal.categoryTag = "Ações";
+            dismissProposal.effects.Add(FlipPhoneEffect.CreateDismissProposal());
+            dismissProposal.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 0, 0, 5)));
+            ActionCatalog[dismissProposal.id] = dismissProposal;
         }
 
         private CardDefinition RegisterAssetInCatalog(ScriptableObject asset)
@@ -312,6 +461,14 @@ namespace Mandato.Infrastructure
             {
                 endScreenPresenter.OnRestartRequested += RestartRun;
                 endScreenPresenter.OnMainMenuRequested += ReturnToMenu;
+            }
+
+            // 6. Flip-Phone
+            if (flipPhonePresenter != null)
+            {
+                flipPhonePresenter.OnActionRequested += RequestUseFlipPhoneAction;
+                flipPhonePresenter.OnPhoneOpened += OnFlipPhoneOpenedByPresenter;
+                flipPhonePresenter.OnPhoneClosed += OnFlipPhoneClosedByPresenter;
             }
         }
 
@@ -474,6 +631,9 @@ namespace Mandato.Infrastructure
         {
             if (StateMachine == null) return;
 
+            // Atualiza cooldowns visuais no celular
+            RefreshFlipPhoneUI();
+
             // Verifica se a run terminou
             if (StateMachine.RunState.termination.IsDefeat || StateMachine.RunState.termination.IsVictory)
             {
@@ -482,12 +642,39 @@ namespace Mandato.Infrastructure
 
             SyncCanvasUI();
 
-            // Tutorial avança imediatamente sem delay de saída de NPC
+            // Tutorial contínuo avança direto sem delay
             bool isTutorial = report != null ? IsTutorialCard(report.cardId) : IsTutorialCard(StateMachine.CurrentCard);
-            float delay = isTutorial ? 0.05f : Mathf.Max(0.2f, delayBetweenProposals);
+            bool hasMoreTutorial = isTutorial && HasRemainingTutorialCards();
 
-            // Puxa a próxima proposta do mandato
-            StartCoroutine(DrawNextProposalRoutine(delay));
+            if (isTutorial && hasMoreTutorial)
+            {
+                if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
+                {
+                    DrawNextProposalImmediate();
+                }
+                else
+                {
+                    StartCoroutine(DrawNextProposalRoutine(0.05f));
+                }
+                return;
+            }
+
+            float delay = Mathf.Max(0.2f, delayBetweenProposals);
+            pendingProposalDelay = delay;
+
+            if (requireSpaceToCallNextNpc)
+            {
+                isAwaitingSpaceForNextNpc = true;
+                Debug.Log("<color=#00e5ff>[MandatoBootstrap]</color> ⏳ <b>Gabinete livre.</b> Pressione <b>[ESPAÇO]</b> para autorizar a entrada do próximo visitante.");
+            }
+            else if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
+            {
+                DrawNextProposalImmediate();
+            }
+            else
+            {
+                StartCoroutine(DrawNextProposalRoutine(delay));
+            }
         }
 
         private void SyncCameraEffects(bool instant = false)
@@ -593,19 +780,25 @@ namespace Mandato.Infrastructure
             catch { }
         }
 
-        private IEnumerator DrawNextProposalRoutine(float delay = 0.2f)
+        private void DrawNextProposalImmediate()
         {
-            yield return new WaitForSeconds(delay);
-
             if (StateMachine != null && CardCatalog.Count > 0)
             {
                 StateMachine.DrawAndPresentProposal(CardCatalog);
             }
         }
 
+        private IEnumerator DrawNextProposalRoutine(float delay = 0.2f)
+        {
+            yield return new WaitForSeconds(delay);
+            DrawNextProposalImmediate();
+        }
+
         private void OnRunTerminated(RunTermination termination)
         {
             if (StateMachine == null) return;
+
+            isAwaitingSpaceForNextNpc = false;
 
             RunSnapshot finalSnapshot = StateMachine.RunState.GetSnapshot();
             EndingDefinition evaluatedEnding = null;
@@ -630,7 +823,7 @@ namespace Mandato.Infrastructure
                 catch { }
             }
 
-            // 2. Limpa papel e overlay de decisão
+            // 2. Limpa papel, overlay de decisão e celular
             if (paperPresenter != null)
             {
                 paperPresenter.Clear();
@@ -641,6 +834,8 @@ namespace Mandato.Infrastructure
             {
                 decisionOverlayPresenter.ClearChoices();
             }
+
+            CloseFlipPhone();
 
             // 3. Unfocus da câmera
             NotifyCameraUnfocus();
@@ -737,9 +932,51 @@ namespace Mandato.Infrastructure
 
         private Coroutine playerAnimRoutine;
 
+        private void EnsurePlayerAnimator()
+        {
+            if (playerAnimator != null && playerAnimator.runtimeAnimatorController != null) return;
+
+            var animators = FindObjectsByType<Animator>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var a in animators)
+            {
+                if (a == null || a.runtimeAnimatorController == null) continue;
+
+                int dealHash = Animator.StringToHash(dealAnimationName);
+                int baseDealHash = Animator.StringToHash("Base Layer." + dealAnimationName);
+
+                if (a.HasState(0, dealHash) || a.HasState(0, baseDealHash))
+                {
+                    playerAnimator = a;
+                    Debug.Log($"<color=#00ffaa>[MandatoBootstrap]</color> ✋ Animator do jogador auto-detectado em '{a.gameObject.name}'.");
+                    break;
+                }
+            }
+
+            if (playerAnimator == null && animators.Length > 0)
+            {
+                // Fallback: se nenhum tem o nome exato do estado, busca um com nome Player / Mao / Hand / MaoJogador
+                foreach (var a in animators)
+                {
+                    if (a == null || a.runtimeAnimatorController == null) continue;
+                    string lower = a.gameObject.name.ToLower();
+                    if (lower.Contains("player") || lower.Contains("mao") || lower.Contains("hand") || lower.Contains("braco") || lower.Contains("arm"))
+                    {
+                        playerAnimator = a;
+                        Debug.Log($"<color=#00ffaa>[MandatoBootstrap]</color> ✋ Animator do jogador detectado por nome em '{a.gameObject.name}'.");
+                        break;
+                    }
+                }
+            }
+        }
+
         private void PlayPlayerDealAnimation()
         {
-            if (playerAnimator == null || playerAnimator.runtimeAnimatorController == null) return;
+            EnsurePlayerAnimator();
+            if (playerAnimator == null || playerAnimator.runtimeAnimatorController == null)
+            {
+                Debug.LogWarning("<color=#ff5566>[MandatoBootstrap]</color> ⚠️ PlayerAnimator não encontrado na cena para tocar animação da mão!");
+                return;
+            }
 
             if (playerAnimRoutine != null)
             {
@@ -749,20 +986,52 @@ namespace Mandato.Infrastructure
 
             playerAnimator.speed = 1f;
 
-            if (!string.IsNullOrEmpty(dealAnimationName) && (playerAnimator.HasState(0, Animator.StringToHash(dealAnimationName)) || playerAnimator.HasState(0, Animator.StringToHash("Base Layer." + dealAnimationName))))
+            int stateHash = Animator.StringToHash(dealAnimationName);
+            int baseStateHash = Animator.StringToHash("Base Layer." + dealAnimationName);
+
+            if (playerAnimator.HasState(0, stateHash) || playerAnimator.HasState(0, baseStateHash))
             {
+                Debug.Log($"<color=#00ffaa>[MandatoBootstrap]</color> ✋ Tocando animação '{dealAnimationName}' no Animator '{playerAnimator.gameObject.name}'.");
                 playerAnimator.Play(dealAnimationName, 0, 0f);
+            }
+            else
+            {
+                Debug.LogWarning($"<color=#ff5566>[MandatoBootstrap]</color> ⚠️ Animator '{playerAnimator.gameObject.name}' não possui o estado '{dealAnimationName}'!");
             }
         }
 
         private void PlayPlayerDealAnimationReverse()
         {
+            EnsurePlayerAnimator();
             if (playerAnimator == null || playerAnimator.runtimeAnimatorController == null) return;
 
             if (playerAnimRoutine != null)
             {
-                StopCoroutine(playerAnimRoutine);
+                try
+                {
+                    StopCoroutine(playerAnimRoutine);
+                }
+                catch { }
                 playerAnimRoutine = null;
+            }
+
+            if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
+            {
+                // Fallback caso o GameObject esteja inativo: toca o estado final diretamente
+                if (!string.IsNullOrEmpty(dealAnimationReverseName) &&
+                    (playerAnimator.HasState(0, Animator.StringToHash(dealAnimationReverseName)) ||
+                     playerAnimator.HasState(0, Animator.StringToHash("Base Layer." + dealAnimationReverseName))))
+                {
+                    playerAnimator.speed = 1f;
+                    playerAnimator.Play(dealAnimationReverseName, 0, 0f);
+                }
+                else if (!string.IsNullOrEmpty(defaultAnimationName) &&
+                         (playerAnimator.HasState(0, Animator.StringToHash(defaultAnimationName)) ||
+                          playerAnimator.HasState(0, Animator.StringToHash("Base Layer." + defaultAnimationName))))
+                {
+                    playerAnimator.Play(defaultAnimationName, 0, 0f);
+                }
+                return;
             }
 
             playerAnimRoutine = StartCoroutine(PlayDealAnimationReverseRoutine());
@@ -770,7 +1039,10 @@ namespace Mandato.Infrastructure
 
         private IEnumerator PlayDealAnimationReverseRoutine()
         {
+            EnsurePlayerAnimator();
             if (playerAnimator == null) yield break;
+
+            Debug.Log($"<color=#00ffaa>[MandatoBootstrap]</color> ✋ Tocando animação reversa de '{dealAnimationName}' no Animator '{playerAnimator.gameObject.name}'.");
 
             // 1. Se houver estado dedicado reverso no Animator, toca ele
             if (!string.IsNullOrEmpty(dealAnimationReverseName) &&
@@ -825,6 +1097,233 @@ namespace Mandato.Infrastructure
             }
         }
 
+        #region Flip-Phone Operations
+
+        private void OnFlipPhoneOpenedByPresenter()
+        {
+            PlayPlayerDealAnimation();
+            RefreshFlipPhoneUI();
+            Debug.Log("<color=#00e5ff>[MandatoBootstrap]</color> 📱 Flip-Phone aberto via atalho/UI. Tocando animação da mão.");
+        }
+
+        private void OnFlipPhoneClosedByPresenter()
+        {
+            PlayPlayerDealAnimationReverse();
+            Debug.Log("<color=#00e5ff>[MandatoBootstrap]</color> 📱 Flip-Phone fechado via atalho/UI. Tocando animação reversa da mão.");
+        }
+
+        public void OpenFlipPhone()
+        {
+            if (flipPhonePresenter != null)
+            {
+                if (!flipPhonePresenter.IsOpen)
+                {
+                    flipPhonePresenter.Open();
+                }
+                else
+                {
+                    RefreshFlipPhoneUI();
+                }
+            }
+            else
+            {
+                PlayPlayerDealAnimation();
+            }
+        }
+
+        public void CloseFlipPhone()
+        {
+            if (flipPhonePresenter != null)
+            {
+                if (flipPhonePresenter.IsOpen)
+                {
+                    flipPhonePresenter.Close();
+                }
+            }
+            else
+            {
+                PlayPlayerDealAnimationReverse();
+            }
+        }
+
+        public void ToggleFlipPhone()
+        {
+            bool isCurrentlyOpen = flipPhonePresenter != null && flipPhonePresenter.IsOpen;
+            Debug.Log($"<color=#00e5ff>[MandatoBootstrap]</color> 📱 <b>Toggle Flip-Phone</b> (Estado atual: {(isCurrentlyOpen ? "Aberto -> Fechando" : "Fechado -> Abrindo")})");
+
+            if (isCurrentlyOpen) CloseFlipPhone();
+            else OpenFlipPhone();
+        }
+
+        public void RefreshFlipPhoneUI()
+        {
+            if (flipPhonePresenter == null || StateMachine == null) return;
+
+            var viewModels = new List<FlipPhoneActionViewModel>();
+            var runState = StateMachine.RunState;
+            var currentCard = StateMachine.CurrentCard;
+            string currentNpcId = currentCard != null ? currentCard.npcId : string.Empty;
+
+            foreach (var kvp in ActionCatalog)
+            {
+                var action = kvp.Value;
+                if (action == null) continue;
+
+                bool isUnlocked = runState.IsActionUnlocked(action.id) || action.unlockByDefault;
+                if (!isUnlocked) continue;
+
+                bool isConsumed = action.cooldownType == FlipPhoneCooldownType.SingleUse && runState.IsActionConsumed(action.id);
+                bool isOnCooldown = runState.IsActionOnCooldown(action.id);
+                int cooldownTurns = runState.GetActionCooldown(action.id);
+                bool conditionsMet = action.AreConditionsMet(runState.stats, runState.calendar.currentMonthIndex, runState.activePerkIds, runState.decisionHistory, currentNpcId);
+
+                var vm = new FlipPhoneActionViewModel
+                {
+                    id = action.id,
+                    displayName = action.displayName,
+                    description = action.description,
+                    categoryTag = !string.IsNullOrEmpty(action.categoryTag) ? action.categoryTag : "Ações",
+                    icon = action.icon,
+                    isConsumed = isConsumed,
+                    isOnCooldown = isOnCooldown,
+                    cooldownTurnsRemaining = cooldownTurns,
+                    isAvailable = !isConsumed && !isOnCooldown && conditionsMet,
+                    statusText = !conditionsMet ? "REQUISITOS NÃO ATENDIDOS" : string.Empty
+                };
+
+                // Monta resumo de tags de impacto
+                if (action.effects != null)
+                {
+                    foreach (var eff in action.effects)
+                    {
+                        if (eff == null) continue;
+                        if (eff.effectType == FlipPhoneEffectType.StatImpact && eff.statImpacts != null)
+                        {
+                            if (eff.statImpacts.climaticChanges != 0)
+                                vm.impactTags.Add($"Clima {(eff.statImpacts.climaticChanges > 0 ? "+" : "")}{eff.statImpacts.climaticChanges}%");
+                            if (eff.statImpacts.economy != 0)
+                                vm.impactTags.Add($"Eco {(eff.statImpacts.economy > 0 ? "+" : "")}{eff.statImpacts.economy}%");
+                            if (eff.statImpacts.internationalRelations != 0)
+                                vm.impactTags.Add($"Rel {(eff.statImpacts.internationalRelations > 0 ? "+" : "")}{eff.statImpacts.internationalRelations}%");
+                            if (eff.statImpacts.popularApproval != 0)
+                                vm.impactTags.Add($"Pop {(eff.statImpacts.popularApproval > 0 ? "+" : "")}{eff.statImpacts.popularApproval}%");
+                            if (eff.statImpacts.corruption != 0)
+                                vm.impactTags.Add($"Corrupção {(eff.statImpacts.corruption > 0 ? "+" : "")}{eff.statImpacts.corruption}%");
+                        }
+                        else if (eff.effectType == FlipPhoneEffectType.DismissCurrentProposal)
+                        {
+                            vm.impactTags.Add("Descarta Proposta");
+                        }
+                        else if (eff.effectType == FlipPhoneEffectType.RemoveNpcFromGame)
+                        {
+                            vm.impactTags.Add($"Elimina NPC: {eff.targetId}");
+                        }
+                    }
+                }
+
+                viewModels.Add(vm);
+            }
+
+            Debug.Log($"<color=#00e5ff>[MandatoBootstrap]</color> 📱 RefreshFlipPhoneUI: {viewModels.Count} ações enviadas para a interface.");
+            flipPhonePresenter.Refresh(viewModels);
+        }
+
+        public void RequestUseFlipPhoneAction(string actionId)
+        {
+            if (StateMachine == null || string.IsNullOrEmpty(actionId)) return;
+
+            Debug.Log($"<color=#00e5ff>[MandatoBootstrap]</color> 📱 Solicitando execução da ação '<b>{actionId}</b>'...");
+
+            if (!ActionCatalog.TryGetValue(actionId, out var action) || action == null)
+            {
+                Debug.LogWarning($"<color=#ff5566>[MandatoBootstrap]</color> 📱 Ação '{actionId}' não encontrada no catálogo!");
+                if (flipPhonePresenter != null)
+                    flipPhonePresenter.ShowMessage("Ação não encontrada no diretório.", isError: true);
+                return;
+            }
+
+            var report = FlipPhoneResolver.ResolveUse(
+                StateMachine.RunState,
+                StateMachine.DeckState,
+                action,
+                CardCatalog,
+                StateMachine.CurrentCard
+            );
+
+            if (report.success)
+            {
+                Debug.Log($"<color=#00ffaa>[MandatoBootstrap]</color> 📱 ✅ Ação '<b>{report.actionDisplayName}</b>' executada com sucesso!" +
+                          $" [Impactos: Eco {report.impactsApplied.economy:+#;-#;0}, Pop {report.impactsApplied.popularApproval:+#;-#;0}, " +
+                          $"Rel {report.impactsApplied.internationalRelations:+#;-#;0}, Clima {report.impactsApplied.climaticChanges:+#;-#;0}, " +
+                          $"Corrupção {report.impactsApplied.corruption:+#;-#;0}]");
+
+                // 1. Atualiza visual do monitor se houve variação
+                if (retroMonitorPresenter != null)
+                {
+                    retroMonitorPresenter.UpdateSnapshot(StateMachine.RunState.GetSnapshot());
+                    retroMonitorPresenter.TriggerGlitch();
+                }
+
+                if (decisionOverlayPresenter != null)
+                {
+                    decisionOverlayPresenter.SetCorruptionLevel(StateMachine.RunState.stats.corruption);
+                }
+
+                SyncCanvasUI();
+                SyncCameraEffects(instant: false);
+
+                // 2. Se a ação descartou a proposta atual
+                if (report.dismissedCurrentProposal)
+                {
+                    Debug.Log("<color=#00ffaa>[MandatoBootstrap]</color> 📱 Ação descartou a proposta atual.");
+                    if (paperPresenter != null)
+                    {
+                        paperPresenter.Clear();
+                        paperPresenter.SetPaperInteractable(false);
+                    }
+                    if (decisionOverlayPresenter != null)
+                    {
+                        decisionOverlayPresenter.ClearChoices();
+                    }
+
+                    CloseFlipPhone();
+
+                    pendingProposalDelay = Mathf.Max(0.2f, delayBetweenProposals);
+                    if (requireSpaceToCallNextNpc)
+                    {
+                        isAwaitingSpaceForNextNpc = true;
+                        Debug.Log("<color=#00e5ff>[MandatoBootstrap]</color> ⏳ <b>Gabinete livre após descarte.</b> Pressione <b>[ESPAÇO]</b> para autorizar a entrada do próximo visitante.");
+                    }
+                    else if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
+                    {
+                        DrawNextProposalImmediate();
+                    }
+                    else
+                    {
+                        StartCoroutine(DrawNextProposalRoutine(pendingProposalDelay));
+                    }
+                    return;
+                }
+
+                // 3. Atualiza UI do celular com mensagem de sucesso
+                RefreshFlipPhoneUI();
+                if (flipPhonePresenter != null)
+                {
+                    flipPhonePresenter.ShowMessage($"> \"{report.actionDisplayName}\" executada com sucesso.");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"<color=#ff5566>[MandatoBootstrap]</color> 📱 ❌ Falha ao executar ação '{actionId}': {report.failReason}");
+                if (flipPhonePresenter != null)
+                {
+                    flipPhonePresenter.ShowMessage(report.failReason, isError: true);
+                }
+            }
+        }
+
+        #endregion
+
         private void OnDestroy()
         {
             if (StateMachine != null)
@@ -848,6 +1347,13 @@ namespace Mandato.Infrastructure
             {
                 endScreenPresenter.OnRestartRequested -= RestartRun;
                 endScreenPresenter.OnMainMenuRequested -= ReturnToMenu;
+            }
+
+            if (flipPhonePresenter != null)
+            {
+                flipPhonePresenter.OnActionRequested -= RequestUseFlipPhoneAction;
+                flipPhonePresenter.OnPhoneOpened -= OnFlipPhoneOpenedByPresenter;
+                flipPhonePresenter.OnPhoneClosed -= OnFlipPhoneClosedByPresenter;
             }
         }
     }

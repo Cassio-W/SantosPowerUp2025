@@ -321,7 +321,10 @@ namespace Mandato.UI
             arrow.text = delta > 0 ? "▲" : "▼";
             arrow.style.color = isGood ? new StyleColor(new Color(0.2f, 0.9f, 0.3f)) : new StyleColor(new Color(0.9f, 0.2f, 0.2f));
 
-            StartCoroutine(ClearArrowAfterDelay(arrow, 3f));
+            if (gameObject.activeInHierarchy && isActiveAndEnabled)
+            {
+                StartCoroutine(ClearArrowAfterDelay(arrow, 3f));
+            }
         }
 
         private IEnumerator ClearArrowAfterDelay(Label arrow, float delay)
@@ -332,7 +335,7 @@ namespace Mandato.UI
 
         public void TriggerGlitch()
         {
-            if (crtMaterial != null && crtMaterial.HasProperty("_GlitchStrength"))
+            if (crtMaterial != null && crtMaterial.HasProperty("_GlitchStrength") && gameObject.activeInHierarchy && isActiveAndEnabled)
             {
                 StartCoroutine(GlitchPulseRoutine());
             }

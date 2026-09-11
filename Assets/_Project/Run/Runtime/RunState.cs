@@ -1,5 +1,6 @@
-using System;
+  using System;
 using System.Collections.Generic;
+using Mandato.Content;
 using Mandato.Core;
 
 namespace Mandato.Run
@@ -18,6 +19,9 @@ namespace Mandato.Run
         public Dictionary<string, QuestRunState> questStates = new Dictionary<string, QuestRunState>();
         public List<ActiveEventState> activeEvents = new List<ActiveEventState>();
         public List<ActivePerkState> activePerks = new List<ActivePerkState>();
+        public List<string> unlockedActionIds = new List<string>();
+        public Dictionary<string, int> actionCooldowns = new Dictionary<string, int>();
+        public List<string> consumedSingleUseActions = new List<string>();
         public int seed;
 
         public RunState(int seed = 0)
@@ -38,6 +42,9 @@ namespace Mandato.Run
             questStates.Clear();
             activeEvents.Clear();
             activePerks.Clear();
+            unlockedActionIds.Clear();
+            actionCooldowns.Clear();
+            consumedSingleUseActions.Clear();
         }
 
         public NpcRunState GetOrCreateNpcState(string npcId)
@@ -122,6 +129,77 @@ namespace Mandato.Run
             politicalAxis.ApplyDelta(deltaX, deltaY);
         }
 
+        public void UnlockAction(string actionId)
+        {
+            if (!string.IsNullOrEmpty(actionId) && !unlockedActionIds.Contains(actionId))
+            {
+                unlockedActionIds.Add(actionId);
+            }
+        }
+
+        public void LockAction(string actionId)
+        {
+            if (!string.IsNullOrEmpty(actionId))
+            {
+                unlockedActionIds.Remove(actionId);
+            }
+        }
+
+        public bool IsActionUnlocked(string actionId)
+        {
+            return !string.IsNullOrEmpty(actionId) && unlockedActionIds.Contains(actionId);
+        }
+
+        public bool IsActionConsumed(string actionId)
+        {
+            return !string.IsNullOrEmpty(actionId) && consumedSingleUseActions.Contains(actionId);
+        }
+
+        public bool IsActionOnCooldown(string actionId)
+        {
+            if (string.IsNullOrEmpty(actionId)) return false;
+            return actionCooldowns.TryGetValue(actionId, out int turns) && turns > 0;
+        }
+
+        public int GetActionCooldown(string actionId)
+        {
+            if (string.IsNullOrEmpty(actionId)) return 0;
+            return actionCooldowns.TryGetValue(actionId, out int turns) ? turns : 0;
+        }
+
+        public void RecordActionUsed(string actionId, FlipPhoneCooldownType cooldownType, int cooldownTurns)
+        {
+            if (string.IsNullOrEmpty(actionId)) return;
+
+            if (cooldownType == FlipPhoneCooldownType.SingleUse)
+            {
+                if (!consumedSingleUseActions.Contains(actionId))
+                    consumedSingleUseActions.Add(actionId);
+            }
+            else if (cooldownType == FlipPhoneCooldownType.Turns && cooldownTurns > 0)
+            {
+                actionCooldowns[actionId] = cooldownTurns;
+            }
+        }
+
+        public void TickActionCooldowns()
+        {
+            if (actionCooldowns.Count == 0) return;
+
+            var keys = new List<string>(actionCooldowns.Keys);
+            foreach (var key in keys)
+            {
+                if (actionCooldowns[key] > 0)
+                {
+                    actionCooldowns[key]--;
+                    if (actionCooldowns[key] <= 0)
+                    {
+                        actionCooldowns.Remove(key);
+                    }
+                }
+            }
+        }
+
         public void AdvanceMonth()
         {
             if (!termination.IsOngoing) return;
@@ -149,6 +227,9 @@ namespace Mandato.Run
                     }
                 }
             }
+
+            // Atualiza cooldowns de ações do Flip-Phone
+            TickActionCooldowns();
 
             calendar.Advance();
             UpdateTermination();

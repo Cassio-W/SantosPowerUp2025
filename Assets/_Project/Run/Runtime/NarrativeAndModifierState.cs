@@ -11,7 +11,15 @@ namespace Mandato.Run
         public string npcId = string.Empty;
         public int relationScore = 0; // -100 (Hostil) a +100 (Aliado fiel)
         public bool isMet = false;
+        public bool isDead = false;
+        public bool isRemoved = false;
         public int interactionCount = 0;
+
+        public int relationship
+        {
+            get => relationScore;
+            set => relationScore = Math.Clamp(value, -100, 100);
+        }
 
         public NpcRunState() { }
 

@@ -1,0 +1,322 @@
+/* ========================================================================= */
+/* FLIP-PHONE / DISPOSITIVO DE GABINETE - ESTILOS UI TOOLKIT                 */
+/* ========================================================================= */
+
+.phone-screen-root {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(5, 8, 12, 0.75);
+    transition: opacity 0.25s ease-out;
+}
+
+.phone-screen-root.hidden {
+    display: none;
+    opacity: 0;
+}
+
+/* CHASSI / TELA DO CELULAR */
+.phone-chassis {
+    width: 580px;
+    max-width: 92%;
+    height: 780px;
+    max-height: 92%;
+    background-color: #0b0f14;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+    border-width: 2px;
+    border-color: #1e3a47;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85);
+}
+
+/* TOP STATUS BAR */
+.phone-status-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: #182b35;
+    margin-bottom: 10px;
+}
+
+.status-network-box {
+    flex-direction: row;
+    align-items: center;
+}
+
+.status-led {
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background-color: #00ffaa;
+    margin-right: 6px;
+    box-shadow: 0 0 6px #00ffaa;
+}
+
+.status-network-text {
+    font-size: 11px;
+    color: #6a9fb5;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+.status-close-btn {
+    background-color: transparent;
+    border-width: 1px;
+    border-color: #334d5c;
+    border-radius: 6px;
+    color: #9ab4c2;
+    font-size: 11px;
+    -unity-font-style: bold;
+    padding: 3px 8px;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.status-close-btn:hover {
+    background-color: #8b1e22;
+    border-color: #d13438;
+    color: #ffffff;
+}
+
+/* HEADER DO TELEFONE */
+.phone-header {
+    margin-bottom: 12px;
+}
+
+.phone-title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    color: #e6f6ff;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.phone-subtitle {
+    font-size: 11px;
+    color: #728d9c;
+}
+
+/* CATEGORY TABS / CHIPS */
+.category-tabs-container {
+    flex-direction: row;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.category-tab-btn {
+    background-color: #121c24;
+    border-width: 1px;
+    border-color: #233a48;
+    border-radius: 12px;
+    padding: 4px 12px;
+    color: #8ca5b5;
+    font-size: 11px;
+    -unity-font-style: bold;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.category-tab-btn:hover {
+    background-color: #1a2a38;
+    color: #e0f0ff;
+    border-color: #00bcd4;
+}
+
+.category-tab-btn.active {
+    background-color: #00bcd4;
+    border-color: #00e5ff;
+    color: #04131a;
+}
+
+/* LISTA DE AÇÕES (SCROLLVIEW) */
+.actions-scroll-view {
+    flex-grow: 1;
+    margin-bottom: 10px;
+}
+
+.actions-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* EMPTY STATE */
+.empty-actions-label {
+    color: #647b8c;
+    font-size: 13px;
+    -unity-text-align: middle-center;
+    margin-top: 40px;
+    -unity-font-style: italic;
+}
+
+/* CARD / ITEM DE AÇÃO */
+.action-item-card {
+    background-color: #111a22;
+    border-width: 1px;
+    border-color: #1c2e3b;
+    border-radius: 12px;
+    padding: 12px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    transition: border-color 0.2s, background-color 0.2s;
+}
+
+.action-item-card:hover {
+    background-color: #15222e;
+    border-color: #2c495d;
+}
+
+.action-item-card.on-cooldown {
+    opacity: 0.6;
+    background-color: #0d141b;
+    border-color: #16222b;
+}
+
+.action-item-card.consumed {
+    opacity: 0.35;
+    background-color: #080c10;
+    border-color: #111a20;
+}
+
+.action-info-col {
+    flex-grow: 1;
+    margin-right: 12px;
+}
+
+.action-name-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.action-category-badge {
+    background-color: #1a2c38;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 9px;
+    -unity-font-style: bold;
+    color: #00e5ff;
+    margin-right: 6px;
+    letter-spacing: 0.5px;
+}
+
+.action-item-name {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: #eef6fa;
+}
+
+.action-item-desc {
+    font-size: 11px;
+    color: #8da1ae;
+    white-space: normal;
+    margin-bottom: 6px;
+    line-height: 14px;
+}
+
+.action-tags-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.action-impact-chip {
+    background-color: #16242c;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 9px;
+    -unity-font-style: bold;
+    color: #7ec38a;
+}
+
+.action-impact-chip.negative {
+    color: #e06c75;
+    background-color: #261517;
+}
+
+/* BOTÃO DE USAR AÇÃO */
+.action-exec-btn {
+    min-width: 95px;
+    height: 38px;
+    background-color: #008f5d;
+    border-width: 1px;
+    border-color: #00c782;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    transition: background-color 0.15s, transform 0.1s;
+}
+
+.action-exec-btn:hover {
+    background-color: #00b072;
+    border-color: #24ffb0;
+    scale: 1.03;
+}
+
+.action-exec-btn:active {
+    background-color: #007049;
+    scale: 0.97;
+}
+
+.action-exec-btn.btn-cooldown {
+    background-color: #222d36;
+    border-color: #354652;
+    color: #6e8494;
+    font-size: 10px;
+}
+
+.action-exec-btn.btn-cooldown:hover {
+    background-color: #222d36;
+    border-color: #354652;
+    scale: 1;
+}
+
+.action-exec-btn.btn-consumed {
+    background-color: #171d22;
+    border-color: #222b32;
+    color: #4b5a64;
+    font-size: 10px;
+}
+
+/* FOOTER STATUS BAR */
+.phone-footer-bar {
+    padding-top: 8px;
+    border-top-width: 1px;
+    border-top-color: #182b35;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.phone-status-message {
+    font-size: 11px;
+    color: #5c8496;
+    -unity-font-style: italic;
+    flex-grow: 1;
+}
+
+.phone-status-message.success {
+    color: #00ffaa;
+    -unity-font-style: bold;
+}
+
+.phone-status-message.error {
+    color: #ff5566;
+    -unity-font-style: bold;
+}

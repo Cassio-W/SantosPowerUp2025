@@ -129,6 +129,52 @@ namespace Mandato.Run
             }
         }
 
+        public void RemoveCardsByNpc(string npcId, IReadOnlyDictionary<string, CardDefinition> catalog)
+        {
+            if (string.IsNullOrEmpty(npcId) || catalog == null) return;
+
+            var toRemove = new List<string>();
+            foreach (var cardId in drawPile)
+            {
+                if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null && string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase))
+                {
+                    toRemove.Add(cardId);
+                }
+            }
+            foreach (var cardId in discardPile)
+            {
+                if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null && string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase))
+                {
+                    toRemove.Add(cardId);
+                }
+            }
+
+            foreach (var id in toRemove)
+            {
+                RemoveCard(id);
+            }
+        }
+
+        public void RemoveCardsMatching(Func<string, bool> predicate)
+        {
+            if (predicate == null) return;
+
+            var toRemove = new List<string>();
+            foreach (var cardId in drawPile)
+            {
+                if (predicate(cardId)) toRemove.Add(cardId);
+            }
+            foreach (var cardId in discardPile)
+            {
+                if (predicate(cardId)) toRemove.Add(cardId);
+            }
+
+            foreach (var id in toRemove)
+            {
+                RemoveCard(id);
+            }
+        }
+
         public void ReshuffleDiscardIntoDraw(Random rng)
         {
             if (discardPile.Count == 0) return;
