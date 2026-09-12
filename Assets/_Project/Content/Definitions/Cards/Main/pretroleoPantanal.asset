@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 244f3de4bec46614db5e71d119057e6a, type: 3}
+  m_Name: pretroleoPantanal
+  m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CardDefinition
+  id: pretroleoPantanal
+  title: pretroleoPantanal
+  description: "Uma empresa quer explorar petr\xF3leo no pantanal. Rende grana, mas
+    pode dar ruim na fauna."
+  npcId: Deputado Suspeito
+  npcPrefab: {fileID: 4047350394622487709, guid: 16e4de0f62729694eb1a5ff97f31af79, type: 3}
+  sourceLegacyAsset: {fileID: 11400000, guid: 2d366339e2d1d264da911338dc93ea46, type: 2}
+  categoryTag: 
+  isTutorial: 0
+  baseWeight: 100
+  leftChoice:
+    label: "N\xC3O toca no pantanal, j\xE1 basta o calor!"
+    statImpacts:
+      climaticChanges: -25
+      internationalRelations: -25
+      popularApproval: 0
+      economy: 35
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  rightChoice:
+    label: "Perfura tudo, at\xE9 achar petr\xF3leo ou capivara."
+    statImpacts:
+      climaticChanges: 25
+      internationalRelations: 25
+      popularApproval: 0
+      economy: -15
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  conditions: []

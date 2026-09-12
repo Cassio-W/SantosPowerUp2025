@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 244f3de4bec46614db5e71d119057e6a, type: 3}
+  m_Name: Culpar Refugiados
+  m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CardDefinition
+  id: Culpar Refugiados
+  title: Culpar Refugiados
+  description: "Existem imigrantes que est\xE3o fazendo o caos entre a popula\xE7\xE3o?
+    O que acha de deport\xE1-los?"
+  npcId: "Comandante do Ex\xE9rcito"
+  npcPrefab: {fileID: 6040501860826345181, guid: bce69ffb460102040acb20bbea5190c3, type: 3}
+  sourceLegacyAsset: {fileID: 11400000, guid: a90f5843b60410b4fab87e0a30fd6122, type: 2}
+  categoryTag: 
+  isTutorial: 0
+  baseWeight: 100
+  leftChoice:
+    label: Deportem todos!
+    statImpacts:
+      climaticChanges: 0
+      internationalRelations: -15
+      popularApproval: 15
+      economy: 0
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  rightChoice:
+    label: Apenas prenda-os. Precisamos deles.
+    statImpacts:
+      climaticChanges: 0
+      internationalRelations: 15
+      popularApproval: -15
+      economy: 0
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  conditions: []

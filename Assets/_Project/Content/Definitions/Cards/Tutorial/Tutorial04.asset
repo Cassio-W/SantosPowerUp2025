@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 244f3de4bec46614db5e71d119057e6a, type: 3}
+  m_Name: Tutorial04
+  m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CardDefinition
+  id: Tutorial04
+  title: Tutorial04
+  description: "Atrav\xE9s das \xFAltimas pesquisas com a ODS 2030, chegamos \xE0
+    conclus\xE3o das 4 coisas que o pais mais precisa tomar cuidado: Clima, Rela\xE7\xF5es
+    Internacionais, Aprova\xE7\xE3o Populacional e Economia. "
+  npcId: Vice-Presidente
+  npcPrefab: {fileID: 7410145720240828870, guid: b126acb8a7a673f439f5ec19e17dfd59, type: 3}
+  sourceLegacyAsset: {fileID: 11400000, guid: 891ac940a26d8664bb5b054b804051fa, type: 2}
+  categoryTag: 
+  isTutorial: 1
+  baseWeight: 100
+  leftChoice:
+    label: "Caramba \xE9 muita coisa"
+    statImpacts:
+      climaticChanges: 0
+      internationalRelations: 0
+      popularApproval: 0
+      economy: 0
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  rightChoice:
+    label: "Ser presidente n\xE3o \xE9 f\xE1cil"
+    statImpacts:
+      climaticChanges: 0
+      internationalRelations: 0
+      popularApproval: 0
+      economy: 0
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  conditions: []

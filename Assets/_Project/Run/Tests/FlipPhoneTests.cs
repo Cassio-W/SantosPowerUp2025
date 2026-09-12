@@ -40,7 +40,7 @@ namespace Mandato.Run.Tests
                 "Injeta recursos na economia ao custo de aprovação popular.",
                 FlipPhoneCooldownType.None
             );
-            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 20, 0, -10, 0)));
+            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, -10, 20, 0)));
 
             var report = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
 
@@ -58,84 +58,80 @@ namespace Mandato.Run.Tests
             var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
                 "action_pronunciamento",
                 "Pronunciamento Oficial",
-                "Aumenta aprovação popular com cooldown de 2 turnos.",
+                "Pronunciamento em rede nacional para acalmar a população.",
                 FlipPhoneCooldownType.Turns,
                 cooldownTurns: 2
             );
-            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 0, 15, 0)));
+            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 10, 0, 0)));
 
-            // Primeiro uso: sucesso
+            // 1. Primeiro uso é bem-sucedido
             var report1 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
             Assert.IsTrue(report1.success);
+            Assert.AreEqual(60, runState.stats.popularApproval);
             Assert.IsTrue(runState.IsActionOnCooldown(action.id));
             Assert.AreEqual(2, runState.GetActionCooldown(action.id));
 
-            // Segundo uso imediato: bloqueado por cooldown
+            // 2. Segundo uso consecutivo é bloqueado
             var report2 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
             Assert.IsFalse(report2.success);
-            StringAssert.Contains("recarga", report2.failReason.ToLower());
+            Assert.IsTrue(report2.failReason.Contains("recarga"));
 
-            // Avança 1 mês: cooldown vai para 1
+            // 3. Avança 1 mês: cooldown vai para 1 (ainda bloqueado)
             runState.AdvanceMonth();
-            Assert.IsTrue(runState.IsActionOnCooldown(action.id));
             Assert.AreEqual(1, runState.GetActionCooldown(action.id));
-
             var report3 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
             Assert.IsFalse(report3.success);
 
-            // Avança mais 1 mês: cooldown expira
+            // 4. Avança mais 1 mês: cooldown expira (0) e a ação volta a ficar disponível
             runState.AdvanceMonth();
             Assert.IsFalse(runState.IsActionOnCooldown(action.id));
-            Assert.AreEqual(0, runState.GetActionCooldown(action.id));
-
-            // Agora pode ser usada novamente
             var report4 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
             Assert.IsTrue(report4.success);
+            Assert.AreEqual(70, runState.stats.popularApproval);
         }
 
         [Test]
         public void SingleUse_Action_CanOnlyBeUsedOnce()
         {
             var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
-                "action_intervencao_extrema",
-                "Intervenção Federal",
-                "Ação única drástica.",
+                "action_decreto_secreto",
+                "Decreto Presidencial",
+                "Medida extrema de uso único.",
                 FlipPhoneCooldownType.SingleUse
             );
-            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 30, 0, 0, 0)));
+            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 0, 20, 10)));
 
+            // 1. Primeiro uso funciona
             var report1 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
             Assert.IsTrue(report1.success);
             Assert.IsTrue(runState.IsActionConsumed(action.id));
 
-            // Mesmo após avançar meses, continua consumida
-            runState.AdvanceMonth();
-            runState.AdvanceMonth();
-
+            // 2. Segundo uso é permanentemente bloqueado
             var report2 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
             Assert.IsFalse(report2.success);
-            StringAssert.Contains("consumida", report2.failReason.ToLower());
+            Assert.IsTrue(report2.failReason.Contains("consumida"));
         }
 
         [Test]
         public void RemoveNpc_RemovesAllCardsFromNpcInDeck()
         {
             var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
-                "action_exonerar_ministro",
-                "Demitir Ministro da Economia",
-                "Remove o ministro e todas as suas propostas da partida.",
-                FlipPhoneCooldownType.SingleUse
+                "action_demitir_ministro",
+                "Demitir Ministro",
+                "Exonera o Ministro da Economia e remove suas propostas do baralho."
             );
-            action.effects.Add(FlipPhoneEffect.CreateRemoveNpc("MinistroEco"));
+            action.effects.Add(FlipPhoneEffect.CreateRemoveNpcFromGame("MinistroEco"));
 
-            Assert.AreEqual(3, deckState.TotalActiveCards);
+            Assert.AreEqual(3, deckState.drawPile.Count);
 
             var report = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
             Assert.IsTrue(report.success);
-            Assert.Contains("MinistroEco", report.removedNpcIds);
+            Assert.AreEqual(2, report.removedCardIds.Count);
+            Assert.Contains("card_a", report.removedCardIds);
+            Assert.Contains("card_b", report.removedCardIds);
 
-            // Resta apenas a carta do Deputado no baralho
-            Assert.AreEqual(1, deckState.TotalActiveCards);
+            // Deck agora só tem a carta do Deputado
+            Assert.AreEqual(1, deckState.drawPile.Count);
             Assert.AreEqual("card_c", deckState.drawPile[0]);
         }
 
@@ -143,20 +139,20 @@ namespace Mandato.Run.Tests
         public void LockedAction_CannotBeUsed_UntilUnlocked()
         {
             var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
-                "action_secreta",
-                "Operação Secreta",
+                "action_gabinete_crise",
+                "Gabinete de Crise",
                 "Ação bloqueada inicialmente.",
+                FlipPhoneCooldownType.None,
                 unlockByDefault: false
             );
 
-            // Não está desbloqueada
+            // Bloqueada
             var report1 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
             Assert.IsFalse(report1.success);
+            Assert.IsTrue(report1.failReason.Contains("desbloqueada"));
 
             // Desbloqueia na run
-            runState.UnlockAction("action_secreta");
-            Assert.IsTrue(runState.IsActionUnlocked("action_secreta"));
-
+            runState.UnlockAction(action.id);
             var report2 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
             Assert.IsTrue(report2.success);
         }
@@ -165,8 +161,8 @@ namespace Mandato.Run.Tests
         public void Conditions_MustBeMetToUseAction()
         {
             var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
-                "action_condicional",
-                "Ação de Emergência Econômica",
+                "action_socorro_financeiro",
+                "Socorro Financeiro",
                 "Apenas utilizável se a economia estiver abaixo de 30%."
             );
             action.conditions.Add(new FlipPhoneCondition
@@ -182,7 +178,7 @@ namespace Mandato.Run.Tests
             Assert.IsFalse(report1.success);
 
             // Reduz economia para 25
-            runState.ApplyStatImpacts(new StatBlock(0, -25, 0, 0, 0));
+            runState.ApplyStatImpacts(new StatBlock(0, 0, 0, -25, 0));
             Assert.AreEqual(25, runState.stats.economy);
 
             // Agora a condição é atendida

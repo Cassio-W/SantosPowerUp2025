@@ -209,9 +209,9 @@ namespace Mandato.Run
             }
         }
 
-        public void RemoveCardsByNpc(string npcId, IReadOnlyDictionary<string, CardDefinition> catalog)
+        public List<string> RemoveCardsByNpc(string npcId, IReadOnlyDictionary<string, CardDefinition> catalog)
         {
-            if (string.IsNullOrEmpty(npcId) || catalog == null) return;
+            if (string.IsNullOrEmpty(npcId) || catalog == null) return new List<string>();
 
             var toRemove = new List<string>();
 
@@ -219,7 +219,7 @@ namespace Mandato.Run
             {
                 if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
                 {
-                    if (string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase) && !toRemove.Contains(cardId))
                     {
                         toRemove.Add(cardId);
                     }
@@ -230,7 +230,7 @@ namespace Mandato.Run
             {
                 if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
                 {
-                    if (string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase) && !toRemove.Contains(cardId))
                     {
                         toRemove.Add(cardId);
                     }
@@ -241,7 +241,7 @@ namespace Mandato.Run
             {
                 if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
                 {
-                    if (string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase) && !toRemove.Contains(cardId))
                     {
                         toRemove.Add(cardId);
                     }
@@ -252,6 +252,8 @@ namespace Mandato.Run
             {
                 RemoveCard(cardId);
             }
+
+            return toRemove;
         }
 
         public void ReshuffleDiscardIntoDraw(Random rng)

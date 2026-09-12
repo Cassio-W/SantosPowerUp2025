@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 244f3de4bec46614db5e71d119057e6a, type: 3}
+  m_Name: onuArvores
+  m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CardDefinition
+  id: onuArvores
+  title: onuArvores
+  description: "Presidente, a ONU quer que a gente vire refer\xEAncia ambiental.
+    Planta \xE1rvore at\xE9 no banheiro?"
+  npcId: Min. do Meio Ambiente
+  npcPrefab: {fileID: 9067916053490012197, guid: 1bddbd3a1afe9314f936a7e5fde0da5c, type: 3}
+  sourceLegacyAsset: {fileID: 11400000, guid: 4912dd21848da424b80ebe862d2534a9, type: 2}
+  categoryTag: 
+  isTutorial: 0
+  baseWeight: 100
+  leftChoice:
+    label: "Vira floresta esse pa\xEDs!"
+    statImpacts:
+      climaticChanges: 40
+      internationalRelations: 25
+      popularApproval: 0
+      economy: -30
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  rightChoice:
+    label: "Prefiro ar-condicionado a sombra de \xE1rvore."
+    statImpacts:
+      climaticChanges: -40
+      internationalRelations: -20
+      popularApproval: -25
+      economy: 0
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  conditions: []

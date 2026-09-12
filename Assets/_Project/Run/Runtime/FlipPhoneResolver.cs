@@ -150,7 +150,11 @@ namespace Mandato.Run
 
                                 if (deckState != null && catalog != null)
                                 {
-                                    deckState.RemoveCardsByNpc(effect.targetId, catalog);
+                                    var removed = deckState.RemoveCardsByNpc(effect.targetId, catalog);
+                                    if (removed != null)
+                                    {
+                                        report.removedCardIds.AddRange(removed);
+                                    }
                                 }
 
                                 report.removedNpcIds.Add(effect.targetId);

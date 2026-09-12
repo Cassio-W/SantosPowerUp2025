@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 244f3de4bec46614db5e71d119057e6a, type: 3}
+  m_Name: investirEducacao
+  m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CardDefinition
+  id: investirEducacao
+  title: investirEducacao
+  description: "Educa\xE7\xE3o de qualidade custa caro, mas uma popula\xE7\xE3o burra
+    tamb\xE9m. O que acha de subirmos o n\xEDvel?"
+  npcId: Vice-Presidente
+  npcPrefab: {fileID: 7410145720240828870, guid: b126acb8a7a673f439f5ec19e17dfd59, type: 3}
+  sourceLegacyAsset: {fileID: 11400000, guid: c029ded8ca285f6419300294fa986b44, type: 2}
+  categoryTag: 
+  isTutorial: 0
+  baseWeight: 100
+  leftChoice:
+    label: Melhor manter o povo sem saber quem sou.
+    statImpacts:
+      climaticChanges: 0
+      internationalRelations: 0
+      popularApproval: 30
+      economy: -15
+      corruption: 10
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  rightChoice:
+    label: "Quero doutores at\xE9 nos a\xE7ougues!"
+    statImpacts:
+      climaticChanges: 0
+      internationalRelations: 0
+      popularApproval: -30
+      economy: 15
+      corruption: -10
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  conditions: []

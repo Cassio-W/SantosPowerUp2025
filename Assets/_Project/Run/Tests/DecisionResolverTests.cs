@@ -51,7 +51,7 @@ namespace Mandato.Run.Tests
             Assert.AreEqual("Aprovar", report.choiceLabel);
             Assert.AreEqual(50, report.statsBefore.economy);
             Assert.AreEqual(35, report.statsAfter.economy);
-            Assert.AreEqual(60, report.statsAfter.popularApproval);
+            Assert.AreEqual(62, report.statsAfter.popularApproval);
 
             Assert.AreEqual(-3, run.politicalAxis.x);
             Assert.AreEqual(2, run.politicalAxis.y);

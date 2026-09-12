@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 244f3de4bec46614db5e71d119057e6a, type: 3}
+  m_Name: GuerraFavelas
+  m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CardDefinition
+  id: GuerraFavelas
+  title: GuerraFavelas
+  description: "As fac\xE7\xF5es criminosas entraram em guerra contra o estado ap\xF3s
+    a sua decis\xE3o de \"destruir\" as favelas. Vamos combat\xEA-las?"
+  npcId: "Comandante do Ex\xE9rcito"
+  npcPrefab: {fileID: 6040501860826345181, guid: bce69ffb460102040acb20bbea5190c3, type: 3}
+  sourceLegacyAsset: {fileID: 11400000, guid: 69f6820e07cf58f4ba0c8c1275bc106d, type: 2}
+  categoryTag: 
+  isTutorial: 0
+  baseWeight: 100
+  leftChoice:
+    label: Aceitar
+    statImpacts:
+      climaticChanges: 0
+      internationalRelations: -10
+      popularApproval: 10
+      economy: 10
+      corruption: -10
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  rightChoice:
+    label: Recusar
+    statImpacts:
+      climaticChanges: 0
+      internationalRelations: 0
+      popularApproval: -15
+      economy: 0
+      corruption: 15
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  conditions: []

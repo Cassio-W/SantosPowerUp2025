@@ -19,6 +19,7 @@ namespace Mandato.Editor
         public static void MigrateAllDeals()
         {
             EnsureDirectoriesExist();
+            CreateDefaultPerks();
 
             string[] dealGuids = AssetDatabase.FindAssets("t:ScriptableObject", new[] { SourceFolder });
             int migratedCount = 0;
@@ -72,6 +73,49 @@ namespace Mandato.Editor
 
             Debug.Log($"<color=#00ffaa><b>[DealToCardMigrator] Migração Concluída com Sucesso!</b></color> " +
                       $"Total de {migratedCount} cartas migradas/atualizadas em '{TargetBaseFolder}'. ({skippedCount} ignorados).");
+        }
+
+        [MenuItem("Mandato/Migração/Criar Perks Padrão")]
+        public static void CreateDefaultPerks()
+        {
+            string perksFolder = "Assets/_Project/Content/Definitions/Perks";
+            if (!AssetDatabase.IsValidFolder("Assets/_Project/Content/Definitions"))
+            {
+                AssetDatabase.CreateFolder("Assets/_Project/Content", "Definitions");
+            }
+            if (!AssetDatabase.IsValidFolder(perksFolder))
+            {
+                AssetDatabase.CreateFolder("Assets/_Project/Content/Definitions", "Perks");
+            }
+
+            var perks = new List<(string id, string title, string desc, StatBlock deltas)>
+            {
+                ("ReservaFlorestal", "Reserva Florestal Protegida", "Garante a preservação de biomas estratégicos e proteção ambiental contínua.", new StatBlock(1, 0, 0, 1, 0)),
+                ("Cripto", "Hub de Criptoativos", "Incentivos à economia digital e blockchain aumentam a inovação econômica.", new StatBlock(0, 1, 0, 0, 1)),
+                ("AliancaEUA", "Aliança Estratégica com os EUA", "Cooperação comercial e diplomática contínua com a maior economia ocidental.", new StatBlock(0, 1, 1, 0, 0)),
+                ("TratadoInternacional", "Tratado Comercial do Oriente", "Abertura de novos mercados bilaterais e fluxos de comércio exterior.", new StatBlock(0, 1, 1, 0, 0)),
+                ("InvestimentoUsina", "Complexo Nuclear em Operação", "Geração contínua de energia limpa para a matriz industrial nacional.", new StatBlock(1, 1, 0, 0, 0))
+            };
+
+            foreach (var p in perks)
+            {
+                string path = $"{perksFolder}/{p.id}.asset";
+                var existing = AssetDatabase.LoadAssetAtPath<PerkDefinition>(path);
+                if (existing == null)
+                {
+                    var perk = ScriptableObject.CreateInstance<PerkDefinition>();
+                    perk.id = p.id;
+                    perk.title = p.title;
+                    perk.description = p.desc;
+                    perk.statDeltasPerMonth = p.deltas;
+                    perk.durationMonths = 0;
+                    AssetDatabase.CreateAsset(perk, path);
+                }
+            }
+
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+            Debug.Log("<color=#00ffaa>[DealToCardMigrator] Perks padrão criados com sucesso em Assets/_Project/Content/Definitions/Perks!</color>");
         }
 
         private static void PopulateCardFromDeal(CardDefinition card, ScriptableObject legacyDeal, bool isTutorial)

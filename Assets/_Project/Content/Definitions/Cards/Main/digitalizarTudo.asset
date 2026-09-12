@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 244f3de4bec46614db5e71d119057e6a, type: 3}
+  m_Name: digitalizarTudo
+  m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CardDefinition
+  id: digitalizarTudo
+  title: digitalizarTudo
+  description: "Podemos trocar todo o papel do governo por digital. E-book at\xE9
+    pra RG."
+  npcId: Candidato Populista
+  npcPrefab: {fileID: 5340672492827399196, guid: e0963aa14dba98a43938b379bb1c9335, type: 3}
+  sourceLegacyAsset: {fileID: 11400000, guid: 50322464021713d41a851ec10690bfd2, type: 2}
+  categoryTag: 
+  isTutorial: 0
+  baseWeight: 100
+  leftChoice:
+    label: Vai tudo pra nuvem, inclusive nossos dados!
+    statImpacts:
+      climaticChanges: 20
+      internationalRelations: 0
+      popularApproval: -20
+      economy: 15
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds:
+    - apagaoHackerNacional
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  rightChoice:
+    label: Papel e caneta nunca travam.
+    statImpacts:
+      climaticChanges: -20
+      internationalRelations: 0
+      popularApproval: 20
+      economy: -15
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  conditions: []

@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 244f3de4bec46614db5e71d119057e6a, type: 3}
+  m_Name: transporteGratis
+  m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CardDefinition
+  id: transporteGratis
+  title: transporteGratis
+  description: "O povo quer transporte p\xFAblico gr\xE1tis. S\xF3 custa o pre\xE7o
+    de um rim."
+  npcId: Candidato Militar
+  npcPrefab: {fileID: 3995003932205011531, guid: 9179786054c1ca64996197a586509ff2, type: 3}
+  sourceLegacyAsset: {fileID: 11400000, guid: b3b99561286dc12468670553d252ad71, type: 2}
+  categoryTag: 
+  isTutorial: 0
+  baseWeight: 100
+  leftChoice:
+    label: "Vai de gra\xE7a, mas aperta a\xED!"
+    statImpacts:
+      climaticChanges: 35
+      internationalRelations: 0
+      popularApproval: 40
+      economy: -30
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  rightChoice:
+    label: Quer moleza? Compra um carro!
+    statImpacts:
+      climaticChanges: -20
+      internationalRelations: 0
+      popularApproval: -25
+      economy: 25
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  conditions: []

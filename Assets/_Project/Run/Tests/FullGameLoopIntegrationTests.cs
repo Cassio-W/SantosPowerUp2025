@@ -70,19 +70,15 @@ namespace Mandato.Run.Tests
             var mainDeckIds = new List<string> { "main_card_1", "main_card_2" };
 
             // Cria cartas de tutorial
-            catalog["tut_1"] = CardDefinition.CreateRuntimeInstance("tut_1", "Tutorial 1", "Bem-vindo!", new ChoiceDefinition("Continuar"), new ChoiceDefinition("Continuar"));
-            catalog["tut_2"] = CardDefinition.CreateRuntimeInstance("tut_2", "Tutorial 2", "Entendido!", new ChoiceDefinition("Continuar"), new ChoiceDefinition("Continuar"));
+            catalog["tut_1"] = CardDefinition.CreateRuntimeInstance("tut_1", "Tutorial 1", "Bem-vindo!", new ChoiceDefinition("Continuar"), new ChoiceDefinition("Continuar"), isTutorial: true);
+            catalog["tut_2"] = CardDefinition.CreateRuntimeInstance("tut_2", "Tutorial 2", "Entendido!", new ChoiceDefinition("Continuar"), new ChoiceDefinition("Continuar"), isTutorial: true);
 
             // Cria cartas do deck principal
             catalog["main_card_1"] = CardDefinition.CreateRuntimeInstance("main_card_1", "Decreto 1", "Economia", new ChoiceDefinition("Aprovar"), new ChoiceDefinition("Vetar"));
             catalog["main_card_2"] = CardDefinition.CreateRuntimeInstance("main_card_2", "Decreto 2", "Saúde", new ChoiceDefinition("Aprovar"), new ChoiceDefinition("Vetar"));
 
-            // Concatena ordem inicial: tutorial no topo + deck principal
-            var initialDeckIds = new List<string>(tutorialIds);
-            initialDeckIds.AddRange(mainDeckIds);
-
             var stateMachine = new RunStateMachine(seed: 123);
-            stateMachine.StartRun(initialDeckIds, seed: 123);
+            stateMachine.StartRun(mainDeckIds, seed: 123, priorityCardIds: tutorialIds);
 
             // 1. Primeira carta puxada DEVE ser o Tutorial 1
             bool drawn1 = stateMachine.DrawAndPresentProposal(catalog);

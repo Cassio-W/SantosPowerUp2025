@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 244f3de4bec46614db5e71d119057e6a, type: 3}
+  m_Name: sacolasPlasticas
+  m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CardDefinition
+  id: sacolasPlasticas
+  title: sacolasPlasticas
+  description: "Poder\xEDamos proibir sacolas pl\xE1sticas. Mas o povo vai ter que
+    carregar compra no dente."
+  npcId: "Pol\xEDtico Influencer"
+  npcPrefab: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
+  sourceLegacyAsset: {fileID: 11400000, guid: 78f2f43c3151cb742953f891205b9d4d, type: 2}
+  categoryTag: 
+  isTutorial: 0
+  baseWeight: 100
+  leftChoice:
+    label: "Pl\xE1stico \xE9 tradi\xE7\xE3o. For\xE7a nos oceanos!"
+    statImpacts:
+      climaticChanges: 15
+      internationalRelations: 10
+      popularApproval: -20
+      economy: 0
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  rightChoice:
+    label: "Sacola agora \xE9 de pano ou l\xE1grima!"
+    statImpacts:
+      climaticChanges: -15
+      internationalRelations: -15
+      popularApproval: 20
+      economy: 0
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  conditions: []

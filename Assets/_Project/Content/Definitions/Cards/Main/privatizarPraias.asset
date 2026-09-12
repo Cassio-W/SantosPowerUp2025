@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 244f3de4bec46614db5e71d119057e6a, type: 3}
+  m_Name: privatizarPraias
+  m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CardDefinition
+  id: privatizarPraias
+  title: privatizarPraias
+  description: Uma rede de resorts internacionais quer privatizar a orla das praias
+    tropicais para turismo exclusivo de luxo. Vamos apoiar?
+  npcId: Candidato Populista
+  npcPrefab: {fileID: 5340672492827399196, guid: e0963aa14dba98a43938b379bb1c9335, type: 3}
+  sourceLegacyAsset: {fileID: 11400000, guid: b1111111111111111111111111111111, type: 2}
+  categoryTag: Praias
+  isTutorial: 0
+  baseWeight: 100
+  leftChoice:
+    label: "Privatize! Turista gringo traz d\xF3lares!"
+    statImpacts:
+      climaticChanges: -15
+      internationalRelations: 15
+      popularApproval: -25
+      economy: 25
+      corruption: 15
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds:
+    - farofaNoResort
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  rightChoice:
+    label: "Praia \xE9 patrim\xF4nio p\xFAblico e gratuito!"
+    statImpacts:
+      climaticChanges: 10
+      internationalRelations: -10
+      popularApproval: 20
+      economy: -15
+      corruption: -5
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+  conditions: []
