@@ -6,9 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/MandatoV2/MenuV2.unity
+    guid: c30009e9c5a0dac45942cdfe9b21f5a5
+  - enabled: 1
+    path: Assets/Scenes/MandatoV2/JogoV2.unity
+    guid: 62e6ace776aec0c4b8b2dd138c94a410
+  - enabled: 0
     path: Assets/Scenes/Menu 1.unity
     guid: 9f409d8f97355e3418ebca2f68712a87
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Testes/Teste.unity
     guid: 2fe83d9544a7baf4cb61b71211d6dcc2
   - enabled: 0

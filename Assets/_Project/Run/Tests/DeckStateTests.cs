@@ -73,11 +73,84 @@ namespace Mandato.Run.Tests
             var deck = new DeckState(new[] { "c1" });
 
             deck.InjectCard("c_injected", onTop: true);
-            Assert.AreEqual("c_injected", deck.drawPile[0]);
+            Assert.IsTrue(deck.priorityDrawPile.Contains("c_injected"));
 
             deck.RemoveCard("c1");
             Assert.IsFalse(deck.drawPile.Contains("c1"));
             Assert.IsTrue(deck.removedCardIds.Contains("c1"));
+        }
+
+        [Test]
+        public void DrawNextCard_FiltersIneligibleCards_AndReturnsNull_WhenNoCardEligible()
+        {
+            var cardIneligible = CardDefinition.CreateRuntimeInstance("c_blocked", "Bloqueada", "Desc", null, null);
+            cardIneligible.conditions.Add(new CardCondition
+            {
+                minMonth = 20 // Estamos no mês 1
+            });
+
+            var localCatalog = new Dictionary<string, CardDefinition>
+            {
+                ["c_blocked"] = cardIneligible
+            };
+
+            var deck = new DeckState(new[] { "c_blocked" });
+            var stats = new StatBlock();
+            var rng = new Random(123);
+
+            // Não deve retornar carta com condição falha
+            CardDefinition drawn = deck.DrawNextCard(localCatalog, stats, currentMonth: 1, rng: rng);
+            Assert.IsNull(drawn);
+            Assert.AreEqual(1, deck.drawPile.Count);
+            Assert.AreEqual(0, deck.discardPile.Count);
+        }
+
+        [Test]
+        public void DrawNextCard_UsesWeightedSelection_DeterministicallyWithSeed()
+        {
+            var heavyCard = CardDefinition.CreateRuntimeInstance("c_heavy", "Pesada", "Desc", null, null);
+            heavyCard.baseWeight = 1000;
+
+            var lightCard = CardDefinition.CreateRuntimeInstance("c_light", "Leve", "Desc", null, null);
+            lightCard.baseWeight = 1;
+
+            var localCatalog = new Dictionary<string, CardDefinition>
+            {
+                ["c_heavy"] = heavyCard,
+                ["c_light"] = lightCard
+            };
+
+            int heavyDrawnCount = 0;
+            int totalTrials = 100;
+
+            for (int i = 0; i < totalTrials; i++)
+            {
+                var deck = new DeckState(new[] { "c_heavy", "c_light" });
+                var rng = new Random(i + 1);
+                var drawn = deck.DrawNextCard(localCatalog, new StatBlock(), 1, rng);
+                if (drawn.id == "c_heavy") heavyDrawnCount++;
+            }
+
+            // Com peso 1000 vs 1, a carta pesada deve ser sorteada na imensa maioria das vezes (>90%)
+            Assert.GreaterOrEqual(heavyDrawnCount, 90);
+        }
+
+        [Test]
+        public void InjectCard_DoesNotReinject_PermanentlyRemovedCard_UnlessForced()
+        {
+            var deck = new DeckState(new[] { "c1", "c2" });
+            deck.RemoveCard("c1");
+
+            Assert.IsTrue(deck.removedCardIds.Contains("c1"));
+
+            // Tentativa padrão de reinjeção é bloqueada
+            deck.InjectCard("c1", onTop: true, forceRestore: false);
+            Assert.IsFalse(deck.priorityDrawPile.Contains("c1") || deck.drawPile.Contains("c1"));
+
+            // Tentativa com forceRestore restaura
+            deck.InjectCard("c1", onTop: true, forceRestore: true);
+            Assert.IsTrue(deck.priorityDrawPile.Contains("c1") || deck.drawPile.Contains("c1"));
+            Assert.IsFalse(deck.removedCardIds.Contains("c1"));
         }
     }
 }

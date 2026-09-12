@@ -58,7 +58,7 @@ namespace Mandato.Run.Tests
             Assert.AreEqual(1, run.decisionHistory.Count);
 
             // Injeção de carta e concessão de perk
-            Assert.IsTrue(deck.drawPile.Contains("card_consequence_1"));
+            Assert.IsTrue(deck.priorityDrawPile.Contains("card_consequence_1") || deck.drawPile.Contains("card_consequence_1"));
             Assert.Contains("card_consequence_1", report.injectedCardIds);
             Assert.IsTrue(run.activePerkIds.Contains("perk_reformista"));
         }
@@ -116,6 +116,17 @@ namespace Mandato.Run.Tests
             Assert.IsTrue(phases.Contains(RunPhase.AdvancingTime));
             Assert.AreEqual(RunPhase.PreparingRun, stateMachine.CurrentPhase);
             Assert.AreEqual(2, stateMachine.RunState.calendar.currentMonthIndex);
+        }
+
+        [Test]
+        public void Resolve_InvalidChoiceIndex_ReturnsNull()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+
+            Assert.IsNull(DecisionResolver.Resolve(run, deck, testCard, choiceIndex: -1));
+            Assert.IsNull(DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 2));
+            Assert.IsNull(DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 99));
         }
     }
 }

@@ -37,15 +37,15 @@ Material:
     - _GlitchBurst: 0
     - _GlitchFrequency: 1
     - _GlitchIntensity: 0.05
-    - _MaskScale: 960
-    - _NoiseIntensity: 0.06
+    - _MaskScale: 292.4
+    - _NoiseIntensity: 0.023
     - _NoiseSpeed: 18
     - _ScanlineCount: 540
-    - _ScanlineIntensity: 0
+    - _ScanlineIntensity: 0.1
     - _ScanlineSpeed: 0.4
-    - _ShadowMaskIntensity: 0.2
+    - _ShadowMaskIntensity: 0.18
     - _VignetteIntensity: 0.4
     m_Colors:
-    - _ColorTint: {r: 1, g: 1, b: 1, a: 1}
+    - _ColorTint: {r: 0.61, g: 0.961, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

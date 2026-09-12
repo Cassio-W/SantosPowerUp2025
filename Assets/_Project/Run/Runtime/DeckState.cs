@@ -8,11 +8,12 @@ namespace Mandato.Run
     [Serializable]
     public class DeckState
     {
+        public List<string> priorityDrawPile = new List<string>();
         public List<string> drawPile = new List<string>();
         public List<string> discardPile = new List<string>();
         public List<string> removedCardIds = new List<string>();
 
-        public int TotalActiveCards => drawPile.Count + discardPile.Count;
+        public int TotalActiveCards => priorityDrawPile.Count + drawPile.Count + discardPile.Count;
 
         public DeckState() { }
 
@@ -23,9 +24,15 @@ namespace Mandato.Run
 
         public void Initialize(IEnumerable<string> initialCardIds, int seed = 0, IEnumerable<string> priorityCardIds = null)
         {
+            priorityDrawPile.Clear();
             drawPile.Clear();
             discardPile.Clear();
             removedCardIds.Clear();
+
+            if (priorityCardIds != null)
+            {
+                priorityDrawPile.AddRange(priorityCardIds);
+            }
 
             if (initialCardIds != null)
             {
@@ -35,16 +42,6 @@ namespace Mandato.Run
             if (seed != 0)
             {
                 Shuffle(new Random(seed));
-            }
-
-            // Insere as cartas prioritárias (ex: tutorial) garantidamente no topo na ordem correta
-            if (priorityCardIds != null)
-            {
-                var priorityList = new List<string>(priorityCardIds);
-                for (int i = priorityList.Count - 1; i >= 0; i--)
-                {
-                    drawPile.Insert(0, priorityList[i]);
-                }
             }
         }
 
@@ -63,52 +60,128 @@ namespace Mandato.Run
             IReadOnlyDictionary<string, CardDefinition> catalog,
             StatBlock stats,
             int currentMonth,
-            Random rng)
+            Random rng,
+            IEnumerable<string> activePerkIds = null)
         {
-            if (catalog == null || (drawPile.Count == 0 && discardPile.Count == 0))
+            if (catalog == null)
                 return null;
 
-            // Se a pilha de compra esvaziar, reembaralha o descarte
+            if (rng == null)
+            {
+                rng = new Random();
+            }
+
+            // 1. Primeiro verifica se há cartas na fila prioritária (ex: Tutorial ou injetadas no topo)
+            for (int i = 0; i < priorityDrawPile.Count; i++)
+            {
+                string priorityId = priorityDrawPile[i];
+                if (catalog.TryGetValue(priorityId, out CardDefinition priorityCard) && priorityCard != null)
+                {
+                    if (priorityCard.AreConditionsMet(stats, currentMonth, activePerkIds))
+                    {
+                        priorityDrawPile.RemoveAt(i);
+                        discardPile.Add(priorityId);
+                        return priorityCard;
+                    }
+                }
+            }
+
+            if (drawPile.Count == 0 && discardPile.Count == 0)
+                return null;
+
+            // 2. Se a pilha de compra padrão esvaziar, reembaralha o descarte
             if (drawPile.Count == 0 && discardPile.Count > 0)
             {
                 ReshuffleDiscardIntoDraw(rng);
             }
 
-            // Procura a primeira carta da pilha cujas condições sejam satisfeitas
-            for (int i = 0; i < drawPile.Count; i++)
+            CardDefinition drawn = TryDrawEligibleCard(catalog, stats, currentMonth, rng, activePerkIds);
+            if (drawn != null)
             {
-                string cardId = drawPile[i];
-                if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
-                {
-                    if (card.AreConditionsMet(stats, currentMonth))
-                    {
-                        drawPile.RemoveAt(i);
-                        discardPile.Add(cardId);
-                        return card;
-                    }
-                }
+                return drawn;
             }
 
-            // Fallback: se nenhuma carta da pilha passou nas condições, pega a primeira disponível
-            if (drawPile.Count > 0)
+            // Se não encontrou na pilha de compra mas há descarte, tenta reembaralhar o descarte
+            if (discardPile.Count > 0)
             {
-                string fallbackId = drawPile[0];
-                drawPile.RemoveAt(0);
-                discardPile.Add(fallbackId);
-                catalog.TryGetValue(fallbackId, out CardDefinition fallbackCard);
-                return fallbackCard;
+                ReshuffleDiscardIntoDraw(rng);
+                return TryDrawEligibleCard(catalog, stats, currentMonth, rng, activePerkIds);
             }
 
             return null;
         }
 
-        public void InjectCard(string cardId, bool onTop = true)
+        private CardDefinition TryDrawEligibleCard(
+            IReadOnlyDictionary<string, CardDefinition> catalog,
+            StatBlock stats,
+            int currentMonth,
+            Random rng,
+            IEnumerable<string> activePerkIds)
+        {
+            if (drawPile.Count == 0) return null;
+
+            var eligibleIndices = new List<int>();
+            var eligibleWeights = new List<int>();
+            int totalWeight = 0;
+
+            for (int i = 0; i < drawPile.Count; i++)
+            {
+                string cardId = drawPile[i];
+                if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
+                {
+                    if (card.AreConditionsMet(stats, currentMonth, activePerkIds))
+                    {
+                        eligibleIndices.Add(i);
+                        int weight = Math.Max(1, card.baseWeight);
+                        eligibleWeights.Add(weight);
+                        totalWeight += weight;
+                    }
+                }
+            }
+
+            if (eligibleIndices.Count == 0 || totalWeight <= 0)
+            {
+                return null;
+            }
+
+            // Sorteio ponderado pelo peso base da carta
+            int roll = rng.Next(totalWeight);
+            int accumulated = 0;
+            int chosenEligibleIndex = 0;
+
+            for (int k = 0; k < eligibleWeights.Count; k++)
+            {
+                accumulated += eligibleWeights[k];
+                if (roll < accumulated)
+                {
+                    chosenEligibleIndex = k;
+                    break;
+                }
+            }
+
+            int drawIndex = eligibleIndices[chosenEligibleIndex];
+            string chosenId = drawPile[drawIndex];
+            drawPile.RemoveAt(drawIndex);
+            discardPile.Add(chosenId);
+            return catalog[chosenId];
+        }
+
+        public void InjectCard(string cardId, bool onTop = true, bool forceRestore = false)
         {
             if (string.IsNullOrEmpty(cardId)) return;
 
+            if (removedCardIds.Contains(cardId))
+            {
+                if (!forceRestore)
+                {
+                    return;
+                }
+                removedCardIds.Remove(cardId);
+            }
+
             if (onTop)
             {
-                drawPile.Insert(0, cardId);
+                priorityDrawPile.Insert(0, cardId);
             }
             else
             {
@@ -120,6 +193,7 @@ namespace Mandato.Run
         {
             if (string.IsNullOrEmpty(cardId)) return;
 
+            priorityDrawPile.RemoveAll(id => id == cardId);
             drawPile.RemoveAll(id => id == cardId);
             discardPile.RemoveAll(id => id == cardId);
 
@@ -134,6 +208,13 @@ namespace Mandato.Run
             if (string.IsNullOrEmpty(npcId) || catalog == null) return;
 
             var toRemove = new List<string>();
+            foreach (var cardId in priorityDrawPile)
+            {
+                if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null && string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase))
+                {
+                    toRemove.Add(cardId);
+                }
+            }
             foreach (var cardId in drawPile)
             {
                 if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null && string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase))
@@ -160,6 +241,10 @@ namespace Mandato.Run
             if (predicate == null) return;
 
             var toRemove = new List<string>();
+            foreach (var cardId in priorityDrawPile)
+            {
+                if (predicate(cardId)) toRemove.Add(cardId);
+            }
             foreach (var cardId in drawPile)
             {
                 if (predicate(cardId)) toRemove.Add(cardId);
@@ -187,6 +272,7 @@ namespace Mandato.Run
         public DeckState Clone()
         {
             var clone = new DeckState();
+            clone.priorityDrawPile.AddRange(priorityDrawPile);
             clone.drawPile.AddRange(drawPile);
             clone.discardPile.AddRange(discardPile);
             clone.removedCardIds.AddRange(removedCardIds);

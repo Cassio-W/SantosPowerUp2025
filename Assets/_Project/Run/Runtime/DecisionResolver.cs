@@ -58,6 +58,7 @@ namespace Mandato.Run
             int choiceIndex)
         {
             if (runState == null || card == null) return null;
+            if (choiceIndex < 0 || choiceIndex > 1) return null;
 
             ChoiceDefinition choice = card.GetChoice(choiceIndex);
             if (choice == null) return null;
@@ -115,9 +116,9 @@ namespace Mandato.Run
             }
 
             // 4. Concede perk se houver
-            if (!string.IsNullOrEmpty(choice.grantPerkId) && !runState.activePerkIds.Contains(choice.grantPerkId))
+            if (!string.IsNullOrEmpty(choice.grantPerkId))
             {
-                runState.activePerkIds.Add(choice.grantPerkId);
+                runState.GrantPerk(choice.grantPerkId);
             }
 
             // 5. Registra no histórico da run

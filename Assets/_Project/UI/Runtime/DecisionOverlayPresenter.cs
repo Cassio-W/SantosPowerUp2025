@@ -13,7 +13,7 @@ namespace Mandato.UI
 
         public event Action<int> OnChoiceSelected;
 
-        private UIDocument uiDocument;
+        [SerializeField] private UIDocument uiDocument;
         private VisualElement decisionContainer;
         private VisualElement vignetteCorruption;
         private VisualElement wrapperApprove;
@@ -52,7 +52,7 @@ namespace Mandato.UI
 
             if (uiDocument == null)
             {
-                var docs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+                var docs = FindObjectsByType<UIDocument>(FindObjectsInactive.Include, FindObjectsSortMode.None);
                 foreach (var d in docs)
                 {
                     if (d != null && d.visualTreeAsset != null && d.visualTreeAsset.name.IndexOf("Decision", StringComparison.OrdinalIgnoreCase) >= 0)

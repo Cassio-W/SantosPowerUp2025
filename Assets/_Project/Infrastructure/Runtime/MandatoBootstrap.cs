@@ -143,6 +143,16 @@ namespace Mandato.Infrastructure
             }
         }
 
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            if (string.IsNullOrEmpty(mainMenuSceneName))
+            {
+                mainMenuSceneName = "MenuV2";
+            }
+        }
+#endif
+
         private void ApplyLegacyCanvasSuppression()
         {
             if (!disableLegacyCanvas) return;
@@ -168,6 +178,16 @@ namespace Mandato.Infrastructure
                     }
                 }
             }
+
+            // Desativa componentes UIManager legados na cena para evitar execução concorrente
+            var legacyUIManagers = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var mb in legacyUIManagers)
+            {
+                if (mb != null && mb.GetType().Name == "UIManager")
+                {
+                    mb.enabled = false;
+                }
+            }
         }
 
         private void AutoDetectPresenters()
@@ -185,17 +205,19 @@ namespace Mandato.Infrastructure
             // 2. Papel Físico 3D
             if (paperPresenter == null)
             {
-                paperPresenter = FindFirstObjectByType<PaperDocumentPresenter>();
+                paperPresenter = FindFirstObjectByType<PaperDocumentPresenter>(FindObjectsInactive.Include);
                 if (paperPresenter == null)
                 {
                     var paperObj = GameObject.Find("Papel") ?? GameObject.Find("Paper");
                     if (paperObj != null)
                     {
-                        paperPresenter = paperObj.AddComponent<PaperDocumentPresenter>();
+                        paperPresenter = paperObj.GetComponent<PaperDocumentPresenter>() ?? paperObj.AddComponent<PaperDocumentPresenter>();
                     }
                     else
                     {
-                        paperPresenter = gameObject.AddComponent<PaperDocumentPresenter>();
+                        var go = new GameObject("PaperPresenter");
+                        go.transform.SetParent(transform);
+                        paperPresenter = go.AddComponent<PaperDocumentPresenter>();
                     }
                 }
             }
@@ -203,17 +225,19 @@ namespace Mandato.Infrastructure
             // 3. Monitor Retrô
             if (retroMonitorPresenter == null)
             {
-                retroMonitorPresenter = FindFirstObjectByType<RetroMonitorPresenter>();
+                retroMonitorPresenter = FindFirstObjectByType<RetroMonitorPresenter>(FindObjectsInactive.Include);
                 if (retroMonitorPresenter == null)
                 {
                     var monitorObj = GameObject.Find("Monitor") ?? GameObject.Find("RetroMonitor");
                     if (monitorObj != null)
                     {
-                        retroMonitorPresenter = monitorObj.AddComponent<RetroMonitorPresenter>();
+                        retroMonitorPresenter = monitorObj.GetComponent<RetroMonitorPresenter>() ?? monitorObj.AddComponent<RetroMonitorPresenter>();
                     }
                     else
                     {
-                        retroMonitorPresenter = gameObject.AddComponent<RetroMonitorPresenter>();
+                        var go = new GameObject("RetroMonitorPresenter");
+                        go.transform.SetParent(transform);
+                        retroMonitorPresenter = go.AddComponent<RetroMonitorPresenter>();
                     }
                 }
             }
@@ -221,17 +245,18 @@ namespace Mandato.Infrastructure
             // 4. Interface de Decisão
             if (decisionOverlayPresenter == null)
             {
-                decisionOverlayPresenter = FindFirstObjectByType<DecisionOverlayPresenter>();
+                decisionOverlayPresenter = FindFirstObjectByType<DecisionOverlayPresenter>(FindObjectsInactive.Include);
                 if (decisionOverlayPresenter == null)
                 {
-                    var canvasObj = GameObject.Find("Canvas") ?? GameObject.Find("UIManager");
-                    if (canvasObj != null)
+                    var decisionObj = GameObject.Find("DecisionOverlayUI") ?? GameObject.Find("DecisionUI") ?? GameObject.Find("Canvas");
+                    if (decisionObj != null)
                     {
-                        decisionOverlayPresenter = canvasObj.AddComponent<DecisionOverlayPresenter>();
+                        decisionOverlayPresenter = decisionObj.GetComponent<DecisionOverlayPresenter>() ?? decisionObj.AddComponent<DecisionOverlayPresenter>();
                     }
                     else
                     {
-                        decisionOverlayPresenter = gameObject.AddComponent<DecisionOverlayPresenter>();
+                        var go = new GameObject("DecisionOverlayUI");
+                        decisionOverlayPresenter = go.AddComponent<DecisionOverlayPresenter>();
                     }
                 }
             }
@@ -239,10 +264,19 @@ namespace Mandato.Infrastructure
             // 5. Tela de Fim de Jogo
             if (endScreenPresenter == null)
             {
-                endScreenPresenter = FindFirstObjectByType<EndScreenPresenter>();
+                endScreenPresenter = FindFirstObjectByType<EndScreenPresenter>(FindObjectsInactive.Include);
                 if (endScreenPresenter == null)
                 {
-                    endScreenPresenter = gameObject.AddComponent<EndScreenPresenter>();
+                    var endScreenObj = GameObject.Find("EndScreenUI") ?? GameObject.Find("EndScreen");
+                    if (endScreenObj != null)
+                    {
+                        endScreenPresenter = endScreenObj.GetComponent<EndScreenPresenter>() ?? endScreenObj.AddComponent<EndScreenPresenter>();
+                    }
+                    else
+                    {
+                        var go = new GameObject("EndScreenUI");
+                        endScreenPresenter = go.AddComponent<EndScreenPresenter>();
+                    }
                 }
             }
 
@@ -263,17 +297,18 @@ namespace Mandato.Infrastructure
             // 7. Flip-Phone
             if (flipPhonePresenter == null)
             {
-                flipPhonePresenter = FindFirstObjectByType<FlipPhonePresenter>();
+                flipPhonePresenter = FindFirstObjectByType<FlipPhonePresenter>(FindObjectsInactive.Include);
                 if (flipPhonePresenter == null)
                 {
-                    var phoneObj = GameObject.Find("FlipPhone") ?? GameObject.Find("Phone") ?? GameObject.Find("Celular");
+                    var phoneObj = GameObject.Find("Celular") ?? GameObject.Find("FlipPhone") ?? GameObject.Find("Phone");
                     if (phoneObj != null)
                     {
-                        flipPhonePresenter = phoneObj.AddComponent<FlipPhonePresenter>();
+                        flipPhonePresenter = phoneObj.GetComponent<FlipPhonePresenter>() ?? phoneObj.AddComponent<FlipPhonePresenter>();
                     }
                     else
                     {
-                        flipPhonePresenter = gameObject.AddComponent<FlipPhonePresenter>();
+                        var go = new GameObject("FlipPhoneUI");
+                        flipPhonePresenter = go.AddComponent<FlipPhonePresenter>();
                     }
                 }
             }
@@ -509,11 +544,24 @@ namespace Mandato.Infrastructure
 
         public bool HasRemainingTutorialCards()
         {
-            if (StateMachine == null || StateMachine.DeckState == null || StateMachine.DeckState.drawPile == null) return false;
-            foreach (var cardId in StateMachine.DeckState.drawPile)
+            if (StateMachine == null || StateMachine.DeckState == null) return false;
+
+            if (StateMachine.DeckState.priorityDrawPile != null)
             {
-                if (IsTutorialCard(cardId)) return true;
+                foreach (var cardId in StateMachine.DeckState.priorityDrawPile)
+                {
+                    if (IsTutorialCard(cardId)) return true;
+                }
             }
+
+            if (StateMachine.DeckState.drawPile != null)
+            {
+                foreach (var cardId in StateMachine.DeckState.drawPile)
+                {
+                    if (IsTutorialCard(cardId)) return true;
+                }
+            }
+
             return false;
         }
 
@@ -662,17 +710,33 @@ namespace Mandato.Infrastructure
 
             SyncCanvasUI();
 
-            // Tutorial contínuo avança direto sem delay
+            // Tutorial contínuo avança direto sem delay e sem exigir tecla entre diálogos
             bool isTutorial = report != null ? IsTutorialCard(report.cardId) : IsTutorialCard(StateMachine.CurrentCard);
             bool hasMoreTutorial = isTutorial && HasRemainingTutorialCards();
 
-            if (isTutorial && hasMoreTutorial)
+            if (isTutorial)
             {
-                // Usa sempre coroutine (mínimo 1 frame de delay) para não colidir com PresentConsequencesRoutine em execução
-                if (gameObject.activeInHierarchy && isActiveAndEnabled)
-                    StartCoroutine(DrawNextProposalRoutine(0.05f));
+                if (hasMoreTutorial)
+                {
+                    // Diálogos de tutorial avançam instantaneamente para o próximo diálogo
+                    StartCoroutine(DrawNextProposalRoutine(0.02f));
+                }
                 else
-                    StartCoroutine(DrawNextProposalRoutine(0.05f)); // mesmo se inativo, agenda para o próximo frame
+                {
+                    // Concluiu todos os diálogos de tutorial: agora sim prepara o gabinete para receber o primeiro visitante
+                    float endDelay = Mathf.Max(0.2f, delayBetweenProposals);
+                    pendingProposalDelay = endDelay;
+
+                    if (requireSpaceToCallNextNpc)
+                    {
+                        isAwaitingSpaceForNextNpc = true;
+                        Debug.Log("<color=#00e5ff>[MandatoBootstrap]</color> ⏳ <b>Tutorial concluído! Gabinete livre.</b> Pressione <b>[ESPAÇO]</b> para autorizar a entrada do primeiro visitante.");
+                    }
+                    else
+                    {
+                        StartCoroutine(DrawNextProposalRoutine(endDelay));
+                    }
+                }
                 return;
             }
 

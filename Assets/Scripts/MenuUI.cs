@@ -6,7 +6,8 @@ using UnityEngine.UI;
 
 public class MenuUI : MonoBehaviour
 {
-    [SerializeField] int numCenaJogar;
+    [SerializeField] int numCenaJogar = 1;
+    [SerializeField] string nomeCenaJogar = "JogoV2";
     [SerializeField] GameObject painelCreditos;
     [SerializeField] GameObject painelMenu;
     bool boolPainelCreditos = false;
@@ -24,7 +25,14 @@ public class MenuUI : MonoBehaviour
 
     public void Jogar()
     {
-        SceneManager.LoadScene(numCenaJogar);
+        if (!string.IsNullOrEmpty(nomeCenaJogar))
+        {
+            SceneManager.LoadScene(nomeCenaJogar);
+        }
+        else
+        {
+            SceneManager.LoadScene(numCenaJogar);
+        }
     }
 
     public void Sair()

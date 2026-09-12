@@ -232,7 +232,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &66615433
 Transform:
   m_ObjectHideFlags: 0
@@ -6554,7 +6554,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &474556740
 Transform:
   m_ObjectHideFlags: 0
@@ -9673,7 +9673,7 @@ MonoBehaviour:
   presentationCoordinator: {fileID: 0}
   paperPresenter: {fileID: 0}
   retroMonitorPresenter: {fileID: 0}
-  decisionOverlayPresenter: {fileID: 0}
+  decisionOverlayPresenter: {fileID: 1992211295}
   endScreenPresenter: {fileID: 0}
   flipPhonePresenter: {fileID: 0}
   startingActions: []
@@ -11957,7 +11957,7 @@ GameObject:
   - component: {fileID: 1992211295}
   - component: {fileID: 1992211297}
   m_Layer: 0
-  m_Name: UIManager
+  m_Name: DecisionOverlayUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11972,53 +11972,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 1992211294}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e1766a355296f574e9f86d16c6ae0f30, type: 3}
+  m_Script: {fileID: 11500000, guid: 07bcae9283a167c48b8af06cfc1dc341, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: 
-  decisionUIDocument: {fileID: 0}
-  decisionUxmlAsset: {fileID: 0}
-  decisionPanelSettings: {fileID: 0}
-  dealPanel: {fileID: 1404911417}
-  showDescriptionPanel: 0
-  physicalPaper: {fileID: 0}
-  paperGameObject: {fileID: 0}
-  paperDescriptionText: {fileID: 0}
-  paperNameText: {fileID: 0}
-  decisionButtonsPanel: {fileID: 0}
-  approveButton: {fileID: 0}
-  rejectButton: {fileID: 0}
-  approveButtonText: {fileID: 0}
-  rejectButtonText: {fileID: 0}
-  playerAnimator: {fileID: 0}
-  dealAnimationName: LevantaMao
-  defaultAnimationName: None
-  dealAnimationReverseName: 
-  dealAnimationDelay: 0
-  playRandomHandAnimation: 1
-  randomHandAnimations:
-  - Joia
-  - Dislike
-  - Direita
-  - Esquerda
-  - Aponta
-  defaultRandomHandDuration: 1
-  datePanel: {fileID: 1755341072}
-  corruptionPanel: {fileID: 598048641}
-  gameOverPanel: {fileID: 438976841}
-  nameText: {fileID: 842853979}
-  descriptionText: {fileID: 1901293440}
-  leftAnswerText: {fileID: 1576123253}
-  rightAnswerText: {fileID: 716514723}
-  dateText: {fileID: 675285402}
-  gameOverText: {fileID: 2100126939}
-  climateSlider: {fileID: 1932534143}
-  relationsSlider: {fileID: 1627408648}
-  approvalSlider: {fileID: 1902365862}
-  economySlider: {fileID: 1293679839}
-  corruptionSlider: {fileID: 2136031359}
-  perks: []
-  animationSpeed: 2
-  easeType: 2
+  m_EditorClassIdentifier: Mandato.UI::Mandato.UI.DecisionOverlayPresenter
+  enableKeyboardShortcuts: 1
+  uiDocument: {fileID: 0}
 --- !u!4 &1992211296
 Transform:
   m_ObjectHideFlags: 0

@@ -71,5 +71,29 @@ namespace Mandato.Content.Tests
             // Mês dentro e economia adequada
             Assert.IsTrue(card.AreConditionsMet(healthyEcoStats, 10));
         }
+
+        [Test]
+        public void CardConditions_EvaluateRequiredPerk_Correctly()
+        {
+            var card = CardDefinition.CreateRuntimeInstance("test_perk", "Teste Perk", "Desc", null, null);
+            card.conditions.Add(new CardCondition
+            {
+                requiredPerkId = "perk_alianca_centro"
+            });
+
+            var stats = new StatBlock(50, 50, 50, 50, 0);
+
+            // Sem perks ativos
+            Assert.IsFalse(card.AreConditionsMet(stats, 1, null));
+            Assert.IsFalse(card.AreConditionsMet(stats, 1, new string[] { }));
+
+            // Com perk diferente
+            Assert.IsFalse(card.AreConditionsMet(stats, 1, new[] { "perk_outro" }));
+
+            // Com o perk correto
+            Assert.IsTrue(card.AreConditionsMet(stats, 1, new[] { "perk_alianca_centro" }));
+            // Case-insensitive
+            Assert.IsTrue(card.AreConditionsMet(stats, 1, new[] { "PERK_ALIANCA_CENTRO" }));
+        }
     }
 }

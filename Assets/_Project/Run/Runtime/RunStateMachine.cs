@@ -61,7 +61,7 @@ namespace Mandato.Run
                 return false;
             }
 
-            CurrentCard = DeckState.DrawNextCard(catalog, RunState.stats, RunState.calendar.currentMonthIndex, rng);
+            CurrentCard = DeckState.DrawNextCard(catalog, RunState.stats, RunState.calendar.currentMonthIndex, rng, RunState.activePerkIds);
             if (CurrentCard == null)
             {
                 return false;

@@ -47,7 +47,7 @@ namespace Mandato.Content
         public int maxStatValue = 100;
         public string requiredPerkId = string.Empty;
 
-        public bool IsMet(StatBlock stats, int currentMonth)
+        public bool IsMet(StatBlock stats, int currentMonth, IEnumerable<string> activePerkIds = null)
         {
             if (currentMonth < minMonth || currentMonth > maxMonth)
                 return false;
@@ -57,6 +57,23 @@ namespace Mandato.Content
                 int val = stats.Get(requiredStat);
                 if (val < minStatValue || val > maxStatValue)
                     return false;
+            }
+
+            if (!string.IsNullOrEmpty(requiredPerkId))
+            {
+                bool hasPerk = false;
+                if (activePerkIds != null)
+                {
+                    foreach (var p in activePerkIds)
+                    {
+                        if (string.Equals(p, requiredPerkId, StringComparison.OrdinalIgnoreCase))
+                        {
+                            hasPerk = true;
+                            break;
+                        }
+                    }
+                }
+                if (!hasPerk) return false;
             }
 
             return true;
@@ -83,14 +100,14 @@ namespace Mandato.Content
 
         public ChoiceDefinition GetChoice(int index) => index == 0 ? leftChoice : rightChoice;
 
-        public bool AreConditionsMet(StatBlock stats, int currentMonth)
+        public bool AreConditionsMet(StatBlock stats, int currentMonth, IEnumerable<string> activePerkIds = null)
         {
             if (conditions == null || conditions.Count == 0)
                 return true;
 
             for (int i = 0; i < conditions.Count; i++)
             {
-                if (conditions[i] != null && !conditions[i].IsMet(stats, currentMonth))
+                if (conditions[i] != null && !conditions[i].IsMet(stats, currentMonth, activePerkIds))
                     return false;
             }
             return true;
