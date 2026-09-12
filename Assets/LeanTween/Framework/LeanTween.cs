@@ -498,6 +498,8 @@ public class LeanTween : MonoBehaviour {
         }
     }
 
+    public static bool isInitialised => tweens != null;
+
     /**
     * <summary>Cancels all tweens</summary>
     * 
@@ -509,11 +511,11 @@ public class LeanTween : MonoBehaviour {
         cancelAll(false);
     }
     public static void cancelAll(bool callComplete){
-        init();
+        if (tweens == null) return;
         for (int i = 0; i <= tweenMaxSearch; i++)
         {
-            if (tweens[i].trans != null){
-                if (callComplete && tweens[i].optional.onComplete != null)
+            if (tweens[i] != null && tweens[i].trans != null){
+                if (callComplete && tweens[i].optional != null && tweens[i].optional.onComplete != null)
                     tweens[i].optional.onComplete();
                 removeTween(i);
             }
@@ -533,12 +535,12 @@ public class LeanTween : MonoBehaviour {
         cancel( gameObject, false);
     }
     public static void cancel( GameObject gameObject, bool callOnComplete ){
-        init();
+        if (tweens == null || gameObject == null) return;
         Transform trans = gameObject.transform;
         for(int i = 0; i <= tweenMaxSearch; i++){
             LTDescr tween = tweens[i];
             if(tween!=null && tween.toggle && tween.trans==trans){
-                if (callOnComplete && tween.optional.onComplete != null)
+                if (callOnComplete && tween.optional != null && tween.optional.onComplete != null)
                     tween.optional.onComplete();
                 removeTween(i);
             }
@@ -546,28 +548,15 @@ public class LeanTween : MonoBehaviour {
     }
 
     public static void cancel( RectTransform rect ){
-        cancel( rect.gameObject, false);
+        if (rect != null) cancel( rect.gameObject, false);
     }
 
-//  public static void cancel( GameObject gameObject, int uniqueId ){
-//      if(uniqueId>=0){
-//          init();
-//          int backId = uniqueId & 0xFFFF;
-//          int backCounter = uniqueId >> 16;
-//          // Debug.Log("uniqueId:"+uniqueId+ " id:"+backId +" counter:"+backCounter + " setCounter:"+ tweens[backId].counter + " tweens[id].type:"+tweens[backId].type);
-//          if(tweens[backId].trans==null || (tweens[backId].trans.gameObject == gameObject && tweens[backId].counter==backCounter))
-//              removeTween((int)backId);
-//      }
-//  }
-
     public static void cancel( GameObject gameObject, int uniqueId, bool callOnComplete = false ){
-        if(uniqueId>=0){
-            init();
+        if(uniqueId>=0 && tweens != null){
             int backId = uniqueId & 0xFFFF;
             int backCounter = uniqueId >> 16;
-                // Debug.Log("uniqueId:"+uniqueId+ " id:"+backId +" counter:"+backCounter + " setCounter:"+ tw     eens[backId].counter + " tweens[id].type:"+tweens[backId].type);
-            if(tweens[backId].trans==null || (tweens[backId].trans.gameObject == gameObject && tweens[backId].counter==backCounter)) {
-                if (callOnComplete && tweens[backId].optional.onComplete != null)
+            if(backId < tweens.Length && tweens[backId] != null && (tweens[backId].trans==null || (tweens[backId].trans.gameObject == gameObject && tweens[backId].counter==backCounter))) {
+                if (callOnComplete && tweens[backId].optional != null && tweens[backId].optional.onComplete != null)
                     tweens[backId].optional.onComplete();
                 removeTween((int)backId);
             }
@@ -575,12 +564,10 @@ public class LeanTween : MonoBehaviour {
     }
 
     public static void cancel( LTRect ltRect, int uniqueId ){
-        if(uniqueId>=0){
-            init();
+        if(uniqueId>=0 && tweens != null){
             int backId = uniqueId & 0xFFFF;
             int backCounter = uniqueId >> 16;
-            // Debug.Log("uniqueId:"+uniqueId+ " id:"+backId +" action:"+(TweenAction)backType + " tweens[id].type:"+tweens[backId].type);
-            if(tweens[backId]._optional.ltRect == ltRect && tweens[backId].counter==backCounter)
+            if(backId < tweens.Length && tweens[backId] != null && tweens[backId]._optional != null && tweens[backId]._optional.ltRect == ltRect && tweens[backId].counter==backCounter)
                 removeTween((int)backId);
         }
     }
@@ -598,29 +585,29 @@ public class LeanTween : MonoBehaviour {
         cancel( uniqueId, false);
     }
     public static void cancel( int uniqueId, bool callOnComplete ){
-        if(uniqueId>=0){
-            init();
+        if(uniqueId>=0 && tweens != null){
             int backId = uniqueId & 0xFFFF;
             int backCounter = uniqueId >> 16;
             if (backId > tweens.Length - 1) { // sequence
                 int sequenceId = backId - tweens.Length;
-                LTSeq seq = sequences[sequenceId];
-                // Debug.Log("sequenceId:" + sequenceId+" maxSequences:"+maxSequences+" prev:"+seq.previous);
-
-                for (int i = 0; i < maxSequences; i++) {
-                    if (seq.current.tween != null) {
-                        int tweenId = seq.current.tween.uniqueId;
-                        int tweenIndex = tweenId & 0xFFFF;
-                        removeTween(tweenIndex);
+                if (sequences != null && sequenceId >= 0 && sequenceId < sequences.Length) {
+                    LTSeq seq = sequences[sequenceId];
+                    if (seq != null) {
+                        for (int i = 0; i < maxSequences; i++) {
+                            if (seq.current.tween != null) {
+                                int tweenId = seq.current.tween.uniqueId;
+                                int tweenIndex = tweenId & 0xFFFF;
+                                removeTween(tweenIndex);
+                            }
+                            if (seq.current.previous == null)
+                                break;
+                            seq.current = seq.current.previous;
+                        }
                     }
-                    if (seq.current.previous == null)
-                        break;
-                    seq.current = seq.current.previous;
                 }
             } else { // tween
-                // Debug.Log("uniqueId:"+uniqueId+ " id:"+backId +" action:"+(TweenAction)backType + " tweens[id].type:"+tweens[backId].type);
-                if (tweens[backId].counter == backCounter) {
-                    if (callOnComplete && tweens[backId].optional.onComplete != null)
+                if (backId < tweens.Length && tweens[backId] != null && tweens[backId].counter == backCounter) {
+                    if (callOnComplete && tweens[backId].optional != null && tweens[backId].optional.onComplete != null)
                         tweens[backId].optional.onComplete();
                     removeTween((int)backId);
                 }

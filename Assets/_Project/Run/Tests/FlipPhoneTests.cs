@@ -204,5 +204,28 @@ namespace Mandato.Run.Tests
             Assert.IsTrue(report.success);
             Assert.IsTrue(report.dismissedCurrentProposal);
         }
+
+        [Test]
+        public void StateMachine_DismissCurrentProposal_ResetsCurrentCardAndPreparesNextTurn()
+        {
+            var stateMachine = new RunStateMachine(seed: 42);
+            stateMachine.StartRun(new[] { "card_a", "card_b" });
+
+            bool drawn = stateMachine.DrawAndPresentProposal(catalog);
+            Assert.IsTrue(drawn);
+            Assert.IsNotNull(stateMachine.CurrentCard);
+            Assert.AreEqual(RunPhase.AwaitingChoice, stateMachine.CurrentPhase);
+
+            // Descarta a proposta
+            stateMachine.DismissCurrentProposal(advanceMonth: false);
+
+            Assert.IsNull(stateMachine.CurrentCard);
+            Assert.AreEqual(RunPhase.PreparingRun, stateMachine.CurrentPhase);
+
+            // Pode puxar a próxima proposta normalmente
+            bool drawnNext = stateMachine.DrawAndPresentProposal(catalog);
+            Assert.IsTrue(drawnNext);
+            Assert.IsNotNull(stateMachine.CurrentCard);
+        }
     }
 }

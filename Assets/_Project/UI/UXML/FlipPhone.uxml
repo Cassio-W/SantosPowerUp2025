@@ -3,22 +3,16 @@
     <ui:VisualElement name="phone-screen-root" class="phone-screen-root">
         <ui:VisualElement name="phone-chassis" class="phone-chassis">
             
-            <!-- TOP STATUS BAR -->
-            <ui:VisualElement class="phone-status-bar">
-                <ui:VisualElement class="status-network-box">
+            <!-- PHONE STATUS BAR: LED + NETWORK + CLOSE BUTTON -->
+            <ui:VisualElement class="phone-top-bar">
+                <ui:VisualElement class="top-title-group">
                     <ui:VisualElement class="status-led" />
-                    <ui:Label text="SECURE 4G • GABINETE EXECUTIVO" class="status-network-text" />
+                    <ui:Label text="4G SECURE • LINHA DIRETA" class="status-network-text" />
                 </ui:VisualElement>
-                <ui:Button name="phone-close-btn" text="FECHAR [F]" class="status-close-btn" />
+                <ui:Button name="phone-close-btn" text="✕ FECHAR (F)" class="status-close-btn" />
             </ui:VisualElement>
 
-            <!-- HEADER -->
-            <ui:VisualElement class="phone-header">
-                <ui:Label text="FLIP-PHONE PRESIDENCIAL" class="phone-title" />
-                <ui:Label text="Diretrizes executivas, contatos e manobras políticas" class="phone-subtitle" />
-            </ui:VisualElement>
-
-            <!-- CATEGORY CHIPS / TABS -->
+            <!-- CATEGORY FILTER TABS -->
             <ui:VisualElement name="category-tabs" class="category-tabs-container">
                 <ui:Button name="tab-all" text="TODAS" class="category-tab-btn active" />
                 <ui:Button name="tab-actions" text="AÇÕES" class="category-tab-btn" />
@@ -29,12 +23,12 @@
             <!-- ACTION LIST SCROLLVIEW -->
             <ui:ScrollView name="actions-scroll-view" class="actions-scroll-view">
                 <ui:VisualElement name="actions-list-container" class="actions-list-container">
-                    <!-- Itens inseridos dinamicamente pelo FlipPhonePresenter -->
+                    <!-- Cards inseridos dinamicamente pelo FlipPhonePresenter -->
                 </ui:VisualElement>
                 <ui:Label name="empty-actions-label" text="Nenhuma ação ou contato disponível no momento." class="empty-actions-label hidden" />
             </ui:ScrollView>
 
-            <!-- FOOTER STATUS BAR -->
+            <!-- COMPACT FOOTER STATUS BAR -->
             <ui:VisualElement class="phone-footer-bar">
                 <ui:Label name="phone-status-message" text="> Linha segura ativa. Pressione [F] para alternar." class="phone-status-message" />
             </ui:VisualElement>

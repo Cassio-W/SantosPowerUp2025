@@ -128,6 +128,33 @@ namespace Mandato.Run
             SetPhase(RunPhase.PreparingRun);
         }
 
+        public void DismissCurrentProposal(bool advanceMonth = false)
+        {
+            CurrentCard = null;
+
+            if (RunState.termination.IsDefeat || RunState.termination.IsVictory)
+            {
+                SetPhase(RunPhase.Terminated);
+                OnRunTerminated?.Invoke(RunState.termination);
+                return;
+            }
+
+            if (advanceMonth)
+            {
+                SetPhase(RunPhase.AdvancingTime);
+                RunState.AdvanceMonth();
+
+                if (RunState.termination.IsDefeat || RunState.termination.IsVictory)
+                {
+                    SetPhase(RunPhase.Terminated);
+                    OnRunTerminated?.Invoke(RunState.termination);
+                    return;
+                }
+            }
+
+            SetPhase(RunPhase.PreparingRun);
+        }
+
         private void SetPhase(RunPhase phase)
         {
             CurrentPhase = phase;

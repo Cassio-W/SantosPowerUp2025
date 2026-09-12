@@ -29,6 +29,17 @@ namespace Mandato.Presentation
         private Coroutine activePresentationRoutine;
 
         private GameObject activeNpcGameObject;
+        private INpcController activeNpcController;
+
+        private void Awake()
+        {
+            enabled = true;
+        }
+
+        private void OnEnable()
+        {
+            enabled = true;
+        }
 
         public void Bind(RunStateMachine runStateMachine, IReadOnlyDictionary<string, CardDefinition> catalog)
         {
@@ -61,11 +72,11 @@ namespace Mandato.Presentation
 
             StopActiveRoutine();
 
-            if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
+            if (gameObject != null && !gameObject.activeSelf)
             {
-                OnProposalOnDesk?.Invoke(card);
-                return;
+                gameObject.SetActive(true);
             }
+            enabled = true;
 
             activePresentationRoutine = StartCoroutine(PresentProposalRoutine(card));
         }
@@ -98,13 +109,13 @@ namespace Mandato.Presentation
                 {
                     SafeDestroy(activeNpcGameObject);
                     activeNpcGameObject = null;
+                    activeNpcController = null;
                 }
 
                 Vector3 spawnPos = npcSpawnPoint != null ? npcSpawnPoint.position : defaultSpawnPosition;
                 Quaternion spawnRot = npcSpawnPoint != null ? npcSpawnPoint.rotation : Quaternion.identity;
 
                 activeNpcGameObject = Instantiate(prefabToSpawn, spawnPos, spawnRot);
-                activeNpcGameObject.transform.position = spawnPos;
 
                 // Garante que o NavMeshAgent esteja perfeitamente posicionado na malha
                 var navAgent = activeNpcGameObject.GetComponent<UnityEngine.AI.NavMeshAgent>();
@@ -113,49 +124,39 @@ namespace Mandato.Presentation
                     navAgent.Warp(spawnPos);
                 }
 
-                // 1. Verifica se tem NPCController no prefab
-                Type controllerType = null;
-                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                // Tenta obter INpcController (implementado pelo NPCController legado)
+                activeNpcController = activeNpcGameObject.GetComponent<INpcController>();
+
+                if (activeNpcController != null)
                 {
-                    controllerType = asm.GetType("NPCController");
-                    if (controllerType != null) break;
-                }
+                    Debug.Log($"<color=#00ffaa>[RunPresentationCoordinator]</color> 🧑 NPC com INpcController instanciado. Spawn: {spawnPos}, Mesa: {defaultTablePosition}");
 
-                Component npcController = controllerType != null ? activeNpcGameObject.GetComponent(controllerType) : null;
-
-                if (npcController != null)
-                {
-                    // Garante posições de início e destino se o spawnPoint for customizado
-                    if (npcSpawnPoint != null)
-                    {
-                        var startPosField = controllerType.GetField("startPosition");
-                        var targetPosField = controllerType.GetField("targetPosition");
-                        startPosField?.SetValue(npcController, spawnPos);
-                        targetPosField?.SetValue(npcController, defaultTablePosition);
-                    }
-
-                    // Usa a rotina nativa do NPCController
-                    var moveMethod = controllerType.GetMethod("MoveToTable");
-                    var isDeliveredField = controllerType.GetField("isDelivered");
-
-                    moveMethod?.Invoke(npcController, null);
+                    // Define posições antes de iniciar o movimento
+                    activeNpcController.SetPositions(spawnPos, defaultTablePosition);
+                    activeNpcController.MoveToTable();
 
                     // Aguarda o NPC caminhar até a mesa e entregar o papel (com timeout de segurança)
                     float walkTimeout = 0f;
-                    while (activeNpcGameObject != null && walkTimeout < 10f)
+                    while (activeNpcGameObject != null && walkTimeout < 15f)
                     {
                         walkTimeout += Time.deltaTime;
-                        bool delivered = (bool)(isDeliveredField?.GetValue(npcController) ?? false);
-                        if (delivered) break;
+                        if (activeNpcController.IsReadyForDismissal()) break;
                         yield return null;
                     }
 
+                    if (activeNpcGameObject == null)
+                    {
+                        Debug.LogWarning("<color=#ff5566>[RunPresentationCoordinator]</color> ⚠️ NPC destruído antes de entregar o papel!");
+                        yield break;
+                    }
+
+                    Debug.Log($"<color=#00ffaa>[RunPresentationCoordinator]</color> 📄 Papel entregue após {walkTimeout:F1}s. Liberando proposta.");
                     yield return new WaitForSeconds(0.05f);
                     OnProposalOnDesk?.Invoke(card);
                 }
                 else
                 {
-                    // Usa NpcPresentation
+                    // Fallback: usa NpcPresentation (sem NPCController)
                     activeNpc = activeNpcGameObject.GetComponent<NpcPresentation>();
                     if (activeNpc == null)
                     {
@@ -193,11 +194,11 @@ namespace Mandato.Presentation
 
             StopActiveRoutine();
 
-            if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
+            if (gameObject != null && !gameObject.activeSelf)
             {
-                OnConsequencesFinished?.Invoke(report);
-                return;
+                gameObject.SetActive(true);
             }
+            enabled = true;
 
             activePresentationRoutine = StartCoroutine(PresentConsequencesRoutine(report));
         }
@@ -213,75 +214,128 @@ namespace Mandato.Presentation
             // 2. Comanda reação do NPC e saída
             bool isPositive = report.choiceIndex == 0; // 0 = Aceitar / Aprovar, 1 = Recusar / Rejeitar
 
-            if (activeNpcGameObject != null)
+            yield return StartCoroutine(DismissNpcRoutine(isPositive));
+
+            // Aguarda 1 frame para garantir que esta coroutine retorne ao Unity antes de
+            // qualquer listener de OnConsequencesFinished disparar uma nova proposta sincronamente
+            yield return null;
+
+            OnConsequencesFinished?.Invoke(report);
+            stateMachine?.CompleteTurnAndAdvance();
+        }
+
+        public void DismissCurrentProposal(bool isPositive = false, Action onDismissed = null)
+        {
+            StopActiveRoutine();
+
+            // Fallback: se activeNpcController estiver nulo, busca qualquer INpcController ativo na cena
+            if (activeNpcController == null && activeNpcGameObject == null)
             {
-                Type controllerType = null;
-                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
                 {
-                    controllerType = asm.GetType("NPCController");
-                    if (controllerType != null) break;
-                }
-
-                Component npcController = controllerType != null ? activeNpcGameObject.GetComponent(controllerType) : null;
-
-                if (npcController != null)
-                {
-                    var reactMethod = controllerType.GetMethod("ReactAndExit");
-                    if (reactMethod != null)
+                    if (mb is INpcController ctrl)
                     {
-                        reactMethod.Invoke(npcController, new object[] { isPositive });
-                    }
-
-                    // Aguarda o NPC completar a saída pela porta ou o objeto ser destruído (timeout de 7s)
-                    float exitTimer = 0f;
-                    while (activeNpcGameObject != null && exitTimer < 7f)
-                    {
-                        exitTimer += Time.deltaTime;
-                        if (activeNpcGameObject != null && activeNpcGameObject.transform.position.x >= defaultSpawnPosition.x - 0.3f)
-                        {
-                            SafeDestroy(activeNpcGameObject);
-                            activeNpcGameObject = null;
-                            break;
-                        }
-                        yield return null;
-                    }
-
-                    if (activeNpcGameObject != null)
-                    {
-                        SafeDestroy(activeNpcGameObject);
-                        activeNpcGameObject = null;
+                        activeNpcController = ctrl;
+                        activeNpcGameObject = mb.gameObject;
+                        break;
                     }
                 }
-                else if (activeNpc != null)
+            }
+
+            if (gameObject != null && !gameObject.activeSelf)
+            {
+                gameObject.SetActive(true);
+            }
+            enabled = true;
+
+            activePresentationRoutine = StartCoroutine(DismissProposalRoutine(isPositive, onDismissed));
+        }
+
+        private IEnumerator DismissProposalRoutine(bool isPositive, Action onDismissed)
+        {
+            // Fallback de busca dentro da coroutine
+            if (activeNpcController == null && activeNpcGameObject == null)
+            {
+                foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
                 {
-                    bool exited = false;
-                    activeNpc.ReactAndExit(isPositive, report.presentationCue, () =>
+                    if (mb is INpcController ctrl)
                     {
-                        exited = true;
-                    });
-
-                    while (!exited && activeNpcGameObject != null)
-                    {
-                        yield return null;
-                    }
-
-                    if (activeNpcGameObject != null)
-                    {
-                        SafeDestroy(activeNpcGameObject);
-                        activeNpcGameObject = null;
+                        activeNpcController = ctrl;
+                        activeNpcGameObject = mb.gameObject;
+                        Debug.Log($"<color=#ffaa00>[RunPresentationCoordinator]</color> 🔍 INpcController encontrado via fallback: {mb.gameObject.name}");
+                        break;
                     }
                 }
+            }
 
-                activeNpc = null;
+            yield return StartCoroutine(DismissNpcRoutine(isPositive));
+
+            // Aguarda 1 frame para garantir que a coroutine retorne ao Unity antes de disparar o callback
+            yield return null;
+
+            onDismissed?.Invoke();
+        }
+
+        /// <summary>
+        /// Coroutine central de dismissal: comanda reação + saída do NPC e aguarda ele sair/se destruir.
+        /// Usada tanto por DismissProposalRoutine quanto por PresentConsequencesRoutine.
+        /// </summary>
+        private IEnumerator DismissNpcRoutine(bool isPositive)
+        {
+            Debug.Log($"<color=#ffaa00>[RunPresentationCoordinator]</color> 🔎 DismissNpcRoutine: activeNpcController={(activeNpcController != null ? "OK" : "NULL")}, activeNpcGameObject={(activeNpcGameObject != null ? activeNpcGameObject.name : "NULL")}");
+
+            if (activeNpcController != null && activeNpcGameObject != null)
+            {
+                Debug.Log($"<color=#00ffaa>[RunPresentationCoordinator]</color> 🚪 Comandando ReactAndExit(isPositive={isPositive}) no NPC '{activeNpcGameObject.name}'.");
+
+                activeNpcController.ReactAndExit(isPositive);
+
+                // Aguarda o NPC completar sua animação de reação, caminhar até a porta e se destruir (timeout de 12s)
+                float exitTimer = 0f;
+                while (activeNpcGameObject != null && exitTimer < 12f)
+                {
+                    exitTimer += Time.deltaTime;
+                    yield return null;
+                }
+
+                Debug.Log($"<color=#00ffaa>[RunPresentationCoordinator]</color> ✅ NPC saiu após {exitTimer:F1}s.");
+
+                if (activeNpcGameObject != null)
+                {
+                    Debug.LogWarning("<color=#ff5566>[RunPresentationCoordinator]</color> ⚠️ NPC não se auto-destruiu no tempo esperado. Forçando destruição.");
+                    SafeDestroy(activeNpcGameObject);
+                }
+
+                activeNpcGameObject = null;
+                activeNpcController = null;
+            }
+            else if (activeNpc != null)
+            {
+                bool exited = false;
+                activeNpc.ReactAndExit(isPositive, string.Empty, () =>
+                {
+                    exited = true;
+                });
+
+                while (!exited && activeNpcGameObject != null)
+                {
+                    yield return null;
+                }
+
+                if (activeNpcGameObject != null)
+                {
+                    SafeDestroy(activeNpcGameObject);
+                }
+
                 activeNpcGameObject = null;
             }
             else
             {
+                Debug.LogWarning("<color=#ff5566>[RunPresentationCoordinator]</color> ⚠️ Nenhum NPC ativo para dispensar.");
                 yield return new WaitForSeconds(0.05f);
             }
 
-            OnConsequencesFinished?.Invoke(report);
-            stateMachine?.CompleteTurnAndAdvance();
+            activeNpc = null;
         }
 
         private void SafeDestroy(GameObject obj)

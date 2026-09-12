@@ -547,7 +547,7 @@ public class CameraFocusManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (_effectTweenId != -1)
+        if (_effectTweenId != -1 && LeanTween.isInitialised)
         {
             LeanTween.cancel(_effectTweenId);
             _effectTweenId = -1;

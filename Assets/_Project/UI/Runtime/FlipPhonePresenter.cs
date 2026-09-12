@@ -83,7 +83,7 @@ namespace Mandato.UI
         {
             if (uiDocument == null)
             {
-                uiDocument = GetComponent<UIDocument>();
+                uiDocument = GetComponent<UIDocument>() ?? GetComponentInChildren<UIDocument>() ?? GetComponentInParent<UIDocument>();
             }
 
             if (uiDocument == null)
@@ -131,18 +131,16 @@ namespace Mandato.UI
             tabContacts = root.Q<Button>("tab-contacts");
             tabCabinet = root.Q<Button>("tab-cabinet");
 
-            SetupTab(tabAll, "TODAS");
-            SetupTab(tabActions, "AÇÕES");
-            SetupTab(tabContacts, "CONTATOS");
-            SetupTab(tabCabinet, "GABINETE");
+            if (tabAll != null) { tabAll.clicked -= OnTabAllClicked; tabAll.clicked += OnTabAllClicked; }
+            if (tabActions != null) { tabActions.clicked -= OnTabActionsClicked; tabActions.clicked += OnTabActionsClicked; }
+            if (tabContacts != null) { tabContacts.clicked -= OnTabContactsClicked; tabContacts.clicked += OnTabContactsClicked; }
+            if (tabCabinet != null) { tabCabinet.clicked -= OnTabCabinetClicked; tabCabinet.clicked += OnTabCabinetClicked; }
         }
 
-        private void SetupTab(Button tabBtn, string filterName)
-        {
-            if (tabBtn == null) return;
-            tabBtn.clicked -= () => SetCategoryFilter(filterName);
-            tabBtn.clicked += () => SetCategoryFilter(filterName);
-        }
+        private void OnTabAllClicked() => SetCategoryFilter("TODAS");
+        private void OnTabActionsClicked() => SetCategoryFilter("AÇÕES");
+        private void OnTabContactsClicked() => SetCategoryFilter("CONTATOS");
+        private void OnTabCabinetClicked() => SetCategoryFilter("GABINETE");
 
         public void SetCategoryFilter(string filterName)
         {
@@ -190,6 +188,12 @@ namespace Mandato.UI
                 screenRoot.style.display = DisplayStyle.None;
                 screenRoot.AddToClassList("hidden");
                 screenRoot.style.opacity = 0f;
+                screenRoot.Blur();
+            }
+
+            if (root != null)
+            {
+                root.Blur();
             }
 
             Debug.Log("<color=#6a9fb5>[FlipPhonePresenter]</color> UI Toolkit: Tela do celular ocultada.");

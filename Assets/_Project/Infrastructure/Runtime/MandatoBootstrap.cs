@@ -108,18 +108,38 @@ namespace Mandato.Infrastructure
 
         private void Update()
         {
-            if (isAwaitingSpaceForNextNpc && Input.GetKeyDown(callNextNpcKey))
+            if (isAwaitingSpaceForNextNpc)
             {
-                isAwaitingSpaceForNextNpc = false;
-                Debug.Log($"<color=#00ffaa>[MandatoBootstrap]</color> ⌨️ Tecla <b>[{callNextNpcKey}]</b> pressionada. Aguardando delay ({pendingProposalDelay:F1}s) e chamando próximo visitante...");
-                if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
+                bool spaceOrEnter = Input.GetKeyDown(callNextNpcKey) ||
+                                    Input.GetKeyDown(KeyCode.Space) ||
+                                    Input.GetKeyDown(KeyCode.Return) ||
+                                    Input.GetKeyDown(KeyCode.KeypadEnter);
+
+                if (spaceOrEnter)
                 {
-                    DrawNextProposalImmediate();
+                    AuthorizeNextVisitor();
                 }
-                else
-                {
-                    StartCoroutine(DrawNextProposalRoutine(pendingProposalDelay));
-                }
+            }
+        }
+
+        /// <summary>
+        /// Autoriza e inicia a chamada do próximo visitante quando o gabinete estiver livre.
+        /// Pode ser acionado pela tecla configurada (Espaço/Enter) ou por botão de interface.
+        /// </summary>
+        public void AuthorizeNextVisitor()
+        {
+            if (!isAwaitingSpaceForNextNpc) return;
+
+            isAwaitingSpaceForNextNpc = false;
+            Debug.Log($"<color=#00ffaa>[MandatoBootstrap]</color> 🚪 Entrada autorizada. Chamando próximo visitante...");
+
+            if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
+            {
+                DrawNextProposalImmediate();
+            }
+            else
+            {
+                StartCoroutine(DrawNextProposalRoutine(0.05f));
             }
         }
 
@@ -648,14 +668,11 @@ namespace Mandato.Infrastructure
 
             if (isTutorial && hasMoreTutorial)
             {
-                if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
-                {
-                    DrawNextProposalImmediate();
-                }
-                else
-                {
+                // Usa sempre coroutine (mínimo 1 frame de delay) para não colidir com PresentConsequencesRoutine em execução
+                if (gameObject.activeInHierarchy && isActiveAndEnabled)
                     StartCoroutine(DrawNextProposalRoutine(0.05f));
-                }
+                else
+                    StartCoroutine(DrawNextProposalRoutine(0.05f)); // mesmo se inativo, agenda para o próximo frame
                 return;
             }
 
@@ -667,12 +684,9 @@ namespace Mandato.Infrastructure
                 isAwaitingSpaceForNextNpc = true;
                 Debug.Log("<color=#00e5ff>[MandatoBootstrap]</color> ⏳ <b>Gabinete livre.</b> Pressione <b>[ESPAÇO]</b> para autorizar a entrada do próximo visitante.");
             }
-            else if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
-            {
-                DrawNextProposalImmediate();
-            }
             else
             {
+                // Sempre via coroutine — nunca síncrono — para evitar race com PresentConsequencesRoutine
                 StartCoroutine(DrawNextProposalRoutine(delay));
             }
         }
@@ -784,7 +798,15 @@ namespace Mandato.Infrastructure
         {
             if (StateMachine != null && CardCatalog.Count > 0)
             {
-                StateMachine.DrawAndPresentProposal(CardCatalog);
+                bool drawn = StateMachine.DrawAndPresentProposal(CardCatalog);
+                if (!drawn)
+                {
+                    Debug.LogWarning("<color=#ffaa00>[MandatoBootstrap]</color> ⚠️ Nenhuma nova proposta foi sorteada (fim de baralho ou partida encerrada).");
+                }
+            }
+            else
+            {
+                Debug.LogWarning($"<color=#ff5566>[MandatoBootstrap]</color> ⚠️ Não foi possível puxar proposta: StateMachine={StateMachine != null}, Catálogo={CardCatalog?.Count} itens.");
             }
         }
 
@@ -1275,7 +1297,7 @@ namespace Mandato.Infrastructure
                 // 2. Se a ação descartou a proposta atual
                 if (report.dismissedCurrentProposal)
                 {
-                    Debug.Log("<color=#00ffaa>[MandatoBootstrap]</color> 📱 Ação descartou a proposta atual.");
+                    Debug.Log("<color=#00ffaa>[MandatoBootstrap]</color> 📱 Ação descartou a proposta atual. Comandando reação e saída do visitante...");
                     if (paperPresenter != null)
                     {
                         paperPresenter.Clear();
@@ -1286,22 +1308,67 @@ namespace Mandato.Infrastructure
                         decisionOverlayPresenter.ClearChoices();
                     }
 
-                    CloseFlipPhone();
+                    // Abaixa a mão do jogador e reseta a flag de animação para a próxima proposta
+                    PlayPlayerDealAnimationReverse();
+                    isPlayerHandRaised = false;
 
-                    pendingProposalDelay = Mathf.Max(0.2f, delayBetweenProposals);
-                    if (requireSpaceToCallNextNpc)
+                    CloseFlipPhone();
+                    NotifyCameraUnfocus();
+                    RefreshFlipPhoneUI();
+
+                    Action onNpcDismissed = () =>
                     {
-                        isAwaitingSpaceForNextNpc = true;
-                        Debug.Log("<color=#00e5ff>[MandatoBootstrap]</color> ⏳ <b>Gabinete livre após descarte.</b> Pressione <b>[ESPAÇO]</b> para autorizar a entrada do próximo visitante.");
+                        Debug.Log("<color=#00ffaa>[MandatoBootstrap]</color> 🚪 Gabinete desocupado após saída do NPC.");
+                        StateMachine.DismissCurrentProposal(advanceMonth: false);
+                        RefreshFlipPhoneUI();
+
+                        pendingProposalDelay = Mathf.Max(0.2f, delayBetweenProposals);
+                        if (requireSpaceToCallNextNpc)
+                        {
+                            isAwaitingSpaceForNextNpc = true;
+                            Debug.Log("<color=#00e5ff>[MandatoBootstrap]</color> ⏳ <b>Gabinete livre após descarte.</b> Pressione <b>[ESPAÇO]</b> ou <b>[ENTER]</b> para autorizar a entrada do próximo visitante.");
+                        }
+                        else if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
+                        {
+                            DrawNextProposalImmediate();
+                        }
+                        else
+                        {
+                            StartCoroutine(DrawNextProposalRoutine(pendingProposalDelay));
+                        }
+                    };
+
+                    if (presentationCoordinator == null)
+                    {
+                        presentationCoordinator = FindFirstObjectByType<RunPresentationCoordinator>() ?? gameObject.AddComponent<RunPresentationCoordinator>();
+                        presentationCoordinator.Bind(StateMachine, CardCatalog);
+                        presentationCoordinator.OnProposalOnDesk += OnProposalReadyOnDesk;
+                        presentationCoordinator.OnConsequencesFinished += OnConsequencesFinishedAndAdvance;
                     }
-                    else if (!gameObject.activeInHierarchy || !isActiveAndEnabled)
+
+                    if (presentationCoordinator != null)
                     {
-                        DrawNextProposalImmediate();
+                        presentationCoordinator.DismissCurrentProposal(isPositive: false, onDismissed: onNpcDismissed);
                     }
                     else
                     {
-                        StartCoroutine(DrawNextProposalRoutine(pendingProposalDelay));
+                        try
+                        {
+                            // Busca tipada via interface (sem reflection)
+                            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+                            {
+                                if (mb is Mandato.Presentation.INpcController npcCtrl)
+                                {
+                                    npcCtrl.ReactAndExit(false);
+                                    break;
+                                }
+                            }
+                        }
+                        catch { }
+
+                        onNpcDismissed();
                     }
+
                     return;
                 }
 

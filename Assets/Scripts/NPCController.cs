@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Mandato.Presentation;
 
-public class NPCController : MonoBehaviour
+public class NPCController : MonoBehaviour, INpcController
 {
     [Header("Configuracoes")]
     public Vector3 targetPosition; // Posicao final na mesa
@@ -64,6 +65,7 @@ public class NPCController : MonoBehaviour
     public bool hasReachedTarget = false;
     public bool isDelivered = false;
     private bool isExiting = false;
+    private int exitStartFrame = -1;
     private Coroutine deliveryCoroutine;
 
     public AudioSource audioPassos;
@@ -83,6 +85,16 @@ public class NPCController : MonoBehaviour
         targetCamera = Camera.main;
     }
 
+    /// <summary>Define posições de spawn e mesa. Deve ser chamado antes de MoveToTable.</summary>
+    public void SetPositions(Vector3 spawnPosition, Vector3 tablePosition)
+    {
+        startPosition = spawnPosition;
+        targetPosition = tablePosition;
+    }
+
+    /// <summary>Retorna true quando o papel foi entregue e o NPC está aguardando decisão.</summary>
+    public bool IsReadyForDismissal() => isDelivered;
+
     public void MoveToTable()
     {
         isExiting = false;
@@ -101,6 +113,7 @@ public class NPCController : MonoBehaviour
     /// <param name="isPositive">True para reação positiva (aprovação), False para reação negativa (rejeição).</param>
     public void ReactAndExit(bool isPositive = true)
     {
+        Debug.Log($"<color=#ffaa00>[NPCController]</color> 🎬 ReactAndExit(isPositive={isPositive}) chamado em '{gameObject.name}'. hasReachedTarget={hasReachedTarget}, isDelivered={isDelivered}, isExiting={isExiting}");
         StartCoroutine(ReactAndExitRoutine(isPositive));
     }
 
@@ -181,6 +194,8 @@ public class NPCController : MonoBehaviour
     public void MoveToExit()
     {
         isExiting = true;
+        exitStartFrame = Time.frameCount;
+        Debug.Log($"<color=#ffaa00>[NPCController]</color> 🚶 MoveToExit() chamado. startPosition={startPosition}, posição atual={transform.position}");
         if (audioPassos != null) audioPassos.Play();
         if (agent != null) agent.SetDestination(startPosition);
         if (animator != null && !string.IsNullOrEmpty(walkAnimation) && HasAnimationState(animator, walkAnimation))
@@ -191,7 +206,7 @@ public class NPCController : MonoBehaviour
 
     private void Update()
     {
-        if (!hasReachedTarget)
+        if (!hasReachedTarget && !isExiting)
         {
             bool reachedByZ = Mathf.Abs(transform.position.z - targetPosition.z) <= 0.08f;
             bool reachedByNavMesh = (agent != null && !agent.pathPending && agent.hasPath && agent.remainingDistance <= Mathf.Max(agent.stoppingDistance, 0.15f));
@@ -209,19 +224,33 @@ public class NPCController : MonoBehaviour
             LookAtCameraY();
         }
 
-        if (hasReachedTarget && transform.position.x >= startPosition.x - 0.2f)
+        // Aguarda pelo menos 10 frames após MoveToExit() para o NavMesh calcular o path real
+        if (isExiting && exitStartFrame >= 0 && (Time.frameCount - exitStartFrame) >= 10)
         {
-#if UNITY_EDITOR
-            if (UnityEditor.Selection.activeGameObject == gameObject || 
-                (UnityEditor.Selection.activeGameObject != null && UnityEditor.Selection.activeGameObject.transform.IsChildOf(transform)) ||
-                (UnityEditor.Selection.objects != null && System.Array.Exists(UnityEditor.Selection.objects, o => o is GameObject go && go != null && (go == gameObject || go.transform.IsChildOf(transform)))))
+            // Usa o NavMeshAgent para detectar chegada ao destino de saída (startPosition)
+            bool arrivedViaNavMesh = agent != null && !agent.pathPending && agent.hasPath &&
+                                     agent.remainingDistance <= Mathf.Max(agent.stoppingDistance, 0.15f);
+
+            // Fallback por distância euclidiana (caso o agent não tenha path ativo)
+            bool arrivedByDistance = agent == null || !agent.hasPath
+                ? Vector3.Distance(transform.position, startPosition) <= 0.5f
+                : false;
+
+            if (arrivedViaNavMesh || arrivedByDistance)
             {
-                UnityEditor.Selection.objects = new UnityEngine.Object[0];
-                UnityEditor.Selection.activeGameObject = null;
-            }
+                Debug.Log($"<color=#ffaa00>[NPCController]</color> 🚪 Chegou à saída. arrivedViaNavMesh={arrivedViaNavMesh}, arrivedByDistance={arrivedByDistance}, pos={transform.position}, startPos={startPosition}");
+#if UNITY_EDITOR
+                if (UnityEditor.Selection.activeGameObject == gameObject || 
+                    (UnityEditor.Selection.activeGameObject != null && UnityEditor.Selection.activeGameObject.transform.IsChildOf(transform)) ||
+                    (UnityEditor.Selection.objects != null && System.Array.Exists(UnityEditor.Selection.objects, o => o is GameObject go && go != null && (go == gameObject || go.transform.IsChildOf(transform)))))
+                {
+                    UnityEditor.Selection.objects = new UnityEngine.Object[0];
+                    UnityEditor.Selection.activeGameObject = null;
+                }
 #endif
-            gameObject.SetActive(false);
-            Destroy(gameObject);
+                gameObject.SetActive(false);
+                Destroy(gameObject);
+            }
         }
     }
 
