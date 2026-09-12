@@ -29,11 +29,11 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Brightness: 1.76
+    - _Brightness: 1.15
     - _ChromaticAberration: 0.0071
-    - _Contrast: 1
+    - _Contrast: 1.05
     - _CornerSmoothness: 0.0112
-    - _Curvature: 0.06
+    - _Curvature: 0
     - _GlitchBurst: 0
     - _GlitchFrequency: 1
     - _GlitchIntensity: 0.05
@@ -41,11 +41,11 @@ Material:
     - _NoiseIntensity: 0.06
     - _NoiseSpeed: 18
     - _ScanlineCount: 540
-    - _ScanlineIntensity: 0.103
+    - _ScanlineIntensity: 0
     - _ScanlineSpeed: 0.4
     - _ShadowMaskIntensity: 0.2
     - _VignetteIntensity: 0.4
     m_Colors:
-    - _ColorTint: {r: 0.5411765, g: 0.86822724, b: 1, a: 0}
+    - _ColorTint: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

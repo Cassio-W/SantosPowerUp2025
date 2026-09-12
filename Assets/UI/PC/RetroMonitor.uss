@@ -7,31 +7,18 @@
     -unity-font: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
     -unity-font-definition: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
 
-    --color-bg-dark: #03070a;
-    
-    --color-nature-solid: #22c55e;
-    --color-nature-glow: #4ade80;
-    --color-nature-bg: rgba(34, 197, 94, 0.42);
-    
-    --color-economy-solid: #eab308;
-    --color-economy-glow: #facc15;
-    --color-economy-bg: rgba(234, 179, 8, 0.42);
-    
-    --color-relations-solid: #38bdf8;
-    --color-relations-glow: #7dd3fc;
-    --color-relations-bg: rgba(56, 189, 248, 0.42);
-    
-    --color-people-solid: #f472b6;
-    --color-people-glow: #f472b6;
-    --color-people-bg: rgba(244, 114, 182, 0.42);
-    
-    --color-corruption-solid: #ef4444;
-    --color-corruption-glow: #ff2244;
-    --color-corruption-bg: rgba(220, 38, 38, 0.65);
-
     width: 100%;
     height: 100%;
-    background-color: var(--color-bg-dark);
+    background-color: #03070a;
+    padding: 16px;
+    box-sizing: border-box;
+    justify-content: space-between;
+}
+
+.screen-root {
+    width: 100%;
+    height: 100%;
+    background-color: #03070a;
     padding: 16px;
     box-sizing: border-box;
     justify-content: space-between;
@@ -145,27 +132,27 @@ Label {
 }
 
 .fill-nature-bg {
-    background-color: var(--color-nature-bg);
+    background-color: rgba(34, 197, 94, 0.42);
     border-top-width: 5px;
-    border-top-color: var(--color-nature-glow);
+    border-top-color: #4ade80;
 }
 
 .fill-economy-bg {
-    background-color: var(--color-economy-bg);
+    background-color: rgba(234, 179, 8, 0.42);
     border-top-width: 5px;
-    border-top-color: var(--color-economy-glow);
+    border-top-color: #facc15;
 }
 
 .fill-relations-bg {
-    background-color: var(--color-relations-bg);
+    background-color: rgba(56, 189, 248, 0.42);
     border-top-width: 5px;
-    border-top-color: var(--color-relations-glow);
+    border-top-color: #7dd3fc;
 }
 
 .fill-people-bg {
-    background-color: var(--color-people-bg);
+    background-color: rgba(244, 114, 182, 0.42);
     border-top-width: 5px;
-    border-top-color: var(--color-people-glow);
+    border-top-color: #f472b6;
 }
 
 /* Conteúdo sobreposto (Ícone + Porcentagem Lado a Lado) */
@@ -182,6 +169,7 @@ Label {
     width: 130px;
     height: 130px;
     -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: #ffffff;
 }
 
 .giant-value {
@@ -195,21 +183,21 @@ Label {
 }
 
 /* Cores específicas de bordas e valores */
-.card-nature { border-color: var(--color-nature-solid); }
-.card-nature .giant-value { color: var(--color-nature-glow); border-color: var(--color-nature-solid); }
-.card-nature:hover { border-color: var(--color-nature-glow); }
+.card-nature { border-color: #22c55e; }
+.card-nature .giant-value { color: #4ade80; border-color: #22c55e; }
+.card-nature:hover { border-color: #4ade80; }
 
-.card-economy { border-color: var(--color-economy-solid); }
-.card-economy .giant-value { color: var(--color-economy-glow); border-color: var(--color-economy-solid); }
-.card-economy:hover { border-color: var(--color-economy-glow); }
+.card-economy { border-color: #eab308; }
+.card-economy .giant-value { color: #facc15; border-color: #eab308; }
+.card-economy:hover { border-color: #facc15; }
 
-.card-relations { border-color: var(--color-relations-solid); }
-.card-relations .giant-value { color: var(--color-relations-glow); border-color: var(--color-relations-solid); }
-.card-relations:hover { border-color: var(--color-relations-glow); }
+.card-relations { border-color: #38bdf8; }
+.card-relations .giant-value { color: #7dd3fc; border-color: #38bdf8; }
+.card-relations:hover { border-color: #7dd3fc; }
 
-.card-people { border-color: var(--color-people-solid); }
-.card-people .giant-value { color: var(--color-people-glow); border-color: var(--color-people-solid); }
-.card-people:hover { border-color: var(--color-people-glow); }
+.card-people { border-color: #f472b6; }
+.card-people .giant-value { color: #f472b6; border-color: #f472b6; }
+.card-people:hover { border-color: #f472b6; }
 
 /* ============================================================
    21% VERTICAL CORRUPTION PILLAR (FULL HEIGHT)
@@ -233,9 +221,9 @@ Label {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: var(--color-corruption-bg);
+    background-color: rgba(220, 38, 38, 0.65);
     border-top-width: 6px;
-    border-top-color: var(--color-corruption-glow);
+    border-top-color: #ff2244;
 }
 
 .corruption-foreground {
@@ -269,12 +257,11 @@ Label {
     width: 100px;
     height: 100px;
     -unity-background-scale-mode: scale-to-fit;
-    -unity-background-image-tint-color: #ffffff; /* Deixa o ícone totalmente branco */
+    -unity-background-image-tint-color: #ffffff;
 }
 
 /* ============================================================
    FEEDBACK DE VARIAÇÃO — SETA (↑↓)
-   Grande o suficiente para ser visível à distância
    ============================================================ */
 .attr-arrow {
     position: absolute;
@@ -317,8 +304,6 @@ Label {
 
 /* ============================================================
    GHOST FILL — preenchimento fantasma de variação
-   Posição absoluta ancorada na base, igual ao fill principal
-   Opacidade controlada totalmente por script
    ============================================================ */
 .ghost-fill {
     position: absolute;
@@ -326,11 +311,8 @@ Label {
     left: 0;
     right: 0;
     width: 100%;
-    /* sem transition — altura e opacity animadas via script (MoveTowards) */
 }
 
-/* Perda: ghost mostra o nível anterior acima da barra que caiu */
-/* Ganho: ghost mostra o nível futuro antes da barra subir */
 .ghost-nature {
     background-color: rgba(34, 197, 94, 0.22);
     border-top-width: 4px;
@@ -396,7 +378,6 @@ Label {
 
 /* ============================================================
    ESTADO 100% — card-full (brilho pulsante APENAS na borda)
-   Não altera cor do card nem do fundo — só a borda pulsa
    ============================================================ */
 .card-full {
     border-color: rgba(255, 255, 255, 0.85);
@@ -405,7 +386,6 @@ Label {
     transition-timing-function: ease-in-out;
 }
 
-/* Estado alternado do shimmer — borda diminui suavemente */
 .card-full-glow {
     border-color: rgba(255, 255, 255, 0.25);
     transition-property: border-color;
@@ -415,8 +395,6 @@ Label {
 
 /* ============================================================
    HELPER — hidden
-   Usa visibility para manter position:absolute funcional
-   e permitir transição de opacidade suave
    ============================================================ */
 .hidden {
     visibility: hidden;
@@ -425,7 +403,6 @@ Label {
 
 /* ============================================================
    SHAKE — classe aplicada e removida via script
-   Usa translate para deslocar o card horizontalmente
    ============================================================ */
 .card-shaking {
     translate: 5px 0;

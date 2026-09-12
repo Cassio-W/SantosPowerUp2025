@@ -189,7 +189,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: d3a227e701432154ab7a4e01e47aff45, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2058087740}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: d3a227e701432154ab7a4e01e47aff45, type: 3}
       insertIndex: -1
@@ -8560,9 +8563,6 @@ PrefabInstance:
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: eb4a7ca3713ca394b844a7238f8482b8, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2058087740}
-    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: eb4a7ca3713ca394b844a7238f8482b8, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 641589240}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: eb4a7ca3713ca394b844a7238f8482b8, type: 3}
@@ -9137,7 +9137,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 81920ae1938546ea947cf29184ba2091, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldSpaceUIInteraction
-  uiDocument: {fileID: 641589243}
+  uiDocument: {fileID: 1001529930}
   interactionCamera: {fileID: 0}
   interactableLayers:
     serializedVersion: 2
@@ -10328,34 +10328,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89d06b1c4f0ed0941afc96990455b6c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttributeCameraEffects
-  pollutionVolume: {fileID: 1860537182}
-  pollutionStartThreshold: 50
-  corruptionVolume: {fileID: 1402890043}
-  corruptionStartThreshold: 0
-  corruptionMaxThreshold: 100
-  skyMaterial: {fileID: 2100000, guid: 6e3ecc34cbd56824297623dc77531785, type: 2}
-  pollutionHue: 58
-  maxPollutionSaturation: 60
-  corruptionHue: 0
-  maxCorruptionSaturation: 100
-  transitionDuration: 1.2
-  easeType: 4
-  useUnscaledTime: 1
-  _tintPropName: _Tint
-  _initialSkyColor:
-    r: 1
-    g: 1
-    b: 1
-    a: 1
-  _initialHue: 0
-  _initialSaturation: 0
-  _initialValue: 1
-  _hasSkyColorSaved: 0
-  _currentClimate: 50
-  _currentCorruption: 0
-  _pollutionVolumeTweenId: -1
-  _skyTweenId: -1
-  _corruptionVolumeTweenId: -1
 --- !u!1001 &1417177513
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12360,12 +12332,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2058087739}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.5352791, y: -0.5327187, z: -0.46239772, w: -0.4646239}
-  m_LocalPosition: {x: -0.012883564, y: 0.0001228634, z: 0.0026538782}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: -0.048477545, y: -0.7035478, z: 0.051200356, w: -0.70714146}
+  m_LocalPosition: {x: -1.97, y: 0.34, z: 0}
+  m_LocalScale: {x: 134, y: 76.521225, z: 132.84038}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 893990540}
+  m_Father: {fileID: 15590616}
   m_LocalEulerAnglesHint: {x: 180.866, y: -82.108, z: -89.543}
 --- !u!1 &2100126936
 GameObject:
