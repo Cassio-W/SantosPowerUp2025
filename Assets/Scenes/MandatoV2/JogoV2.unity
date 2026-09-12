@@ -10328,6 +10328,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 89d06b1c4f0ed0941afc96990455b6c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttributeCameraEffects
+  pollutionVolume: {fileID: 1860537182}
+  pollutionStartThreshold: 50
+  corruptionVolume: {fileID: 1402890043}
+  corruptionStartThreshold: 0
+  corruptionMaxThreshold: 100
+  skyMaterial: {fileID: 2100000, guid: 6e3ecc34cbd56824297623dc77531785, type: 2}
+  pollutionHue: 58
+  maxPollutionSaturation: 60
+  corruptionHue: 0
+  maxCorruptionSaturation: 100
+  transitionDuration: 1.2
+  easeType: 4
+  useUnscaledTime: 1
 --- !u!1001 &1417177513
 PrefabInstance:
   m_ObjectHideFlags: 0
