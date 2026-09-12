@@ -1,7 +1,8 @@
-using NUnit.Framework;
+using System.Collections.Generic;
 using Mandato.Content;
 using Mandato.Core;
 using Mandato.Run;
+using NUnit.Framework;
 
 namespace Mandato.Run.Tests
 {
@@ -53,50 +54,83 @@ namespace Mandato.Run.Tests
         }
 
         [Test]
-        public void EventsAndPerks_ExpireCorrectlyOnMonthAdvance()
+        public void DecisionResolver_UpdatesNpcRelation_AndAdvancesQuest()
         {
-            var run = new RunState();
+            var runState = new RunState();
+            var card1 = CardDefinition.CreateRuntimeInstance("card_step_1", "Proposta 1", "", new ChoiceDefinition("Aprovar"), new ChoiceDefinition("Rejeitar"), npcId: "npc_senador");
+            var card2 = CardDefinition.CreateRuntimeInstance("card_step_2", "Proposta 2", "", new ChoiceDefinition("Aprovar"), new ChoiceDefinition("Rejeitar"), npcId: "npc_senador");
 
-            // Adiciona evento temporário de 2 meses e perk temporário de 1 mês
-            run.TriggerEvent("event_campanha_eleitoral", duration: 2);
-            run.GrantPerk("perk_populista", duration: 1);
+            var quest = QuestDefinition.CreateRuntimeInstance("quest_senado", "npc_senador", "Acordo do Senado");
+            quest.rewardPerkId = "perk_apoio_senado";
+            quest.steps.Add(new QuestStepDefinition { stepIndex = 0, triggerCardId = "card_step_1", requiredChoiceIndex = 0 });
+            quest.steps.Add(new QuestStepDefinition { stepIndex = 1, triggerCardId = "card_step_2", requiredChoiceIndex = 0 });
 
-            Assert.AreEqual(1, run.activeEvents.Count);
-            Assert.IsTrue(run.activePerkIds.Contains("perk_populista"));
+            var questCatalog = new Dictionary<string, QuestDefinition> { { quest.id, quest } };
 
-            // Avança 1 mês
-            run.AdvanceMonth();
-            Assert.AreEqual(1, run.activeEvents.Count);
-            Assert.AreEqual(1, run.activeEvents[0].remainingMonths);
-            Assert.IsFalse(run.activePerkIds.Contains("perk_populista")); // Perk expirou após 1 mês
+            // Decisão 1: Aprova (choiceIndex = 0)
+            var report1 = DecisionResolver.Resolve(runState, null, card1, 0, questCatalog);
 
-            // Avança 2º mês
-            run.AdvanceMonth();
-            Assert.AreEqual(0, run.activeEvents.Count); // Evento expirou
+            Assert.AreEqual("npc_senador", report1.npcId);
+            Assert.AreEqual(5, report1.npcRelationAfter);
+            Assert.AreEqual(1, runState.GetOrCreateNpcState("npc_senador").interactionCount);
+            Assert.IsTrue(report1.advancedQuestIds.Contains("quest_senado"));
+            Assert.IsFalse(runState.IsQuestCompleted("quest_senado"));
+
+            // Decisão 2: Aprova etapa 2 (conclusão da quest)
+            var report2 = DecisionResolver.Resolve(runState, null, card2, 0, questCatalog);
+
+            Assert.AreEqual(10, report2.npcRelationAfter);
+            Assert.IsTrue(report2.completedQuestIds.Contains("quest_senado"));
+            Assert.IsTrue(report2.grantedRewardPerkIds.Contains("perk_apoio_senado"));
+            Assert.IsTrue(runState.IsQuestCompleted("quest_senado"));
+            Assert.IsTrue(runState.activePerkIds.Contains("perk_apoio_senado"));
         }
 
         [Test]
-        public void PhoneAction_AppliesCostsAndImpacts()
+        public void CardCondition_FiltersByNpcRelation_AndQuestState()
         {
-            var action = PhoneActionDefinition.CreateRuntimeInstance(
-                id: "action_pacote_emergencial",
-                name: "Pacote Emergencial",
-                description: "Injeta dinheiro rápido na economia.",
-                popCost: -5,
-                corruptCost: 10,
-                impacts: new StatBlock(0, 0, 0, 20, 0)
-            );
+            var runState = new RunState();
+            var conditionNpc = new CardCondition
+            {
+                checkNpcRelation = true,
+                targetNpcId = "npc_governador",
+                minNpcRelation = 20
+            };
 
-            var run = new RunState();
+            var conditionQuest = new CardCondition
+            {
+                requiredQuestId = "quest_metro",
+                requireQuestCompleted = true
+            };
 
-            // Aplica os custos e efeitos da ação
-            run.ApplyStatDelta(StatId.PopularApproval, action.politicalCost);
-            run.ApplyStatDelta(StatId.Corruption, action.corruptionCost);
-            run.ApplyStatImpacts(action.instantStatImpacts);
+            // Sem atingir requisitos
+            Assert.IsFalse(conditionNpc.IsMet(runState.stats, 1, null, null, id => runState.GetNpcRelation(id), id => runState.GetQuestState(id)));
+            Assert.IsFalse(conditionQuest.IsMet(runState.stats, 1, null, null, id => runState.GetNpcRelation(id), id => runState.GetQuestState(id)));
 
-            Assert.AreEqual(45, run.stats.popularApproval);
-            Assert.AreEqual(10, run.stats.corruption);
-            Assert.AreEqual(70, run.stats.economy);
+            // Atende relação
+            runState.GetOrCreateNpcState("npc_governador").ModifyRelation(30);
+            Assert.IsTrue(conditionNpc.IsMet(runState.stats, 1, null, null, id => runState.GetNpcRelation(id), id => runState.GetQuestState(id)));
+
+            // Conclui quest
+            var quest = runState.GetOrCreateQuestState("quest_metro");
+            quest.isCompleted = true;
+            Assert.IsTrue(conditionQuest.IsMet(runState.stats, 1, null, null, id => runState.GetNpcRelation(id), id => runState.GetQuestState(id)));
+        }
+
+        [Test]
+        public void CardCondition_FiltersByPoliticalAxis()
+        {
+            var axis = new PoliticalAxis(-6, 4); // Esquerda Autoritária
+            var condition = new CardCondition
+            {
+                requiredPoliticalQuadrant = "Esquerda Autoritária"
+            };
+
+            Assert.IsTrue(condition.IsMet(null, 1, null, politicalAxis: axis));
+
+            axis.Unlock();
+            axis.ApplyDelta(12, 0); // Vira Direita Autoritária
+            Assert.IsFalse(condition.IsMet(null, 1, null, politicalAxis: axis));
         }
     }
 }

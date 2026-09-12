@@ -44,26 +44,42 @@ namespace Mandato.Run
                 return new FlipPhoneUseReport { success = false, failReason = "RunState ou Ação nula." };
             }
 
-            // 1. Verifica se está desbloqueada
+            // 1. Verifica se a partida está em andamento
+            if (!runState.termination.IsOngoing)
+            {
+                return new FlipPhoneUseReport { success = false, failReason = "A partida já está encerrada." };
+            }
+
+            // 2. Verifica se está desbloqueada
             if (!runState.IsActionUnlocked(action.id) && !action.unlockByDefault)
             {
                 return new FlipPhoneUseReport { success = false, failReason = "Ação não desbloqueada." };
             }
 
-            // 2. Verifica se já foi consumida (SingleUse)
+            // 3. Verifica se já foi consumida (SingleUse)
             if (action.cooldownType == FlipPhoneCooldownType.SingleUse && runState.IsActionConsumed(action.id))
             {
                 return new FlipPhoneUseReport { success = false, failReason = "Ação de uso único já consumida." };
             }
 
-            // 3. Verifica cooldown ativo
+            // 4. Verifica cooldown ativo
             if (runState.IsActionOnCooldown(action.id))
             {
                 int remaining = runState.GetActionCooldown(action.id);
                 return new FlipPhoneUseReport { success = false, failReason = $"Ação em recarga ({remaining} turno(s) restante(s))." };
             }
 
-            // 4. Valida condições
+            // 5. Valida efeitos que requerem proposta ativa
+            if (action.effects != null)
+            {
+                bool requiresProposal = action.effects.Exists(e => e != null && e.effectType == FlipPhoneEffectType.DismissCurrentProposal);
+                if (requiresProposal && currentCard == null)
+                {
+                    return new FlipPhoneUseReport { success = false, failReason = "Nenhuma proposta ativa para dispensar." };
+                }
+            }
+
+            // 6. Valida condições
             string currentNpcId = currentCard != null ? currentCard.npcId : string.Empty;
             if (!action.AreConditionsMet(runState.stats, runState.calendar.currentMonthIndex, runState.activePerkIds, runState.decisionHistory, currentNpcId))
             {
@@ -78,7 +94,7 @@ namespace Mandato.Run
                 statsBefore = runState.stats.Clone()
             };
 
-            // 5. Aplica cada efeito
+            // 7. Aplica cada efeito
             if (action.effects != null)
             {
                 foreach (var effect in action.effects)
@@ -164,7 +180,7 @@ namespace Mandato.Run
                 }
             }
 
-            // 6. Registra consumo / cooldown
+            // 8. Registra consumo / cooldown
             runState.RecordActionUsed(action.id, action.cooldownType, action.cooldownTurns);
 
             report.statsAfter = runState.stats.Clone();

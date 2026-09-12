@@ -63,15 +63,16 @@ namespace Mandato.Content
         }
     }
 
-    [CreateAssetMenu(fileName = "NewPhoneAction", menuName = "Mandato/Phone Action Definition")]
+    [Obsolete("Utilize FlipPhoneActionDefinition para todas as ações do telefone.")]
+    [CreateAssetMenu(fileName = "NewPhoneAction", menuName = "Mandato/Phone Action Definition (Legacy)")]
     public class PhoneActionDefinition : ScriptableObject
     {
         public string id = string.Empty;
         public string actionName = string.Empty;
         [TextArea(2, 3)] public string description = string.Empty;
 
-        public int politicalCost = 0; // Custo em aprovação popular ou capital político
-        public int corruptionCost = 0; // Custo/aumento em corrupção
+        public int politicalCost = 0;
+        public int corruptionCost = 0;
         public StatBlock instantStatImpacts = new StatBlock(0, 0, 0, 0, 0);
 
         public static PhoneActionDefinition CreateRuntimeInstance(

@@ -191,7 +191,7 @@ namespace Mandato.Run.Tests
         }
 
         [Test]
-        public void DismissProposal_FlagsProposalDismissal()
+        public void DismissProposal_FlagsProposalDismissal_WhenProposalExists()
         {
             var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
                 "action_descartar",
@@ -200,9 +200,36 @@ namespace Mandato.Run.Tests
             );
             action.effects.Add(FlipPhoneEffect.CreateDismissProposal());
 
-            var report = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            var currentCard = catalog["card_a"];
+            var report = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog, currentCard: currentCard);
             Assert.IsTrue(report.success);
             Assert.IsTrue(report.dismissedCurrentProposal);
+        }
+
+        [Test]
+        public void DismissProposal_Fails_WhenNoProposalActive()
+        {
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_descartar",
+                "Engavetar Proposta",
+                "Descarta a proposta atual."
+            );
+            action.effects.Add(FlipPhoneEffect.CreateDismissProposal());
+
+            var report = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog, currentCard: null);
+            Assert.IsFalse(report.success);
+            StringAssert.Contains("nenhuma proposta", report.failReason.ToLower());
+        }
+
+        [Test]
+        public void ResolveUse_Fails_WhenRunTerminated()
+        {
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance("action_test", "Teste", "Desc");
+            runState.ForceDefeat("Derrota de Teste");
+
+            var report = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsFalse(report.success);
+            StringAssert.Contains("encerrada", report.failReason.ToLower());
         }
 
         [Test]

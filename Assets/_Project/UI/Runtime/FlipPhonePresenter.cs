@@ -28,6 +28,10 @@ namespace Mandato.UI
         [SerializeField] private PanelSettings panelSettings;
         [SerializeField] private KeyCode toggleKey = KeyCode.F;
         [SerializeField] private bool allowKeyboardToggle = true;
+        [SerializeField] private GameObject phoneGameObject;
+
+        public GameObject GetPhoneGameObject() => phoneGameObject != null ? phoneGameObject : gameObject;
+        public void SetPhoneGameObject(GameObject go) => phoneGameObject = go;
 
         public event Action<string> OnActionRequested;
         public event Action OnPhoneOpened;

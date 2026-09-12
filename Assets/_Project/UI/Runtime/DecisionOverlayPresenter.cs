@@ -117,13 +117,15 @@ namespace Mandato.UI
 
             if (card != null)
             {
-                bool isTutorial = card.id.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                bool isTutorial = card.isTutorial ||
+                                  card.id.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                  card.categoryTag.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
                                   card.title.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0;
 
                 string leftText = card.leftChoice != null && !string.IsNullOrEmpty(card.leftChoice.label) ? card.leftChoice.label : "Aceitar";
                 string rightText = card.rightChoice != null && !string.IsNullOrEmpty(card.rightChoice.label) ? card.rightChoice.label : "Recusar";
 
-                // Se a carta for de tutorial de 1 escolha (ou sem rejeição):
+                // Se a carta for de tutorial ou de 1 escolha (ou sem rejeição):
                 bool hasOnlyOneOption = isTutorial ||
                                          string.Equals(leftText, rightText, StringComparison.OrdinalIgnoreCase) ||
                                          leftText.IndexOf("Continuar", StringComparison.OrdinalIgnoreCase) >= 0 ||
@@ -136,15 +138,15 @@ namespace Mandato.UI
                     wrapperContinue.style.display = DisplayStyle.Flex;
                     if (wrapperApprove != null) wrapperApprove.style.display = DisplayStyle.None;
                     if (wrapperReject != null) wrapperReject.style.display = DisplayStyle.None;
-                    if (lblContinue != null) lblContinue.text = "Continuar";
+                    if (lblContinue != null) lblContinue.text = !string.IsNullOrEmpty(leftText) ? leftText : "Continuar";
                 }
                 else
                 {
                     if (wrapperContinue != null) wrapperContinue.style.display = DisplayStyle.None;
                     if (wrapperApprove != null) wrapperApprove.style.display = DisplayStyle.Flex;
                     if (wrapperReject != null) wrapperReject.style.display = DisplayStyle.Flex;
-                    if (lblLeftChoice != null) lblLeftChoice.text = "Aceitar";
-                    if (lblRightChoice != null) lblRightChoice.text = "Recusar";
+                    if (lblLeftChoice != null) lblLeftChoice.text = leftText;
+                    if (lblRightChoice != null) lblRightChoice.text = rightText;
                 }
             }
         }

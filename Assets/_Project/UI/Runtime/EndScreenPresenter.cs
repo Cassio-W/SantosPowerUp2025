@@ -16,6 +16,8 @@ namespace Mandato.UI
         public event Action OnRestartRequested;
         public event Action OnMainMenuRequested;
 
+        public bool IsVisible { get; private set; } = false;
+
         private VisualElement root;
         private VisualElement endScreenOverlay;
         private VisualElement endScreenContainer;
@@ -168,6 +170,8 @@ namespace Mandato.UI
             EnsureDocumentSetup();
             CacheElements();
 
+            IsVisible = true;
+
             if (endScreenOverlay != null)
             {
                 endScreenOverlay.RemoveFromClassList("hidden");
@@ -254,6 +258,7 @@ namespace Mandato.UI
 
         public void Hide()
         {
+            IsVisible = false;
             CacheElements();
             if (endScreenOverlay != null)
             {

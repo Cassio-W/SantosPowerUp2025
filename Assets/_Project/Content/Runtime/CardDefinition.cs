@@ -47,7 +47,32 @@ namespace Mandato.Content
         public int maxStatValue = 100;
         public string requiredPerkId = string.Empty;
 
-        public bool IsMet(StatBlock stats, int currentMonth, IEnumerable<string> activePerkIds = null)
+        // Condições Narrativas & Quests
+        public string requiredQuestId = string.Empty;
+        public int requiredQuestStepIndex = -1; // -1 se qualquer etapa ativa
+        public bool requireQuestCompleted = false;
+
+        // Condições de Afinidade com NPC
+        public string targetNpcId = string.Empty;
+        public bool checkNpcRelation = false;
+        public int minNpcRelation = -100;
+        public int maxNpcRelation = 100;
+
+        // Condições de Eixo Político
+        public string requiredPoliticalQuadrant = string.Empty;
+        public bool checkPoliticalRange = false;
+        public int minPoliticalX = -10;
+        public int maxPoliticalX = 10;
+        public int minPoliticalY = -10;
+        public int maxPoliticalY = 10;
+
+        public bool IsMet(
+            StatBlock stats,
+            int currentMonth,
+            IEnumerable<string> activePerkIds = null,
+            PoliticalAxis politicalAxis = null,
+            Func<string, int> getNpcRelation = null,
+            Func<string, (int step, bool completed, bool failed)> getQuestState = null)
         {
             if (currentMonth < minMonth || currentMonth > maxMonth)
                 return false;
@@ -76,6 +101,45 @@ namespace Mandato.Content
                 if (!hasPerk) return false;
             }
 
+            // Validação de Eixo Político
+            if (politicalAxis != null)
+            {
+                if (!string.IsNullOrEmpty(requiredPoliticalQuadrant))
+                {
+                    if (!string.Equals(politicalAxis.Quadrant, requiredPoliticalQuadrant, StringComparison.OrdinalIgnoreCase))
+                        return false;
+                }
+
+                if (checkPoliticalRange)
+                {
+                    if (!politicalAxis.IsInRange(minPoliticalX, maxPoliticalX, minPoliticalY, maxPoliticalY))
+                        return false;
+                }
+            }
+
+            // Validação de Relação com NPC
+            if (checkNpcRelation && !string.IsNullOrEmpty(targetNpcId) && getNpcRelation != null)
+            {
+                int rel = getNpcRelation(targetNpcId);
+                if (rel < minNpcRelation || rel > maxNpcRelation)
+                    return false;
+            }
+
+            // Validação de Quest
+            if (!string.IsNullOrEmpty(requiredQuestId) && getQuestState != null)
+            {
+                var qState = getQuestState(requiredQuestId);
+                if (requireQuestCompleted && !qState.completed)
+                    return false;
+
+                if (!requireQuestCompleted)
+                {
+                    if (qState.failed) return false;
+                    if (requiredQuestStepIndex >= 0 && qState.step != requiredQuestStepIndex)
+                        return false;
+                }
+            }
+
             return true;
         }
     }
@@ -91,6 +155,7 @@ namespace Mandato.Content
         public GameObject npcPrefab;
         public ScriptableObject sourceLegacyAsset;
         public string categoryTag = string.Empty;
+        public bool isTutorial = false;
         [Range(1, 1000)] public int baseWeight = 100;
 
         public ChoiceDefinition leftChoice = new ChoiceDefinition("Aceitar");
@@ -100,14 +165,20 @@ namespace Mandato.Content
 
         public ChoiceDefinition GetChoice(int index) => index == 0 ? leftChoice : rightChoice;
 
-        public bool AreConditionsMet(StatBlock stats, int currentMonth, IEnumerable<string> activePerkIds = null)
+        public bool AreConditionsMet(
+            StatBlock stats,
+            int currentMonth,
+            IEnumerable<string> activePerkIds = null,
+            PoliticalAxis politicalAxis = null,
+            Func<string, int> getNpcRelation = null,
+            Func<string, (int step, bool completed, bool failed)> getQuestState = null)
         {
             if (conditions == null || conditions.Count == 0)
                 return true;
 
             for (int i = 0; i < conditions.Count; i++)
             {
-                if (conditions[i] != null && !conditions[i].IsMet(stats, currentMonth, activePerkIds))
+                if (conditions[i] != null && !conditions[i].IsMet(stats, currentMonth, activePerkIds, politicalAxis, getNpcRelation, getQuestState))
                     return false;
             }
             return true;
@@ -148,7 +219,8 @@ namespace Mandato.Content
             ChoiceDefinition left,
             ChoiceDefinition right,
             string npcId = "",
-            string tag = "")
+            string tag = "",
+            bool isTutorial = false)
         {
             var card = CreateInstance<CardDefinition>();
             card.id = id;
@@ -158,6 +230,7 @@ namespace Mandato.Content
             card.rightChoice = right ?? new ChoiceDefinition("Recusar");
             card.npcId = npcId ?? string.Empty;
             card.categoryTag = tag ?? string.Empty;
+            card.isTutorial = isTutorial;
             return card;
         }
     }

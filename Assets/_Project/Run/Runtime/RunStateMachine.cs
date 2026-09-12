@@ -23,10 +23,12 @@ namespace Mandato.Run
         public RunPhase CurrentPhase { get; private set; } = RunPhase.PreparingRun;
         public CardDefinition CurrentCard { get; private set; }
         public ResolutionReport LastResolutionReport { get; private set; }
+        public MonthlyEffectsReport LastMonthlyReport { get; private set; }
 
         public event Action<RunPhase> OnPhaseChanged;
         public event Action<CardDefinition> OnProposalReady;
         public event Action<ResolutionReport> OnConsequencesReady;
+        public event Action<MonthlyEffectsReport> OnMonthAdvanced;
         public event Action<RunTermination> OnRunTerminated;
 
         private Random rng;
@@ -61,7 +63,17 @@ namespace Mandato.Run
                 return false;
             }
 
-            CurrentCard = DeckState.DrawNextCard(catalog, RunState.stats, RunState.calendar.currentMonthIndex, rng, RunState.activePerkIds);
+            CurrentCard = DeckState.DrawNextCard(
+                catalog,
+                RunState.stats,
+                RunState.calendar.currentMonthIndex,
+                rng,
+                RunState.activePerkIds,
+                RunState.politicalAxis,
+                id => RunState.GetNpcRelation(id),
+                id => RunState.GetQuestState(id)
+            );
+
             if (CurrentCard == null)
             {
                 return false;
@@ -73,19 +85,19 @@ namespace Mandato.Run
             return true;
         }
 
-        public ResolutionReport SubmitChoice(int choiceIndex)
+        public ResolutionReport SubmitChoice(int choiceIndex, IReadOnlyDictionary<string, QuestDefinition> questCatalog = null)
         {
             if (CurrentPhase != RunPhase.AwaitingChoice || CurrentCard == null)
                 return null;
 
             SetPhase(RunPhase.ResolvingChoice);
 
-            LastResolutionReport = DecisionResolver.Resolve(RunState, DeckState, CurrentCard, choiceIndex);
+            LastResolutionReport = DecisionResolver.Resolve(RunState, DeckState, CurrentCard, choiceIndex, questCatalog);
 
             SetPhase(RunPhase.PresentingConsequences);
             OnConsequencesReady?.Invoke(LastResolutionReport);
 
-            if (LastResolutionReport.IsRunTerminated)
+            if (LastResolutionReport != null && LastResolutionReport.IsRunTerminated)
             {
                 SetPhase(RunPhase.Terminated);
                 OnRunTerminated?.Invoke(LastResolutionReport.resultingTermination);
@@ -94,16 +106,18 @@ namespace Mandato.Run
             return LastResolutionReport;
         }
 
-        public void CompleteTurnAndAdvance()
+        public MonthlyEffectsReport CompleteTurnAndAdvance(
+            IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null,
+            IReadOnlyDictionary<string, RunEventDefinition> eventCatalog = null)
         {
             if (CurrentPhase != RunPhase.PresentingConsequences)
-                return;
+                return null;
 
             if (RunState.termination.IsDefeat || RunState.termination.IsVictory)
             {
                 SetPhase(RunPhase.Terminated);
                 OnRunTerminated?.Invoke(RunState.termination);
-                return;
+                return null;
             }
 
             // Não avança o mês caso a proposta seja do tutorial
@@ -115,20 +129,22 @@ namespace Mandato.Run
             if (!isTutorialCard)
             {
                 SetPhase(RunPhase.AdvancingTime);
-                RunState.AdvanceMonth();
+                LastMonthlyReport = RunState.AdvanceMonth(perkCatalog, eventCatalog);
+                OnMonthAdvanced?.Invoke(LastMonthlyReport);
 
                 if (RunState.termination.IsDefeat || RunState.termination.IsVictory)
                 {
                     SetPhase(RunPhase.Terminated);
                     OnRunTerminated?.Invoke(RunState.termination);
-                    return;
+                    return LastMonthlyReport;
                 }
             }
 
             SetPhase(RunPhase.PreparingRun);
+            return LastMonthlyReport;
         }
 
-        public void DismissCurrentProposal(bool advanceMonth = false)
+        public void DismissCurrentProposal(bool advanceMonth = false, IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null, IReadOnlyDictionary<string, RunEventDefinition> eventCatalog = null)
         {
             CurrentCard = null;
 
@@ -142,7 +158,8 @@ namespace Mandato.Run
             if (advanceMonth)
             {
                 SetPhase(RunPhase.AdvancingTime);
-                RunState.AdvanceMonth();
+                LastMonthlyReport = RunState.AdvanceMonth(perkCatalog, eventCatalog);
+                OnMonthAdvanced?.Invoke(LastMonthlyReport);
 
                 if (RunState.termination.IsDefeat || RunState.termination.IsVictory)
                 {

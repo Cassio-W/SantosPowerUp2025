@@ -61,7 +61,10 @@ namespace Mandato.Run
             StatBlock stats,
             int currentMonth,
             Random rng,
-            IEnumerable<string> activePerkIds = null)
+            IEnumerable<string> activePerkIds = null,
+            PoliticalAxis politicalAxis = null,
+            Func<string, int> getNpcRelation = null,
+            Func<string, (int step, bool completed, bool failed)> getQuestState = null)
         {
             if (catalog == null)
                 return null;
@@ -77,7 +80,7 @@ namespace Mandato.Run
                 string priorityId = priorityDrawPile[i];
                 if (catalog.TryGetValue(priorityId, out CardDefinition priorityCard) && priorityCard != null)
                 {
-                    if (priorityCard.AreConditionsMet(stats, currentMonth, activePerkIds))
+                    if (priorityCard.AreConditionsMet(stats, currentMonth, activePerkIds, politicalAxis, getNpcRelation, getQuestState))
                     {
                         priorityDrawPile.RemoveAt(i);
                         discardPile.Add(priorityId);
@@ -95,7 +98,7 @@ namespace Mandato.Run
                 ReshuffleDiscardIntoDraw(rng);
             }
 
-            CardDefinition drawn = TryDrawEligibleCard(catalog, stats, currentMonth, rng, activePerkIds);
+            CardDefinition drawn = TryDrawEligibleCard(catalog, stats, currentMonth, rng, activePerkIds, politicalAxis, getNpcRelation, getQuestState);
             if (drawn != null)
             {
                 return drawn;
@@ -105,7 +108,7 @@ namespace Mandato.Run
             if (discardPile.Count > 0)
             {
                 ReshuffleDiscardIntoDraw(rng);
-                return TryDrawEligibleCard(catalog, stats, currentMonth, rng, activePerkIds);
+                return TryDrawEligibleCard(catalog, stats, currentMonth, rng, activePerkIds, politicalAxis, getNpcRelation, getQuestState);
             }
 
             return null;
@@ -116,7 +119,10 @@ namespace Mandato.Run
             StatBlock stats,
             int currentMonth,
             Random rng,
-            IEnumerable<string> activePerkIds)
+            IEnumerable<string> activePerkIds,
+            PoliticalAxis politicalAxis,
+            Func<string, int> getNpcRelation,
+            Func<string, (int step, bool completed, bool failed)> getQuestState)
         {
             if (drawPile.Count == 0) return null;
 
@@ -129,7 +135,7 @@ namespace Mandato.Run
                 string cardId = drawPile[i];
                 if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
                 {
-                    if (card.AreConditionsMet(stats, currentMonth, activePerkIds))
+                    if (card.AreConditionsMet(stats, currentMonth, activePerkIds, politicalAxis, getNpcRelation, getQuestState))
                     {
                         eligibleIndices.Add(i);
                         int weight = Math.Max(1, card.baseWeight);
@@ -193,9 +199,9 @@ namespace Mandato.Run
         {
             if (string.IsNullOrEmpty(cardId)) return;
 
-            priorityDrawPile.RemoveAll(id => id == cardId);
-            drawPile.RemoveAll(id => id == cardId);
-            discardPile.RemoveAll(id => id == cardId);
+            priorityDrawPile.RemoveAll(id => string.Equals(id, cardId, StringComparison.OrdinalIgnoreCase));
+            drawPile.RemoveAll(id => string.Equals(id, cardId, StringComparison.OrdinalIgnoreCase));
+            discardPile.RemoveAll(id => string.Equals(id, cardId, StringComparison.OrdinalIgnoreCase));
 
             if (!removedCardIds.Contains(cardId))
             {
@@ -208,55 +214,43 @@ namespace Mandato.Run
             if (string.IsNullOrEmpty(npcId) || catalog == null) return;
 
             var toRemove = new List<string>();
-            foreach (var cardId in priorityDrawPile)
-            {
-                if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null && string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase))
-                {
-                    toRemove.Add(cardId);
-                }
-            }
+
             foreach (var cardId in drawPile)
             {
-                if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null && string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase))
+                if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
                 {
-                    toRemove.Add(cardId);
-                }
-            }
-            foreach (var cardId in discardPile)
-            {
-                if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null && string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase))
-                {
-                    toRemove.Add(cardId);
+                    if (string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        toRemove.Add(cardId);
+                    }
                 }
             }
 
-            foreach (var id in toRemove)
-            {
-                RemoveCard(id);
-            }
-        }
-
-        public void RemoveCardsMatching(Func<string, bool> predicate)
-        {
-            if (predicate == null) return;
-
-            var toRemove = new List<string>();
             foreach (var cardId in priorityDrawPile)
             {
-                if (predicate(cardId)) toRemove.Add(cardId);
-            }
-            foreach (var cardId in drawPile)
-            {
-                if (predicate(cardId)) toRemove.Add(cardId);
-            }
-            foreach (var cardId in discardPile)
-            {
-                if (predicate(cardId)) toRemove.Add(cardId);
+                if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
+                {
+                    if (string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        toRemove.Add(cardId);
+                    }
+                }
             }
 
-            foreach (var id in toRemove)
+            foreach (var cardId in discardPile)
             {
-                RemoveCard(id);
+                if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
+                {
+                    if (string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        toRemove.Add(cardId);
+                    }
+                }
+            }
+
+            foreach (var cardId in toRemove)
+            {
+                RemoveCard(cardId);
             }
         }
 
@@ -267,16 +261,6 @@ namespace Mandato.Run
             drawPile.AddRange(discardPile);
             discardPile.Clear();
             Shuffle(rng);
-        }
-
-        public DeckState Clone()
-        {
-            var clone = new DeckState();
-            clone.priorityDrawPile.AddRange(priorityDrawPile);
-            clone.drawPile.AddRange(drawPile);
-            clone.discardPile.AddRange(discardPile);
-            clone.removedCardIds.AddRange(removedCardIds);
-            return clone;
         }
     }
 }

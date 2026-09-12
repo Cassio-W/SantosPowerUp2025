@@ -44,6 +44,17 @@ namespace Mandato.Run
         public string grantedPerkId = string.Empty;
         public string presentationCue = string.Empty;
 
+        // Narrativa & NPCs
+        public string npcId = string.Empty;
+        public int npcRelationBefore = 0;
+        public int npcRelationAfter = 0;
+        public int npcRelationDelta = 0;
+
+        // Quests
+        public List<string> advancedQuestIds = new List<string>();
+        public List<string> completedQuestIds = new List<string>();
+        public List<string> grantedRewardPerkIds = new List<string>();
+
         public RunTermination resultingTermination;
 
         public bool IsRunTerminated => resultingTermination.IsDefeat || resultingTermination.IsVictory;
@@ -51,11 +62,15 @@ namespace Mandato.Run
 
     public static class DecisionResolver
     {
+        public const int DefaultAcceptNpcRelationDelta = 5;
+        public const int DefaultRejectNpcRelationDelta = -5;
+
         public static ResolutionReport Resolve(
             RunState runState,
             DeckState deckState,
             CardDefinition card,
-            int choiceIndex)
+            int choiceIndex,
+            IReadOnlyDictionary<string, QuestDefinition> questCatalog = null)
         {
             if (runState == null || card == null) return null;
             if (choiceIndex < 0 || choiceIndex > 1) return null;
@@ -73,7 +88,8 @@ namespace Mandato.Run
                 deltaPoliticalX = choice.deltaPoliticalX,
                 deltaPoliticalY = choice.deltaPoliticalY,
                 grantedPerkId = choice.grantPerkId,
-                presentationCue = choice.presentationCue
+                presentationCue = choice.presentationCue,
+                npcId = card.npcId ?? string.Empty
             };
 
             // 1. Aplica impactos em atributos
@@ -121,7 +137,59 @@ namespace Mandato.Run
                 runState.GrantPerk(choice.grantPerkId);
             }
 
-            // 5. Registra no histórico da run
+            // 5. Atualização de Relação com NPC
+            if (!string.IsNullOrEmpty(card.npcId))
+            {
+                var npcState = runState.GetOrCreateNpcState(card.npcId);
+                report.npcRelationBefore = npcState.relationScore;
+                npcState.RecordInteraction();
+
+                int relationDelta = choiceIndex == 0 ? DefaultAcceptNpcRelationDelta : DefaultRejectNpcRelationDelta;
+                npcState.ModifyRelation(relationDelta);
+                report.npcRelationAfter = npcState.relationScore;
+                report.npcRelationDelta = relationDelta;
+            }
+
+            // 6. Resolução de Quests
+            if (questCatalog != null)
+            {
+                foreach (var kvp in questCatalog)
+                {
+                    string qId = kvp.Key;
+                    QuestDefinition qDef = kvp.Value;
+                    if (qDef == null || qDef.steps == null || qDef.steps.Count == 0) continue;
+
+                    var qState = runState.GetOrCreateQuestState(qId);
+                    if (qState.isCompleted || qState.isFailed) continue;
+
+                    if (qState.currentStepIndex < qDef.steps.Count)
+                    {
+                        var step = qDef.steps[qState.currentStepIndex];
+                        if (step != null && string.Equals(step.triggerCardId, card.id, StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (step.requiredChoiceIndex == -1 || step.requiredChoiceIndex == choiceIndex)
+                            {
+                                bool advanced = qState.AdvanceStep(qDef);
+                                if (advanced)
+                                {
+                                    report.advancedQuestIds.Add(qId);
+                                    if (qState.isCompleted)
+                                    {
+                                        report.completedQuestIds.Add(qId);
+                                        if (!string.IsNullOrEmpty(qDef.rewardPerkId))
+                                        {
+                                            runState.GrantPerk(qDef.rewardPerkId);
+                                            report.grantedRewardPerkIds.Add(qDef.rewardPerkId);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 7. Registra no histórico da run
             var record = new DecisionRecord(
                 card.id,
                 choiceIndex,
@@ -131,7 +199,7 @@ namespace Mandato.Run
             );
             runState.decisionHistory.Add(record.cardId);
 
-            // 6. Atualiza o status terminal
+            // 8. Atualiza o status terminal
             report.resultingTermination = runState.termination;
 
             return report;

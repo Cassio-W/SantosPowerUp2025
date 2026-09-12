@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Mandato.Content;
 using Mandato.Core;
 using Mandato.Presentation;
@@ -27,6 +28,11 @@ namespace Mandato.Infrastructure
 
         [Tooltip("Lista de Finais possíveis para avaliação no término do mandato.")]
         [SerializeField] private List<EndingDefinition> endingsCatalog = new List<EndingDefinition>();
+
+        [Header("Catálogos de Modificadores & Narrativa")]
+        [SerializeField] private List<PerkDefinition> perksCatalog = new List<PerkDefinition>();
+        [SerializeField] private List<RunEventDefinition> eventsCatalog = new List<RunEventDefinition>();
+        [SerializeField] private List<QuestDefinition> questsCatalog = new List<QuestDefinition>();
 
         [Header("Semente e Configurações")]
         [SerializeField] private int customSeed = 0;
@@ -64,12 +70,17 @@ namespace Mandato.Infrastructure
         public bool disableLegacyCanvas = true;
 
         public RunStateMachine StateMachine { get; private set; }
-        public Dictionary<string, CardDefinition> CardCatalog { get; private set; } = new Dictionary<string, CardDefinition>();
-        public Dictionary<string, FlipPhoneActionDefinition> ActionCatalog { get; private set; } = new Dictionary<string, FlipPhoneActionDefinition>();
-        public ProfileState CurrentProfile { get; private set; }
+        public RunCatalog Catalog => catalog;
+        public IReadOnlyDictionary<string, CardDefinition> CardCatalog => catalog.Cards;
+        public IReadOnlyDictionary<string, FlipPhoneActionDefinition> ActionCatalog => catalog.Actions;
+        public IReadOnlyDictionary<string, PerkDefinition> PerkCatalog => catalog.Perks;
+        public IReadOnlyDictionary<string, RunEventDefinition> EventCatalog => catalog.Events;
+        public IReadOnlyDictionary<string, QuestDefinition> QuestCatalog => catalog.Quests;
+        public ProfileState CurrentProfile => profileService.CurrentProfile;
+        public RunProfileService ProfileService => profileService;
 
-        private List<string> tutorialCardIds = new List<string>();
-        private List<string> mainDeckCardIds = new List<string>();
+        private readonly RunCatalog catalog = new RunCatalog();
+        private readonly RunProfileService profileService = new RunProfileService();
 
         private void Awake()
         {
@@ -80,7 +91,7 @@ namespace Mandato.Infrastructure
 
             AutoDetectPresenters();
             ApplyLegacyCanvasSuppression();
-            CurrentProfile = SaveSystem.LoadProfile();
+            profileService.InitializeProfile();
             BuildCatalog();
             InitializeStateMachine();
             BindPresenters();
@@ -110,14 +121,20 @@ namespace Mandato.Infrastructure
         {
             if (isAwaitingSpaceForNextNpc)
             {
-                bool spaceOrEnter = Input.GetKeyDown(callNextNpcKey) ||
-                                    Input.GetKeyDown(KeyCode.Space) ||
-                                    Input.GetKeyDown(KeyCode.Return) ||
-                                    Input.GetKeyDown(KeyCode.KeypadEnter);
+                bool isModalOpen = (flipPhonePresenter != null && flipPhonePresenter.IsOpen) ||
+                                   (endScreenPresenter != null && endScreenPresenter.IsVisible);
 
-                if (spaceOrEnter)
+                if (!isModalOpen)
                 {
-                    AuthorizeNextVisitor();
+                    bool spaceOrEnter = Input.GetKeyDown(callNextNpcKey) ||
+                                        Input.GetKeyDown(KeyCode.Space) ||
+                                        Input.GetKeyDown(KeyCode.Return) ||
+                                        Input.GetKeyDown(KeyCode.KeypadEnter);
+
+                    if (spaceOrEnter)
+                    {
+                        AuthorizeNextVisitor();
+                    }
                 }
             }
         }
@@ -129,6 +146,8 @@ namespace Mandato.Infrastructure
         public void AuthorizeNextVisitor()
         {
             if (!isAwaitingSpaceForNextNpc) return;
+            if (flipPhonePresenter != null && flipPhonePresenter.IsOpen) return;
+            if (endScreenPresenter != null && endScreenPresenter.IsVisible) return;
 
             isAwaitingSpaceForNextNpc = false;
             Debug.Log($"<color=#00ffaa>[MandatoBootstrap]</color> 🚪 Entrada autorizada. Chamando próximo visitante...");
@@ -360,126 +379,26 @@ namespace Mandato.Infrastructure
 
         private void BuildCatalog()
         {
-            CardCatalog.Clear();
-            ActionCatalog.Clear();
-            tutorialCardIds.Clear();
-            mainDeckCardIds.Clear();
-
-            // 1. Processa cartas de tutorial
-            if (playTutorial && tutorialDealsOrCards != null)
-            {
-                foreach (var asset in tutorialDealsOrCards)
-                {
-                    if (asset == null) continue;
-                    var card = RegisterAssetInCatalog(asset);
-                    if (card != null && !tutorialCardIds.Contains(card.id))
-                    {
-                        tutorialCardIds.Add(card.id);
-                    }
-                }
-            }
-
-            // 2. Processa cartas do baralho principal
-            if (startingDealsOrCards != null && startingDealsOrCards.Count > 0)
-            {
-                foreach (var asset in startingDealsOrCards)
-                {
-                    if (asset == null) continue;
-                    var card = RegisterAssetInCatalog(asset);
-                    if (card != null && !mainDeckCardIds.Contains(card.id))
-                    {
-                        mainDeckCardIds.Add(card.id);
-                    }
-                }
-            }
-
-            // 3. Processa Ações do Flip-Phone
-            if (startingActions != null && startingActions.Count > 0)
-            {
-                foreach (var act in startingActions)
-                {
-                    if (act != null && !string.IsNullOrEmpty(act.id))
-                    {
-                        ActionCatalog[act.id] = act;
-                    }
-                }
-            }
-            else
-            {
-                CreateDefaultActions();
-            }
-        }
-
-        private void CreateDefaultActions()
-        {
-            // Ação 1: Ligar para o Conselheiro
-            var callAdvisor = FlipPhoneActionDefinition.CreateRuntimeInstance(
-                "action_ligar_conselheiro",
-                "Ligar para o Conselheiro",
-                "Consulta a base governista para alinhar o discurso e tranquilizar a opinião pública.",
-                FlipPhoneCooldownType.Turns,
-                cooldownTurns: 2
+            catalog.Build(
+                tutorialDealsOrCards,
+                startingDealsOrCards,
+                perksCatalog,
+                eventsCatalog,
+                questsCatalog,
+                endingsCatalog,
+                startingActions,
+                playTutorial
             );
-            callAdvisor.categoryTag = "Contatos";
-            callAdvisor.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 5, 5, 0)));
-            ActionCatalog[callAdvisor.id] = callAdvisor;
-
-            // Ação 2: Pacote de Estímulo Emergencial
-            var emergencyStimulus = FlipPhoneActionDefinition.CreateRuntimeInstance(
-                "action_pacote_emergencial",
-                "Decreto de Estímulo Financeiro",
-                "Injeta capital em setores estratégicos ao custo de concessões duvidosas.",
-                FlipPhoneCooldownType.Turns,
-                cooldownTurns: 3
-            );
-            emergencyStimulus.categoryTag = "Gabinete";
-            emergencyStimulus.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 15, 0, -5, 10)));
-            ActionCatalog[emergencyStimulus.id] = emergencyStimulus;
-
-            // Ação 3: Engavetar Proposta Atual
-            var dismissProposal = FlipPhoneActionDefinition.CreateRuntimeInstance(
-                "action_engavetar_proposta",
-                "Engavetar Documento",
-                "Recusa o trâmite do documento atual sem se comprometer publicamente.",
-                FlipPhoneCooldownType.Turns,
-                cooldownTurns: 2
-            );
-            dismissProposal.categoryTag = "Ações";
-            dismissProposal.effects.Add(FlipPhoneEffect.CreateDismissProposal());
-            dismissProposal.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 0, 0, 5)));
-            ActionCatalog[dismissProposal.id] = dismissProposal;
-        }
-
-        private CardDefinition RegisterAssetInCatalog(ScriptableObject asset)
-        {
-            if (asset == null) return null;
-
-            CardDefinition card = null;
-            if (asset is CardDefinition cardDef)
-            {
-                card = cardDef;
-            }
-            else
-            {
-                card = LegacyDealAdapter.ConvertToCardDefinition(asset);
-            }
-
-            if (card != null && !string.IsNullOrEmpty(card.id))
-            {
-                CardCatalog[card.id] = card;
-            }
-
-            return card;
         }
 
         private void InitializeStateMachine()
         {
             int seed = customSeed != 0 ? customSeed : UnityEngine.Random.Range(1, 100000);
             
-            var priorityIds = (playTutorial && tutorialCardIds.Count > 0) ? tutorialCardIds : null;
+            var priorityIds = (playTutorial && catalog.TutorialCardIds.Count > 0) ? catalog.TutorialCardIds : null;
 
             StateMachine = new RunStateMachine(seed: seed);
-            StateMachine.StartRun(mainDeckCardIds, seed, priorityIds);
+            StateMachine.StartRun(catalog.MainDeckCardIds, seed, priorityIds);
         }
 
         private void BindPresenters()
@@ -530,6 +449,7 @@ namespace Mandato.Infrastructure
         public bool IsTutorialCard(CardDefinition card)
         {
             if (card == null) return false;
+            if (card.isTutorial) return true;
             return IsTutorialCard(card.id) ||
                    card.categoryTag.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
                    card.title.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0;
@@ -538,7 +458,8 @@ namespace Mandato.Infrastructure
         public bool IsTutorialCard(string cardId)
         {
             if (string.IsNullOrEmpty(cardId)) return false;
-            if (tutorialCardIds != null && tutorialCardIds.Contains(cardId)) return true;
+            if (catalog.IsTutorialCardId(cardId)) return true;
+            if (catalog.Cards.TryGetValue(cardId, out var card) && card != null && card.isTutorial) return true;
             return cardId.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
@@ -643,8 +564,8 @@ namespace Mandato.Infrastructure
                 }
             }
 
-            // 3. Submete a escolha para resolução de estado
-            StateMachine.SubmitChoice(choiceIndex);
+            // 3. Submete a escolha para resolução de estado (com catálogo de quests)
+            StateMachine.SubmitChoice(choiceIndex, QuestCatalog);
         }
 
         private void NotifyCameraUnfocus()
@@ -738,6 +659,19 @@ namespace Mandato.Infrastructure
                     }
                 }
                 return;
+            }
+
+            // Avança o turno e processa os modificadores mensais (Perks e Eventos)
+            var monthlyReport = StateMachine.CompleteTurnAndAdvance(PerkCatalog, EventCatalog);
+            if (monthlyReport != null && monthlyReport.HasAnyImpact)
+            {
+                if (retroMonitorPresenter != null)
+                {
+                    retroMonitorPresenter.UpdateSnapshot(StateMachine.RunState.GetSnapshot());
+                    retroMonitorPresenter.TriggerGlitch();
+                }
+                SyncCanvasUI();
+                SyncCameraEffects(instant: false);
             }
 
             float delay = Mathf.Max(0.2f, delayBetweenProposals);
@@ -891,7 +825,8 @@ namespace Mandato.Infrastructure
 
             try
             {
-                evaluatedEnding = EndingEvaluator.EvaluateEnding(StateMachine.RunState, endingsCatalog);
+                var endingsList = endingsCatalog != null && endingsCatalog.Count > 0 ? (IEnumerable<EndingDefinition>)endingsCatalog : catalog.Endings.Values;
+                evaluatedEnding = EndingEvaluator.EvaluateEnding(StateMachine.RunState, endingsList);
             }
             catch (Exception ex)
             {
@@ -899,15 +834,7 @@ namespace Mandato.Infrastructure
             }
 
             // 1. Registra e salva metaprogressão
-            if (CurrentProfile != null)
-            {
-                try
-                {
-                    CurrentProfile.RecordRunCompleted(termination.IsVictory, evaluatedEnding?.id);
-                    SaveSystem.SaveProfile(CurrentProfile);
-                }
-                catch { }
-            }
+            profileService.RecordRunCompleted(termination.IsVictory, evaluatedEnding?.id);
 
             // 2. Limpa papel, overlay de decisão e celular
             if (paperPresenter != null)

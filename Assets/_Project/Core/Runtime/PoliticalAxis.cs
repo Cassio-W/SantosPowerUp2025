@@ -16,22 +16,36 @@ namespace Mandato.Core
         [Range(MinValue, MaxValue)]
         public int y = Center; // -10 (Liberal) a +10 (Autoritário)
 
+        public bool isLocked = false;
+
         public PoliticalAxis()
         {
             x = Center;
             y = Center;
+            isLocked = false;
         }
 
-        public PoliticalAxis(int initialX, int initialY)
+        public PoliticalAxis(int initialX, int initialY, bool locked = false)
         {
             x = Clamp(initialX);
             y = Clamp(initialY);
+            isLocked = locked;
         }
+
+        public void Lock() => isLocked = true;
+        public void Unlock() => isLocked = false;
 
         public void ApplyDelta(int deltaX, int deltaY)
         {
+            if (isLocked) return;
+
             x = Clamp(x + deltaX);
             y = Clamp(y + deltaY);
+        }
+
+        public bool IsInRange(int minX, int maxX, int minY, int maxY)
+        {
+            return x >= minX && x <= maxX && y >= minY && y <= maxY;
         }
 
         public string Quadrant
@@ -61,7 +75,7 @@ namespace Mandato.Core
 
         public PoliticalAxis Clone()
         {
-            return new PoliticalAxis(x, y);
+            return new PoliticalAxis(x, y, isLocked);
         }
 
         public static int Clamp(int value)

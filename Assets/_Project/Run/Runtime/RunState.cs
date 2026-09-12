@@ -1,4 +1,4 @@
-  using System;
+using System;
 using System.Collections.Generic;
 using Mandato.Content;
 using Mandato.Core;
@@ -59,6 +59,12 @@ namespace Mandato.Run
             return state;
         }
 
+        public int GetNpcRelation(string npcId)
+        {
+            if (string.IsNullOrEmpty(npcId)) return 0;
+            return npcStates.TryGetValue(npcId, out var state) ? state.relationScore : 0;
+        }
+
         public QuestRunState GetOrCreateQuestState(string questId)
         {
             if (string.IsNullOrEmpty(questId)) return null;
@@ -71,11 +77,26 @@ namespace Mandato.Run
             return state;
         }
 
+        public (int step, bool completed, bool failed) GetQuestState(string questId)
+        {
+            if (string.IsNullOrEmpty(questId) || !questStates.TryGetValue(questId, out var q))
+            {
+                return (0, false, false);
+            }
+            return (q.currentStepIndex, q.isCompleted, q.isFailed);
+        }
+
+        public bool IsQuestCompleted(string questId)
+        {
+            if (string.IsNullOrEmpty(questId)) return false;
+            return questStates.TryGetValue(questId, out var q) && q.isCompleted;
+        }
+
         public void TriggerEvent(string eventId, int duration = 3)
         {
             if (string.IsNullOrEmpty(eventId)) return;
 
-            var existing = activeEvents.Find(e => e.eventId == eventId);
+            var existing = activeEvents.Find(e => string.Equals(e.eventId, eventId, StringComparison.OrdinalIgnoreCase));
             if (existing != null)
             {
                 existing.remainingMonths = duration;
@@ -95,7 +116,7 @@ namespace Mandato.Run
                 activePerkIds.Add(perkId);
             }
 
-            var existing = activePerks.Find(p => p.perkId == perkId);
+            var existing = activePerks.Find(p => string.Equals(p.perkId, perkId, StringComparison.OrdinalIgnoreCase));
             if (existing != null)
             {
                 existing.remainingMonths = duration;
@@ -104,6 +125,14 @@ namespace Mandato.Run
             {
                 activePerks.Add(new ActivePerkState(perkId, duration));
             }
+        }
+
+        public void RemovePerk(string perkId)
+        {
+            if (string.IsNullOrEmpty(perkId)) return;
+
+            activePerkIds.Remove(perkId);
+            activePerks.RemoveAll(p => string.Equals(p.perkId, perkId, StringComparison.OrdinalIgnoreCase));
         }
 
         public void ApplyStatDelta(StatId id, int delta)
@@ -200,39 +229,11 @@ namespace Mandato.Run
             }
         }
 
-        public void AdvanceMonth()
+        public MonthlyEffectsReport AdvanceMonth(
+            IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null,
+            IReadOnlyDictionary<string, RunEventDefinition> eventCatalog = null)
         {
-            if (!termination.IsOngoing) return;
-
-            // Atualiza e remove eventos expirados
-            for (int i = activeEvents.Count - 1; i >= 0; i--)
-            {
-                activeEvents[i].TickMonth();
-                if (activeEvents[i].IsExpired)
-                {
-                    activeEvents.RemoveAt(i);
-                }
-            }
-
-            // Atualiza perks temporários
-            for (int i = activePerks.Count - 1; i >= 0; i--)
-            {
-                if (activePerks[i].remainingMonths > 0)
-                {
-                    activePerks[i].TickMonth();
-                    if (activePerks[i].remainingMonths == 0)
-                    {
-                        activePerkIds.Remove(activePerks[i].perkId);
-                        activePerks.RemoveAt(i);
-                    }
-                }
-            }
-
-            // Atualiza cooldowns de ações do Flip-Phone
-            TickActionCooldowns();
-
-            calendar.Advance();
-            UpdateTermination();
+            return MonthlyEffectsResolver.ResolveMonth(this, perkCatalog, eventCatalog);
         }
 
         public void ForceDefeat(string reason)
@@ -245,7 +246,7 @@ namespace Mandato.Run
             termination = RunTermination.CreateVictory(reason);
         }
 
-        private void UpdateTermination()
+        public void UpdateTermination()
         {
             termination = RunRules.Evaluate(stats, calendar);
         }
