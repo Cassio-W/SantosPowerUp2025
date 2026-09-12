@@ -54,6 +54,7 @@ namespace Mandato.Run
         public List<string> advancedQuestIds = new List<string>();
         public List<string> completedQuestIds = new List<string>();
         public List<string> grantedRewardPerkIds = new List<string>();
+        public List<string> rescuedByPerkIds = new List<string>();
 
         public RunTermination resultingTermination;
 
@@ -70,7 +71,8 @@ namespace Mandato.Run
             DeckState deckState,
             CardDefinition card,
             int choiceIndex,
-            IReadOnlyDictionary<string, QuestDefinition> questCatalog = null)
+            IReadOnlyDictionary<string, QuestDefinition> questCatalog = null,
+            IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null)
         {
             if (runState == null || card == null) return null;
             if (choiceIndex < 0 || choiceIndex > 1) return null;
@@ -199,7 +201,16 @@ namespace Mandato.Run
             );
             runState.decisionHistory.Add(record.cardId);
 
-            // 8. Atualiza o status terminal
+            // 8. Avalia e aplica perks de resgate emergencial caso algum atributo tenha zerado
+            var rescued = runState.CheckAndApplyEmergencyRescue(perkCatalog);
+            if (rescued != null && rescued.Count > 0)
+            {
+                report.rescuedByPerkIds.AddRange(rescued);
+                report.statsAfter = runState.stats.Clone();
+            }
+
+            // 9. Atualiza o status terminal
+            runState.UpdateTermination();
             report.resultingTermination = runState.termination;
 
             return report;

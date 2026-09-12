@@ -9651,7 +9651,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f4e66db240975924a8768d16102e609f, type: 2}
   - {fileID: 11400000, guid: f170648715930e44b8eb9c999914ec05, type: 2}
   endingsCatalog: []
-  perksCatalog: []
+  perksCatalog:
+  - {fileID: 11400000, guid: f2c6f1ae53de5ea44bb96c2e9dc50438, type: 2}
+  - {fileID: 11400000, guid: 711fc31e114d1194ab4e9fc7984279b3, type: 2}
+  - {fileID: 11400000, guid: f78e90a6cf4113446a02f0ad16e64e53, type: 2}
+  - {fileID: 11400000, guid: f5b7516c34e45cd4badd13d926224979, type: 2}
+  - {fileID: 11400000, guid: e7c78e7a20fb5d343b7a60e1688b05d2, type: 2}
   eventsCatalog: []
   questsCatalog: []
   customSeed: 0

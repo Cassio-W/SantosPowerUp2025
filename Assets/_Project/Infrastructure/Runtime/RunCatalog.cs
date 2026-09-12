@@ -90,6 +90,11 @@ namespace Mandato.Infrastructure
                 }
             }
 
+            if (perks.Count == 0)
+            {
+                CreateDefaultPerks();
+            }
+
             if (eventsList != null)
             {
                 foreach (var ev in eventsList)
@@ -127,6 +132,51 @@ namespace Mandato.Infrastructure
             {
                 CreateDefaultActions();
             }
+        }
+
+        private void CreateDefaultPerks()
+        {
+            var cripto = PerkDefinition.CreateRuntimeInstance(
+                "Cripto",
+                "Hub de Criptoativos",
+                "Incentivos à economia digital e blockchain aumentam a inovação econômica.",
+                new StatBlock(0, 0, 1, 0, 1)
+            );
+            perks[cripto.id] = cripto;
+
+            var alianca = PerkDefinition.CreateRescuePerk(
+                "AliancaEUA",
+                "Aliança Estratégica com os EUA",
+                "Acordo diplomático bilateral. Se as Relações Internacionais chegarem a 0, restaura para 30 e consome o acordo.",
+                StatId.InternationalRelations,
+                30
+            );
+            perks[alianca.id] = alianca;
+
+            var usina = PerkDefinition.CreateRuntimeInstance(
+                "InvestimentoUsina",
+                "Subsídio Energético Nacional",
+                "Investimento massivo no setor energético impulsiona a economia.",
+                new StatBlock(-1, 2, 0, 0, 0)
+            );
+            perks[usina.id] = usina;
+
+            var reserva = PerkDefinition.CreateRescuePerk(
+                "ReservaFlorestal",
+                "Reserva Florestal Protegida",
+                "Garante a preservação de biomas estratégicos. Se o Meio Ambiente chegar a 0, restaura para 35 e consome a reserva.",
+                StatId.ClimaticChanges,
+                35
+            );
+            perks[reserva.id] = reserva;
+
+            var tratado = PerkDefinition.CreateRuntimeInstance(
+                "TratadoInternacional",
+                "Pacto de Cooperação Global",
+                "Tratado multilateral que eleva o prestígio internacional do país.",
+                new StatBlock(0, 0, 2, 0, 0)
+            );
+            perks[tratado.id] = tratado;
         }
 
         public CardDefinition RegisterCard(ScriptableObject asset, bool isTutorial = false)

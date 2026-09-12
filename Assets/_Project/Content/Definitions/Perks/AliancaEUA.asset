@@ -14,16 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.PerkDefinition
   id: AliancaEUA
   title: "Alian\xE7a Estrat\xE9gica com os EUA"
-  description: "Coopera\xE7\xE3o comercial e diplom\xE1tica cont\xEDnua com a maior
-    economia ocidental."
+  description: "Acordo diplomático bilateral. Se as Relações Internacionais chegarem a 0, restaura para 30 e consome o acordo."
   icon: {fileID: 21300000, guid: 1f1011ece3d947243b0d8cd77a437885, type: 3}
-  isPassive: 1
-  isOneTimeUse: 0
+  isPassive: 0
+  isOneTimeUse: 1
   durationMonths: 0
+  isEmergencyRescue: 1
+  rescueStat: 1
+  rescueRestoreValue: 30
+  rescueMessage: "Aliança com os EUA ativada! Relações internacionais restauradas para 30."
   statDeltasPerMonth:
     climaticChanges: 0
-    internationalRelations: 1
-    popularApproval: 1
+    internationalRelations: 0
+    popularApproval: 0
     economy: 0
     corruption: 0
   corruptionImmunity: 0

@@ -158,7 +158,10 @@ namespace Mandato.Run
             // 8. Avanço do Calendário
             runState.calendar.Advance();
 
-            // 9. Avaliação das Regras Terminais
+            // 9. Avaliação e Aplicação de Resgate Emergencial de Perks
+            runState.CheckAndApplyEmergencyRescue(perkCatalog);
+
+            // 10. Avaliação das Regras Terminais
             runState.UpdateTermination();
 
             report.statsAfter = runState.stats.Clone();

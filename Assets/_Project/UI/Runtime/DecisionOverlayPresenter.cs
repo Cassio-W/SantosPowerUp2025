@@ -16,6 +16,12 @@ namespace Mandato.UI
         [SerializeField] private UIDocument uiDocument;
         private VisualElement decisionContainer;
         private VisualElement vignetteCorruption;
+        private VisualElement perksContainer;
+        private VisualElement perkModalPopup;
+        private Label lblPerkTitle;
+        private Label lblPerkTag;
+        private Label lblPerkDesc;
+
         private VisualElement wrapperApprove;
         private VisualElement wrapperReject;
         private VisualElement wrapperContinue;
@@ -72,6 +78,17 @@ namespace Mandato.UI
 
             decisionContainer = root.Q<VisualElement>("decision-container");
             vignetteCorruption = root.Q<VisualElement>("vignette-corruption");
+            perksContainer = root.Q<VisualElement>("perks-container");
+            perkModalPopup = root.Q<VisualElement>("perk-modal-popup");
+            lblPerkTitle = root.Q<Label>("perk-modal-title");
+            lblPerkTag = root.Q<Label>("perk-modal-tag");
+            lblPerkDesc = root.Q<Label>("perk-modal-desc");
+
+            if (perkModalPopup != null)
+            {
+                perkModalPopup.style.display = DisplayStyle.None;
+            }
+
             wrapperApprove = root.Q<VisualElement>("wrapper-approve");
             wrapperReject = root.Q<VisualElement>("wrapper-reject");
             wrapperContinue = root.Q<VisualElement>("wrapper-continue");
@@ -170,6 +187,158 @@ namespace Mandato.UI
             // Começa a ficar visível a partir de 30% de corrupção, com opacidade máxima em 100%
             float factor = Mathf.Clamp01((corruption - 25f) / 75f);
             vignetteCorruption.style.opacity = factor * 0.9f;
+        }
+
+        public void RefreshActivePerks(System.Collections.Generic.IEnumerable<string> activePerkIds, System.Collections.Generic.IReadOnlyDictionary<string, PerkDefinition> perkCatalog)
+        {
+            EnsureReferences();
+            CacheElements();
+
+            if (perksContainer == null) return;
+            perksContainer.Clear();
+
+            if (activePerkIds == null)
+            {
+                HidePerkTooltip();
+                return;
+            }
+
+            foreach (var perkId in activePerkIds)
+            {
+                if (string.IsNullOrEmpty(perkId)) continue;
+
+                PerkDefinition def = null;
+                if (perkCatalog != null)
+                {
+                    perkCatalog.TryGetValue(perkId, out def);
+                }
+
+                var itemEl = new VisualElement();
+                itemEl.AddToClassList("perk-item");
+
+                var cardEl = new VisualElement();
+                cardEl.AddToClassList("perk-icon-card");
+
+                var iconEl = new VisualElement();
+                iconEl.AddToClassList("perk-icon-large");
+
+                if (def != null && def.icon != null)
+                {
+                    iconEl.style.backgroundImage = new StyleBackground(def.icon);
+                }
+
+                cardEl.Add(iconEl);
+                itemEl.Add(cardEl);
+
+                // Callbacks de hover para modal / tooltip
+                string capturedId = perkId;
+                PerkDefinition capturedDef = def;
+                VisualElement capturedCard = cardEl;
+
+                cardEl.RegisterCallback<PointerEnterEvent>(evt => ShowPerkTooltip(capturedId, capturedDef, capturedCard));
+                cardEl.RegisterCallback<PointerLeaveEvent>(evt => HidePerkTooltip());
+
+                perksContainer.Add(itemEl);
+            }
+        }
+
+        private void ShowPerkTooltip(string perkId, PerkDefinition def, VisualElement targetCard)
+        {
+            if (perkModalPopup == null) return;
+
+            if (lblPerkTitle != null)
+            {
+                lblPerkTitle.text = (def != null && !string.IsNullOrEmpty(def.title)) ? def.title : perkId;
+            }
+
+            if (lblPerkTag != null)
+            {
+                lblPerkTag.text = (def != null && def.durationMonths > 0) ? $"{def.durationMonths}M" : "PERK";
+            }
+
+            if (lblPerkDesc != null)
+            {
+                lblPerkDesc.text = FormatPerkDescription(def);
+            }
+
+            // Posiciona à direita do painel de perks
+            perkModalPopup.style.left = 124;
+
+            if (targetCard != null && targetCard.worldBound.yMin > 0)
+            {
+                perkModalPopup.style.top = targetCard.worldBound.yMin;
+            }
+            else
+            {
+                perkModalPopup.style.top = 28;
+            }
+
+            perkModalPopup.style.display = DisplayStyle.Flex;
+            perkModalPopup.AddToClassList("open");
+        }
+
+        private void HidePerkTooltip()
+        {
+            if (perkModalPopup == null) return;
+            perkModalPopup.RemoveFromClassList("open");
+            perkModalPopup.style.display = DisplayStyle.None;
+        }
+
+        private string FormatPerkDescription(PerkDefinition def)
+        {
+            if (def == null) return "Vantagem ativa no mandato.";
+
+            var sb = new System.Text.StringBuilder();
+            if (!string.IsNullOrEmpty(def.description))
+            {
+                sb.AppendLine(def.description);
+            }
+
+            if (def.statDeltasPerMonth != null)
+            {
+                var d = def.statDeltasPerMonth;
+                var deltas = new System.Collections.Generic.List<string>();
+
+                if (d.economy != 0)
+                    deltas.Add($"{(d.economy > 0 ? "+" : "")}{d.economy} Economia/mês");
+                if (d.popularApproval != 0)
+                    deltas.Add($"{(d.popularApproval > 0 ? "+" : "")}{d.popularApproval} Aprovação/mês");
+                if (d.internationalRelations != 0)
+                    deltas.Add($"{(d.internationalRelations > 0 ? "+" : "")}{d.internationalRelations} Relações Int./mês");
+                if (d.climaticChanges != 0)
+                    deltas.Add($"{(d.climaticChanges > 0 ? "+" : "")}{d.climaticChanges} Meio Ambiente/mês");
+                if (d.corruption != 0)
+                    deltas.Add($"{(d.corruption > 0 ? "+" : "")}{d.corruption} Corrupção/mês");
+
+                if (deltas.Count > 0)
+                {
+                    if (sb.Length > 0) sb.AppendLine();
+                    sb.Append("<b>Efeitos Mensais:</b> " + string.Join(", ", deltas));
+                }
+            }
+
+            if (def.corruptionImmunity)
+            {
+                if (sb.Length > 0) sb.AppendLine();
+                sb.Append("🛡️ <b>Imunidade a escândalos de corrupção.</b>");
+            }
+
+            if (def.isEmergencyRescue)
+            {
+                if (sb.Length > 0) sb.AppendLine();
+                string statName = def.rescueStat switch
+                {
+                    Mandato.Core.StatId.ClimaticChanges => "Meio Ambiente",
+                    Mandato.Core.StatId.InternationalRelations => "Relações Internacionais",
+                    Mandato.Core.StatId.PopularApproval => "Aprovação Popular",
+                    Mandato.Core.StatId.Economy => "Economia",
+                    Mandato.Core.StatId.Corruption => "Corrupção",
+                    _ => "Atributo"
+                };
+                sb.Append($"🛡️ <b>Prevenção de Derrota:</b> Se o indicador de <b>{statName}</b> chegar a 0, restaura para {def.rescueRestoreValue} e consome este perk.");
+            }
+
+            return sb.ToString().TrimEnd();
         }
 
         private void OnLeftClicked()

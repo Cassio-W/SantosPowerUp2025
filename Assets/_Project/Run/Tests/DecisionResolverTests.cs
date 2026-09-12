@@ -128,5 +128,117 @@ namespace Mandato.Run.Tests
             Assert.IsNull(DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 2));
             Assert.IsNull(DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 99));
         }
+
+        [Test]
+        public void Resolve_WhenClimateDropsToZero_WithReservaFlorestal_RestoresTo35AndConsumesPerk()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+
+            // Configura clima inicial em 20
+            run.stats.climaticChanges = 20;
+
+            // Concede ReservaFlorestal
+            var perkReserva = PerkDefinition.CreateRescuePerk(
+                "ReservaFlorestal",
+                "Reserva Florestal",
+                "Protege contra colapso climático",
+                StatId.ClimaticChanges,
+                35
+            );
+            var perkCatalog = new Dictionary<string, PerkDefinition> { { perkReserva.id, perkReserva } };
+            run.GrantPerk("ReservaFlorestal");
+
+            // Carta que reduz clima em -50 (levando de 20 para 0 ou menos)
+            var fatalCard = CardDefinition.CreateRuntimeInstance(
+                "card_fatal_climate",
+                "Desastre Iminente",
+                "Impacto severo no clima",
+                left: new ChoiceDefinition("Desmatar", new StatBlock(-50, 0, 0, 0, 0)),
+                right: new ChoiceDefinition("Proteger", new StatBlock(0, 0, 0, 0, 0))
+            );
+
+            var report = DecisionResolver.Resolve(run, deck, fatalCard, choiceIndex: 0, perkCatalog: perkCatalog);
+
+            Assert.IsNotNull(report);
+            Assert.IsTrue(report.rescuedByPerkIds.Contains("ReservaFlorestal"));
+            Assert.AreEqual(35, run.stats.climaticChanges);
+            Assert.AreEqual(35, report.statsAfter.climaticChanges);
+            Assert.IsFalse(run.activePerkIds.Contains("ReservaFlorestal"), "Perk de uso único de resgate deve ser consumido.");
+            Assert.IsTrue(run.termination.IsOngoing, "A partida não deve encerrar em derrota quando resgatada pelo perk.");
+        }
+
+        [Test]
+        public void Resolve_WithMultiplePerks_WhereReservaFlorestalIsFirst_SuccessfullyRestoresClimateAndPreservesSecondPerk()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+
+            run.stats.climaticChanges = 15;
+
+            var perkReserva = PerkDefinition.CreateRescuePerk("ReservaFlorestal", "Reserva Florestal", "", StatId.ClimaticChanges, 35);
+            var perkCripto = PerkDefinition.CreateRuntimeInstance("Cripto", "Cripto", "", new StatBlock(0, 0, 1, 0, 1));
+
+            var perkCatalog = new Dictionary<string, PerkDefinition>
+            {
+                { perkReserva.id, perkReserva },
+                { perkCripto.id, perkCripto }
+            };
+
+            // Jogador adquire primeiro a ReservaFlorestal, e depois o Cripto
+            run.GrantPerk("ReservaFlorestal");
+            run.GrantPerk("Cripto");
+
+            Assert.AreEqual(2, run.activePerkIds.Count);
+            Assert.AreEqual("ReservaFlorestal", run.activePerkIds[0]);
+            Assert.AreEqual("Cripto", run.activePerkIds[1]);
+
+            var fatalCard = CardDefinition.CreateRuntimeInstance(
+                "card_fatal_climate_2",
+                "Queimada",
+                "Impacto",
+                left: new ChoiceDefinition("Queimar", new StatBlock(-30, 0, 0, 0, 0)),
+                right: new ChoiceDefinition("Apagar", new StatBlock(0, 0, 0, 0, 0))
+            );
+
+            var report = DecisionResolver.Resolve(run, deck, fatalCard, choiceIndex: 0, perkCatalog: perkCatalog);
+
+            Assert.IsNotNull(report);
+            Assert.IsTrue(report.rescuedByPerkIds.Contains("ReservaFlorestal"));
+            Assert.AreEqual(35, run.stats.climaticChanges);
+            Assert.IsFalse(run.activePerkIds.Contains("ReservaFlorestal"), "ReservaFlorestal deve ser consumida.");
+            Assert.IsTrue(run.activePerkIds.Contains("Cripto"), "O segundo perk (Cripto) deve permanecer ativo.");
+            Assert.IsTrue(run.termination.IsOngoing);
+        }
+
+        [Test]
+        public void Resolve_WhenRelationsDropToZero_WithAliancaEUA_RestoresTo30AndConsumesPerk()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+
+            run.stats.internationalRelations = 10;
+
+            var perkAlianca = PerkDefinition.CreateRescuePerk("AliancaEUA", "Aliança EUA", "", StatId.InternationalRelations, 30);
+            var perkCatalog = new Dictionary<string, PerkDefinition> { { perkAlianca.id, perkAlianca } };
+
+            run.GrantPerk("AliancaEUA");
+
+            var fatalCard = CardDefinition.CreateRuntimeInstance(
+                "card_fatal_rel",
+                "Crise Diplomática",
+                "Impacto",
+                left: new ChoiceDefinition("Hostilizar", new StatBlock(0, -40, 0, 0, 0)),
+                right: new ChoiceDefinition("Dialogar", new StatBlock(0, 0, 0, 0, 0))
+            );
+
+            var report = DecisionResolver.Resolve(run, deck, fatalCard, choiceIndex: 0, perkCatalog: perkCatalog);
+
+            Assert.IsNotNull(report);
+            Assert.IsTrue(report.rescuedByPerkIds.Contains("AliancaEUA"));
+            Assert.AreEqual(30, run.stats.internationalRelations);
+            Assert.IsFalse(run.activePerkIds.Contains("AliancaEUA"));
+            Assert.IsTrue(run.termination.IsOngoing);
+        }
     }
 }

@@ -110,6 +110,8 @@ namespace Mandato.Infrastructure
                 decisionOverlayPresenter.SetCorruptionLevel(StateMachine.RunState.stats.corruption);
             }
 
+            RefreshPerksUI();
+
             SyncCanvasUI();
             SyncCameraEffects(instant: true);
 
@@ -520,6 +522,8 @@ namespace Mandato.Infrastructure
                 decisionOverlayPresenter.PresentChoices(card);
             }
 
+            RefreshPerksUI();
+
             // 4. Notifica o monitor retrô CRT da nova proposta e atualiza a data
             if (retroMonitorPresenter != null)
             {
@@ -564,8 +568,8 @@ namespace Mandato.Infrastructure
                 }
             }
 
-            // 3. Submete a escolha para resolução de estado (com catálogo de quests)
-            StateMachine.SubmitChoice(choiceIndex, QuestCatalog);
+            // 3. Submete a escolha para resolução de estado (com catálogos de quests e perks)
+            StateMachine.SubmitChoice(choiceIndex, QuestCatalog, PerkCatalog);
         }
 
         private void NotifyCameraUnfocus()
@@ -607,6 +611,8 @@ namespace Mandato.Infrastructure
                 decisionOverlayPresenter.SetCorruptionLevel(StateMachine.RunState.stats.corruption);
             }
 
+            RefreshPerksUI();
+
             if (retroMonitorPresenter != null)
             {
                 retroMonitorPresenter.UpdateSnapshot(StateMachine.RunState.GetSnapshot(), report);
@@ -620,8 +626,9 @@ namespace Mandato.Infrastructure
         {
             if (StateMachine == null) return;
 
-            // Atualiza cooldowns visuais no celular
+            // Atualiza cooldowns visuais no celular e perks
             RefreshFlipPhoneUI();
+            RefreshPerksUI();
 
             // Verifica se a run terminou
             if (StateMachine.RunState.termination.IsDefeat || StateMachine.RunState.termination.IsVictory)
@@ -1239,6 +1246,14 @@ namespace Mandato.Infrastructure
 
             Debug.Log($"<color=#00e5ff>[MandatoBootstrap]</color> 📱 RefreshFlipPhoneUI: {viewModels.Count} ações enviadas para a interface.");
             flipPhonePresenter.Refresh(viewModels);
+        }
+
+        public void RefreshPerksUI()
+        {
+            if (decisionOverlayPresenter != null && StateMachine != null && StateMachine.RunState != null)
+            {
+                decisionOverlayPresenter.RefreshActivePerks(StateMachine.RunState.activePerkIds, PerkCatalog);
+            }
         }
 
         public void RequestUseFlipPhoneAction(string actionId)

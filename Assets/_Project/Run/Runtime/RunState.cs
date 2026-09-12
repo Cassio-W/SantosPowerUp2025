@@ -135,11 +135,77 @@ namespace Mandato.Run
             activePerks.RemoveAll(p => string.Equals(p.perkId, perkId, StringComparison.OrdinalIgnoreCase));
         }
 
+        public List<string> CheckAndApplyEmergencyRescue(IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null)
+        {
+            var rescuedPerkIds = new List<string>();
+            if (activePerkIds == null || activePerkIds.Count == 0) return rescuedPerkIds;
+
+            // Itera sobre cópia para permitir remoção segura de perks consumidos
+            var activeList = new List<string>(activePerkIds);
+
+            foreach (var perkId in activeList)
+            {
+                if (string.IsNullOrEmpty(perkId)) continue;
+
+                PerkDefinition def = null;
+                if (perkCatalog != null)
+                {
+                    perkCatalog.TryGetValue(perkId, out def);
+                }
+
+                bool isClimateRescue = (def != null && def.isEmergencyRescue && def.rescueStat == StatId.ClimaticChanges) ||
+                                       string.Equals(perkId, "ReservaFlorestal", StringComparison.OrdinalIgnoreCase);
+
+                bool isRelationsRescue = (def != null && def.isEmergencyRescue && def.rescueStat == StatId.InternationalRelations) ||
+                                         string.Equals(perkId, "AliancaEUA", StringComparison.OrdinalIgnoreCase);
+
+                bool isEconomyRescue = (def != null && def.isEmergencyRescue && def.rescueStat == StatId.Economy);
+                bool isPopularityRescue = (def != null && def.isEmergencyRescue && def.rescueStat == StatId.PopularApproval);
+
+                if (isClimateRescue && stats.climaticChanges <= StatBlock.MinValue)
+                {
+                    int restoreVal = (def != null && def.rescueRestoreValue > 0) ? def.rescueRestoreValue : 35;
+                    stats.climaticChanges = restoreVal;
+                    RemovePerk(perkId);
+                    rescuedPerkIds.Add(perkId);
+                }
+                else if (isRelationsRescue && stats.internationalRelations <= StatBlock.MinValue)
+                {
+                    int restoreVal = (def != null && def.rescueRestoreValue > 0) ? def.rescueRestoreValue : 30;
+                    stats.internationalRelations = restoreVal;
+                    RemovePerk(perkId);
+                    rescuedPerkIds.Add(perkId);
+                }
+                else if (isEconomyRescue && stats.economy <= StatBlock.MinValue)
+                {
+                    int restoreVal = (def != null && def.rescueRestoreValue > 0) ? def.rescueRestoreValue : 30;
+                    stats.economy = restoreVal;
+                    RemovePerk(perkId);
+                    rescuedPerkIds.Add(perkId);
+                }
+                else if (isPopularityRescue && stats.popularApproval <= StatBlock.MinValue)
+                {
+                    int restoreVal = (def != null && def.rescueRestoreValue > 0) ? def.rescueRestoreValue : 30;
+                    stats.popularApproval = restoreVal;
+                    RemovePerk(perkId);
+                    rescuedPerkIds.Add(perkId);
+                }
+            }
+
+            if (rescuedPerkIds.Count > 0)
+            {
+                UpdateTermination();
+            }
+
+            return rescuedPerkIds;
+        }
+
         public void ApplyStatDelta(StatId id, int delta)
         {
             if (!termination.IsOngoing) return;
 
             stats.ApplyDelta(id, delta);
+            CheckAndApplyEmergencyRescue();
             UpdateTermination();
         }
 
@@ -148,6 +214,7 @@ namespace Mandato.Run
             if (!termination.IsOngoing || impacts == null) return;
 
             stats.ApplyImpacts(impacts, hasCorruptionMods);
+            CheckAndApplyEmergencyRescue();
             UpdateTermination();
         }
 

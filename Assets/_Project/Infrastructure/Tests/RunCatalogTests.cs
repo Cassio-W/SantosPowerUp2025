@@ -78,5 +78,54 @@ namespace Mandato.Infrastructure.Tests
             Assert.IsTrue(catalog.Perks.ContainsKey("perk_agro"));
             Assert.IsTrue(catalog.Quests.ContainsKey("quest_cop30"));
         }
+
+        [Test]
+        public void Build_WhenNoPerksProvided_GeneratesDefaultPerksIncludingCripto()
+        {
+            var catalog = new RunCatalog();
+            catalog.Build(null, null, null, null, null, null, null, playTutorial: false);
+
+            Assert.IsTrue(catalog.Perks.Count >= 5);
+            Assert.IsTrue(catalog.Perks.ContainsKey("Cripto"));
+            Assert.IsTrue(catalog.Perks.ContainsKey("AliancaEUA"));
+            Assert.IsTrue(catalog.Perks.ContainsKey("InvestimentoUsina"));
+            Assert.IsTrue(catalog.Perks.ContainsKey("ReservaFlorestal"));
+            Assert.IsTrue(catalog.Perks.ContainsKey("TratadoInternacional"));
+
+            var cripto = catalog.Perks["Cripto"];
+            Assert.AreEqual("Hub de Criptoativos", cripto.title);
+            Assert.AreEqual(1, cripto.statDeltasPerMonth.internationalRelations);
+            Assert.AreEqual(1, cripto.statDeltasPerMonth.corruption);
+
+            var reserva = catalog.Perks["ReservaFlorestal"];
+            Assert.IsTrue(reserva.isEmergencyRescue);
+            Assert.AreEqual(StatId.ClimaticChanges, reserva.rescueStat);
+            Assert.AreEqual(35, reserva.rescueRestoreValue);
+
+            var alianca = catalog.Perks["AliancaEUA"];
+            Assert.IsTrue(alianca.isEmergencyRescue);
+            Assert.AreEqual(StatId.InternationalRelations, alianca.rescueStat);
+            Assert.AreEqual(30, alianca.rescueRestoreValue);
+        }
+
+        [Test]
+        public void CriptoPerk_WhenActive_AppliesMonthlyStatsCorrectly()
+        {
+            var catalog = new RunCatalog();
+            catalog.Build(null, null, null, null, null, null, null, playTutorial: false);
+
+            var runState = new Mandato.Run.RunState();
+            int initialRel = runState.stats.internationalRelations;
+            int initialCorrupt = runState.stats.corruption;
+
+            runState.GrantPerk("Cripto");
+            Assert.IsTrue(runState.activePerkIds.Contains("Cripto"));
+
+            var report = Mandato.Run.MonthlyEffectsResolver.ResolveMonth(runState, catalog.Perks, catalog.Events);
+
+            Assert.IsTrue(report.activePerkIdsApplied.Contains("Cripto"));
+            Assert.AreEqual(initialRel + 1, runState.stats.internationalRelations);
+            Assert.AreEqual(initialCorrupt + 1, runState.stats.corruption);
+        }
     }
 }

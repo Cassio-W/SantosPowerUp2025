@@ -16,6 +16,12 @@ namespace Mandato.Content
         public bool isOneTimeUse = false;
         public int durationMonths = 0; // 0 = permanente durante a run toda
 
+        // Resgate Emergencial contra Derrota por Atributo
+        public bool isEmergencyRescue = false;
+        public StatId rescueStat = StatId.ClimaticChanges;
+        public int rescueRestoreValue = 35;
+        public string rescueMessage = string.Empty;
+
         public StatBlock statDeltasPerMonth = new StatBlock(0, 0, 0, 0, 0);
         public bool corruptionImmunity = false;
 
@@ -32,6 +38,27 @@ namespace Mandato.Content
             perk.description = description;
             perk.statDeltasPerMonth = monthlyDeltas ?? new StatBlock(0, 0, 0, 0, 0);
             perk.durationMonths = duration;
+            return perk;
+        }
+
+        public static PerkDefinition CreateRescuePerk(
+            string id,
+            string title,
+            string description,
+            StatId rescueStat,
+            int rescueRestoreValue = 35,
+            Sprite icon = null)
+        {
+            var perk = CreateInstance<PerkDefinition>();
+            perk.id = id;
+            perk.title = title;
+            perk.description = description;
+            perk.isPassive = false;
+            perk.isOneTimeUse = true;
+            perk.isEmergencyRescue = true;
+            perk.rescueStat = rescueStat;
+            perk.rescueRestoreValue = rescueRestoreValue;
+            perk.icon = icon;
             return perk;
         }
     }
