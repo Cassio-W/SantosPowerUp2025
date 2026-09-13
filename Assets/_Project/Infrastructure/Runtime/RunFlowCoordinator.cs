@@ -147,8 +147,6 @@ namespace Mandato.Infrastructure
                     bindings.DecisionOverlayPresenter.SetCorruptionLevel(stateMachine.RunState.stats.corruption);
                     bindings.DecisionOverlayPresenter.UpdateDateDisplay(displayDate, monthIndex);
                 }
-
-                UpdateLegacyDateText(displayDate);
                 bindings.CameraEffects?.ApplyAttributeEffects(stateMachine.RunState.stats, instant: true);
             }
 
@@ -208,8 +206,6 @@ namespace Mandato.Infrastructure
                 bindings.RetroMonitorPresenter.NotifyNewProposal(card);
                 bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
             }
-
-            UpdateLegacyDateText(displayDate);
         }
 
         private void HandlePlayerChoiceHovered(ChoiceDefinition choice)
