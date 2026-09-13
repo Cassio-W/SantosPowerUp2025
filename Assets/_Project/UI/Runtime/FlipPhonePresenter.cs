@@ -41,6 +41,7 @@ namespace Mandato.UI
         public event Action OnPhoneClosed;
 
         public bool IsOpen { get; private set; } = false;
+        public bool IsModalOpen => isModalOpen;
 
         public bool IsPhoneOpen()
         {
@@ -52,15 +53,21 @@ namespace Mandato.UI
         private UIDocument uiDocument;
         private VisualElement root;
         private VisualElement screenRoot;
-        private VisualElement actionsContainer;
+        private VisualElement appsContainer;
         private Label emptyLabel;
-        private Label statusLabel;
         private Button closeBtn;
 
-        // Categorias / Tabs
-        private Button tabAll, tabActions, tabContacts, tabCabinet;
-        private string activeCategoryFilter = "TODAS";
+        // Modal de Ação / Diálogo Inferior
+        private VisualElement modalBackdrop;
+        private VisualElement modalAppIcon;
+        private Label modalTitle;
+        private Label modalCategoryBadge;
+        private Label modalDesc;
+        private Button modalBackBtn;
+        private Button modalExecBtn;
 
+        private bool isModalOpen = false;
+        private FlipPhoneActionViewModel selectedAction;
         private List<FlipPhoneActionViewModel> cachedViewModels = new List<FlipPhoneActionViewModel>();
 
         private void Awake()
@@ -87,11 +94,18 @@ namespace Mandato.UI
         {
             if (IsOpen && Input.GetKeyDown(KeyCode.Escape))
             {
-                Close();
+                if (isModalOpen)
+                {
+                    CloseActionModal();
+                }
+                else
+                {
+                    Close();
+                }
             }
         }
 
-        private void EnsureDocument()
+        public void EnsureDocument()
         {
             if (uiDocument == null)
             {
@@ -114,21 +128,24 @@ namespace Mandato.UI
             }
             else if (uiDocument.visualTreeAsset == null)
             {
-                // Tenta carregar asset padrão
+#if UNITY_EDITOR
+                var loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/_Project/UI/UXML/FlipPhone.uxml");
+                if (loaded != null) uiDocument.visualTreeAsset = loaded;
+#else
                 var loaded = Resources.Load<VisualTreeAsset>("FlipPhone");
                 if (loaded != null) uiDocument.visualTreeAsset = loaded;
+#endif
             }
         }
 
-        private void CacheVisualElements()
+        public void CacheVisualElements()
         {
             if (uiDocument == null || uiDocument.rootVisualElement == null) return;
 
             root = uiDocument.rootVisualElement;
             screenRoot = root.Q<VisualElement>("phone-screen-root");
-            actionsContainer = root.Q<VisualElement>("actions-list-container");
+            appsContainer = root.Q<VisualElement>("apps-grid-container");
             emptyLabel = root.Q<Label>("empty-actions-label");
-            statusLabel = root.Q<Label>("phone-status-message");
             closeBtn = root.Q<Button>("phone-close-btn");
 
             if (closeBtn != null)
@@ -137,41 +154,32 @@ namespace Mandato.UI
                 closeBtn.clicked += Close;
             }
 
-            // Tabs
-            tabAll = root.Q<Button>("tab-all");
-            tabActions = root.Q<Button>("tab-actions");
-            tabContacts = root.Q<Button>("tab-contacts");
-            tabCabinet = root.Q<Button>("tab-cabinet");
+            // Modal de Diálogo Inferior
+            modalBackdrop = root.Q<VisualElement>("action-modal-backdrop");
+            modalAppIcon = root.Q<VisualElement>("modal-app-icon");
+            modalTitle = root.Q<Label>("modal-action-title");
+            modalCategoryBadge = root.Q<Label>("modal-category-badge");
+            modalDesc = root.Q<Label>("modal-action-desc");
+            modalBackBtn = root.Q<Button>("modal-back-btn");
+            modalExecBtn = root.Q<Button>("modal-exec-btn");
 
-            if (tabAll != null) { tabAll.clicked -= OnTabAllClicked; tabAll.clicked += OnTabAllClicked; }
-            if (tabActions != null) { tabActions.clicked -= OnTabActionsClicked; tabActions.clicked += OnTabActionsClicked; }
-            if (tabContacts != null) { tabContacts.clicked -= OnTabContactsClicked; tabContacts.clicked += OnTabContactsClicked; }
-            if (tabCabinet != null) { tabCabinet.clicked -= OnTabCabinetClicked; tabCabinet.clicked += OnTabCabinetClicked; }
+            if (modalBackBtn != null)
+            {
+                modalBackBtn.clicked -= CloseActionModal;
+                modalBackBtn.clicked += CloseActionModal;
+            }
+
+            if (modalExecBtn != null)
+            {
+                modalExecBtn.clicked -= HandleModalExecClicked;
+                modalExecBtn.clicked += HandleModalExecClicked;
+            }
         }
-
-        private void OnTabAllClicked() => SetCategoryFilter("TODAS");
-        private void OnTabActionsClicked() => SetCategoryFilter("AÇÕES");
-        private void OnTabContactsClicked() => SetCategoryFilter("CONTATOS");
-        private void OnTabCabinetClicked() => SetCategoryFilter("GABINETE");
 
         public void SetCategoryFilter(string filterName)
         {
-            activeCategoryFilter = filterName;
-            Debug.Log($"<color=#6a9fb5>[FlipPhonePresenter]</color> Filtro de categoria selecionado: <b>{filterName}</b>");
-
-            UpdateTabState(tabAll, filterName == "TODAS");
-            UpdateTabState(tabActions, filterName == "AÇÕES");
-            UpdateTabState(tabContacts, filterName == "CONTATOS");
-            UpdateTabState(tabCabinet, filterName == "GABINETE");
-
-            RebuildActionCards();
-        }
-
-        private void UpdateTabState(Button tabBtn, bool isActive)
-        {
-            if (tabBtn == null) return;
-            if (isActive) tabBtn.AddToClassList("active");
-            else tabBtn.RemoveFromClassList("active");
+            // Abas foram removidas para simplificação e foco em grade de aplicativos.
+            // Mantido para compatibilidade com assinaturas antigas.
         }
 
         public void Open()
@@ -185,6 +193,7 @@ namespace Mandato.UI
 
             EnsureDocument();
             CacheVisualElements();
+            CloseActionModal();
 
             if (screenRoot != null)
             {
@@ -200,6 +209,7 @@ namespace Mandato.UI
         public void Close()
         {
             IsOpen = false;
+            CloseActionModal();
 
             if (screenRoot != null)
             {
@@ -239,21 +249,118 @@ namespace Mandato.UI
 
             EnsureDocument();
             CacheVisualElements();
-            RebuildActionCards();
+            RebuildAppTiles();
 
-            Debug.Log($"<color=#6a9fb5>[FlipPhonePresenter]</color> Interface atualizada com {cachedViewModels.Count} ações.");
+            Debug.Log($"<color=#6a9fb5>[FlipPhonePresenter]</color> Interface atualizada com {cachedViewModels.Count} aplicativos.");
+        }
 
-            if (!string.IsNullOrEmpty(statusMessage))
+        public void OpenActionModal(FlipPhoneActionViewModel vm)
+        {
+            if (vm == null) return;
+            selectedAction = vm;
+
+            EnsureDocument();
+            CacheVisualElements();
+
+            if (modalTitle != null)
             {
-                ShowMessage(statusMessage);
+                modalTitle.text = vm.displayName;
+            }
+
+            if (modalDesc != null)
+            {
+                modalDesc.text = !string.IsNullOrEmpty(vm.description) ? vm.description : "Sem descrição disponível.";
+            }
+
+            if (modalCategoryBadge != null)
+            {
+                modalCategoryBadge.text = !string.IsNullOrEmpty(vm.categoryTag) ? vm.categoryTag.ToUpper() : "GABINETE";
+            }
+
+            if (modalAppIcon != null)
+            {
+                if (vm.icon != null)
+                {
+                    modalAppIcon.style.backgroundImage = new StyleBackground(vm.icon);
+                    modalAppIcon.style.display = DisplayStyle.Flex;
+                }
+                else
+                {
+                    modalAppIcon.style.backgroundImage = StyleKeyword.None;
+                    modalAppIcon.style.display = DisplayStyle.None;
+                }
+            }
+
+            if (modalExecBtn != null)
+            {
+                modalExecBtn.RemoveFromClassList("btn-disabled");
+
+                if (vm.isConsumed)
+                {
+                    modalExecBtn.text = "UTILIZADO";
+                    modalExecBtn.SetEnabled(false);
+                    modalExecBtn.AddToClassList("btn-disabled");
+                }
+                else if (vm.isOnCooldown)
+                {
+                    modalExecBtn.text = $"RECARGA ({vm.cooldownTurnsRemaining}T)";
+                    modalExecBtn.SetEnabled(false);
+                    modalExecBtn.AddToClassList("btn-disabled");
+                }
+                else if (!vm.isAvailable)
+                {
+                    modalExecBtn.text = !string.IsNullOrEmpty(vm.statusText) ? vm.statusText.ToUpper() : "INDISPONIVEL";
+                    modalExecBtn.SetEnabled(false);
+                    modalExecBtn.AddToClassList("btn-disabled");
+                }
+                else
+                {
+                    bool isContact = vm.categoryTag != null && vm.categoryTag.IndexOf("Contato", StringComparison.OrdinalIgnoreCase) >= 0;
+                    modalExecBtn.text = isContact ? "LIGAR" : "EXECUTAR";
+                    modalExecBtn.SetEnabled(true);
+                }
+            }
+
+            if (modalBackdrop != null)
+            {
+                modalBackdrop.RemoveFromClassList("hidden");
+                modalBackdrop.style.display = DisplayStyle.Flex;
+            }
+
+            isModalOpen = true;
+            Debug.Log($"<color=#6a9fb5>[FlipPhonePresenter]</color> Modal de detalhes aberto para o app: <b>{vm.displayName}</b>");
+        }
+
+        public void CloseActionModal()
+        {
+            if (modalBackdrop != null)
+            {
+                modalBackdrop.AddToClassList("hidden");
+                modalBackdrop.style.display = DisplayStyle.None;
+            }
+
+            selectedAction = null;
+            isModalOpen = false;
+        }
+
+        public void HandleModalExecClicked()
+        {
+            if (selectedAction == null) return;
+
+            if (selectedAction.isAvailable && !selectedAction.isOnCooldown && !selectedAction.isConsumed)
+            {
+                string actionId = selectedAction.id;
+                Debug.Log($"<color=#6a9fb5>[FlipPhonePresenter]</color> Executando ação confirmada no modal: '<b>{actionId}</b>'");
+                CloseActionModal();
+                OnActionRequested?.Invoke(actionId);
             }
         }
 
-        private void RebuildActionCards()
+        private void RebuildAppTiles()
         {
-            if (actionsContainer == null) return;
+            if (appsContainer == null) return;
 
-            actionsContainer.Clear();
+            appsContainer.Clear();
 
             int visibleCount = 0;
 
@@ -261,15 +368,9 @@ namespace Mandato.UI
             {
                 if (vm == null) continue;
 
-                // Aplica filtro de categoria
-                if (!MatchesCategoryFilter(vm.categoryTag, activeCategoryFilter))
-                {
-                    continue;
-                }
-
                 visibleCount++;
-                var card = CreateActionCard(vm);
-                actionsContainer.Add(card);
+                var tile = CreateAppTile(vm);
+                appsContainer.Add(tile);
             }
 
             if (emptyLabel != null)
@@ -287,127 +388,73 @@ namespace Mandato.UI
             }
         }
 
-        private bool MatchesCategoryFilter(string categoryTag, string filter)
+        private VisualElement CreateAppTile(FlipPhoneActionViewModel vm)
         {
-            if (string.IsNullOrEmpty(filter) || filter == "TODAS") return true;
-            if (string.IsNullOrEmpty(categoryTag)) return false;
-
-            return categoryTag.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0;
-        }
-
-        private VisualElement CreateActionCard(FlipPhoneActionViewModel vm)
-        {
-            var card = new VisualElement();
-            card.AddToClassList("action-item-card");
-
-            if (vm.isConsumed) card.AddToClassList("consumed");
-            else if (vm.isOnCooldown) card.AddToClassList("on-cooldown");
-
-            // Coluna de Informações
-            var infoCol = new VisualElement();
-            infoCol.AddToClassList("action-info-col");
-
-            // Linha do Nome + Badge de Categoria
-            var nameRow = new VisualElement();
-            nameRow.AddToClassList("action-name-row");
-
-            if (!string.IsNullOrEmpty(vm.categoryTag))
-            {
-                var catBadge = new Label(vm.categoryTag.ToUpper());
-                catBadge.AddToClassList("action-category-badge");
-                nameRow.Add(catBadge);
-            }
-
-            var nameLabel = new Label(vm.displayName);
-            nameLabel.AddToClassList("action-item-name");
-            nameRow.Add(nameLabel);
-            infoCol.Add(nameRow);
-
-            // Descrição
-            if (!string.IsNullOrEmpty(vm.description))
-            {
-                var descLabel = new Label(vm.description);
-                descLabel.AddToClassList("action-item-desc");
-                infoCol.Add(descLabel);
-            }
-
-            // Chips de Impactos / Tags
-            if (vm.impactTags != null && vm.impactTags.Count > 0)
-            {
-                var tagsRow = new VisualElement();
-                tagsRow.AddToClassList("action-tags-row");
-
-                foreach (var tag in vm.impactTags)
-                {
-                    if (string.IsNullOrEmpty(tag)) continue;
-                    var chip = new Label(tag);
-                    chip.AddToClassList("action-impact-chip");
-                    if (tag.StartsWith("-") || tag.IndexOf("perda", StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        chip.AddToClassList("negative");
-                    }
-                    tagsRow.Add(chip);
-                }
-                infoCol.Add(tagsRow);
-            }
-
-            card.Add(infoCol);
-
-            // Botão de Ação
-            var btn = new Button();
-            btn.AddToClassList("action-exec-btn");
+            var tile = new VisualElement();
+            tile.AddToClassList("app-tile");
+            tile.pickingMode = PickingMode.Position;
 
             if (vm.isConsumed)
             {
-                btn.text = "UTILIZADO";
-                btn.SetEnabled(false);
-                btn.AddToClassList("btn-consumed");
+                tile.AddToClassList("consumed");
             }
             else if (vm.isOnCooldown)
             {
-                btn.text = $"RECARGA ({vm.cooldownTurnsRemaining}t)";
-                btn.SetEnabled(false);
-                btn.AddToClassList("btn-cooldown");
+                tile.AddToClassList("on-cooldown");
+
+                var badge = new Label($"{vm.cooldownTurnsRemaining}T");
+                badge.AddToClassList("app-badge");
+                badge.AddToClassList("badge-cooldown");
+                badge.pickingMode = PickingMode.Ignore;
+                tile.Add(badge);
             }
             else if (!vm.isAvailable)
             {
-                btn.text = !string.IsNullOrEmpty(vm.statusText) ? vm.statusText : "INDISPONÍVEL";
-                btn.SetEnabled(false);
-                btn.AddToClassList("btn-cooldown");
+                tile.AddToClassList("unavailable");
+            }
+
+            // Ícone do Aplicativo ou Fallback estilizado
+            if (vm.icon != null)
+            {
+                var iconEl = new VisualElement();
+                iconEl.AddToClassList("app-icon");
+                iconEl.style.backgroundImage = new StyleBackground(vm.icon);
+                iconEl.pickingMode = PickingMode.Ignore;
+                tile.Add(iconEl);
             }
             else
             {
-                bool isContact = vm.categoryTag != null && vm.categoryTag.IndexOf("Contato", StringComparison.OrdinalIgnoreCase) >= 0;
-                btn.text = isContact ? "LIGAR" : "EXECUTAR";
-                btn.SetEnabled(true);
-                btn.clicked += () =>
-                {
-                    Debug.Log($"<color=#6a9fb5>[FlipPhonePresenter]</color> Botão clicado para a ação: '<b>{vm.id}</b>' ({vm.displayName})");
-                    OnActionRequested?.Invoke(vm.id);
-                };
+                var fallbackBox = new VisualElement();
+                fallbackBox.AddToClassList("app-fallback-box");
+                fallbackBox.pickingMode = PickingMode.Ignore;
+
+                string initial = !string.IsNullOrEmpty(vm.displayName) ? vm.displayName.Substring(0, 1).ToUpper() : "?";
+                var letter = new Label(initial);
+                letter.AddToClassList("app-fallback-letter");
+                letter.pickingMode = PickingMode.Ignore;
+
+                fallbackBox.Add(letter);
+                tile.Add(fallbackBox);
             }
 
-            card.Add(btn);
+            // Título do Aplicativo
+            var titleLabel = new Label(vm.displayName);
+            titleLabel.AddToClassList("app-title");
+            titleLabel.pickingMode = PickingMode.Ignore;
+            tile.Add(titleLabel);
 
-            return card;
+            // Clique no tile abre o modal de diálogo na base
+            tile.RegisterCallback<ClickEvent>(evt =>
+            {
+                OpenActionModal(vm);
+            });
+
+            return tile;
         }
 
         public void ShowMessage(string message, bool isError = false)
         {
-            if (statusLabel == null) return;
-
-            statusLabel.text = message;
-            statusLabel.RemoveFromClassList("success");
-            statusLabel.RemoveFromClassList("error");
-
-            if (isError)
-            {
-                statusLabel.AddToClassList("error");
-            }
-            else
-            {
-                statusLabel.AddToClassList("success");
-            }
+            // Mantido para compatibilidade com chamadas de status
         }
     }
 }

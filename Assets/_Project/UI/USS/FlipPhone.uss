@@ -1,5 +1,29 @@
 /* ========================================================================= */
-/* FLIP-PHONE / DISPOSITIVO DE GABINETE - ESTILOS UI TOOLKIT                 */
+/* FLIP-PHONE / DISPOSITIVO DE GABINETE - RETRO TECH UI (UI TOOLKIT)        */
+/* FONT: RETROTECH.ttf | DIEGETIC OS / APPS GRID + MODAL DIALOG             */
+/* ========================================================================= */
+
+:root {
+    -unity-font: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+    -unity-font-definition: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+
+    width: 100%;
+    height: 100%;
+    background-color: #03070a;
+}
+
+Label {
+    -unity-font: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+    -unity-font-definition: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+}
+
+Button {
+    -unity-font: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+    -unity-font-definition: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+}
+
+/* ========================================================================= */
+/* ROOT & CHASSIS                                                            */
 /* ========================================================================= */
 
 .phone-screen-root {
@@ -10,12 +34,9 @@
     top: 0;
     right: 0;
     bottom: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: #060a0f;
-    padding: 0;
-    margin: 0;
+    background-color: #03070a;
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 .phone-screen-root.hidden {
@@ -23,293 +44,452 @@
     opacity: 0;
 }
 
-/* CHASSI / TELA DO CELULAR */
 .phone-chassis {
     width: 100%;
     height: 100%;
-    background-color: #090e14;
+    background-color: #060e14;
+    border-width: 2px;
+    border-color: #1a4454;
+    border-radius: 10px;
     padding: 12px;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
 }
 
-/* COMPACT TOP BAR */
+/* ========================================================================= */
+/* TOP COMPACT BAR (STATUS LED + TITLE + CLOSE BUTTON)                       */
+/* ========================================================================= */
+
 .phone-top-bar {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 8px;
-    border-bottom-width: 1px;
-    border-bottom-color: #1a2d3a;
-    margin-bottom: 8px;
+    background-color: rgba(6, 16, 22, 0.95);
+    border-width: 2px;
+    border-color: #1a4454;
+    border-radius: 6px;
+    padding: 6px 14px;
+    margin-bottom: 12px;
     flex-shrink: 0;
-    height: 32px;
+    height: 44px;
 }
 
-.top-title-group {
+.system-tag-box {
     flex-direction: row;
     align-items: center;
-    flex-shrink: 1;
-    overflow: hidden;
 }
 
-.status-led {
-    width: 8px;
-    height: 8px;
-    border-radius: 4px;
-    background-color: #00ffaa;
-    margin-right: 6px;
-    flex-shrink: 0;
+.system-status-led {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;
+    background-color: #22c55e;
+    margin-right: 10px;
+    border-width: 2px;
+    border-color: #86efac;
 }
 
-.status-network-text {
-    font-size: 11px;
-    -unity-font-style: bold;
+.system-compact-title {
+    font-size: 20px;
     color: #38bdf8;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
+    letter-spacing: 2px;
+    -unity-font-style: bold;
 }
 
-.status-close-btn {
+.phone-close-btn {
     background-color: #141f28;
-    border-width: 1px;
+    border-width: 2px;
     border-color: #2a3f4e;
     border-radius: 6px;
     color: #94a3b8;
-    font-size: 11px;
+    font-size: 16px;
     -unity-font-style: bold;
-    padding: 4px 10px;
+    padding: 4px 14px;
     margin: 0;
-    flex-shrink: 0;
-    height: 26px;
+    height: 32px;
+    -unity-text-align: middle-center;
 }
 
-.status-close-btn:hover {
+.phone-close-btn:hover {
     background-color: #dc2626;
     border-color: #ef4444;
     color: #ffffff;
 }
 
-/* CATEGORY TABS / CHIPS */
-.category-tabs-container {
-    flex-direction: row;
-    justify-content: space-between;
-    margin-bottom: 8px;
-    flex-shrink: 0;
-    height: 28px;
-    gap: 4px;
+.phone-close-btn:active {
+    background-color: #991b1b;
 }
 
-.category-tab-btn {
-    flex-grow: 1;
-    flex-basis: 0;
-    background-color: #101922;
-    border-width: 1px;
-    border-color: #1f3242;
-    border-radius: 6px;
-    padding: 0;
-    height: 28px;
-    color: #7dd3fc;
-    font-size: 11px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
-    margin: 0;
-}
+/* ========================================================================= */
+/* MAIN APPS WORKSPACE & GRID                                                */
+/* ========================================================================= */
 
-.category-tab-btn:hover {
-    background-color: #1a2c3a;
-    color: #e0f2fe;
-    border-color: #38bdf8;
-}
-
-.category-tab-btn.active {
-    background-color: #0284c7;
-    border-color: #38bdf8;
-    color: #ffffff;
-}
-
-/* LISTA DE AÇÕES (SCROLLVIEW) */
-.actions-scroll-view {
+.apps-scroll-view {
     flex-grow: 1;
     flex-shrink: 1;
-    margin-bottom: 6px;
     overflow: hidden;
 }
 
-.actions-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+.apps-grid-container {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 4px 2px;
+    gap: 12px;
 }
 
 /* EMPTY STATE */
 .empty-actions-label {
     color: #64748b;
-    font-size: 12px;
+    font-size: 18px;
     -unity-text-align: middle-center;
-    margin-top: 30px;
-    -unity-font-style: italic;
-}
-
-/* CARD / ITEM DE AÇÃO */
-.action-item-card {
-    background-color: #0d151e;
-    border-width: 1px;
-    border-color: #1e2e3c;
-    border-radius: 8px;
-    padding: 10px;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-}
-
-.action-item-card:hover {
-    background-color: #131e2b;
-    border-color: #2e4a60;
-}
-
-.action-item-card.on-cooldown {
-    opacity: 0.65;
-    background-color: #0a1017;
-    border-color: #15222d;
-}
-
-.action-item-card.consumed {
-    opacity: 0.4;
-    background-color: #070b10;
-    border-color: #101920;
-}
-
-.action-info-col {
-    flex-grow: 1;
-    flex-shrink: 1;
-    margin-right: 8px;
-    overflow: hidden;
-}
-
-.action-name-row {
-    flex-direction: row;
-    align-items: center;
-    margin-bottom: 2px;
-    flex-wrap: nowrap;
-}
-
-.action-category-badge {
-    background-color: #162a38;
-    border-radius: 4px;
-    padding: 1px 5px;
-    font-size: 9px;
+    margin-top: 40px;
     -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+/* ========================================================================= */
+/* APP TILE (QUADRADO COM ÍCONE DO APP)                                      */
+/* ========================================================================= */
+
+.app-tile {
+    width: 48%;
+    height: 145px;
+    position: relative;
+    background-color: rgba(8, 20, 28, 0.95);
+    border-width: 3px;
+    border-color: #1e3a4a;
+    border-radius: 12px;
+    padding: 10px 8px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    transition-property: border-color, background-color;
+    transition-duration: 0.1s;
+}
+
+.app-tile:hover {
+    border-color: #38bdf8;
+    background-color: rgba(16, 42, 60, 0.98);
+}
+
+.app-tile:hover .app-title {
+    color: #7dd3fc;
+}
+
+.app-tile:hover .app-fallback-box {
+    border-color: #38bdf8;
+    background-color: #16364a;
+}
+
+.app-tile:active {
+    background-color: rgba(6, 16, 22, 0.98);
+    border-color: #0284c7;
+}
+
+/* Ícone do App */
+.app-icon {
+    width: 68px;
+    height: 68px;
+    margin-bottom: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: #ffffff;
+}
+
+/* Fallback de Ícone (quando não houver Sprite configurado) */
+.app-fallback-box {
+    width: 68px;
+    height: 68px;
+    margin-bottom: 8px;
+    background-color: #0f2230;
+    border-width: 2px;
+    border-color: #1e4a60;
+    border-radius: 10px;
+    justify-content: center;
+    align-items: center;
+}
+
+.app-fallback-letter {
+    font-size: 32px;
     color: #38bdf8;
-    margin-right: 6px;
-    flex-shrink: 0;
-}
-
-.action-item-name {
-    font-size: 13px;
-    -unity-font-style: bold;
-    color: #f1f5f9;
-    flex-shrink: 1;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
-.action-item-desc {
-    font-size: 10px;
-    color: #94a3b8;
-    white-space: normal;
-    margin-bottom: 4px;
-    line-height: 13px;
-}
-
-.action-tags-row {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-
-.action-impact-chip {
-    background-color: #122822;
-    border-radius: 3px;
-    padding: 1px 5px;
-    font-size: 9px;
-    -unity-font-style: bold;
-    color: #4ade80;
-}
-
-.action-impact-chip.negative {
-    color: #f87171;
-    background-color: #2a1518;
-}
-
-/* BOTÃO DE USAR AÇÃO */
-.action-exec-btn {
-    min-width: 88px;
-    height: 32px;
-    background-color: #059669;
-    border-width: 1px;
-    border-color: #10b981;
-    border-radius: 6px;
-    color: #ffffff;
-    font-size: 11px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    flex-shrink: 0;
+}
+
+/* Nome do App */
+.app-title {
+    font-size: 16px;
+    color: #ffffff;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    letter-spacing: 0.5px;
+    max-width: 95%;
+}
+
+/* BADGE DE COOLDOWN / STATUS NO CANTO DO APP */
+.app-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background-color: rgba(180, 83, 9, 0.92);
+    border-width: 1px;
+    border-color: #f59e0b;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+    color: #ffffff;
+    -unity-font-style: bold;
+    letter-spacing: 0.5px;
+}
+
+.app-badge.badge-cooldown {
+    background-color: rgba(180, 83, 9, 0.95);
+    border-color: #f59e0b;
+    color: #ffffff;
+}
+
+/* ========================================================================= */
+/* ESTADOS ESPECIAIS E HOVER DE AÇÕES NÃO UTILIZÁVEIS                       */
+/* ========================================================================= */
+
+/* 1. Em Recarga (Cooldown) */
+.app-tile.on-cooldown {
+    opacity: 0.85;
+    border-color: #78350f;
+    background-color: rgba(22, 14, 8, 0.92);
+}
+
+.app-tile.on-cooldown:hover {
+    border-color: #f59e0b;
+    background-color: rgba(38, 24, 10, 0.98);
+    opacity: 1;
+}
+
+.app-tile.on-cooldown:hover .app-title {
+    color: #fde68a;
+}
+
+.app-tile.on-cooldown:hover .app-fallback-box {
+    border-color: #f59e0b;
+    background-color: #291a0c;
+}
+
+/* 2. Já Utilizado (Consumed) */
+.app-tile.consumed {
+    opacity: 0.5;
+    border-color: #374151;
+    background-color: rgba(10, 12, 16, 0.92);
+}
+
+.app-tile.consumed:hover {
+    border-color: #64748b;
+    background-color: rgba(24, 28, 36, 0.98);
+    opacity: 0.8;
+}
+
+.app-tile.consumed:hover .app-title {
+    color: #cbd5e1;
+}
+
+.app-tile.consumed:hover .app-fallback-box {
+    border-color: #64748b;
+    background-color: #1a202c;
+}
+
+/* 3. Indisponível / Requisitos não cumpridos */
+.app-tile.unavailable {
+    opacity: 0.7;
+    border-color: #581c1c;
+    background-color: rgba(22, 10, 12, 0.95);
+}
+
+.app-tile.unavailable:hover {
+    border-color: #ef4444;
+    background-color: rgba(38, 14, 18, 0.98);
+    opacity: 0.95;
+}
+
+.app-tile.unavailable:hover .app-title {
+    color: #fca5a5;
+}
+
+.app-tile.unavailable:hover .app-fallback-box {
+    border-color: #ef4444;
+    background-color: #2b0f13;
+}
+
+/* ========================================================================= */
+/* ACTION DETAIL MODAL (BOTTOM DIALOG BOX)                                   */
+/* ========================================================================= */
+
+.action-modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(2, 6, 10, 0.82);
+    justify-content: flex-end;
+    transition-property: opacity;
+    transition-duration: 0.2s;
+}
+
+.action-modal-dialog {
+    width: 100%;
+    background-color: rgba(6, 16, 24, 0.98);
+    border-top-width: 4px;
+    border-top-color: #38bdf8;
+    border-left-width: 2px;
+    border-left-color: #1a4454;
+    border-right-width: 2px;
+    border-right-color: #1a4454;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+/* Modal Header */
+.modal-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    border-bottom-width: 1px;
+    border-bottom-color: #1a3344;
+    padding-bottom: 8px;
+}
+
+.modal-header-left {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.modal-app-icon {
+    width: 52px;
+    height: 52px;
+    margin-right: 12px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: #ffffff;
+}
+
+.modal-title-box {
+    flex-direction: column;
+    justify-content: center;
+}
+
+.modal-action-title {
+    font-size: 22px;
+    color: #ffffff;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+}
+
+.modal-category-badge {
+    font-size: 13px;
+    color: #99f6e4;
+    background-color: rgba(15, 23, 42, 0.9);
+    border-width: 1px;
+    border-color: #0284c7;
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin-top: 4px;
+    align-self: flex-start;
+    -unity-font-style: bold;
+}
+
+/* Modal Body */
+.modal-body {
+    margin-bottom: 16px;
+    min-height: 70px;
+    justify-content: center;
+}
+
+.modal-action-desc {
+    font-size: 17px;
+    color: #e2e8f0;
+    white-space: normal;
+    line-height: 22px;
+}
+
+/* Modal Footer Buttons */
+.modal-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.modal-btn {
+    height: 48px;
+    border-radius: 8px;
+    font-size: 18px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    letter-spacing: 1px;
     margin: 0;
 }
 
-.action-exec-btn:hover {
+.modal-back-btn {
+    flex-grow: 1;
+    background-color: #1e293b;
+    border-width: 2px;
+    border-color: #475569;
+    color: #cbd5e1;
+}
+
+.modal-back-btn:hover {
+    background-color: #334155;
+    border-color: #94a3b8;
+    color: #ffffff;
+}
+
+.modal-back-btn:active {
+    background-color: #0f172a;
+}
+
+.modal-exec-btn {
+    flex-grow: 1.4;
+    background-color: #059669;
+    border-width: 2px;
+    border-color: #10b981;
+    color: #ffffff;
+}
+
+.modal-exec-btn:hover {
     background-color: #10b981;
     border-color: #34d399;
 }
 
-.action-exec-btn:active {
+.modal-exec-btn:active {
     background-color: #047857;
 }
 
-.action-exec-btn.btn-cooldown {
-    background-color: #1e293b;
-    border-color: #334155;
+.modal-exec-btn.btn-disabled {
+    background-color: #182028;
+    border-color: #2e3d4c;
     color: #64748b;
-    font-size: 9px;
 }
 
-.action-exec-btn.btn-consumed {
-    background-color: #141a23;
-    border-color: #1e2632;
-    color: #475569;
-    font-size: 9px;
-}
-
-/* FOOTER STATUS BAR */
-.phone-footer-bar {
-    padding-top: 6px;
-    border-top-width: 1px;
-    border-top-color: #1a2d3a;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    flex-shrink: 0;
-    height: 24px;
-}
-
-.phone-status-message {
-    font-size: 10px;
+.modal-exec-btn.btn-disabled:hover {
+    background-color: #182028;
+    border-color: #2e3d4c;
     color: #64748b;
-    -unity-font-style: italic;
-    flex-grow: 1;
-    white-space: nowrap;
-    text-overflow: ellipsis;
 }
 
-.phone-status-message.success {
-    color: #34d399;
-    -unity-font-style: bold;
-}
+/* ========================================================================= */
+/* HELPERS                                                                   */
+/* ========================================================================= */
 
-.phone-status-message.error {
-    color: #f87171;
-    -unity-font-style: bold;
+.hidden {
+    display: none;
+    visibility: hidden;
+    opacity: 0;
 }

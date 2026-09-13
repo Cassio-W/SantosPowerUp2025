@@ -139,6 +139,65 @@ namespace Mandato.UI.Tests
             Assert.IsFalse(vm.isConsumed);
         }
 
+        [Test]
+        public void FlipPhonePresenter_OpenActionModal_And_Execute_FiresActionRequested()
+        {
+            var go = new GameObject("FlipPhoneTest");
+            var presenter = go.AddComponent<FlipPhonePresenter>();
+
+            string requestedId = null;
+            presenter.OnActionRequested += id => requestedId = id;
+
+            var vm = new FlipPhoneActionViewModel
+            {
+                id = "action_pronunciamento",
+                displayName = "Pronunciamento Oficial",
+                description = "Discurso em cadeia nacional.",
+                isAvailable = true,
+                isOnCooldown = false,
+                isConsumed = false
+            };
+
+            presenter.Refresh(new[] { vm });
+            Assert.IsFalse(presenter.IsModalOpen);
+
+            presenter.OpenActionModal(vm);
+            Assert.IsTrue(presenter.IsModalOpen);
+
+            presenter.HandleModalExecClicked();
+            Assert.IsFalse(presenter.IsModalOpen);
+            Assert.AreEqual("action_pronunciamento", requestedId);
+
+            Object.DestroyImmediate(go);
+        }
+
+        [Test]
+        public void FlipPhonePresenter_CloseActionModal_CancelsSelectionWithoutExecution()
+        {
+            var go = new GameObject("FlipPhoneTest");
+            var presenter = go.AddComponent<FlipPhonePresenter>();
+
+            string requestedId = null;
+            presenter.OnActionRequested += id => requestedId = id;
+
+            var vm = new FlipPhoneActionViewModel
+            {
+                id = "action_engavetar",
+                displayName = "Engavetar Proposta",
+                description = "Arquiva a proposta atual.",
+                isAvailable = true
+            };
+
+            presenter.OpenActionModal(vm);
+            Assert.IsTrue(presenter.IsModalOpen);
+
+            presenter.CloseActionModal();
+            Assert.IsFalse(presenter.IsModalOpen);
+            Assert.IsNull(requestedId);
+
+            Object.DestroyImmediate(go);
+        }
+
         // ── RetroMonitorPresenter Snapshot Logic Tests ────────────
 
         [Test]
