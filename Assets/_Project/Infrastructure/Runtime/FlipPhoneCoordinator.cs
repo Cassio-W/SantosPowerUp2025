@@ -95,7 +95,7 @@ namespace Mandato.Infrastructure
 
         public void OpenPhone()
         {
-            if (phonePresenter != null && !phonePresenter.IsOpen)
+            if (phonePresenter != null)
             {
                 RefreshPhoneActions();
                 phonePresenter.Open();
@@ -104,7 +104,7 @@ namespace Mandato.Infrastructure
 
         public void ClosePhone()
         {
-            if (phonePresenter != null && phonePresenter.IsOpen)
+            if (phonePresenter != null)
             {
                 phonePresenter.Close();
             }
@@ -113,7 +113,7 @@ namespace Mandato.Infrastructure
         public void TogglePhone()
         {
             if (phonePresenter == null) return;
-            if (phonePresenter.IsOpen)
+            if (phonePresenter.IsOpen || phonePresenter.IsPhoneOpen())
             {
                 ClosePhone();
             }
@@ -165,6 +165,7 @@ namespace Mandato.Infrastructure
                 }
 
                 RefreshPhoneActions();
+                ClosePhone();
                 OnActionExecuted?.Invoke(report);
             }
 

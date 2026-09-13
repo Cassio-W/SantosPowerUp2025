@@ -250,5 +250,73 @@ namespace Mandato.Run.Tests
             Assert.IsTrue(drawnNext);
             Assert.IsNotNull(stateMachine.CurrentCard);
         }
+
+        [Test]
+        public void PronunciamentoNacional_IncreasesAllStatsBy10_AndSets6TurnCooldown()
+        {
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_pronunciamento_nacional",
+                "Pronunciamento Nacional",
+                "Aumenta 10 de todos os atributos.",
+                cooldownType: FlipPhoneCooldownType.Turns,
+                cooldownTurns: 6
+            );
+            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(10, 10, 10, 10, 0)));
+
+            int initClimate = runState.stats.climaticChanges;
+            int initEco = runState.stats.economy;
+            int initRel = runState.stats.internationalRelations;
+            int initApp = runState.stats.popularApproval;
+
+            var report = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+
+            Assert.IsTrue(report.success);
+            Assert.AreEqual(initClimate + 10, runState.stats.climaticChanges);
+            Assert.AreEqual(initEco + 10, runState.stats.economy);
+            Assert.AreEqual(initRel + 10, runState.stats.internationalRelations);
+            Assert.AreEqual(initApp + 10, runState.stats.popularApproval);
+
+            Assert.IsTrue(runState.IsActionOnCooldown("action_pronunciamento_nacional"));
+            Assert.AreEqual(6, runState.GetActionCooldown("action_pronunciamento_nacional"));
+        }
+
+        [Test]
+        public void EngavetarProposta_Requires50Corruption_AndDismissesProposal_SingleUse()
+        {
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_engavetar_proposta",
+                "Engavetar Proposta",
+                "Pula proposta com 50% ou mais de corrupção.",
+                cooldownType: FlipPhoneCooldownType.SingleUse
+            );
+            action.conditions.Add(new FlipPhoneCondition
+            {
+                checkStat = true,
+                requiredStat = StatId.Corruption,
+                minStatValue = 50,
+                maxStatValue = 100
+            });
+            action.effects.Add(FlipPhoneEffect.CreateDismissProposal());
+
+            var currentCard = catalog["card_a"];
+
+            // 1. Falha quando corrupção < 50
+            runState.stats.corruption = 20;
+            var reportFail = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog, currentCard: currentCard);
+            Assert.IsFalse(reportFail.success);
+            StringAssert.Contains("condições", reportFail.failReason.ToLower());
+
+            // 2. Sucesso quando corrupção >= 50
+            runState.stats.corruption = 55;
+            var reportSuccess = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog, currentCard: currentCard);
+            Assert.IsTrue(reportSuccess.success);
+            Assert.IsTrue(reportSuccess.dismissedCurrentProposal);
+
+            // 3. Como é SingleUse, não pode ser usada novamente
+            Assert.IsTrue(runState.IsActionConsumed("action_engavetar_proposta"));
+            var reportSecondUse = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog, currentCard: currentCard);
+            Assert.IsFalse(reportSecondUse.success);
+            StringAssert.Contains("consumida", reportSecondUse.failReason.ToLower());
+        }
     }
 }

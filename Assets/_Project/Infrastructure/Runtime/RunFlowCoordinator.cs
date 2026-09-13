@@ -96,11 +96,16 @@ namespace Mandato.Infrastructure
                 bindings.DecisionOverlayPresenter.OnChoiceUnhovered += HandlePlayerChoiceUnhovered;
             }
 
-            // 5. Modais do Celular
+            // 5. Modais e Ações do Celular
             if (bindings.FlipPhonePresenter != null)
             {
                 bindings.FlipPhonePresenter.OnPhoneOpened += () => modalCoordinator.SetModalState(UIModalCoordinator.MODAL_FLIP_PHONE, true);
                 bindings.FlipPhonePresenter.OnPhoneClosed += () => modalCoordinator.SetModalState(UIModalCoordinator.MODAL_FLIP_PHONE, false);
+            }
+
+            if (flipPhoneCoordinator != null)
+            {
+                flipPhoneCoordinator.OnActionExecuted += HandleFlipPhoneActionExecuted;
             }
 
             // 6. Botões de Fim de Jogo
@@ -108,6 +113,99 @@ namespace Mandato.Infrastructure
             {
                 bindings.EndScreenPresenter.OnRestartRequested += RestartRun;
                 bindings.EndScreenPresenter.OnMainMenuRequested += ReturnToMenu;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (flipPhoneCoordinator != null)
+            {
+                flipPhoneCoordinator.OnActionExecuted -= HandleFlipPhoneActionExecuted;
+            }
+        }
+
+        private void HandleFlipPhoneActionExecuted(FlipPhoneUseReport report)
+        {
+            if (report == null || !report.success) return;
+
+            if (report.dismissedCurrentProposal)
+            {
+                DismissCurrentProposal();
+            }
+        }
+
+        public void DismissCurrentProposal()
+        {
+            if (stateMachine == null || stateMachine.CurrentCard == null) return;
+
+            // 1. Limpa monitor e botões de decisão
+            bindings.RetroMonitorPresenter?.ClearPreviewImpacts();
+            if (bindings.DecisionOverlayPresenter != null)
+            {
+                bindings.DecisionOverlayPresenter.ClearChoices();
+            }
+
+            // 2. Fecha celular
+            flipPhoneCoordinator?.ClosePhone();
+
+            // 3. Abaixa a mão do jogador e desativa papel 3D
+            bindings.PlayDealAnimationReverse();
+            isPlayerHandRaised = false;
+
+            if (bindings.PaperPresenter != null)
+            {
+                bindings.PaperPresenter.SetPaperInteractable(false);
+                bindings.PaperPresenter.SetPaperActive(false);
+            }
+
+            bindings.CameraFocus?.Unfocus();
+
+            // 4. Apresentação do NPC saindo ou avanço direto
+            if (bindings.PresentationCoordinator != null)
+            {
+                bindings.PresentationCoordinator.DismissCurrentProposal(false, () =>
+                {
+                    FinishProposalDismissal();
+                });
+            }
+            else
+            {
+                FinishProposalDismissal();
+            }
+        }
+
+        private void FinishProposalDismissal()
+        {
+            if (stateMachine == null) return;
+
+            stateMachine.DismissCurrentProposal(advanceMonth: false, catalog.Perks, catalog.Events);
+
+            if (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory)
+            {
+                return;
+            }
+
+            string displayDate = stateMachine.RunState.calendar.DisplayDate;
+            int monthIndex = stateMachine.RunState.calendar.CurrentMonthIndex;
+
+            if (bindings.DecisionOverlayPresenter != null)
+            {
+                bindings.DecisionOverlayPresenter.UpdateDateDisplay(displayDate, monthIndex);
+            }
+
+            if (bindings.RetroMonitorPresenter != null)
+            {
+                bindings.RetroMonitorPresenter.UpdateSnapshot(stateMachine.RunState.GetSnapshot());
+                bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
+            }
+
+            if (requireSpaceToCallNextNpc)
+            {
+                isAwaitingSpaceForNextNpc = true;
+            }
+            else
+            {
+                StartCoroutine(DrawNextProposalRoutine(delayBetweenProposals));
             }
         }
 

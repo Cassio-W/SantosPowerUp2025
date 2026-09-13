@@ -386,7 +386,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 995890ccfd7577243bae2a206f82e53e, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 921391927218321214, guid: 995890ccfd7577243bae2a206f82e53e, type: 3}
       propertyPath: m_IsActive
@@ -7845,7 +7845,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e7c78e7a20fb5d343b7a60e1688b05d2, type: 2}
   eventsCatalog: []
   questsCatalog: []
-  startingActions: []
+  startingActions:
+  - {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0001a, type: 2}
+  - {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0002b, type: 2}
   customSeed: 0
   mainMenuSceneName: MenuV2
   delayBetweenProposals: 1.5

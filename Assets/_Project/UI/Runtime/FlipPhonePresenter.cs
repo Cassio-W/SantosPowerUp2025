@@ -42,6 +42,13 @@ namespace Mandato.UI
 
         public bool IsOpen { get; private set; } = false;
 
+        public bool IsPhoneOpen()
+        {
+            if (screenRoot != null && screenRoot.style.display == DisplayStyle.Flex) return true;
+            if (phoneGameObject != null && phoneGameObject.activeSelf) return true;
+            return IsOpen;
+        }
+
         private UIDocument uiDocument;
         private VisualElement root;
         private VisualElement screenRoot;
@@ -70,17 +77,15 @@ namespace Mandato.UI
 
         private void Start()
         {
-            // Oculta inicialmente
-            Close();
+            if (!IsOpen)
+            {
+                Close();
+            }
         }
 
         private void Update()
         {
-            if (allowKeyboardToggle && Input.GetKeyDown(toggleKey))
-            {
-                Toggle();
-            }
-            else if (IsOpen && Input.GetKeyDown(KeyCode.Escape))
+            if (IsOpen && Input.GetKeyDown(KeyCode.Escape))
             {
                 Close();
             }
@@ -220,7 +225,7 @@ namespace Mandato.UI
 
         public void Toggle()
         {
-            if (IsOpen) Close();
+            if (IsPhoneOpen()) Close();
             else Open();
         }
 
