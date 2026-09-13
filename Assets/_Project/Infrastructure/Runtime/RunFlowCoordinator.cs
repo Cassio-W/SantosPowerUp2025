@@ -318,7 +318,6 @@ namespace Mandato.Infrastructure
                 bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
             }
 
-            UpdateLegacyDateText(displayDate);
 
             if (monthlyReport != null && stateMachine != null)
             {
@@ -441,19 +440,5 @@ namespace Mandato.Infrastructure
             }
         }
 
-        private void UpdateLegacyDateText(string displayDate)
-        {
-            if (string.IsNullOrEmpty(displayDate)) return;
-
-            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
-            {
-                if (mb != null && (mb.gameObject.name.IndexOf("date", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                   mb.gameObject.name.IndexOf("data", StringComparison.OrdinalIgnoreCase) >= 0))
-                {
-                    var textProp = mb.GetType().GetProperty("text");
-                    textProp?.SetValue(mb, displayDate);
-                }
-            }
-        }
     }
 }
