@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Mandato.Content;
+using Mandato.Infrastructure;
 using UnityEditor;
 using UnityEngine;
 
@@ -244,6 +246,252 @@ namespace Mandato.Editor
                 Debug.LogWarning($"[MandatoValidator] ⚠️ Carta '{cardId}' ({choiceName}) concede perk '{choice.grantPerkId}' não registrado no catálogo de Perks. Path: {path}");
                 warningCount++;
             }
+        }
+
+        [MenuItem("Mandato/Validação/Validar Configuração de Cena (Bootstrap)")]
+        public static void ValidateSceneConfiguration()
+        {
+            int warningCount = 0;
+
+            // 1. Procura o MandatoBootstrap na cena aberta
+            var bootstrap = UnityEngine.Object.FindFirstObjectByType<MandatoBootstrap>();
+            if (bootstrap == null)
+            {
+                Debug.LogWarning("[MandatoValidator] ⚠️ MandatoBootstrap não encontrado na cena aberta. Abra a cena JogoV2 antes de validar.");
+                return;
+            }
+
+            var bootstrapType = typeof(MandatoBootstrap);
+
+            // 2. Verifica campos de cartas via reflexión (campos são serialized private)
+            var startingField = bootstrapType.GetField("startingCards", BindingFlags.NonPublic | BindingFlags.Instance);
+            var tutorialField = bootstrapType.GetField("tutorialCards", BindingFlags.NonPublic | BindingFlags.Instance);
+            var catalogField = bootstrapType.GetField("catalogCards", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var startingCards = startingField?.GetValue(bootstrap) as System.Collections.IList;
+            var tutorialCards = tutorialField?.GetValue(bootstrap) as System.Collections.IList;
+            var catalogCards = catalogField?.GetValue(bootstrap) as System.Collections.IList;
+
+            int startingCount = startingCards?.Count ?? 0;
+            int tutorialCount = tutorialCards?.Count ?? 0;
+            int catalogCount = catalogCards?.Count ?? 0;
+
+            if (startingCount == 0)
+            {
+                Debug.LogError("[MandatoValidator] ❌ startingCards está vazio no MandatoBootstrap! A run não terá cartas no baralho.");
+                warningCount++;
+            }
+            else
+            {
+                Debug.Log($"[MandatoValidator] ✅ startingCards: {startingCount} carta(s) configurada(s).");
+            }
+
+            Debug.Log($"[MandatoValidator] 📝 tutorialCards: {tutorialCount} carta(s) | catalogCards (injetáveis): {catalogCount} carta(s).");
+
+            // 3. Constrói conjunto de IDs registrados (deck + catálogo)
+            var allCardIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            void AddCardsFromList(System.Collections.IList list)
+            {
+                if (list == null) return;
+                foreach (var obj in list)
+                {
+                    if (obj is CardDefinition cd && !string.IsNullOrEmpty(cd.id))
+                        allCardIds.Add(cd.id);
+                }
+            }
+
+            AddCardsFromList(tutorialCards);
+            AddCardsFromList(startingCards);
+            AddCardsFromList(catalogCards);
+
+            // 4. Valida injectCardIds de todas as cartas nos campos serialized
+            void CheckCardInjects(System.Collections.IList cardList, string listName)
+            {
+                if (cardList == null) return;
+                foreach (var obj in cardList)
+                {
+                    if (obj is not CardDefinition card) continue;
+
+                    void CheckSide(ChoiceDefinition choice, string side)
+                    {
+                        if (choice?.injectCardIds == null) return;
+                        foreach (var injectId in choice.injectCardIds)
+                        {
+                            if (!string.IsNullOrEmpty(injectId) && !allCardIds.Contains(injectId))
+                            {
+                                Debug.LogWarning($"[MandatoValidator] ⚠️ [{listName}] Carta '{card.id}' ({side}) injeta '{injectId}' que não está no catálogo da cena.");
+                                warningCount++;
+                            }
+                        }
+                    }
+
+                    CheckSide(card.leftChoice, "Esquerda");
+                    CheckSide(card.rightChoice, "Direita");
+                }
+            }
+
+            CheckCardInjects(tutorialCards, "Tutorial");
+            CheckCardInjects(startingCards, "Starting");
+            CheckCardInjects(catalogCards, "Catalog");
+
+            // 5. Validação de ScenePresentationBindings
+            if (bootstrap.PresentationBindings != null)
+            {
+                if (!bootstrap.PresentationBindings.Validate(out var missingList))
+                {
+                    foreach (var err in missingList)
+                    {
+                        Debug.LogWarning($"[MandatoValidator] ⚠️ ScenePresentationBindings: {err}");
+                        warningCount++;
+                    }
+                }
+                else
+                {
+                    Debug.Log("[MandatoValidator] ✅ ScenePresentationBindings: todos os apresentadores estão configurados.");
+                }
+            }
+            else
+            {
+                Debug.LogError("[MandatoValidator] ❌ presentationBindings é nulo no MandatoBootstrap!");
+                warningCount++;
+            }
+
+            // 6. Resultado
+            if (warningCount == 0)
+            {
+                Debug.Log($"<color=#00ffaa><b>[MandatoValidator] ✅ Configuração de cena válida!</b></color> {allCardIds.Count} cartas registradas, nenhum problema encontrado.");
+            }
+            else
+            {
+                Debug.LogWarning($"<b>[MandatoValidator] ⚠️ Configuração de cena com {warningCount} problema(s).</b> Resolva antes de entrar em Play Mode.");
+            }
+        }
+
+        [MenuItem("Mandato/Configuração/Preencher e Salvar Bindings da Cena")]
+        public static void AutoBindScenePresenters()
+        {
+            var bootstrap = UnityEngine.Object.FindFirstObjectByType<MandatoBootstrap>();
+            if (bootstrap == null)
+            {
+                Debug.LogWarning("[MandatoValidator] ⚠️ MandatoBootstrap não encontrado na cena aberta. Abra a cena JogoV2.");
+                return;
+            }
+
+            Undo.RecordObject(bootstrap, "Preencher Presentation Bindings");
+
+            // 1. Presentation Coordinator
+            var presCoord = UnityEngine.Object.FindFirstObjectByType<Mandato.Presentation.RunPresentationCoordinator>(FindObjectsInactive.Include);
+            if (presCoord == null)
+            {
+                var go = GameObject.Find("PresentationCoordinator") ?? GameObject.Find("GameController") ?? bootstrap.gameObject;
+                presCoord = Undo.AddComponent<Mandato.Presentation.RunPresentationCoordinator>(go);
+            }
+
+            // 2. Paper Presenter
+            var paper = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.PaperDocumentPresenter>(FindObjectsInactive.Include);
+            if (paper == null)
+            {
+                var go = GameObject.Find("PhysicalPaperUI") ?? GameObject.Find("Papel") ?? GameObject.Find("Paper") ?? GameObject.Find("Documento") ?? bootstrap.gameObject;
+                paper = Undo.AddComponent<Mandato.UI.PaperDocumentPresenter>(go);
+            }
+
+            // 3. Retro Monitor Presenter
+            var monitor = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.RetroMonitorPresenter>(FindObjectsInactive.Include);
+            if (monitor == null)
+            {
+                var go = GameObject.Find("RetroMonitorUI") ?? GameObject.Find("RetroMonitor") ?? GameObject.Find("Monitor") ?? GameObject.Find("Computador") ?? bootstrap.gameObject;
+                monitor = Undo.AddComponent<Mandato.UI.RetroMonitorPresenter>(go);
+            }
+
+            // 4. Decision Overlay Presenter
+            var overlay = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.DecisionOverlayPresenter>(FindObjectsInactive.Include);
+            if (overlay == null)
+            {
+                var go = GameObject.Find("DecisionOverlay") ?? GameObject.Find("HUD") ?? GameObject.Find("UI") ?? bootstrap.gameObject;
+                overlay = Undo.AddComponent<Mandato.UI.DecisionOverlayPresenter>(go);
+            }
+
+            // 5. End Screen Presenter
+            var endScreen = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.EndScreenPresenter>(FindObjectsInactive.Include);
+            if (endScreen == null)
+            {
+                var go = GameObject.Find("EndScreen") ?? GameObject.Find("GameOver") ?? GameObject.Find("UI") ?? bootstrap.gameObject;
+                endScreen = Undo.AddComponent<Mandato.UI.EndScreenPresenter>(go);
+            }
+
+            // 6. Flip Phone Presenter
+            var phone = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.FlipPhonePresenter>(FindObjectsInactive.Include);
+            if (phone == null)
+            {
+                var go = GameObject.Find("Celular") ?? GameObject.Find("FlipPhone") ?? GameObject.Find("Phone") ?? bootstrap.gameObject;
+                phone = Undo.AddComponent<Mandato.UI.FlipPhonePresenter>(go);
+            }
+
+            // 7. Player Animator
+            Animator playerAnim = null;
+            var animators = UnityEngine.Object.FindObjectsByType<Animator>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var a in animators)
+            {
+                if (a != null && (a.HasState(0, Animator.StringToHash("LevantaMao")) || a.gameObject.name.ToLower().Contains("player") || a.gameObject.name.ToLower().Contains("mao") || a.gameObject.name.ToLower().Contains("hand")))
+                {
+                    playerAnim = a;
+                    break;
+                }
+            }
+
+            // 8. Flip Phone GameObject
+            var phoneObj = GameObject.Find("Celular") ?? GameObject.Find("FlipPhone") ?? GameObject.Find("Phone");
+
+            // Atualiza via SerializedObject para garantir persistência robusta no arquivo .unity
+            var serializedBootstrap = new SerializedObject(bootstrap);
+            var bindingsProp = serializedBootstrap.FindProperty("presentationBindings");
+            if (bindingsProp != null)
+            {
+                var pPresCoord = bindingsProp.FindPropertyRelative("presentationCoordinator");
+                if (pPresCoord != null) pPresCoord.objectReferenceValue = presCoord;
+
+                var pPaper = bindingsProp.FindPropertyRelative("paperPresenter");
+                if (pPaper != null) pPaper.objectReferenceValue = paper;
+
+                var pMonitor = bindingsProp.FindPropertyRelative("retroMonitorPresenter");
+                if (pMonitor != null) pMonitor.objectReferenceValue = monitor;
+
+                var pOverlay = bindingsProp.FindPropertyRelative("decisionOverlayPresenter");
+                if (pOverlay != null) pOverlay.objectReferenceValue = overlay;
+
+                var pEndScreen = bindingsProp.FindPropertyRelative("endScreenPresenter");
+                if (pEndScreen != null) pEndScreen.objectReferenceValue = endScreen;
+
+                var pPhone = bindingsProp.FindPropertyRelative("flipPhonePresenter");
+                if (pPhone != null) pPhone.objectReferenceValue = phone;
+
+                var pPlayerAnim = bindingsProp.FindPropertyRelative("playerAnimator");
+                if (pPlayerAnim != null && playerAnim != null) pPlayerAnim.objectReferenceValue = playerAnim;
+
+                var pPhoneObj = bindingsProp.FindPropertyRelative("flipPhoneObject");
+                if (pPhoneObj != null && phoneObj != null) pPhoneObj.objectReferenceValue = phoneObj;
+
+                serializedBootstrap.ApplyModifiedProperties();
+            }
+
+            // Fallback via reflection direto no objeto em memória
+            var bindings = bootstrap.PresentationBindings;
+            var bindingsType = typeof(ScenePresentationBindings);
+            bindingsType.GetField("presentationCoordinator", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, presCoord);
+            bindingsType.GetField("paperPresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, paper);
+            bindingsType.GetField("retroMonitorPresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, monitor);
+            bindingsType.GetField("decisionOverlayPresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, overlay);
+            bindingsType.GetField("endScreenPresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, endScreen);
+            bindingsType.GetField("flipPhonePresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, phone);
+            if (playerAnim != null) bindingsType.GetField("playerAnimator", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, playerAnim);
+            if (phoneObj != null) bindingsType.GetField("flipPhoneObject", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, phoneObj);
+
+            EditorUtility.SetDirty(bootstrap);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(bootstrap.gameObject.scene);
+
+            Debug.Log("<color=#00ffaa><b>[MandatoValidator] ✅ Bindings preenchidos e serializados na cena!</b></color> Salve a cena (Ctrl+S).");
+            ValidateSceneConfiguration();
         }
     }
 }

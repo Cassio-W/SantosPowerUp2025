@@ -56,7 +56,6 @@ namespace Mandato.Content
         public List<QuestStepDefinition> steps = new List<QuestStepDefinition>();
 
         public string rewardPerkId = string.Empty;
-        public string rewardEndingUnlockId = string.Empty;
 
         public static QuestDefinition CreateRuntimeInstance(
             string id,

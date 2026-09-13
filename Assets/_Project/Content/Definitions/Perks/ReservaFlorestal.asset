@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.PerkDefinition
   id: ReservaFlorestal
   title: Reserva Florestal Protegida
-  description: "Garante a preservação de biomas estratégicos. Se o Meio Ambiente chegar a 0, restaura para 35 e consome a reserva."
+  description: "Garante a preserva\xE7\xE3o de biomas estrat\xE9gicos. Se o Meio
+    Ambiente chegar a 0, restaura para 35 e consome a reserva."
   icon: {fileID: 21300000, guid: d2a65e548c7b9264f8bd7e595f01b620, type: 3}
   isPassive: 0
   isOneTimeUse: 1
@@ -22,10 +23,10 @@ MonoBehaviour:
   isEmergencyRescue: 1
   rescueStat: 0
   rescueRestoreValue: 35
-  rescueMessage: "Reserva Florestal ativada! Meio-ambiente restaurado para 35."
+  rescueMessage: Reserva Florestal ativada! Meio-ambiente restaurado para 35.
   statDeltasPerMonth:
     climaticChanges: 0
-    internationalRelations: 0
+    internationalRelations: 2
     popularApproval: 0
     economy: 0
     corruption: 0

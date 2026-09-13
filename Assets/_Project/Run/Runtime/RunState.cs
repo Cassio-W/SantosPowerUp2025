@@ -205,7 +205,6 @@ namespace Mandato.Run
             if (!termination.IsOngoing) return;
 
             stats.ApplyDelta(id, delta);
-            CheckAndApplyEmergencyRescue();
             UpdateTermination();
         }
 
@@ -214,7 +213,6 @@ namespace Mandato.Run
             if (!termination.IsOngoing || impacts == null) return;
 
             stats.ApplyImpacts(impacts, hasCorruptionMods);
-            CheckAndApplyEmergencyRescue();
             UpdateTermination();
         }
 
@@ -224,6 +222,9 @@ namespace Mandato.Run
 
             politicalAxis.ApplyDelta(deltaX, deltaY);
         }
+
+        public void LockPoliticalAxis() => politicalAxis.Lock();
+        public void UnlockPoliticalAxis() => politicalAxis.Unlock();
 
         public void UnlockAction(string actionId)
         {

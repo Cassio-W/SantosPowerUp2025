@@ -110,15 +110,24 @@ namespace Mandato.Run.Tests
         }
 
         [Test]
-        public void ResolveMonth_TriggersCampaignEvent_AtMonth37()
+        public void ResolveMonth_TriggersCampaignEvent_AtMonth37_AndLocksPoliticalAxis()
         {
             var runState = new RunState();
             runState.calendar.currentMonthIndex = 37;
+            Assert.IsFalse(runState.politicalAxis.isLocked);
 
             var report = MonthlyEffectsResolver.ResolveMonth(runState);
 
             Assert.IsTrue(report.triggeredEventIds.Contains(MonthlyEffectsResolver.CampaignEventId));
             Assert.IsTrue(runState.activeEvents.Exists(e => e.eventId == MonthlyEffectsResolver.CampaignEventId));
+            Assert.IsTrue(runState.politicalAxis.isLocked, "Eixo político deve ser travado durante a Campanha Eleitoral no 4º ano.");
+
+            // Tenta aplicar alteração no eixo político após travamento
+            int prevX = runState.politicalAxis.x;
+            int prevY = runState.politicalAxis.y;
+            runState.ApplyPoliticalDelta(5, -5);
+            Assert.AreEqual(prevX, runState.politicalAxis.x, "Eixo travado não deve sofrer alteração em X.");
+            Assert.AreEqual(prevY, runState.politicalAxis.y, "Eixo travado não deve sofrer alteração em Y.");
         }
     }
 }

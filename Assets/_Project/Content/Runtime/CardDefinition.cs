@@ -212,6 +212,22 @@ namespace Mandato.Content
             }).TrimEnd('\r', '\n');
         }
 
+        public const string NeutralRoutineCardId = "card_routine_dispatch";
+
+        public static CardDefinition CreateNeutralRoutineCard()
+        {
+            return CreateRuntimeInstance(
+                id: NeutralRoutineCardId,
+                title: "Despacho de Rotina",
+                description: "Nenhuma proposta extraordinária aguarda decisão este mês. O expediente segue a rotina administrativa normal.",
+                left: new ChoiceDefinition("Despachar"),
+                right: new ChoiceDefinition("Arquivar"),
+                npcId: string.Empty,
+                tag: "Rotina",
+                isTutorial: false
+            );
+        }
+
         public static CardDefinition CreateRuntimeInstance(
             string id,
             string title,

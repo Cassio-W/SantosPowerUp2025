@@ -76,7 +76,19 @@ namespace Mandato.Run
 
             if (CurrentCard == null)
             {
-                return false;
+                if (RunState.calendar.currentMonthIndex >= RunCalendar.DefaultTotalMonths)
+                {
+                    RunState.UpdateTermination();
+                    if (RunState.termination.IsVictory || RunState.termination.IsDefeat)
+                    {
+                        SetPhase(RunPhase.Terminated);
+                        OnRunTerminated?.Invoke(RunState.termination);
+                        return false;
+                    }
+                }
+
+                // Fallback de contingência explícito: despacho administrativo de rotina
+                CurrentCard = CardDefinition.CreateNeutralRoutineCard();
             }
 
             SetPhase(RunPhase.PresentingProposal);
@@ -93,14 +105,25 @@ namespace Mandato.Run
             if (CurrentPhase != RunPhase.AwaitingChoice || CurrentCard == null)
                 return null;
 
+            if (choiceIndex < 0 || choiceIndex > 1)
+                return null;
+
+            if (CurrentCard.GetChoice(choiceIndex) == null)
+                return null;
+
             SetPhase(RunPhase.ResolvingChoice);
 
             LastResolutionReport = DecisionResolver.Resolve(RunState, DeckState, CurrentCard, choiceIndex, questCatalog, perkCatalog);
+            if (LastResolutionReport == null)
+            {
+                SetPhase(RunPhase.AwaitingChoice);
+                return null;
+            }
 
             SetPhase(RunPhase.PresentingConsequences);
             OnConsequencesReady?.Invoke(LastResolutionReport);
 
-            if (LastResolutionReport != null && LastResolutionReport.IsRunTerminated)
+            if (LastResolutionReport.IsRunTerminated)
             {
                 SetPhase(RunPhase.Terminated);
                 OnRunTerminated?.Invoke(LastResolutionReport.resultingTermination);

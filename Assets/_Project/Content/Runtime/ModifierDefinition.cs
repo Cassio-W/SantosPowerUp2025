@@ -23,7 +23,6 @@ namespace Mandato.Content
         public string rescueMessage = string.Empty;
 
         public StatBlock statDeltasPerMonth = new StatBlock(0, 0, 0, 0, 0);
-        public bool corruptionImmunity = false;
 
         public static PerkDefinition CreateRuntimeInstance(
             string id,

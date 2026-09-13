@@ -14,6 +14,8 @@ namespace Mandato.UI
         public event Action<int> OnChoiceSelected;
 
         [SerializeField] private UIDocument uiDocument;
+        [SerializeField] private VisualTreeAsset uxmlAsset;
+        [SerializeField] private PanelSettings panelSettings;
         private VisualElement decisionContainer;
         private VisualElement vignetteCorruption;
         private VisualElement perksContainer;
@@ -66,6 +68,41 @@ namespace Mandato.UI
                         uiDocument = d;
                         break;
                     }
+                }
+            }
+
+            if (uiDocument == null)
+            {
+                uiDocument = gameObject.AddComponent<UIDocument>();
+            }
+
+            if (uiDocument.panelSettings == null)
+            {
+                if (panelSettings != null)
+                {
+                    uiDocument.panelSettings = panelSettings;
+                }
+                else
+                {
+#if UNITY_EDITOR
+                    var screenPanel = UnityEditor.AssetDatabase.LoadAssetAtPath<PanelSettings>("Assets/UI/Decision/DecisionPanelSettings.asset");
+                    if (screenPanel != null) uiDocument.panelSettings = screenPanel;
+#endif
+                }
+            }
+
+            if (uiDocument.visualTreeAsset == null)
+            {
+                if (uxmlAsset != null)
+                {
+                    uiDocument.visualTreeAsset = uxmlAsset;
+                }
+                else
+                {
+#if UNITY_EDITOR
+                    var uxml = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Decision/DecisionUI.uxml");
+                    if (uxml != null) uiDocument.visualTreeAsset = uxml;
+#endif
                 }
             }
         }
@@ -315,12 +352,6 @@ namespace Mandato.UI
                     if (sb.Length > 0) sb.AppendLine();
                     sb.Append("<b>Efeitos Mensais:</b> " + string.Join(", ", deltas));
                 }
-            }
-
-            if (def.corruptionImmunity)
-            {
-                if (sb.Length > 0) sb.AppendLine();
-                sb.Append("🛡️ <b>Imunidade a escândalos de corrupção.</b>");
             }
 
             if (def.isEmergencyRescue)

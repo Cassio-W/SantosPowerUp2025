@@ -136,7 +136,12 @@ namespace Mandato.Run
             // 4. Concede perk se houver
             if (!string.IsNullOrEmpty(choice.grantPerkId))
             {
-                runState.GrantPerk(choice.grantPerkId);
+                int duration = 0;
+                if (perkCatalog != null && perkCatalog.TryGetValue(choice.grantPerkId, out var perkDef) && perkDef != null)
+                {
+                    duration = perkDef.durationMonths;
+                }
+                runState.GrantPerk(choice.grantPerkId, duration);
             }
 
             // 5. Atualização de Relação com NPC
@@ -180,7 +185,12 @@ namespace Mandato.Run
                                         report.completedQuestIds.Add(qId);
                                         if (!string.IsNullOrEmpty(qDef.rewardPerkId))
                                         {
-                                            runState.GrantPerk(qDef.rewardPerkId);
+                                            int rewardDuration = 0;
+                                            if (perkCatalog != null && perkCatalog.TryGetValue(qDef.rewardPerkId, out var rewardDef) && rewardDef != null)
+                                            {
+                                                rewardDuration = rewardDef.durationMonths;
+                                            }
+                                            runState.GrantPerk(qDef.rewardPerkId, rewardDuration);
                                             report.grantedRewardPerkIds.Add(qDef.rewardPerkId);
                                         }
                                     }

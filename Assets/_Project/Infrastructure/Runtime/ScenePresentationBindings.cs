@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Mandato.Presentation;
 using Mandato.UI;
 using UnityEngine;
@@ -16,7 +17,7 @@ namespace Mandato.Infrastructure
         [SerializeField] private EndScreenPresenter endScreenPresenter;
         [SerializeField] private FlipPhonePresenter flipPhonePresenter;
 
-        [Header("Animação do Jogador")]
+        [Header("Animação do Jogador (Mão)")]
         [SerializeField] private Animator playerAnimator;
         [SerializeField] private string dealAnimationName = "LevantaMao";
         [SerializeField] private string dealAnimationReverseName = "";
@@ -31,33 +32,32 @@ namespace Mandato.Infrastructure
         public DecisionOverlayPresenter DecisionOverlayPresenter => decisionOverlayPresenter;
         public EndScreenPresenter EndScreenPresenter => endScreenPresenter;
         public FlipPhonePresenter FlipPhonePresenter => flipPhonePresenter;
+        public Animator PlayerAnimator => playerAnimator;
         public GameObject FlipPhoneObject => flipPhoneObject;
 
-        public void AutoDetectMissingReferences()
+        public bool Validate(out List<string> missingErrors)
         {
-            if (presentationCoordinator == null)
-                presentationCoordinator = UnityEngine.Object.FindFirstObjectByType<RunPresentationCoordinator>(FindObjectsInactive.Include);
-
-            if (paperPresenter == null)
-                paperPresenter = UnityEngine.Object.FindFirstObjectByType<PaperDocumentPresenter>(FindObjectsInactive.Include);
-
-            if (retroMonitorPresenter == null)
-                retroMonitorPresenter = UnityEngine.Object.FindFirstObjectByType<RetroMonitorPresenter>(FindObjectsInactive.Include);
+            missingErrors = new List<string>();
 
             if (decisionOverlayPresenter == null)
-                decisionOverlayPresenter = UnityEngine.Object.FindFirstObjectByType<DecisionOverlayPresenter>(FindObjectsInactive.Include);
+                missingErrors.Add("DecisionOverlayPresenter não atribuído.");
 
             if (endScreenPresenter == null)
-                endScreenPresenter = UnityEngine.Object.FindFirstObjectByType<EndScreenPresenter>(FindObjectsInactive.Include);
+                missingErrors.Add("EndScreenPresenter não atribuído.");
+
+            if (paperPresenter == null)
+                missingErrors.Add("PaperDocumentPresenter não atribuído.");
+
+            if (retroMonitorPresenter == null)
+                missingErrors.Add("RetroMonitorPresenter não atribuído.");
 
             if (flipPhonePresenter == null)
-                flipPhonePresenter = UnityEngine.Object.FindFirstObjectByType<FlipPhonePresenter>(FindObjectsInactive.Include);
+                missingErrors.Add("FlipPhonePresenter não atribuído.");
 
-            if (flipPhoneObject == null && flipPhonePresenter != null)
-                flipPhoneObject = flipPhonePresenter.GetPhoneGameObject();
+            if (presentationCoordinator == null)
+                missingErrors.Add("RunPresentationCoordinator não atribuído.");
 
-            if (flipPhonePresenter != null && flipPhoneObject != null)
-                flipPhonePresenter.SetPhoneGameObject(flipPhoneObject);
+            return missingErrors.Count == 0;
         }
 
         public void PlayDealAnimation()

@@ -34,9 +34,16 @@ namespace Mandato.Infrastructure
             return tutorialCardIds.Contains(cardId);
         }
 
+        /// <summary>
+        /// Constrói o catálogo a partir de CardDefinition nativos.
+        /// tutorialCards  → entram no deck com prioridade (tutorial)
+        /// startingCards  → entram no deck principal
+        /// catalogCards   → registrados no catálogo mas NÃO no deck inicial (injetáveis via injectCardId)
+        /// </summary>
         public void Build(
-            IEnumerable<ScriptableObject> tutorialDealsOrCards,
-            IEnumerable<ScriptableObject> startingDealsOrCards,
+            IEnumerable<CardDefinition> tutorialCards,
+            IEnumerable<CardDefinition> startingCards,
+            IEnumerable<CardDefinition> catalogCards,
             IEnumerable<PerkDefinition> perksList,
             IEnumerable<RunEventDefinition> eventsList,
             IEnumerable<QuestDefinition> questsList,
@@ -53,35 +60,42 @@ namespace Mandato.Infrastructure
             tutorialCardIds.Clear();
             mainDeckCardIds.Clear();
 
-            // 1. Processa cartas de tutorial
-            if (playTutorial && tutorialDealsOrCards != null)
+            // 1. Cartas de tutorial (entram no deck com prioridade)
+            if (playTutorial && tutorialCards != null)
             {
-                foreach (var asset in tutorialDealsOrCards)
+                foreach (var card in tutorialCards)
                 {
-                    if (asset == null) continue;
-                    var card = RegisterCard(asset, isTutorial: true);
-                    if (card != null && !tutorialCardIds.Contains(card.id))
-                    {
+                    if (card == null || string.IsNullOrEmpty(card.id)) continue;
+                    card.isTutorial = true;
+                    cards[card.id] = card;
+                    if (!tutorialCardIds.Contains(card.id))
                         tutorialCardIds.Add(card.id);
-                    }
                 }
             }
 
-            // 2. Processa cartas do baralho principal
-            if (startingDealsOrCards != null)
+            // 2. Cartas do baralho principal (entram no deck inicial)
+            if (startingCards != null)
             {
-                foreach (var asset in startingDealsOrCards)
+                foreach (var card in startingCards)
                 {
-                    if (asset == null) continue;
-                    var card = RegisterCard(asset, isTutorial: false);
-                    if (card != null && !mainDeckCardIds.Contains(card.id))
-                    {
+                    if (card == null || string.IsNullOrEmpty(card.id)) continue;
+                    cards[card.id] = card;
+                    if (!mainDeckCardIds.Contains(card.id))
                         mainDeckCardIds.Add(card.id);
-                    }
                 }
             }
 
-            // 3. Processa Catálogos de Modificadores e Narrativa
+            // 3. Cartas de catálogo/injetáveis (NonStarting): registradas mas NÃO no deck inicial
+            if (catalogCards != null)
+            {
+                foreach (var card in catalogCards)
+                {
+                    if (card == null || string.IsNullOrEmpty(card.id)) continue;
+                    cards[card.id] = card;
+                }
+            }
+
+            // 4. Perks
             if (perksList != null)
             {
                 foreach (var p in perksList)
@@ -90,11 +104,7 @@ namespace Mandato.Infrastructure
                 }
             }
 
-            if (perks.Count == 0)
-            {
-                CreateDefaultPerks();
-            }
-
+            // 5. Eventos
             if (eventsList != null)
             {
                 foreach (var ev in eventsList)
@@ -103,6 +113,7 @@ namespace Mandato.Infrastructure
                 }
             }
 
+            // 6. Quests
             if (questsList != null)
             {
                 foreach (var q in questsList)
@@ -111,6 +122,7 @@ namespace Mandato.Infrastructure
                 }
             }
 
+            // 7. Finais
             if (endingsList != null)
             {
                 foreach (var end in endingsList)
@@ -119,7 +131,7 @@ namespace Mandato.Infrastructure
                 }
             }
 
-            // 4. Processa Ações do Flip-Phone
+            // 8. Ações do Flip-Phone
             if (startingActionsList != null)
             {
                 foreach (var act in startingActionsList)
@@ -127,71 +139,29 @@ namespace Mandato.Infrastructure
                     if (act != null && !string.IsNullOrEmpty(act.id)) actions[act.id] = act;
                 }
             }
-
-            if (actions.Count == 0)
-            {
-                CreateDefaultActions();
-            }
         }
 
-        private void CreateDefaultPerks()
+        /// <summary>
+        /// Registra um CardDefinition avulso no catálogo.
+        /// Uso por ferramentas de editor ou testes. Não afeta o deck inicial.
+        /// </summary>
+        public void RegisterCard(CardDefinition card, bool isTutorial = false)
         {
-            var cripto = PerkDefinition.CreateRuntimeInstance(
-                "Cripto",
-                "Hub de Criptoativos",
-                "Incentivos à economia digital e blockchain aumentam a inovação econômica.",
-                new StatBlock(0, 0, 1, 0, 1)
-            );
-            perks[cripto.id] = cripto;
-
-            var alianca = PerkDefinition.CreateRescuePerk(
-                "AliancaEUA",
-                "Aliança Estratégica com os EUA",
-                "Acordo diplomático bilateral. Se as Relações Internacionais chegarem a 0, restaura para 30 e consome o acordo.",
-                StatId.InternationalRelations,
-                30
-            );
-            perks[alianca.id] = alianca;
-
-            var usina = PerkDefinition.CreateRuntimeInstance(
-                "InvestimentoUsina",
-                "Subsídio Energético Nacional",
-                "Investimento massivo no setor energético impulsiona a economia.",
-                new StatBlock(-1, 2, 0, 0, 0)
-            );
-            perks[usina.id] = usina;
-
-            var reserva = PerkDefinition.CreateRescuePerk(
-                "ReservaFlorestal",
-                "Reserva Florestal Protegida",
-                "Garante a preservação de biomas estratégicos. Se o Meio Ambiente chegar a 0, restaura para 35 e consome a reserva.",
-                StatId.ClimaticChanges,
-                35
-            );
-            perks[reserva.id] = reserva;
-
-            var tratado = PerkDefinition.CreateRuntimeInstance(
-                "TratadoInternacional",
-                "Pacto de Cooperação Global",
-                "Tratado multilateral que eleva o prestígio internacional do país.",
-                new StatBlock(0, 0, 2, 0, 0)
-            );
-            perks[tratado.id] = tratado;
+            if (card == null || string.IsNullOrEmpty(card.id)) return;
+            if (isTutorial) card.isTutorial = true;
+            cards[card.id] = card;
         }
 
-        public CardDefinition RegisterCard(ScriptableObject asset, bool isTutorial = false)
+        /// <summary>
+        /// Registra um ScriptableObject legado via LegacyDealAdapter.
+        /// Uso restrito a ferramentas de editor e testes de compatibilidade.
+        /// NÃO deve ser chamado no fluxo V2 de produção.
+        /// </summary>
+        public CardDefinition RegisterLegacyAsset(ScriptableObject asset, bool isTutorial = false)
         {
             if (asset == null) return null;
 
-            CardDefinition card = null;
-            if (asset is CardDefinition cardDef)
-            {
-                card = cardDef;
-            }
-            else
-            {
-                card = LegacyDealAdapter.ConvertToCardDefinition(asset);
-            }
+            CardDefinition card = asset is CardDefinition cd ? cd : LegacyDealAdapter.ConvertToCardDefinition(asset);
 
             if (card != null && !string.IsNullOrEmpty(card.id))
             {
@@ -200,43 +170,6 @@ namespace Mandato.Infrastructure
             }
 
             return card;
-        }
-
-        private void CreateDefaultActions()
-        {
-            var callAdvisor = FlipPhoneActionDefinition.CreateRuntimeInstance(
-                "action_ligar_conselheiro",
-                "Ligar para o Conselheiro",
-                "Consulta a base governista para alinhar o discurso e tranquilizar a opinião pública.",
-                FlipPhoneCooldownType.Turns,
-                cooldownTurns: 2
-            );
-            callAdvisor.categoryTag = "Contatos";
-            callAdvisor.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 5, 5, 0)));
-            actions[callAdvisor.id] = callAdvisor;
-
-            var emergencyStimulus = FlipPhoneActionDefinition.CreateRuntimeInstance(
-                "action_pacote_emergencial",
-                "Decreto de Estímulo Financeiro",
-                "Injeta capital em setores estratégicos ao custo de concessões duvidosas.",
-                FlipPhoneCooldownType.Turns,
-                cooldownTurns: 3
-            );
-            emergencyStimulus.categoryTag = "Gabinete";
-            emergencyStimulus.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 15, 0, -5, 10)));
-            actions[emergencyStimulus.id] = emergencyStimulus;
-
-            var dismissProposal = FlipPhoneActionDefinition.CreateRuntimeInstance(
-                "action_engavetar_proposta",
-                "Engavetar Documento",
-                "Recusa o trâmite do documento atual sem se comprometer publicamente.",
-                FlipPhoneCooldownType.Turns,
-                cooldownTurns: 2
-            );
-            dismissProposal.categoryTag = "Ações";
-            dismissProposal.effects.Add(FlipPhoneEffect.CreateDismissProposal());
-            dismissProposal.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 0, 0, 5)));
-            actions[dismissProposal.id] = dismissProposal;
         }
     }
 }

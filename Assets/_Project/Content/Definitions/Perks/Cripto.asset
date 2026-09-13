@@ -20,10 +20,14 @@ MonoBehaviour:
   isPassive: 1
   isOneTimeUse: 0
   durationMonths: 0
+  isEmergencyRescue: 0
+  rescueStat: 3
+  rescueRestoreValue: 35
+  rescueMessage: 
   statDeltasPerMonth:
     climaticChanges: 0
-    internationalRelations: 1
+    internationalRelations: 0
     popularApproval: 0
-    economy: 0
-    corruption: 1
+    economy: 5
+    corruption: 2
   corruptionImmunity: 0

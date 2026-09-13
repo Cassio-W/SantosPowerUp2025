@@ -221,7 +221,6 @@ namespace Mandato.Presentation
             yield return null;
 
             OnConsequencesFinished?.Invoke(report);
-            stateMachine?.CompleteTurnAndAdvance();
         }
 
         public void DismissCurrentProposal(bool isPositive = false, Action onDismissed = null)

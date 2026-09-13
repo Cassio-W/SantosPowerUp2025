@@ -108,6 +108,8 @@ namespace Mandato.UI
             dateLabel = root.Q<Label>("date-display") ?? root.Q<Label>("monitor-date") ?? root.Q<Label>("date-label");
         }
 
+        private bool isInitialSetupDone = false;
+
         public void UpdateSnapshot(RunSnapshot snapshot, ResolutionReport lastReport = null)
         {
             if (snapshot == null) return;
@@ -147,7 +149,7 @@ namespace Mandato.UI
                         attrType.GetField("populationalApproval")?.SetValue(attrInstance, snapshot.Stats.popularApproval);
                         attrType.GetField("corruption")?.SetValue(attrInstance, snapshot.Stats.corruption);
 
-                        if (lastReport != null)
+                        if (isInitialSetupDone || lastReport != null)
                         {
                             // Dispara a rotina completa de feedback visual (setas, ghost fills, tremor, glitch e log)
                             var handleChangedMethod = sceneRetroMonitorUI.GetType().GetMethod("HandleAttributesChanged", 
@@ -162,6 +164,7 @@ namespace Mandato.UI
                             var setAttrMethod = sceneRetroMonitorUI.GetType().GetMethod("SetAttributesImmediate",
                                 System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                             setAttrMethod?.Invoke(sceneRetroMonitorUI, new object[] { attrInstance });
+                            isInitialSetupDone = true;
                         }
                     }
                 }
@@ -171,10 +174,17 @@ namespace Mandato.UI
                 }
             }
 
-            if (sceneRetroMonitorUI == null && lastReport != null)
+            if (sceneRetroMonitorUI == null)
             {
-                ShowVariationArrows(lastReport);
-                if (triggerGlitchOnChanges) TriggerGlitch();
+                if (lastReport != null)
+                {
+                    ShowVariationArrows(lastReport);
+                }
+                if (triggerGlitchOnChanges && isInitialSetupDone)
+                {
+                    TriggerGlitch();
+                }
+                isInitialSetupDone = true;
             }
         }
 

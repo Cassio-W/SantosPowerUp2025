@@ -37,7 +37,8 @@ namespace Mandato.Run
             DeckState deckState,
             FlipPhoneActionDefinition action,
             IReadOnlyDictionary<string, CardDefinition> catalog = null,
-            CardDefinition currentCard = null)
+            CardDefinition currentCard = null,
+            IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null)
         {
             if (runState == null || action == null)
             {
@@ -164,7 +165,12 @@ namespace Mandato.Run
                         case FlipPhoneEffectType.GrantPerk:
                             if (!string.IsNullOrEmpty(effect.targetId))
                             {
-                                runState.GrantPerk(effect.targetId, effect.duration);
+                                int duration = effect.duration;
+                                if (duration <= 0 && perkCatalog != null && perkCatalog.TryGetValue(effect.targetId, out var pDef) && pDef != null)
+                                {
+                                    duration = pDef.durationMonths;
+                                }
+                                runState.GrantPerk(effect.targetId, duration);
                                 report.grantedPerkIds.Add(effect.targetId);
                             }
                             break;
@@ -186,6 +192,10 @@ namespace Mandato.Run
 
             // 8. Registra consumo / cooldown
             runState.RecordActionUsed(action.id, action.cooldownType, action.cooldownTurns);
+
+            // 9. Resgate Emergencial e Término
+            runState.CheckAndApplyEmergencyRescue(perkCatalog);
+            runState.UpdateTermination();
 
             report.statsAfter = runState.stats.Clone();
             report.resultingTermination = runState.termination;

@@ -120,6 +120,7 @@ namespace Mandato.Run
                 if (!runState.activeEvents.Exists(e => string.Equals(e.eventId, CampaignEventId, StringComparison.OrdinalIgnoreCase)))
                 {
                     runState.TriggerEvent(CampaignEventId, duration: 12);
+                    runState.LockPoliticalAxis();
                     report.triggeredEventIds.Add(CampaignEventId);
                 }
             }
