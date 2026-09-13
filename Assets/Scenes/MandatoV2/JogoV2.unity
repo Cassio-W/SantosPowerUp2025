@@ -7450,6 +7450,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFocusManager
   targetCamera: {fileID: 963194227}
+  screenUIDocuments: []
   defaultCameraAnchor: {fileID: 0}
   autoAdjustNearClipPlane: 1
   targetNearClipPlane: 0.02
@@ -7558,7 +7559,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.UI::Mandato.UI.RetroMonitorPresenter
   crtMaterial: {fileID: 0}
   animationSpeed: 5
-  arrowDuration: 4.5
+  arrowDuration: 2
   triggerGlitchOnChanges: 1
   uiDocument: {fileID: 0}
   uxmlAsset: {fileID: 0}
