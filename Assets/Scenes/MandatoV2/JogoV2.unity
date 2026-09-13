@@ -283,6 +283,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c0448892e786caa46a313cad9dfce0af, type: 3}
       insertIndex: -1
       addedObject: {fileID: 756163003}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c0448892e786caa46a313cad9dfce0af, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 756163005}
   m_SourcePrefab: {fileID: 100100000, guid: c0448892e786caa46a313cad9dfce0af, type: 3}
 --- !u!1001 &116235396
 PrefabInstance:
@@ -7298,6 +7301,45 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: c0448892e786caa46a313cad9dfce0af, type: 3}
   m_PrefabInstance: {fileID: 97827090}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &756163005
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 756163002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7dfefa61285aed47b688641ac3dce6d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mandato.Presentation::Mandato.Presentation.DeskCallButton
+  interactable: 1
+  hookFocusableObject: 1
+  handleSpaceKeyLocally: 0
+  localCallKey: 32
+  audioSource: {fileID: 0}
+  pressSound: {fileID: 0}
+  soundVolume: 1
+  hoverSound: {fileID: 0}
+  hoverSoundVolume: 0.5
+  pitchVariation: {x: 0.96, y: 1.04}
+  animator: {fileID: 0}
+  pressTrigger: Press
+  pressAnimationState: 
+  enableProceduralPress: 1
+  movingPart: {fileID: 0}
+  pressOffset: {x: 0, y: -0.015, z: 0}
+  pressDuration: 0.12
+  punchScale: {x: 1.02, y: 0.95, z: 1.02}
+  onButtonPressed:
+    m_PersistentCalls:
+      m_Calls: []
+  onButtonHoverEnter:
+    m_PersistentCalls:
+      m_Calls: []
+  onButtonHoverExit:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -7867,6 +7909,7 @@ MonoBehaviour:
     cameraEffects: {fileID: 1409442305}
     cameraFocus: {fileID: 963194232}
     flipPhoneObject: {fileID: 116235397}
+    deskCallButton: {fileID: 756163005}
   flowCoordinatorRef: {fileID: 1189659390}
 --- !u!4 &1189659388
 Transform:

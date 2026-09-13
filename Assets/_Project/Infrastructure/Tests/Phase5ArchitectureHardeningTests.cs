@@ -52,6 +52,7 @@ namespace Mandato.Infrastructure.Tests
             Assert.IsNull(bindings.FlipPhonePresenter);
             Assert.IsNull(bindings.CameraEffects);
             Assert.IsNull(bindings.CameraFocus);
+            Assert.IsNull(bindings.DeskCallButton);
         }
 
         [Test]

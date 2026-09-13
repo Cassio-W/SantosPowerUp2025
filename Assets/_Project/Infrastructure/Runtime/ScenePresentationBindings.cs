@@ -30,6 +30,9 @@ namespace Mandato.Infrastructure
         [Header("Objeto 3D do Celular")]
         [SerializeField] private GameObject flipPhoneObject;
 
+        [Header("Botão de Mesa (Chamar Visitante)")]
+        [SerializeField] private DeskCallButton deskCallButton;
+
         public RunPresentationCoordinator PresentationCoordinator => presentationCoordinator;
         public PaperDocumentPresenter PaperPresenter => paperPresenter;
         public RetroMonitorPresenter RetroMonitorPresenter => retroMonitorPresenter;
@@ -40,6 +43,7 @@ namespace Mandato.Infrastructure
         public AttributeCameraEffects CameraEffects => cameraEffects;
         public CameraFocusManager CameraFocus => cameraFocus;
         public GameObject FlipPhoneObject => flipPhoneObject;
+        public DeskCallButton DeskCallButton => deskCallButton;
 
         public bool Validate(out List<string> missingErrors)
         {

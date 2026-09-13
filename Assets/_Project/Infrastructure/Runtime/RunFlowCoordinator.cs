@@ -114,6 +114,12 @@ namespace Mandato.Infrastructure
                 bindings.EndScreenPresenter.OnRestartRequested += RestartRun;
                 bindings.EndScreenPresenter.OnMainMenuRequested += ReturnToMenu;
             }
+
+            // 7. Botão de Mesa (Chamar Visitante)
+            if (bindings.DeskCallButton != null)
+            {
+                bindings.DeskCallButton.OnCallRequested += AuthorizeNextVisitor;
+            }
         }
 
         private void OnDestroy()
@@ -121,6 +127,11 @@ namespace Mandato.Infrastructure
             if (flipPhoneCoordinator != null)
             {
                 flipPhoneCoordinator.OnActionExecuted -= HandleFlipPhoneActionExecuted;
+            }
+
+            if (bindings != null && bindings.DeskCallButton != null)
+            {
+                bindings.DeskCallButton.OnCallRequested -= AuthorizeNextVisitor;
             }
         }
 
@@ -211,17 +222,24 @@ namespace Mandato.Infrastructure
 
         private void Update()
         {
-            if (isAwaitingSpaceForNextNpc)
+            bool spaceOrEnter = Input.GetKeyDown(callNextNpcKey) ||
+                                Input.GetKeyDown(KeyCode.Space) ||
+                                Input.GetKeyDown(KeyCode.Return) ||
+                                Input.GetKeyDown(KeyCode.KeypadEnter);
+
+            if (spaceOrEnter)
             {
-                if (modalCoordinator != null && !modalCoordinator.CanCallNextVisitor()) return;
+                // Se o telefone ou a tela final estiverem abertos, ignora
+                if (bindings.EndScreenPresenter != null && bindings.EndScreenPresenter.IsVisible) return;
+                if (bindings.FlipPhonePresenter != null && bindings.FlipPhonePresenter.IsOpen) return;
 
-                bool spaceOrEnter = Input.GetKeyDown(callNextNpcKey) ||
-                                    Input.GetKeyDown(KeyCode.Space) ||
-                                    Input.GetKeyDown(KeyCode.Return) ||
-                                    Input.GetKeyDown(KeyCode.KeypadEnter);
+                // Sempre executa os efeitos audiovisuais (som + animação) do botão físico
+                bindings.DeskCallButton?.PlayPressEffects();
 
-                if (spaceOrEnter)
+                // Se o fluxo estiver aguardando o próximo visitante, avança
+                if (isAwaitingSpaceForNextNpc)
                 {
+                    if (modalCoordinator != null && !modalCoordinator.CanCallNextVisitor()) return;
                     AuthorizeNextVisitor();
                 }
             }
@@ -267,6 +285,7 @@ namespace Mandato.Infrastructure
             if (bindings.EndScreenPresenter != null && bindings.EndScreenPresenter.IsVisible) return;
 
             isAwaitingSpaceForNextNpc = false;
+            bindings.DeskCallButton?.PlayPressEffects();
             StartCoroutine(DrawNextProposalRoutine(0.05f));
         }
 
