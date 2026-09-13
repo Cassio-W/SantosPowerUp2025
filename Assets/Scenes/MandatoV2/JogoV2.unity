@@ -6769,6 +6769,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Mandato.UI::Mandato.UI.PaperDocumentPresenter
   uiDocument: {fileID: 0}
+  uxmlAsset: {fileID: 0}
+  panelSettings: {fileID: 0}
   descriptionLabelName: deal-description
   authorLabelName: deal-author
   dateLabelName: deal-date
@@ -8914,6 +8916,9 @@ MonoBehaviour:
   crtMaterial: {fileID: 0}
   animationSpeed: 5
   triggerGlitchOnChanges: 1
+  uiDocument: {fileID: 0}
+  uxmlAsset: {fileID: 0}
+  panelSettings: {fileID: 0}
 --- !u!1 &1014087955
 GameObject:
   m_ObjectHideFlags: 0
@@ -9297,6 +9302,7 @@ GameObject:
   - component: {fileID: 1189659388}
   - component: {fileID: 1189659387}
   - component: {fileID: 1189659389}
+  - component: {fileID: 1189659390}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -9420,6 +9426,7 @@ MonoBehaviour:
     dealAnimationReverseName: 
     defaultAnimationName: None
     flipPhoneObject: {fileID: 116235397}
+  flowCoordinatorRef: {fileID: 1189659390}
   disableLegacyCanvas: 1
 --- !u!4 &1189659388
 Transform:
@@ -9455,6 +9462,22 @@ MonoBehaviour:
   defaultTablePosition: {x: 0, y: 0, z: -1.5}
   defaultExitPosition: {x: 5.85, y: 0, z: 3.65}
   npcPrefabs: []
+--- !u!114 &1189659390
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1189659386}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f1e3fd9c68e3704d9d43ea3ea2e47f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mandato.Infrastructure::Mandato.Infrastructure.RunFlowCoordinator
+  requireSpaceToCallNextNpc: 1
+  callNextNpcKey: 32
+  delayBetweenProposals: 1.5
+  mainMenuSceneName: MenuV2
 --- !u!1 &1205926908
 GameObject:
   m_ObjectHideFlags: 0

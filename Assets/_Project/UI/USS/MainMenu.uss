@@ -1,0 +1,197 @@
+/* ==========================================================================
+   MAIN MENU UI - RETRO / COMIC STYLIZED (UI TOOLKIT)
+   ========================================================================== */
+
+.main-menu-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 15, 26, 0.96);
+    justify-content: center;
+    align-items: center;
+}
+
+.menu-background-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('project://database/Assets/Sprites/black-concrete-wall.png');
+    -unity-background-scale-mode: scale-and-crop;
+    opacity: 0.35;
+}
+
+.menu-main-container {
+    width: 520px;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    background-color: rgba(18, 26, 43, 0.88);
+    border-radius: 24px;
+    border-width: 3px;
+    border-color: rgba(245, 158, 11, 0.6);
+}
+
+.menu-logo {
+    width: 340px;
+    height: 120px;
+    -unity-background-scale-mode: scale-to-fit;
+    background-image: url('project://database/Assets/Sprites/logo_branco.png');
+    margin-bottom: 8px;
+}
+
+.menu-subtitle {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: #FBBF24;
+    letter-spacing: 3px;
+    margin-bottom: 36px;
+    -unity-text-align: middle-center;
+}
+
+.menu-buttons-container {
+    width: 100%;
+    align-items: center;
+    gap: 16px;
+}
+
+.menu-btn {
+    width: 100%;
+    height: 60px;
+    border-radius: 14px;
+    border-width: 3px;
+    font-size: 20px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    justify-content: center;
+    align-items: center;
+    transition-property: scale, background-color, border-color;
+    transition-duration: 0.16s;
+    transition-timing-function: ease-out;
+}
+
+.menu-btn:hover {
+    scale: 1.04 1.04;
+}
+
+.menu-btn:active {
+    scale: 0.96 0.96;
+}
+
+.btn-play {
+    background-color: #10B981;
+    border-color: #34D399;
+    color: #FFFFFF;
+}
+
+.btn-play:hover {
+    background-color: #059669;
+    border-color: #6EE7B7;
+}
+
+.btn-credits {
+    background-color: rgba(30, 41, 59, 0.95);
+    border-color: #F59E0B;
+    color: #FBBF24;
+}
+
+.btn-credits:hover {
+    background-color: rgba(51, 65, 85, 0.98);
+    border-color: #FCD34D;
+    color: #FFFFFF;
+}
+
+.btn-quit {
+    background-color: rgba(30, 41, 59, 0.95);
+    border-color: #EF4444;
+    color: #F87171;
+}
+
+.btn-quit:hover {
+    background-color: rgba(65, 18, 28, 0.98);
+    border-color: #FCA5A5;
+    color: #FFFFFF;
+}
+
+/* ==========================================================================
+   MODAL DE CRÉDITOS
+   ========================================================================== */
+
+.credits-modal-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    justify-content: center;
+    align-items: center;
+    display: none;
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 0.25s;
+}
+
+.credits-modal-overlay.open {
+    display: flex;
+    opacity: 1;
+}
+
+.credits-modal-card {
+    width: 620px;
+    max-height: 80%;
+    background-color: #0F172A;
+    border-radius: 20px;
+    border-width: 3px;
+    border-color: #F59E0B;
+    padding: 32px;
+    align-items: center;
+}
+
+.credits-title {
+    font-size: 26px;
+    -unity-font-style: bold;
+    color: #FBBF24;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+}
+
+.credits-body {
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+.credits-line {
+    font-size: 16px;
+    color: #E2E8F0;
+    margin-bottom: 8px;
+    -unity-text-align: middle-center;
+}
+
+.credits-highlight {
+    color: #34D399;
+    -unity-font-style: bold;
+}
+
+.btn-credits-close {
+    width: 180px;
+    height: 48px;
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: #94A3B8;
+    background-color: #1E293B;
+    color: #FFFFFF;
+    font-size: 16px;
+    -unity-font-style: bold;
+}
+
+.btn-credits-close:hover {
+    background-color: #334155;
+    border-color: #F8FAFC;
+    scale: 1.05 1.05;
+}

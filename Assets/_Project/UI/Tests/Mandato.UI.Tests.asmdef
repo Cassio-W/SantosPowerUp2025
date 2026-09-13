@@ -1,0 +1,29 @@
+{
+    "name": "Mandato.UI.Tests",
+    "rootNamespace": "Mandato.UI.Tests",
+    "references": [
+        "Mandato.Core",
+        "Mandato.Content",
+        "Mandato.Run",
+        "Mandato.UI",
+        "Mandato.Infrastructure"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}

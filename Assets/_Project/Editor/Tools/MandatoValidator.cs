@@ -493,5 +493,26 @@ namespace Mandato.Editor
             Debug.Log("<color=#00ffaa><b>[MandatoValidator] ✅ Bindings preenchidos e serializados na cena!</b></color> Salve a cena (Ctrl+S).");
             ValidateSceneConfiguration();
         }
+
+        [MenuItem("Mandato/Validação/Validar Cena de Menu (MenuV2)")]
+        public static void ValidateMenuSceneConfiguration()
+        {
+            var menuPresenter = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.MainMenuPresenter>();
+            if (menuPresenter == null)
+            {
+                Debug.LogWarning("[MandatoValidator] ⚠️ MainMenuPresenter não encontrado na cena aberta. Se você está na cena MenuV2, adicione o componente MainMenuPresenter.");
+                return;
+            }
+
+            var uiDoc = menuPresenter.GetComponent<UnityEngine.UIElements.UIDocument>();
+            if (uiDoc == null)
+            {
+                Debug.LogWarning("[MandatoValidator] ⚠️ UIDocument não encontrado no MainMenuPresenter.");
+            }
+            else
+            {
+                Debug.Log("<color=#00ffaa><b>[MandatoValidator] ✅ Cena de Menu válida!</b></color> MainMenuPresenter configurado em UI Toolkit.");
+            }
+        }
     }
 }

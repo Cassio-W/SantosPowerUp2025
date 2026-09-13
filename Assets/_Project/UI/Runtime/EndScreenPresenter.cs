@@ -274,7 +274,7 @@ namespace Mandato.UI
             {
                 OnRestartRequested.Invoke();
             }
-            else
+            else if (Application.isPlaying)
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
@@ -286,7 +286,7 @@ namespace Mandato.UI
             {
                 OnMainMenuRequested.Invoke();
             }
-            else
+            else if (Application.isPlaying)
             {
                 SceneManager.LoadScene(0);
             }

@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="../USS/MainMenu.uss" />
+    <ui:VisualElement name="main-menu-root" class="main-menu-root" picking-mode="Position">
+        
+        <!-- Fundo Estilizado -->
+        <ui:VisualElement name="background-overlay" class="menu-background-overlay" picking-mode="Ignore" />
+
+        <!-- Container Central do Menu -->
+        <ui:VisualElement name="menu-card" class="menu-main-container" picking-mode="Position">
+            
+            <ui:VisualElement name="menu-logo" class="menu-logo" picking-mode="Ignore" />
+            <ui:Label name="menu-subtitle" class="menu-subtitle" text="SIMULADOR DE GESTÃO PÚBLICA" picking-mode="Ignore" />
+
+            <ui:VisualElement name="buttons-container" class="menu-buttons-container" picking-mode="Position">
+                <ui:Button name="btn-play" class="menu-btn btn-play" text="NOVO MANDATO" picking-mode="Position" />
+                <ui:Button name="btn-credits" class="menu-btn btn-credits" text="CRÉDITOS" picking-mode="Position" />
+                <ui:Button name="btn-quit" class="menu-btn btn-quit" text="SAIR DO JOGO" picking-mode="Position" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- Modal de Créditos -->
+        <ui:VisualElement name="credits-modal" class="credits-modal-overlay" picking-mode="Position">
+            <ui:VisualElement class="credits-modal-card" picking-mode="Position">
+                <ui:Label class="credits-title" text="MANDATO — CRÉDITOS" />
+                <ui:ScrollView class="credits-body">
+                    <ui:Label class="credits-line credits-highlight" text="Santos Power Up 2025" />
+                    <ui:Label class="credits-line" text="Desenvolvido com foco em decisões políticas e consequências." />
+                    <ui:Label class="credits-line" text=" " />
+                    <ui:Label class="credits-line credits-highlight" text="Equipe de Desenvolvimento" />
+                    <ui:Label class="credits-line" text="Game Design • Arte 3D • Programação • UI/UX" />
+                    <ui:Label class="credits-line" text=" " />
+                    <ui:Label class="credits-line" text="Santos - SP, Brasil" />
+                </ui:ScrollView>
+                <ui:Button name="btn-credits-close" class="btn-credits-close" text="VOLTAR" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>

@@ -19,7 +19,16 @@ namespace Mandato.EditorScripts
 
         private static void OnPlayModeStateChanged(PlayModeStateChange state)
         {
-            if (state == PlayModeStateChange.ExitingEditMode || state == PlayModeStateChange.EnteredPlayMode)
+            if (state == PlayModeStateChange.ExitingEditMode)
+            {
+                // Limpa seleções ativas do Inspector para evitar que UnityEditor.GameObjectInspector
+                // e UnityEditor.TransformInspector disparem MissingReferenceException ao recriar SerializedObject
+                Selection.objects = new Object[0];
+                Selection.activeObject = null;
+                GUIUtility.hotControl = 0;
+                GUIUtility.keyboardControl = 0;
+            }
+            else if (state == PlayModeStateChange.EnteredPlayMode || state == PlayModeStateChange.EnteredEditMode)
             {
                 CleanInvalidSelection();
             }
@@ -44,6 +53,8 @@ namespace Mandato.EditorScripts
             {
                 Selection.objects = new Object[0];
                 Selection.activeObject = null;
+                GUIUtility.hotControl = 0;
+                GUIUtility.keyboardControl = 0;
             }
         }
 

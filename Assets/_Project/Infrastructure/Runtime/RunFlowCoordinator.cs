@@ -19,6 +19,7 @@ namespace Mandato.Infrastructure
         private ScenePresentationBindings bindings;
         private FlipPhoneCoordinator flipPhoneCoordinator;
         private LegacyCompatibilityBridge legacyBridge;
+        private UIModalCoordinator modalCoordinator;
 
         [Header("Configuração de Fluxo")]
         [SerializeField] private bool requireSpaceToCallNextNpc = true;
@@ -30,6 +31,7 @@ namespace Mandato.Infrastructure
         private bool isPlayerHandRaised = false;
 
         public bool IsAwaitingSpaceForNextNpc => isAwaitingSpaceForNextNpc;
+        public UIModalCoordinator ModalCoordinator => modalCoordinator;
 
         public void Initialize(
             RunStateMachine stateMachine,
@@ -41,7 +43,8 @@ namespace Mandato.Infrastructure
             bool requireSpace = true,
             KeyCode callKey = KeyCode.Space,
             float delayBetween = 1.5f,
-            string menuScene = "MenuV2")
+            string menuScene = "MenuV2",
+            UIModalCoordinator modalCoordinator = null)
         {
             this.stateMachine = stateMachine;
             this.catalog = catalog;
@@ -49,6 +52,7 @@ namespace Mandato.Infrastructure
             this.bindings = bindings;
             this.flipPhoneCoordinator = flipPhoneCoordinator;
             this.legacyBridge = legacyBridge;
+            this.modalCoordinator = modalCoordinator ?? new UIModalCoordinator();
             this.requireSpaceToCallNextNpc = requireSpace;
             this.callNextNpcKey = callKey;
             this.delayBetweenProposals = delayBetween;
@@ -82,10 +86,18 @@ namespace Mandato.Infrastructure
             // 4. Decisões do Jogador
             if (bindings.DecisionOverlayPresenter != null)
             {
+                bindings.DecisionOverlayPresenter.SetModalCoordinator(modalCoordinator);
                 bindings.DecisionOverlayPresenter.OnChoiceSelected += HandlePlayerChoiceSubmitted;
             }
 
-            // 5. Botões de Fim de Jogo
+            // 5. Modais do Celular
+            if (bindings.FlipPhonePresenter != null)
+            {
+                bindings.FlipPhonePresenter.OnPhoneOpened += () => modalCoordinator.SetModalState(UIModalCoordinator.MODAL_FLIP_PHONE, true);
+                bindings.FlipPhonePresenter.OnPhoneClosed += () => modalCoordinator.SetModalState(UIModalCoordinator.MODAL_FLIP_PHONE, false);
+            }
+
+            // 6. Botões de Fim de Jogo
             if (bindings.EndScreenPresenter != null)
             {
                 bindings.EndScreenPresenter.OnRestartRequested += RestartRun;
@@ -97,20 +109,16 @@ namespace Mandato.Infrastructure
         {
             if (isAwaitingSpaceForNextNpc)
             {
-                bool isModalOpen = (bindings.FlipPhonePresenter != null && bindings.FlipPhonePresenter.IsOpen) ||
-                                   (bindings.EndScreenPresenter != null && bindings.EndScreenPresenter.IsVisible);
+                if (modalCoordinator != null && !modalCoordinator.CanCallNextVisitor()) return;
 
-                if (!isModalOpen)
+                bool spaceOrEnter = Input.GetKeyDown(callNextNpcKey) ||
+                                    Input.GetKeyDown(KeyCode.Space) ||
+                                    Input.GetKeyDown(KeyCode.Return) ||
+                                    Input.GetKeyDown(KeyCode.KeypadEnter);
+
+                if (spaceOrEnter)
                 {
-                    bool spaceOrEnter = Input.GetKeyDown(callNextNpcKey) ||
-                                        Input.GetKeyDown(KeyCode.Space) ||
-                                        Input.GetKeyDown(KeyCode.Return) ||
-                                        Input.GetKeyDown(KeyCode.KeypadEnter);
-
-                    if (spaceOrEnter)
-                    {
-                        AuthorizeNextVisitor();
-                    }
+                    AuthorizeNextVisitor();
                 }
             }
         }
@@ -375,12 +383,15 @@ namespace Mandato.Infrastructure
 
         public void RestartRun()
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            if (Application.isPlaying)
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            }
         }
 
         public void ReturnToMenu()
         {
-            if (!string.IsNullOrEmpty(mainMenuSceneName))
+            if (!string.IsNullOrEmpty(mainMenuSceneName) && Application.isPlaying)
             {
                 SceneManager.LoadScene(mainMenuSceneName);
             }

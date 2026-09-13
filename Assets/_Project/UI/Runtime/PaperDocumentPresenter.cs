@@ -6,10 +6,15 @@ using UnityEngine.UIElements;
 
 namespace Mandato.UI
 {
+    /// <summary>
+    /// Presenter do documento de papel 3D da proposta em UI Toolkit puro (renderizado diegeticamente no RenderTexture).
+    /// </summary>
     public class PaperDocumentPresenter : MonoBehaviour
     {
         [Header("UI Document")]
         [SerializeField] private UIDocument uiDocument;
+        [SerializeField] private VisualTreeAsset uxmlAsset;
+        [SerializeField] private PanelSettings panelSettings;
         [SerializeField] private string descriptionLabelName = "deal-description";
         [SerializeField] private string authorLabelName = "deal-author";
         [SerializeField] private string dateLabelName = "deal-date";
@@ -42,11 +47,44 @@ namespace Mandato.UI
             CacheUIElements();
         }
 
-        private void EnsureReferences()
+        public void EnsureReferences()
         {
             if (paperContainer == null) paperContainer = gameObject;
             if (uiDocument == null) uiDocument = GetComponent<UIDocument>() ?? GetComponentInChildren<UIDocument>();
             if (paperRenderer == null) paperRenderer = GetComponent<Renderer>() ?? GetComponentInChildren<Renderer>();
+
+            if (uiDocument != null)
+            {
+                if (uiDocument.panelSettings == null)
+                {
+                    if (panelSettings != null)
+                    {
+                        uiDocument.panelSettings = panelSettings;
+                    }
+                    else
+                    {
+#if UNITY_EDITOR
+                        var pSettings = UnityEditor.AssetDatabase.LoadAssetAtPath<PanelSettings>("Assets/UI/PAPEL/Papel.asset");
+                        if (pSettings != null) uiDocument.panelSettings = pSettings;
+#endif
+                    }
+                }
+
+                if (uiDocument.visualTreeAsset == null)
+                {
+                    if (uxmlAsset != null)
+                    {
+                        uiDocument.visualTreeAsset = uxmlAsset;
+                    }
+                    else
+                    {
+#if UNITY_EDITOR
+                        var uxml = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/PAPEL/PAPEL.uxml");
+                        if (uxml != null) uiDocument.visualTreeAsset = uxml;
+#endif
+                    }
+                }
+            }
         }
 
         private void CacheUIElements()
@@ -54,9 +92,9 @@ namespace Mandato.UI
             if (uiDocument == null || uiDocument.rootVisualElement == null) return;
 
             VisualElement root = uiDocument.rootVisualElement;
-            descriptionLabel = root.Q<Label>(descriptionLabelName);
-            authorLabel = root.Q<Label>(authorLabelName);
-            dateLabel = root.Q<Label>(dateLabelName);
+            descriptionLabel = root.Q<Label>(descriptionLabelName) ?? root.Q<Label>("description-label") ?? root.Q<Label>("txt-description");
+            authorLabel = root.Q<Label>(authorLabelName) ?? root.Q<Label>("author-label") ?? root.Q<Label>("txt-author");
+            dateLabel = root.Q<Label>(dateLabelName) ?? root.Q<Label>("date-label") ?? root.Q<Label>("txt-date");
         }
 
         public void SetPaperActive(bool active)
@@ -67,9 +105,6 @@ namespace Mandato.UI
             {
                 paperContainer.SetActive(active);
             }
-
-            // Sincroniza com UIManager / PhysicalPaperUI legado se presente via reflexão
-            NotifyLegacyPaper(active);
         }
 
         public void SetPaperInteractable(bool interactable)
@@ -105,12 +140,12 @@ namespace Mandato.UI
             string formattedDate = !string.IsNullOrEmpty(displayDate) ? displayDate : "01/2026";
             string dateLoc = $"{defaultLocation}, {formattedDate}";
 
-            // 1. UI Toolkit
+            // 1. UI Toolkit nativo
             if (descriptionLabel != null) descriptionLabel.text = desc;
             if (authorLabel != null) authorLabel.text = author;
             if (dateLabel != null) dateLabel.text = dateLoc;
 
-            // 2. Fallback TextMeshPro no papel
+            // 2. Fallback TextMeshPro no papel se presente
             GameObject targetObj = paperContainer != null ? paperContainer : gameObject;
             var allMono = targetObj.GetComponentsInChildren<MonoBehaviour>(true);
             foreach (var m in allMono)
@@ -136,64 +171,6 @@ namespace Mandato.UI
                     }
                 }
             }
-
-            // 3. Sincroniza com PhysicalPaperUI se presente na cena via reflexão
-            NotifyLegacyPaperUpdate(card, formattedDate);
-        }
-
-        private void NotifyLegacyPaper(bool active)
-        {
-            try
-            {
-                Type type = null;
-                foreach (var asm in System.AppDomain.CurrentDomain.GetAssemblies())
-                {
-                    type = asm.GetType("PhysicalPaperUI");
-                    if (type != null) break;
-                }
-
-                if (type != null)
-                {
-                    var instanceProp = type.GetField("instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                    var inst = instanceProp?.GetValue(null) as Component;
-                    if (inst != null && inst.gameObject != paperContainer)
-                    {
-                        inst.gameObject.SetActive(active);
-                    }
-                }
-            }
-            catch { }
-        }
-
-        private void NotifyLegacyPaperUpdate(CardDefinition card, string displayDate)
-        {
-            try
-            {
-                Type type = null;
-                foreach (var asm in System.AppDomain.CurrentDomain.GetAssemblies())
-                {
-                    type = asm.GetType("PhysicalPaperUI");
-                    if (type != null) break;
-                }
-
-                if (type != null)
-                {
-                    var instanceProp = type.GetField("instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                    var inst = instanceProp?.GetValue(null) as Component ?? FindFirstObjectByType(type) as Component;
-                    if (inst != null)
-                    {
-                        if (card != null && card.sourceLegacyAsset != null)
-                        {
-                            var updateContentMethod = type.GetMethod("UpdateContent");
-                            updateContentMethod?.Invoke(inst, new object[] { card.sourceLegacyAsset });
-                        }
-
-                        var updateDateMethod = type.GetMethod("UpdateDateDisplay", new Type[] { typeof(string) });
-                        updateDateMethod?.Invoke(inst, new object[] { displayDate });
-                    }
-                }
-            }
-            catch { }
         }
 
         public void Clear()

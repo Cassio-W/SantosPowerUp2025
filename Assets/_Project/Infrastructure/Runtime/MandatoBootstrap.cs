@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Mandato.Content;
 using Mandato.Core;
 using Mandato.Run;
+using Mandato.UI;
 using UnityEngine;
 
 namespace Mandato.Infrastructure
@@ -53,6 +54,9 @@ namespace Mandato.Infrastructure
         [Header("Amarrações de Apresentação (Obrigatórias)")]
         [SerializeField] private ScenePresentationBindings presentationBindings = new ScenePresentationBindings();
 
+        [Tooltip("RunFlowCoordinator já presente na cena como componente. Deve ser atribuído no Inspector.")]
+        [SerializeField] private RunFlowCoordinator flowCoordinatorRef;
+
         [Header("Configuração de UI")]
         [Tooltip("Se verdadeiro, desativa os elementos visuais do Canvas legado para rodar em UI Toolkit.")]
         public bool disableLegacyCanvas = true;
@@ -69,6 +73,7 @@ namespace Mandato.Infrastructure
         public RunFlowCoordinator FlowCoordinator => flowCoordinator;
         public FlipPhoneCoordinator FlipPhoneCoordinator => flipPhoneCoordinator;
         public ScenePresentationBindings PresentationBindings => presentationBindings;
+        public UIModalCoordinator ModalCoordinator => flowCoordinator?.ModalCoordinator;
 
         private RunBootstrapResult bootstrapResult;
         private RunFlowCoordinator flowCoordinator;
@@ -111,7 +116,18 @@ namespace Mandato.Infrastructure
             );
 
             // 3. Inicializa o Coordenador de Fluxo da Run
-            flowCoordinator = gameObject.GetComponent<RunFlowCoordinator>() ?? gameObject.AddComponent<RunFlowCoordinator>();
+            // flowCoordinatorRef deve ser um componente já presente na cena e atribuído no Inspector.
+            // GetComponent é o único fallback aceito — AddComponent dinâmico foi removido para evitar
+            // MissingReferenceException no Inspector ao entrar em Play Mode.
+            flowCoordinator = flowCoordinatorRef != null
+                ? flowCoordinatorRef
+                : GetComponent<RunFlowCoordinator>();
+
+            if (flowCoordinator == null)
+            {
+                Debug.LogError("[MandatoBootstrap] RunFlowCoordinator não encontrado! Adicione o componente ao GameObject na cena e atribua o campo 'Flow Coordinator Ref' no Inspector.", this);
+                return;
+            }
             flowCoordinator.Initialize(
                 bootstrapResult.StateMachine,
                 bootstrapResult.Catalog,
@@ -194,13 +210,14 @@ namespace Mandato.Infrastructure
         private void OnValidate()
         {
             if (string.IsNullOrEmpty(mainMenuSceneName))
-            {
                 mainMenuSceneName = "MenuV2";
-            }
+
+            // Auto-detecta RunFlowCoordinator no mesmo GameObject
+            if (flowCoordinatorRef == null)
+                flowCoordinatorRef = GetComponent<RunFlowCoordinator>();
 
             if (presentationBindings != null && !presentationBindings.Validate(out var missingList))
             {
-                // Em editor, informa se campos essenciais estão vazios
                 if (missingList.Count > 0)
                 {
                     // Apenas aviso no console se chamado manualmente

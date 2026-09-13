@@ -16,6 +16,7 @@ namespace Mandato.UI
         [SerializeField] private UIDocument uiDocument;
         [SerializeField] private VisualTreeAsset uxmlAsset;
         [SerializeField] private PanelSettings panelSettings;
+        private UIModalCoordinator modalCoordinator;
         private VisualElement decisionContainer;
         private VisualElement vignetteCorruption;
         private VisualElement perksContainer;
@@ -23,6 +24,11 @@ namespace Mandato.UI
         private Label lblPerkTitle;
         private Label lblPerkTag;
         private Label lblPerkDesc;
+
+        public void SetModalCoordinator(UIModalCoordinator coordinator)
+        {
+            modalCoordinator = coordinator;
+        }
 
         private VisualElement wrapperApprove;
         private VisualElement wrapperReject;
@@ -312,6 +318,7 @@ namespace Mandato.UI
 
             perkModalPopup.style.display = DisplayStyle.Flex;
             perkModalPopup.AddToClassList("open");
+            modalCoordinator?.SetModalState(UIModalCoordinator.MODAL_PERK_TOOLTIP, true);
         }
 
         private void HidePerkTooltip()
@@ -319,6 +326,7 @@ namespace Mandato.UI
             if (perkModalPopup == null) return;
             perkModalPopup.RemoveFromClassList("open");
             perkModalPopup.style.display = DisplayStyle.None;
+            modalCoordinator?.SetModalState(UIModalCoordinator.MODAL_PERK_TOOLTIP, false);
         }
 
         private string FormatPerkDescription(PerkDefinition def)
@@ -399,6 +407,7 @@ namespace Mandato.UI
         private void Update()
         {
             if (!enableKeyboardShortcuts || !isChoicePending) return;
+            if (modalCoordinator != null && !modalCoordinator.CanProcessDecisionShortcuts()) return;
 
             if (isSingleChoiceMode)
             {
