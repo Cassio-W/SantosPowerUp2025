@@ -18,6 +18,9 @@ namespace Mandato.Core
         public int startYear = DefaultStartYear;
         public int totalMonths = DefaultTotalMonths;
 
+        public int CurrentMonthIndex => currentMonthIndex;
+        public int TotalMonths => totalMonths;
+
         public RunCalendar(int initialMonthIndex = 1, int year = DefaultStartYear, int durationMonths = DefaultTotalMonths)
         {
             currentMonthIndex = Math.Max(1, initialMonthIndex);

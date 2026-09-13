@@ -12,6 +12,8 @@ namespace Mandato.UI
         public bool enableKeyboardShortcuts = true;
 
         public event Action<int> OnChoiceSelected;
+        public event Action<ChoiceDefinition> OnChoiceHovered;
+        public event Action OnChoiceUnhovered;
 
         [SerializeField] private UIDocument uiDocument;
         [SerializeField] private VisualTreeAsset uxmlAsset;
@@ -24,6 +26,9 @@ namespace Mandato.UI
         private Label lblPerkTitle;
         private Label lblPerkTag;
         private Label lblPerkDesc;
+        private Label headerDateLabel;
+        private Label headerMonthLabel;
+        private CardDefinition currentCard;
 
         public void SetModalCoordinator(UIModalCoordinator coordinator)
         {
@@ -124,6 +129,8 @@ namespace Mandato.UI
             lblPerkTitle = root.Q<Label>("perk-modal-title");
             lblPerkTag = root.Q<Label>("perk-modal-tag");
             lblPerkDesc = root.Q<Label>("perk-modal-desc");
+            headerDateLabel = root.Q<Label>("header-date-label");
+            headerMonthLabel = root.Q<Label>("header-month-label");
 
             if (perkModalPopup != null)
             {
@@ -146,26 +153,66 @@ namespace Mandato.UI
             {
                 btnLeft.clicked -= OnLeftClicked;
                 btnLeft.clicked += OnLeftClicked;
+                btnLeft.UnregisterCallback<PointerEnterEvent>(OnLeftPointerEnter);
+                btnLeft.RegisterCallback<PointerEnterEvent>(OnLeftPointerEnter);
+                btnLeft.UnregisterCallback<PointerLeaveEvent>(OnPointerLeave);
+                btnLeft.RegisterCallback<PointerLeaveEvent>(OnPointerLeave);
             }
 
             if (btnRight != null)
             {
                 btnRight.clicked -= OnRightClicked;
                 btnRight.clicked += OnRightClicked;
+                btnRight.UnregisterCallback<PointerEnterEvent>(OnRightPointerEnter);
+                btnRight.RegisterCallback<PointerEnterEvent>(OnRightPointerEnter);
+                btnRight.UnregisterCallback<PointerLeaveEvent>(OnPointerLeave);
+                btnRight.RegisterCallback<PointerLeaveEvent>(OnPointerLeave);
             }
 
             if (btnContinue != null)
             {
                 btnContinue.clicked -= OnContinueClicked;
                 btnContinue.clicked += OnContinueClicked;
+                btnContinue.UnregisterCallback<PointerEnterEvent>(OnContinuePointerEnter);
+                btnContinue.RegisterCallback<PointerEnterEvent>(OnContinuePointerEnter);
+                btnContinue.UnregisterCallback<PointerLeaveEvent>(OnPointerLeave);
+                btnContinue.RegisterCallback<PointerLeaveEvent>(OnPointerLeave);
             }
         }
+
+        private void OnLeftPointerEnter(PointerEnterEvent evt)
+        {
+            if (!isChoicePending || currentCard == null) return;
+            OnChoiceHovered?.Invoke(currentCard.leftChoice);
+        }
+
+        private void OnRightPointerEnter(PointerEnterEvent evt)
+        {
+            if (!isChoicePending || currentCard == null) return;
+            OnChoiceHovered?.Invoke(currentCard.rightChoice);
+        }
+
+        private void OnContinuePointerEnter(PointerEnterEvent evt)
+        {
+            if (!isChoicePending || currentCard == null) return;
+            OnChoiceHovered?.Invoke(currentCard.leftChoice);
+        }
+
+        private void OnPointerLeave(PointerLeaveEvent evt)
+        {
+            // Guard: se a escolha já foi submetida (isChoicePending=false), o PointerLeave
+            // disparado pelo ocultamento do container não deve limpar as setas de resultado.
+            if (!isChoicePending) return;
+            OnChoiceUnhovered?.Invoke();
+        }
+
 
         public void PresentChoices(CardDefinition card)
         {
             EnsureReferences();
             CacheElements();
             isChoicePending = true;
+            currentCard = card;
 
             if (decisionContainer != null)
             {
@@ -212,10 +259,29 @@ namespace Mandato.UI
         public void ClearChoices()
         {
             isChoicePending = false;
+            currentCard = null;
+            OnChoiceUnhovered?.Invoke();
+
             if (decisionContainer != null)
             {
                 decisionContainer.AddToClassList("hidden");
                 decisionContainer.style.display = DisplayStyle.None;
+            }
+        }
+
+        public void UpdateDateDisplay(string displayDate, int monthIndex = 1, int totalMonths = 48)
+        {
+            EnsureReferences();
+            CacheElements();
+
+            if (headerDateLabel != null && !string.IsNullOrEmpty(displayDate))
+            {
+                headerDateLabel.text = displayDate;
+            }
+
+            if (headerMonthLabel != null)
+            {
+                headerMonthLabel.text = $"MÊS {monthIndex} DE {totalMonths}";
             }
         }
 
@@ -433,9 +499,24 @@ namespace Mandato.UI
 
         private void OnDestroy()
         {
-            if (btnLeft != null) btnLeft.clicked -= OnLeftClicked;
-            if (btnRight != null) btnRight.clicked -= OnRightClicked;
-            if (btnContinue != null) btnContinue.clicked -= OnContinueClicked;
+            if (btnLeft != null)
+            {
+                btnLeft.clicked -= OnLeftClicked;
+                btnLeft.UnregisterCallback<PointerEnterEvent>(OnLeftPointerEnter);
+                btnLeft.UnregisterCallback<PointerLeaveEvent>(OnPointerLeave);
+            }
+            if (btnRight != null)
+            {
+                btnRight.clicked -= OnRightClicked;
+                btnRight.UnregisterCallback<PointerEnterEvent>(OnRightPointerEnter);
+                btnRight.UnregisterCallback<PointerLeaveEvent>(OnPointerLeave);
+            }
+            if (btnContinue != null)
+            {
+                btnContinue.clicked -= OnContinueClicked;
+                btnContinue.UnregisterCallback<PointerEnterEvent>(OnContinuePointerEnter);
+                btnContinue.UnregisterCallback<PointerLeaveEvent>(OnPointerLeave);
+            }
         }
     }
 }

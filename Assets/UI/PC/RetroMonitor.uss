@@ -261,24 +261,23 @@ Label {
 }
 
 /* ============================================================
-   FEEDBACK DE VARIAÇÃO — SETA (↑↓)
+   FEEDBACK DE VARIAÇÃO — SETA (▲▼)
    ============================================================ */
 .attr-arrow {
     position: absolute;
     top: 6px;
     right: 6px;
-    width: 62px;
-    height: 62px;
+    width: 56px;
+    height: 56px;
     border-radius: 8px;
-    background-color: rgba(6, 10, 16, 0.90);
+    background-color: rgba(6, 10, 16, 0.94);
     border-width: 3px;
     justify-content: center;
     align-items: center;
-    font-size: 44px;
+    font-size: 38px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    transition-property: opacity;
-    transition-duration: 0.4s;
+    opacity: 0;
 }
 
 .attr-arrow.arrow-up {
@@ -291,7 +290,7 @@ Label {
     color: #ef4444;
 }
 
-/* Para corrupção: ↑ = piora (vermelho), ↓ = melhora (verde) */
+/* Para corrupção: ▲ = piora (vermelho), ▼ = melhora (verde) */
 .attr-arrow.arrow-up-bad {
     border-color: #ef4444;
     color: #ef4444;

@@ -166,6 +166,22 @@ namespace Mandato.UI.Tests
             Assert.AreEqual(55, snapshot.Stats.internationalRelations);
             Assert.AreEqual(15, snapshot.Stats.corruption);
 
+            // Test Preview Impacts
+            var impacts = new StatBlock(climate: 10, relations: -5, approval: 15, eco: -10, corrupt: 5);
+            Assert.DoesNotThrow(() => presenter.ShowPreviewImpacts(impacts));
+            Assert.DoesNotThrow(() => presenter.ClearPreviewImpacts());
+
+            // Test Decision Consequences Report
+            var report = new ResolutionReport
+            {
+                cardId = "test_card",
+                choiceIndex = 0,
+                impactsApplied = impacts
+            };
+            var nextStats = new StatBlock(climate: 85, relations: 50, approval: 55, eco: 55, corrupt: 20);
+            var nextSnapshot = new RunSnapshot(nextStats, new PoliticalAxis(), 2, "02/2026", true, false, false, string.Empty);
+            Assert.DoesNotThrow(() => presenter.UpdateSnapshot(nextSnapshot, report));
+
             Object.DestroyImmediate(go);
         }
 
@@ -189,6 +205,20 @@ namespace Mandato.UI.Tests
             Assert.IsNotNull(presenter);
 
             Object.DestroyImmediate(card);
+            Object.DestroyImmediate(go);
+        }
+
+        // ── DecisionOverlayPresenter Date Display Tests ───────────
+
+        [Test]
+        public void DecisionOverlayPresenter_UpdateDateDisplay_DoesNotThrow()
+        {
+            var go = new GameObject("DecisionOverlayTest");
+            var presenter = go.AddComponent<DecisionOverlayPresenter>();
+
+            Assert.DoesNotThrow(() => presenter.UpdateDateDisplay("01/2026", 1, 48));
+            Assert.DoesNotThrow(() => presenter.UpdateDateDisplay("12/2029", 48, 48));
+
             Object.DestroyImmediate(go);
         }
     }

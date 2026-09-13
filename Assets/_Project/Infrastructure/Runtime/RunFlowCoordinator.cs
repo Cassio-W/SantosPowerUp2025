@@ -25,12 +25,19 @@ namespace Mandato.Infrastructure
         [SerializeField] private KeyCode callNextNpcKey = KeyCode.Space;
         [SerializeField] private float delayBetweenProposals = 1.5f;
         [SerializeField] private string mainMenuSceneName = "MenuV2";
+        [Tooltip("Se verdadeiro, o hover dos botões de decisão exibe as setas de impacto no monitor (para perks/habilidades futuras).")]
+        [SerializeField] private bool enableDecisionHoverPreview = false;
 
         private bool isAwaitingSpaceForNextNpc = false;
         private bool isPlayerHandRaised = false;
 
         public bool IsAwaitingSpaceForNextNpc => isAwaitingSpaceForNextNpc;
         public UIModalCoordinator ModalCoordinator => modalCoordinator;
+        public bool EnableDecisionHoverPreview
+        {
+            get => enableDecisionHoverPreview;
+            set => enableDecisionHoverPreview = value;
+        }
 
         public void Initialize(
             RunStateMachine stateMachine,
@@ -85,6 +92,8 @@ namespace Mandato.Infrastructure
             {
                 bindings.DecisionOverlayPresenter.SetModalCoordinator(modalCoordinator);
                 bindings.DecisionOverlayPresenter.OnChoiceSelected += HandlePlayerChoiceSubmitted;
+                bindings.DecisionOverlayPresenter.OnChoiceHovered += HandlePlayerChoiceHovered;
+                bindings.DecisionOverlayPresenter.OnChoiceUnhovered += HandlePlayerChoiceUnhovered;
             }
 
             // 5. Modais do Celular
@@ -122,21 +131,28 @@ namespace Mandato.Infrastructure
 
         public void StartFlow()
         {
-            if (bindings.RetroMonitorPresenter != null && stateMachine != null)
+            if (stateMachine != null)
             {
-                bindings.RetroMonitorPresenter.UpdateSnapshot(stateMachine.RunState.GetSnapshot());
-            }
+                string displayDate = stateMachine.RunState.calendar.DisplayDate;
+                int monthIndex = stateMachine.RunState.calendar.CurrentMonthIndex;
 
-            if (bindings.DecisionOverlayPresenter != null && stateMachine != null)
-            {
-                bindings.DecisionOverlayPresenter.SetCorruptionLevel(stateMachine.RunState.stats.corruption);
+                if (bindings.RetroMonitorPresenter != null)
+                {
+                    bindings.RetroMonitorPresenter.UpdateSnapshot(stateMachine.RunState.GetSnapshot());
+                    bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
+                }
+
+                if (bindings.DecisionOverlayPresenter != null)
+                {
+                    bindings.DecisionOverlayPresenter.SetCorruptionLevel(stateMachine.RunState.stats.corruption);
+                    bindings.DecisionOverlayPresenter.UpdateDateDisplay(displayDate, monthIndex);
+                }
+
+                UpdateLegacyDateText(displayDate);
+                bindings.CameraEffects?.ApplyAttributeEffects(stateMachine.RunState.stats, instant: true);
             }
 
             RefreshPerksUI();
-            if (stateMachine != null)
-            {
-                bindings.CameraEffects?.ApplyAttributeEffects(stateMachine.RunState.stats, instant: true);
-            }
             DrawFirstProposal();
         }
 
@@ -177,10 +193,11 @@ namespace Mandato.Infrastructure
                 isPlayerHandRaised = true;
             }
 
-            // 3. Exibe botões de decisão
+            // 3. Exibe botões de decisão e atualiza data no overlay
             if (bindings.DecisionOverlayPresenter != null)
             {
                 bindings.DecisionOverlayPresenter.PresentChoices(card);
+                bindings.DecisionOverlayPresenter.UpdateDateDisplay(displayDate, stateMachine.RunState.calendar.CurrentMonthIndex);
             }
 
             RefreshPerksUI();
@@ -191,11 +208,33 @@ namespace Mandato.Infrastructure
                 bindings.RetroMonitorPresenter.NotifyNewProposal(card);
                 bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
             }
+
+            UpdateLegacyDateText(displayDate);
+        }
+
+        private void HandlePlayerChoiceHovered(ChoiceDefinition choice)
+        {
+            if (!enableDecisionHoverPreview) return;
+
+            if (choice != null && bindings.RetroMonitorPresenter != null)
+            {
+                bindings.RetroMonitorPresenter.ShowPreviewImpacts(choice.statImpacts);
+            }
+        }
+
+        private void HandlePlayerChoiceUnhovered()
+        {
+            if (bindings.RetroMonitorPresenter != null)
+            {
+                bindings.RetroMonitorPresenter.ClearPreviewImpacts();
+            }
         }
 
         private void HandlePlayerChoiceSubmitted(int choiceIndex)
         {
             if (stateMachine == null) return;
+
+            bindings.RetroMonitorPresenter?.ClearPreviewImpacts();
 
             bool isTutorial = IsTutorialCard(stateMachine.CurrentCard);
             bool hasMoreTutorial = isTutorial && HasRemainingTutorialCards();
@@ -265,11 +304,21 @@ namespace Mandato.Infrastructure
             bool hasMoreTutorial = HasRemainingTutorialCards();
 
             var monthlyReport = stateMachine.CompleteTurnAndAdvance(catalog.Perks, catalog.Events);
+            string displayDate = stateMachine.RunState.calendar.DisplayDate;
+            int monthIndex = stateMachine.RunState.calendar.CurrentMonthIndex;
+
+            if (bindings.DecisionOverlayPresenter != null)
+            {
+                bindings.DecisionOverlayPresenter.UpdateDateDisplay(displayDate, monthIndex);
+            }
 
             if (monthlyReport != null && bindings.RetroMonitorPresenter != null)
             {
                 bindings.RetroMonitorPresenter.UpdateSnapshot(stateMachine.RunState.GetSnapshot());
+                bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
             }
+
+            UpdateLegacyDateText(displayDate);
 
             if (monthlyReport != null && stateMachine != null)
             {
@@ -389,6 +438,21 @@ namespace Mandato.Infrastructure
             if (!string.IsNullOrEmpty(mainMenuSceneName) && Application.isPlaying)
             {
                 SceneManager.LoadScene(mainMenuSceneName);
+            }
+        }
+
+        private void UpdateLegacyDateText(string displayDate)
+        {
+            if (string.IsNullOrEmpty(displayDate)) return;
+
+            foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
+            {
+                if (mb != null && (mb.gameObject.name.IndexOf("date", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                   mb.gameObject.name.IndexOf("data", StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    var textProp = mb.GetType().GetProperty("text");
+                    textProp?.SetValue(mb, displayDate);
+                }
             }
         }
     }

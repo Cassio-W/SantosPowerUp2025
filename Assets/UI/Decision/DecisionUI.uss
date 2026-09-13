@@ -309,3 +309,54 @@
 .vignette-corruption {
     display: none;
 }
+
+/* ==========================================================================
+   HEADER DE DATA / MANDATO
+   ========================================================================== */
+
+.header-date-container {
+    position: absolute;
+    top: 24px;
+    right: 32px;
+    flex-direction: column;
+    align-items: flex-end;
+    background-color: rgba(15, 23, 42, 0.88);
+    border-radius: 12px;
+    border-width: 2px;
+    border-color: rgba(245, 158, 11, 0.6);
+    padding-top: 6px;
+    padding-bottom: 6px;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.header-date-label {
+    font-size: 22px;
+    -unity-font-style: bold;
+    color: #FBBF24;
+    letter-spacing: 2px;
+    margin-bottom: 0;
+    margin-top: 0;
+    margin-left: 0;
+    margin-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.header-month-label {
+    font-size: 11px;
+    color: #94A3B8;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+    margin-top: 2px;
+    margin-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+

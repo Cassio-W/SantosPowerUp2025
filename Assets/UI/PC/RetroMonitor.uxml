@@ -27,7 +27,7 @@
                             <ui:Label name="value-nature" text="50%" class="giant-value" />
                         </ui:VisualElement>
                         <!-- Seta de variação (grande, visível de longe) -->
-                        <ui:Label name="arrow-nature" class="attr-arrow hidden" text="↑" />
+                        <ui:Label name="arrow-nature" class="attr-arrow" text="" />
                         <!-- Overlay de atributo zerado -->
                         <ui:VisualElement name="dead-overlay-nature" class="dead-overlay hidden">
                             <ui:Label text="✕" class="dead-x-label" />
@@ -42,7 +42,7 @@
                             <ui:VisualElement name="icon-economy" class="giant-icon" style="background-image: url(&apos;project://database/Assets/Sprites/moneynew.png?fileID=21300000&amp;guid=1ff9b9ecfbad1924eb51f51a6f3863ec&amp;type=3#moneynew&apos;);" />
                             <ui:Label name="value-economy" text="50%" class="giant-value" />
                         </ui:VisualElement>
-                        <ui:Label name="arrow-economy" class="attr-arrow hidden" text="↑" />
+                        <ui:Label name="arrow-economy" class="attr-arrow" text="" />
                         <ui:VisualElement name="dead-overlay-economy" class="dead-overlay hidden">
                             <ui:Label text="✕" class="dead-x-label" />
                         </ui:VisualElement>
@@ -59,7 +59,7 @@
                             <ui:VisualElement name="icon-relations" class="giant-icon" style="background-image: url(&apos;project://database/Assets/Sprites/peaceSlider.png?fileID=21300000&amp;guid=7de11bbadd901af438bbd94d6f311438&amp;type=3#peaceSlider&apos;);" />
                             <ui:Label name="value-relations" text="50%" class="giant-value" />
                         </ui:VisualElement>
-                        <ui:Label name="arrow-relations" class="attr-arrow hidden" text="↑" />
+                        <ui:Label name="arrow-relations" class="attr-arrow" text="" />
                         <ui:VisualElement name="dead-overlay-relations" class="dead-overlay hidden">
                             <ui:Label text="✕" class="dead-x-label" />
                         </ui:VisualElement>
@@ -73,7 +73,7 @@
                             <ui:VisualElement name="icon-people" class="giant-icon" style="background-image: url(&apos;project://database/Assets/Sprites/peopleSlider.png?fileID=1537655665&amp;guid=f498b99f7dc683646b439a837578e287&amp;type=3#peopleSlider&apos;);" />
                             <ui:Label name="value-people" text="50%" class="giant-value" />
                         </ui:VisualElement>
-                        <ui:Label name="arrow-people" class="attr-arrow hidden" text="↑" />
+                        <ui:Label name="arrow-people" class="attr-arrow" text="" />
                         <ui:VisualElement name="dead-overlay-people" class="dead-overlay hidden">
                             <ui:Label text="✕" class="dead-x-label" />
                         </ui:VisualElement>
@@ -93,7 +93,7 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <!-- Seta de variação da corrupção -->
-                <ui:Label name="arrow-corruption" class="attr-arrow hidden" text="↑" />
+                <ui:Label name="arrow-corruption" class="attr-arrow" text="" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

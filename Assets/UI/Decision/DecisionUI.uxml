@@ -5,6 +5,12 @@
         <!-- Vinheta de Corrupção Reativa em Tela Cheia -->
         <ui:VisualElement name="vignette-corruption" class="vignette-corruption" picking-mode="Ignore" />
 
+        <!-- Header de Data e Mês do Mandato no Topo Direito -->
+        <ui:VisualElement name="header-date-container" class="header-date-container" picking-mode="Ignore">
+            <ui:Label name="header-date-label" class="header-date-label" text="01/2026" picking-mode="Ignore" />
+            <ui:Label name="header-month-label" class="header-month-label" text="MÊS 1 DE 48" picking-mode="Ignore" />
+        </ui:VisualElement>
+
         <!-- Container dos Perks no Topo Esquerdo (Empilhados Verticalmente) -->
         <ui:VisualElement name="perks-container" class="perks-container" picking-mode="Ignore" />
 

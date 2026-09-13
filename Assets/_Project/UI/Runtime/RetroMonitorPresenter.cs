@@ -18,6 +18,7 @@ namespace Mandato.UI
         [Header("Configurações do Monitor")]
         [SerializeField] private Material crtMaterial;
         [SerializeField] private float animationSpeed = 4f;
+        [SerializeField] private float arrowDuration = 4.5f;
         [SerializeField] private bool triggerGlitchOnChanges = true;
 
         [Header("UI Document e Assets")]
@@ -58,6 +59,7 @@ namespace Mandato.UI
         {
             EnsureReferences();
             CacheElements();
+            HideAllArrows();
         }
 
         private void OnEnable()
@@ -153,6 +155,12 @@ namespace Mandato.UI
             dynamicLogEntry = root.Q<Label>("dynamic-log-entry");
         }
 
+        private Coroutine fadeRoutineNature;
+        private Coroutine fadeRoutineEconomy;
+        private Coroutine fadeRoutineRelations;
+        private Coroutine fadeRoutinePeople;
+        private Coroutine fadeRoutineCorruption;
+
         public void UpdateSnapshot(RunSnapshot snapshot, ResolutionReport lastReport = null)
         {
             if (snapshot == null) return;
@@ -203,19 +211,19 @@ namespace Mandato.UI
                 dCorruption = lastReport.impactsApplied.corruption;
             }
 
-            // Exibe setas ▲ / ▼
-            ShowArrow(arrowNature, dNature, isCorruption: false);
-            ShowArrow(arrowEconomy, dEconomy, isCorruption: false);
-            ShowArrow(arrowRelations, dRelations, isCorruption: false);
-            ShowArrow(arrowPeople, dPeople, isCorruption: false);
-            ShowArrow(arrowCorruption, dCorruption, isCorruption: true);
+            // Exibe setas ▲ / ▼ apenas se houver variação real
+            if (Mathf.Abs(dNature) >= 0.1f) ShowArrow(arrowNature, dNature, isCorruption: false, isPreview: false, ref fadeRoutineNature);
+            if (Mathf.Abs(dEconomy) >= 0.1f) ShowArrow(arrowEconomy, dEconomy, isCorruption: false, isPreview: false, ref fadeRoutineEconomy);
+            if (Mathf.Abs(dRelations) >= 0.1f) ShowArrow(arrowRelations, dRelations, isCorruption: false, isPreview: false, ref fadeRoutineRelations);
+            if (Mathf.Abs(dPeople) >= 0.1f) ShowArrow(arrowPeople, dPeople, isCorruption: false, isPreview: false, ref fadeRoutinePeople);
+            if (Mathf.Abs(dCorruption) >= 0.1f) ShowArrow(arrowCorruption, dCorruption, isCorruption: true, isPreview: false, ref fadeRoutineCorruption);
 
             // Ghost fills
-            TriggerGhost(ghostNature, prevNature, targetNature);
-            TriggerGhost(ghostEconomy, prevEconomy, targetEconomy);
-            TriggerGhost(ghostRelations, prevRelations, targetRelations);
-            TriggerGhost(ghostPeople, prevPeople, targetPeople);
-            TriggerGhost(ghostCorruption, prevCorruption, targetCorruption);
+            if (Mathf.Abs(dNature) >= 0.1f) TriggerGhost(ghostNature, prevNature, targetNature);
+            if (Mathf.Abs(dEconomy) >= 0.1f) TriggerGhost(ghostEconomy, prevEconomy, targetEconomy);
+            if (Mathf.Abs(dRelations) >= 0.1f) TriggerGhost(ghostRelations, prevRelations, targetRelations);
+            if (Mathf.Abs(dPeople) >= 0.1f) TriggerGhost(ghostPeople, prevPeople, targetPeople);
+            if (Mathf.Abs(dCorruption) >= 0.1f) TriggerGhost(ghostCorruption, prevCorruption, targetCorruption);
 
             bool hasChange = Mathf.Abs(dNature) > 0.1f || Mathf.Abs(dEconomy) > 0.1f ||
                              Mathf.Abs(dRelations) > 0.1f || Mathf.Abs(dPeople) > 0.1f ||
@@ -225,6 +233,37 @@ namespace Mandato.UI
             {
                 TriggerGlitch();
             }
+        }
+
+
+        public void ShowPreviewImpacts(StatBlock impacts)
+        {
+            if (impacts == null)
+            {
+                ClearPreviewImpacts();
+                return;
+            }
+
+            EnsureReferences();
+            CacheElements();
+
+            ShowArrow(arrowNature, impacts.climaticChanges, isCorruption: false, isPreview: true, ref fadeRoutineNature);
+            ShowArrow(arrowEconomy, impacts.economy, isCorruption: false, isPreview: true, ref fadeRoutineEconomy);
+            ShowArrow(arrowRelations, impacts.internationalRelations, isCorruption: false, isPreview: true, ref fadeRoutineRelations);
+            ShowArrow(arrowPeople, impacts.popularApproval, isCorruption: false, isPreview: true, ref fadeRoutinePeople);
+            ShowArrow(arrowCorruption, impacts.corruption, isCorruption: true, isPreview: true, ref fadeRoutineCorruption);
+        }
+
+        public void ClearPreviewImpacts()
+        {
+            EnsureReferences();
+            CacheElements();
+
+            HideArrowImmediate(arrowNature, ref fadeRoutineNature);
+            HideArrowImmediate(arrowEconomy, ref fadeRoutineEconomy);
+            HideArrowImmediate(arrowRelations, ref fadeRoutineRelations);
+            HideArrowImmediate(arrowPeople, ref fadeRoutinePeople);
+            HideArrowImmediate(arrowCorruption, ref fadeRoutineCorruption);
         }
 
         private void TriggerGhost(VisualElement ghostEl, float fromVal, float toVal)
@@ -332,30 +371,85 @@ namespace Mandato.UI
             }
         }
 
-        private void ShowArrow(Label arrow, float delta, bool isCorruption = false)
+        private void HideAllArrows()
+        {
+            HideArrowImmediate(arrowNature);
+            HideArrowImmediate(arrowEconomy);
+            HideArrowImmediate(arrowRelations);
+            HideArrowImmediate(arrowPeople);
+            HideArrowImmediate(arrowCorruption);
+        }
+
+        private void ShowArrow(Label arrow, float delta, bool isCorruption, bool isPreview, ref Coroutine fadeRoutine)
         {
             if (arrow == null) return;
 
+            if (fadeRoutine != null)
+            {
+                StopCoroutine(fadeRoutine);
+                fadeRoutine = null;
+            }
+
             if (Mathf.Abs(delta) < 0.1f)
             {
-                arrow.text = string.Empty;
+                HideArrowImmediate(arrow, ref fadeRoutine);
                 return;
             }
 
-            bool isGood = isCorruption ? delta < 0 : delta > 0;
-            arrow.text = delta > 0 ? "▲" : "▼";
-            arrow.style.color = isGood ? new StyleColor(new Color(0.2f, 0.9f, 0.3f)) : new StyleColor(new Color(0.9f, 0.2f, 0.2f));
+            bool isPositive = delta > 0;
+            bool isGood = isCorruption ? !isPositive : isPositive;
 
-            if (gameObject.activeInHierarchy && isActiveAndEnabled)
+            string symbol = isPositive ? "▲" : "▼";
+            Color color = isGood
+                ? new Color(0.133f, 0.773f, 0.369f)   // #22C55E verde
+                : new Color(0.937f, 0.267f, 0.267f);  // #EF4444 vermelho
+
+            // Só muda text, cor e opacity — sem tocar em display nem visibility
+            arrow.text = symbol;
+            arrow.style.color             = color;
+            arrow.style.borderTopColor    = color;
+            arrow.style.borderRightColor  = color;
+            arrow.style.borderBottomColor = color;
+            arrow.style.borderLeftColor   = color;
+            arrow.style.opacity           = 1f;
+
+            if (!isPreview && gameObject.activeInHierarchy && isActiveAndEnabled)
             {
-                StartCoroutine(ClearArrowAfterDelay(arrow, 3f));
+                fadeRoutine = StartCoroutine(FadeOutArrowRoutine(arrow, arrowDuration));
             }
         }
 
-        private IEnumerator ClearArrowAfterDelay(Label arrow, float delay)
+        private IEnumerator FadeOutArrowRoutine(Label arrow, float delay)
         {
             yield return new WaitForSeconds(delay);
-            if (arrow != null) arrow.text = string.Empty;
+            if (arrow == null) yield break;
+
+            float opacity = 1f;
+            while (opacity > 0.05f)
+            {
+                opacity -= Time.deltaTime * 3f;
+                arrow.style.opacity = opacity;
+                yield return null;
+            }
+
+            HideArrowImmediate(arrow);
+        }
+
+        private void HideArrowImmediate(Label arrow)
+        {
+            if (arrow == null) return;
+            arrow.text             = string.Empty; // sem texto = invisível visualmente
+            arrow.style.opacity    = 0f;           // completamente transparente
+        }
+
+        private void HideArrowImmediate(Label arrow, ref Coroutine fadeRoutine)
+        {
+            if (fadeRoutine != null)
+            {
+                StopCoroutine(fadeRoutine);
+                fadeRoutine = null;
+            }
+            HideArrowImmediate(arrow);
         }
 
         public void TriggerGlitch(float strength = 0.4f)
