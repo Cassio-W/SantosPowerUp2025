@@ -300,10 +300,6 @@ namespace ComicVFX
             if (mainCam == null || !mainCam.gameObject.activeInHierarchy)
             {
                 mainCam = Camera.main;
-                if (mainCam == null)
-                {
-                    mainCam = FindFirstObjectByType<Camera>();
-                }
             }
 
             return mainCam;

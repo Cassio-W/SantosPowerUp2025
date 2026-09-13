@@ -37,8 +37,8 @@ namespace Mandato.Infrastructure
         public EndScreenPresenter EndScreenPresenter => endScreenPresenter;
         public FlipPhonePresenter FlipPhonePresenter => flipPhonePresenter;
         public Animator PlayerAnimator => playerAnimator;
-        public AttributeCameraEffects CameraEffects => cameraEffects != null ? cameraEffects : AttributeCameraEffects.Instance;
-        public CameraFocusManager CameraFocus => cameraFocus != null ? cameraFocus : CameraFocusManager.Instance;
+        public AttributeCameraEffects CameraEffects => cameraEffects;
+        public CameraFocusManager CameraFocus => cameraFocus;
         public GameObject FlipPhoneObject => flipPhoneObject;
 
         public bool Validate(out List<string> missingErrors)
@@ -62,6 +62,12 @@ namespace Mandato.Infrastructure
 
             if (presentationCoordinator == null)
                 missingErrors.Add("RunPresentationCoordinator não atribuído.");
+
+            if (cameraEffects == null)
+                missingErrors.Add("AttributeCameraEffects não atribuído.");
+
+            if (cameraFocus == null)
+                missingErrors.Add("CameraFocusManager não atribuído.");
 
             return missingErrors.Count == 0;
         }

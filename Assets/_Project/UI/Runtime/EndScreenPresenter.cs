@@ -80,18 +80,6 @@ namespace Mandato.UI
                     var screenPanel = UnityEditor.AssetDatabase.LoadAssetAtPath<PanelSettings>("Assets/UI/Decision/DecisionPanelSettings.asset");
                     if (screenPanel != null) uiDocument.panelSettings = screenPanel;
 #endif
-                    if (uiDocument.panelSettings == null)
-                    {
-                        var existingDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
-                        foreach (var d in existingDocs)
-                        {
-                            if (d != null && d != uiDocument && d.panelSettings != null && d.panelSettings.targetTexture == null)
-                            {
-                                uiDocument.panelSettings = d.panelSettings;
-                                break;
-                            }
-                        }
-                    }
                 }
             }
 

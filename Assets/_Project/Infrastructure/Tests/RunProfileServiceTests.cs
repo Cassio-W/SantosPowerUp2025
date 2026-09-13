@@ -1,5 +1,6 @@
 using Mandato.Core;
 using Mandato.Infrastructure;
+using Mandato.Run;
 using NUnit.Framework;
 
 namespace Mandato.Infrastructure.Tests
@@ -18,15 +19,23 @@ namespace Mandato.Infrastructure.Tests
         }
 
         [Test]
-        public void RecordRunCompleted_IncrementsCompletedRuns()
+        public void RecordRunCompleted_IncrementsCompletedRunsAndRecordsStats()
         {
             var service = new RunProfileService();
-            service.InitializeProfile();
-            int initialRuns = service.CurrentProfile.totalRunsPlayed;
+            var cleanProfile = new ProfileState();
+            service.InitializeProfile(cleanProfile);
 
-            service.RecordRunCompleted(victory: true, endingId: "ending_mandato_ouro");
+            service.RecordRunCompleted(
+                victory: true,
+                endingId: "ending_mandato_ouro",
+                decisionsCount: 15,
+                finalPopularity: 82
+            );
 
-            Assert.AreEqual(initialRuns + 1, service.CurrentProfile.totalRunsPlayed);
+            Assert.AreEqual(1, service.CurrentProfile.totalRunsPlayed);
+            Assert.AreEqual(1, service.CurrentProfile.totalVictories);
+            Assert.AreEqual(15, service.CurrentProfile.totalDecisionsMade);
+            Assert.AreEqual(82, service.CurrentProfile.highestPopularityScore);
             Assert.IsTrue(service.CurrentProfile.discoveredEndingIds.Contains("ending_mandato_ouro"));
         }
     }

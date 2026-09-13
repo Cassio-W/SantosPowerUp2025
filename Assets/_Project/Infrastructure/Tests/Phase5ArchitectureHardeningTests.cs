@@ -50,6 +50,8 @@ namespace Mandato.Infrastructure.Tests
             Assert.IsNull(bindings.DecisionOverlayPresenter);
             Assert.IsNull(bindings.EndScreenPresenter);
             Assert.IsNull(bindings.FlipPhonePresenter);
+            Assert.IsNull(bindings.CameraEffects);
+            Assert.IsNull(bindings.CameraFocus);
         }
 
         [Test]

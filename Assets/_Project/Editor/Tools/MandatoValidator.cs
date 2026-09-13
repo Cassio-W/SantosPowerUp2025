@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using Mandato.Content;
 using Mandato.Infrastructure;
+using Mandato.Presentation;
+using Mandato.UI;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,10 +13,10 @@ namespace Mandato.Editor
     public static class MandatoValidator
     {
         [MenuItem("Mandato/Validação/Validar Catálogo e Integridade")]
-        public static void ValidateAllContent()
+        public static int ValidateAllContent()
         {
             int totalChecked = 0;
-            int warningCount = 0;
+            int errorCount = 0;
 
             var cardIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var perkIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -34,13 +36,13 @@ namespace Mandato.Editor
                 totalChecked++;
                 if (string.IsNullOrEmpty(perk.id))
                 {
-                    Debug.LogWarning($"[MandatoValidator] ⚠️ Perk sem ID em: {path}");
-                    warningCount++;
+                    Debug.LogError($"[MandatoValidator] ❌ Perk sem ID em: {path}");
+                    errorCount++;
                 }
                 else if (perkIds.Contains(perk.id))
                 {
-                    Debug.LogWarning($"[MandatoValidator] ⚠️ ID de Perk duplicado '{perk.id}' em: {path}");
-                    warningCount++;
+                    Debug.LogError($"[MandatoValidator] ❌ ID de Perk duplicado '{perk.id}' em: {path}");
+                    errorCount++;
                 }
                 else
                 {
@@ -59,13 +61,13 @@ namespace Mandato.Editor
                 totalChecked++;
                 if (string.IsNullOrEmpty(ev.id))
                 {
-                    Debug.LogWarning($"[MandatoValidator] ⚠️ Evento sem ID em: {path}");
-                    warningCount++;
+                    Debug.LogError($"[MandatoValidator] ❌ Evento sem ID em: {path}");
+                    errorCount++;
                 }
                 else if (eventIds.Contains(ev.id))
                 {
-                    Debug.LogWarning($"[MandatoValidator] ⚠️ ID de Evento duplicado '{ev.id}' em: {path}");
-                    warningCount++;
+                    Debug.LogError($"[MandatoValidator] ❌ ID de Evento duplicado '{ev.id}' em: {path}");
+                    errorCount++;
                 }
                 else
                 {
@@ -84,13 +86,13 @@ namespace Mandato.Editor
                 totalChecked++;
                 if (string.IsNullOrEmpty(quest.id))
                 {
-                    Debug.LogWarning($"[MandatoValidator] ⚠️ Quest sem ID em: {path}");
-                    warningCount++;
+                    Debug.LogError($"[MandatoValidator] ❌ Quest sem ID em: {path}");
+                    errorCount++;
                 }
                 else if (questIds.Contains(quest.id))
                 {
-                    Debug.LogWarning($"[MandatoValidator] ⚠️ ID de Quest duplicado '{quest.id}' em: {path}");
-                    warningCount++;
+                    Debug.LogError($"[MandatoValidator] ❌ ID de Quest duplicado '{quest.id}' em: {path}");
+                    errorCount++;
                 }
                 else
                 {
@@ -109,13 +111,13 @@ namespace Mandato.Editor
                 totalChecked++;
                 if (string.IsNullOrEmpty(ending.id))
                 {
-                    Debug.LogWarning($"[MandatoValidator] ⚠️ Final sem ID em: {path}");
-                    warningCount++;
+                    Debug.LogError($"[MandatoValidator] ❌ Final sem ID em: {path}");
+                    errorCount++;
                 }
                 else if (endingIds.Contains(ending.id))
                 {
-                    Debug.LogWarning($"[MandatoValidator] ⚠️ ID de Final duplicado '{ending.id}' em: {path}");
-                    warningCount++;
+                    Debug.LogError($"[MandatoValidator] ❌ ID de Final duplicado '{ending.id}' em: {path}");
+                    errorCount++;
                 }
                 else
                 {
@@ -134,13 +136,13 @@ namespace Mandato.Editor
                 totalChecked++;
                 if (string.IsNullOrEmpty(act.id))
                 {
-                    Debug.LogWarning($"[MandatoValidator] ⚠️ Ação de celular sem ID em: {path}");
-                    warningCount++;
+                    Debug.LogError($"[MandatoValidator] ❌ Ação de celular sem ID em: {path}");
+                    errorCount++;
                 }
                 else if (actionIds.Contains(act.id))
                 {
-                    Debug.LogWarning($"[MandatoValidator] ⚠️ ID de Ação duplicado '{act.id}' em: {path}");
-                    warningCount++;
+                    Debug.LogError($"[MandatoValidator] ❌ ID de Ação duplicado '{act.id}' em: {path}");
+                    errorCount++;
                 }
                 else
                 {
@@ -162,13 +164,13 @@ namespace Mandato.Editor
 
                 if (string.IsNullOrEmpty(card.id))
                 {
-                    Debug.LogWarning($"[MandatoValidator] ⚠️ Carta sem ID em: {path}");
-                    warningCount++;
+                    Debug.LogError($"[MandatoValidator] ❌ Carta sem ID em: {path}");
+                    errorCount++;
                 }
                 else if (cardIds.Contains(card.id))
                 {
-                    Debug.LogWarning($"[MandatoValidator] ⚠️ ID de Carta duplicado '{card.id}' em: {path}");
-                    warningCount++;
+                    Debug.LogError($"[MandatoValidator] ❌ ID de Carta duplicado '{card.id}' em: {path}");
+                    errorCount++;
                 }
                 else
                 {
@@ -177,16 +179,16 @@ namespace Mandato.Editor
 
                 if (string.IsNullOrEmpty(card.description))
                 {
-                    Debug.LogWarning($"[MandatoValidator] ⚠️ Carta '{card.name}' sem descrição em: {path}");
-                    warningCount++;
+                    Debug.LogError($"[MandatoValidator] ❌ Carta '{card.name}' sem descrição em: {path}");
+                    errorCount++;
                 }
             }
 
             // 7. Validação de referências cruzadas (injectCardIds e grantPerkId)
             foreach (var (path, card) in allCards)
             {
-                ValidateChoiceReferences(card.leftChoice, card.id, "Escolha Esquerda", path, cardIds, perkIds, ref warningCount);
-                ValidateChoiceReferences(card.rightChoice, card.id, "Escolha Direita", path, cardIds, perkIds, ref warningCount);
+                ValidateChoiceReferences(card.leftChoice, card.id, "Escolha Esquerda", path, cardIds, perkIds, ref errorCount);
+                ValidateChoiceReferences(card.rightChoice, card.id, "Escolha Direita", path, cardIds, perkIds, ref errorCount);
 
                 if (card.conditions != null)
                 {
@@ -195,26 +197,28 @@ namespace Mandato.Editor
                         if (cond == null) continue;
                         if (!string.IsNullOrEmpty(cond.requiredPerkId) && !perkIds.Contains(cond.requiredPerkId))
                         {
-                            Debug.LogWarning($"[MandatoValidator] ⚠️ Carta '{card.id}' requer perk '{cond.requiredPerkId}' não encontrado no catálogo. Path: {path}");
-                            warningCount++;
+                            Debug.LogError($"[MandatoValidator] ❌ Carta '{card.id}' requer perk '{cond.requiredPerkId}' não encontrado no catálogo. Path: {path}");
+                            errorCount++;
                         }
                         if (!string.IsNullOrEmpty(cond.requiredQuestId) && !questIds.Contains(cond.requiredQuestId))
                         {
-                            Debug.LogWarning($"[MandatoValidator] ⚠️ Carta '{card.id}' requer quest '{cond.requiredQuestId}' não encontrada no catálogo. Path: {path}");
-                            warningCount++;
+                            Debug.LogError($"[MandatoValidator] ❌ Carta '{card.id}' requer quest '{cond.requiredQuestId}' não encontrada no catálogo. Path: {path}");
+                            errorCount++;
                         }
                     }
                 }
             }
 
-            if (warningCount == 0)
+            if (errorCount == 0)
             {
-                Debug.Log($"<color=#00ffaa><b>[MandatoValidator] ✅ Sucesso!</b></color> {totalChecked} assets validados ({cardIds.Count} cartas, {perkIds.Count} perks, {eventIds.Count} eventos, {questIds.Count} quests, {endingIds.Count} finais, {actionIds.Count} ações). Nenhum erro encontrado.");
+                Debug.Log($"<color=#00ffaa><b>[MandatoValidator] ✅ Catálogo Válido!</b></color> {totalChecked} assets verificados ({cardIds.Count} cartas, {perkIds.Count} perks, {eventIds.Count} eventos, {questIds.Count} quests, {endingIds.Count} finais, {actionIds.Count} ações). Nenhum erro encontrado.");
             }
             else
             {
-                Debug.LogWarning($"<b>[MandatoValidator] ⚠️ Concluído com avisos:</b> {totalChecked} assets verificados, {warningCount} problemas encontrados.");
+                Debug.LogError($"<b>[MandatoValidator] ❌ Validação de catálogo falhou:</b> {totalChecked} assets verificados, {errorCount} erro(s) encontrado(s).");
             }
+
+            return errorCount;
         }
 
         private static void ValidateChoiceReferences(
@@ -224,7 +228,7 @@ namespace Mandato.Editor
             string path,
             HashSet<string> cardIds,
             HashSet<string> perkIds,
-            ref int warningCount)
+            ref int errorCount)
         {
             if (choice == null) return;
 
@@ -234,36 +238,35 @@ namespace Mandato.Editor
                 {
                     if (!string.IsNullOrEmpty(injectId) && !cardIds.Contains(injectId))
                     {
-                        Debug.LogWarning($"[MandatoValidator] ⚠️ Carta '{cardId}' ({choiceName}) injeta carta '{injectId}' não encontrada no catálogo. Path: {path}");
-                        warningCount++;
+                        Debug.LogError($"[MandatoValidator] ❌ Carta '{cardId}' ({choiceName}) injeta carta '{injectId}' não encontrada no catálogo. Path: {path}");
+                        errorCount++;
                     }
                 }
             }
 
             if (!string.IsNullOrEmpty(choice.grantPerkId) && !perkIds.Contains(choice.grantPerkId))
             {
-                // Apenas aviso informativo, pois o perk pode ser dinâmico ou adicionado via SO
-                Debug.LogWarning($"[MandatoValidator] ⚠️ Carta '{cardId}' ({choiceName}) concede perk '{choice.grantPerkId}' não registrado no catálogo de Perks. Path: {path}");
-                warningCount++;
+                Debug.LogError($"[MandatoValidator] ❌ Carta '{cardId}' ({choiceName}) concede perk '{choice.grantPerkId}' não registrado no catálogo de Perks. Path: {path}");
+                errorCount++;
             }
         }
 
         [MenuItem("Mandato/Validação/Validar Configuração de Cena (Bootstrap)")]
-        public static void ValidateSceneConfiguration()
+        public static int ValidateSceneConfiguration()
         {
-            int warningCount = 0;
+            int errorCount = 0;
 
             // 1. Procura o MandatoBootstrap na cena aberta
             var bootstrap = UnityEngine.Object.FindFirstObjectByType<MandatoBootstrap>();
             if (bootstrap == null)
             {
                 Debug.LogWarning("[MandatoValidator] ⚠️ MandatoBootstrap não encontrado na cena aberta. Abra a cena JogoV2 antes de validar.");
-                return;
+                return 0; // Não bloqueia se outra cena estiver aberta, tratado separadamente no CI
             }
 
             var bootstrapType = typeof(MandatoBootstrap);
 
-            // 2. Verifica campos de cartas via reflexión (campos são serialized private)
+            // 2. Verifica campos de cartas via reflexão (campos são serialized private)
             var startingField = bootstrapType.GetField("startingCards", BindingFlags.NonPublic | BindingFlags.Instance);
             var tutorialField = bootstrapType.GetField("tutorialCards", BindingFlags.NonPublic | BindingFlags.Instance);
             var catalogField = bootstrapType.GetField("catalogCards", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -279,7 +282,7 @@ namespace Mandato.Editor
             if (startingCount == 0)
             {
                 Debug.LogError("[MandatoValidator] ❌ startingCards está vazio no MandatoBootstrap! A run não terá cartas no baralho.");
-                warningCount++;
+                errorCount++;
             }
             else
             {
@@ -320,8 +323,8 @@ namespace Mandato.Editor
                         {
                             if (!string.IsNullOrEmpty(injectId) && !allCardIds.Contains(injectId))
                             {
-                                Debug.LogWarning($"[MandatoValidator] ⚠️ [{listName}] Carta '{card.id}' ({side}) injeta '{injectId}' que não está no catálogo da cena.");
-                                warningCount++;
+                                Debug.LogError($"[MandatoValidator] ❌ [{listName}] Carta '{card.id}' ({side}) injeta '{injectId}' que não está no catálogo da cena.");
+                                errorCount++;
                             }
                         }
                     }
@@ -342,30 +345,32 @@ namespace Mandato.Editor
                 {
                     foreach (var err in missingList)
                     {
-                        Debug.LogWarning($"[MandatoValidator] ⚠️ ScenePresentationBindings: {err}");
-                        warningCount++;
+                        Debug.LogError($"[MandatoValidator] ❌ ScenePresentationBindings: {err}");
+                        errorCount++;
                     }
                 }
                 else
                 {
-                    Debug.Log("[MandatoValidator] ✅ ScenePresentationBindings: todos os apresentadores estão configurados.");
+                    Debug.Log("[MandatoValidator] ✅ ScenePresentationBindings: todos os apresentadores e efeitos estão configurados.");
                 }
             }
             else
             {
                 Debug.LogError("[MandatoValidator] ❌ presentationBindings é nulo no MandatoBootstrap!");
-                warningCount++;
+                errorCount++;
             }
 
             // 6. Resultado
-            if (warningCount == 0)
+            if (errorCount == 0)
             {
-                Debug.Log($"<color=#00ffaa><b>[MandatoValidator] ✅ Configuração de cena válida!</b></color> {allCardIds.Count} cartas registradas, nenhum problema encontrado.");
+                Debug.Log($"<color=#00ffaa><b>[MandatoValidator] ✅ Configuração de cena válida!</b></color> {allCardIds.Count} cartas registradas, nenhum erro encontrado.");
             }
             else
             {
-                Debug.LogWarning($"<b>[MandatoValidator] ⚠️ Configuração de cena com {warningCount} problema(s).</b> Resolva antes de entrar em Play Mode.");
+                Debug.LogError($"<b>[MandatoValidator] ❌ Configuração de cena com {errorCount} erro(s).</b> Resolva antes de entrar em Play Mode.");
             }
+
+            return errorCount;
         }
 
         [MenuItem("Mandato/Configuração/Preencher e Salvar Bindings da Cena")]
@@ -381,54 +386,58 @@ namespace Mandato.Editor
             Undo.RecordObject(bootstrap, "Preencher Presentation Bindings");
 
             // 1. Presentation Coordinator
-            var presCoord = UnityEngine.Object.FindFirstObjectByType<Mandato.Presentation.RunPresentationCoordinator>(FindObjectsInactive.Include);
+            var presCoord = UnityEngine.Object.FindFirstObjectByType<RunPresentationCoordinator>(FindObjectsInactive.Include);
             if (presCoord == null)
             {
                 var go = GameObject.Find("PresentationCoordinator") ?? GameObject.Find("GameController") ?? bootstrap.gameObject;
-                presCoord = Undo.AddComponent<Mandato.Presentation.RunPresentationCoordinator>(go);
+                presCoord = Undo.AddComponent<RunPresentationCoordinator>(go);
             }
 
             // 2. Paper Presenter
-            var paper = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.PaperDocumentPresenter>(FindObjectsInactive.Include);
+            var paper = UnityEngine.Object.FindFirstObjectByType<PaperDocumentPresenter>(FindObjectsInactive.Include);
             if (paper == null)
             {
                 var go = GameObject.Find("PaperPresenter") ?? GameObject.Find("Papel") ?? GameObject.Find("Paper") ?? GameObject.Find("Documento") ?? bootstrap.gameObject;
-                paper = Undo.AddComponent<Mandato.UI.PaperDocumentPresenter>(go);
+                paper = Undo.AddComponent<PaperDocumentPresenter>(go);
             }
 
             // 3. Retro Monitor Presenter
-            var monitor = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.RetroMonitorPresenter>(FindObjectsInactive.Include);
+            var monitor = UnityEngine.Object.FindFirstObjectByType<RetroMonitorPresenter>(FindObjectsInactive.Include);
             if (monitor == null)
             {
                 var go = GameObject.Find("RetroMonitorPresenter") ?? GameObject.Find("RetroMonitor") ?? GameObject.Find("Monitor") ?? GameObject.Find("Computador") ?? bootstrap.gameObject;
-                monitor = Undo.AddComponent<Mandato.UI.RetroMonitorPresenter>(go);
+                monitor = Undo.AddComponent<RetroMonitorPresenter>(go);
             }
 
             // 4. Decision Overlay Presenter
-            var overlay = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.DecisionOverlayPresenter>(FindObjectsInactive.Include);
+            var overlay = UnityEngine.Object.FindFirstObjectByType<DecisionOverlayPresenter>(FindObjectsInactive.Include);
             if (overlay == null)
             {
                 var go = GameObject.Find("DecisionOverlay") ?? GameObject.Find("HUD") ?? GameObject.Find("UI") ?? bootstrap.gameObject;
-                overlay = Undo.AddComponent<Mandato.UI.DecisionOverlayPresenter>(go);
+                overlay = Undo.AddComponent<DecisionOverlayPresenter>(go);
             }
 
             // 5. End Screen Presenter
-            var endScreen = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.EndScreenPresenter>(FindObjectsInactive.Include);
+            var endScreen = UnityEngine.Object.FindFirstObjectByType<EndScreenPresenter>(FindObjectsInactive.Include);
             if (endScreen == null)
             {
                 var go = GameObject.Find("EndScreen") ?? GameObject.Find("GameOver") ?? GameObject.Find("UI") ?? bootstrap.gameObject;
-                endScreen = Undo.AddComponent<Mandato.UI.EndScreenPresenter>(go);
+                endScreen = Undo.AddComponent<EndScreenPresenter>(go);
             }
 
             // 6. Flip Phone Presenter
-            var phone = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.FlipPhonePresenter>(FindObjectsInactive.Include);
+            var phone = UnityEngine.Object.FindFirstObjectByType<FlipPhonePresenter>(FindObjectsInactive.Include);
             if (phone == null)
             {
                 var go = GameObject.Find("Celular") ?? GameObject.Find("FlipPhone") ?? GameObject.Find("Phone") ?? bootstrap.gameObject;
-                phone = Undo.AddComponent<Mandato.UI.FlipPhonePresenter>(go);
+                phone = Undo.AddComponent<FlipPhonePresenter>(go);
             }
 
-            // 7. Player Animator
+            // 7. Camera Effects & Focus
+            var camEffects = UnityEngine.Object.FindFirstObjectByType<AttributeCameraEffects>(FindObjectsInactive.Include);
+            var camFocus = UnityEngine.Object.FindFirstObjectByType<CameraFocusManager>(FindObjectsInactive.Include);
+
+            // 8. Player Animator
             Animator playerAnim = null;
             var animators = UnityEngine.Object.FindObjectsByType<Animator>(FindObjectsInactive.Include, FindObjectsSortMode.None);
             foreach (var a in animators)
@@ -440,7 +449,7 @@ namespace Mandato.Editor
                 }
             }
 
-            // 8. Flip Phone GameObject
+            // 9. Flip Phone GameObject
             var phoneObj = GameObject.Find("Celular") ?? GameObject.Find("FlipPhone") ?? GameObject.Find("Phone");
 
             // Atualiza via SerializedObject para garantir persistência robusta no arquivo .unity
@@ -466,6 +475,12 @@ namespace Mandato.Editor
                 var pPhone = bindingsProp.FindPropertyRelative("flipPhonePresenter");
                 if (pPhone != null) pPhone.objectReferenceValue = phone;
 
+                var pCamEffects = bindingsProp.FindPropertyRelative("cameraEffects");
+                if (pCamEffects != null && camEffects != null) pCamEffects.objectReferenceValue = camEffects;
+
+                var pCamFocus = bindingsProp.FindPropertyRelative("cameraFocus");
+                if (pCamFocus != null && camFocus != null) pCamFocus.objectReferenceValue = camFocus;
+
                 var pPlayerAnim = bindingsProp.FindPropertyRelative("playerAnimator");
                 if (pPlayerAnim != null && playerAnim != null) pPlayerAnim.objectReferenceValue = playerAnim;
 
@@ -484,6 +499,8 @@ namespace Mandato.Editor
             bindingsType.GetField("decisionOverlayPresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, overlay);
             bindingsType.GetField("endScreenPresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, endScreen);
             bindingsType.GetField("flipPhonePresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, phone);
+            if (camEffects != null) bindingsType.GetField("cameraEffects", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, camEffects);
+            if (camFocus != null) bindingsType.GetField("cameraFocus", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, camFocus);
             if (playerAnim != null) bindingsType.GetField("playerAnimator", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, playerAnim);
             if (phoneObj != null) bindingsType.GetField("flipPhoneObject", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, phoneObj);
 
@@ -495,44 +512,65 @@ namespace Mandato.Editor
         }
 
         [MenuItem("Mandato/Validação/Validar Cena de Menu (MenuV2)")]
-        public static void ValidateMenuSceneConfiguration()
+        public static int ValidateMenuSceneConfiguration()
         {
-            var menuPresenter = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.MainMenuPresenter>();
+            int errorCount = 0;
+            var menuPresenter = UnityEngine.Object.FindFirstObjectByType<MainMenuPresenter>();
             if (menuPresenter == null)
             {
                 Debug.LogWarning("[MandatoValidator] ⚠️ MainMenuPresenter não encontrado na cena aberta. Se você está na cena MenuV2, adicione o componente MainMenuPresenter.");
-                return;
+                return 0;
             }
 
             var uiDoc = menuPresenter.GetComponent<UnityEngine.UIElements.UIDocument>();
             if (uiDoc == null)
             {
-                Debug.LogWarning("[MandatoValidator] ⚠️ UIDocument não encontrado no MainMenuPresenter.");
+                Debug.LogError("[MandatoValidator] ❌ UIDocument não encontrado no MainMenuPresenter.");
+                errorCount++;
             }
             else
             {
                 Debug.Log("<color=#00ffaa><b>[MandatoValidator] ✅ Cena de Menu válida!</b></color> MainMenuPresenter configurado em UI Toolkit.");
             }
+
+            return errorCount;
         }
 
         [MenuItem("Mandato/Validação/Executar Pipeline Completo (Local e CI)")]
         public static bool ValidatePipelineCI()
         {
             Debug.Log("<color=#00ccff><b>[MandatoValidator] 🚀 Iniciando Pipeline de Validação Completo...</b></color>");
-            int errorCount = 0;
+            int totalErrors = 0;
 
-            // 1. Validar Catálogo
-            ValidateAllContent();
+            // 1. Validar Catálogo (falhas viram erros no total)
+            int contentErrors = ValidateAllContent();
+            totalErrors += contentErrors;
 
-            // 2. Validar Ausência de Legado
-            string[] legacyForbiddenTypes = new[] { "GameManager", "UIManager", "PhysicalPaperUI", "RetroMonitorUI", "LegacyDealAdapter", "LegacyCompatibilityBridge" };
+            // 2. Validar Ausência de Legado no AppDomain
+            string[] legacyForbiddenTypes = new[]
+            {
+                "GameManager",
+                "UIManager",
+                "PhysicalPaperUI",
+                "RetroMonitorUI",
+                "LegacyDealAdapter",
+                "LegacyCompatibilityBridge",
+                "MenuUI"
+            };
+
             foreach (var typeName in legacyForbiddenTypes)
             {
-                var foundType = Type.GetType(typeName);
+                Type foundType = null;
+                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
+                {
+                    foundType = asm.GetType(typeName);
+                    if (foundType != null) break;
+                }
+
                 if (foundType != null)
                 {
                     Debug.LogError($"[MandatoValidator] ❌ Tipo legado proibido encontrado no domínio C#: '{typeName}'");
-                    errorCount++;
+                    totalErrors++;
                 }
             }
 
@@ -540,21 +578,21 @@ namespace Mandato.Editor
             var activeScene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
             if (activeScene.name.IndexOf("Jogo", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                ValidateSceneConfiguration();
+                totalErrors += ValidateSceneConfiguration();
             }
             else if (activeScene.name.IndexOf("Menu", StringComparison.OrdinalIgnoreCase) >= 0)
             {
-                ValidateMenuSceneConfiguration();
+                totalErrors += ValidateMenuSceneConfiguration();
             }
 
-            if (errorCount == 0)
+            if (totalErrors == 0)
             {
-                Debug.Log("<color=#00ffaa><b>[MandatoValidator] 🏆 PIPELINE APROVADO! Todos os critérios da arquitetura V2 foram atendidos.</b></color>");
+                Debug.Log("<color=#00ffaa><b>[MandatoValidator] 🏆 PIPELINE APROVADO! Todos os critérios da arquitetura V2 foram atendidos com 0 erros.</b></color>");
                 return true;
             }
             else
             {
-                Debug.LogError($"<color=#ff4444><b>[MandatoValidator] ❌ PIPELINE FALHOU com {errorCount} erro(s).</b></color>");
+                Debug.LogError($"<color=#ff4444><b>[MandatoValidator] ❌ PIPELINE FALHOU com {totalErrors} erro(s).</b></color>");
                 return false;
             }
         }

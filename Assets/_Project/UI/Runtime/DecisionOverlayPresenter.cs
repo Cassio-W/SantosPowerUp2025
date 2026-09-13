@@ -69,19 +69,6 @@ namespace Mandato.UI
 
             if (uiDocument == null)
             {
-                var docs = FindObjectsByType<UIDocument>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-                foreach (var d in docs)
-                {
-                    if (d != null && d.visualTreeAsset != null && d.visualTreeAsset.name.IndexOf("Decision", StringComparison.OrdinalIgnoreCase) >= 0)
-                    {
-                        uiDocument = d;
-                        break;
-                    }
-                }
-            }
-
-            if (uiDocument == null)
-            {
                 uiDocument = gameObject.AddComponent<UIDocument>();
             }
 

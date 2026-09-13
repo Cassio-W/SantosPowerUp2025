@@ -373,10 +373,17 @@ namespace Mandato.Infrastructure
                 evaluatedEnding = EndingEvaluator.EvaluateEnding(stateMachine.RunState, catalog.Endings.Values);
             }
 
+            int decisionsCount = stateMachine.RunState?.decisionHistory?.Count ?? 0;
+            int finalPopularity = stateMachine.RunState?.stats?.popularApproval ?? 0;
+
             profileService.RecordRunCompleted(
                 termination.IsVictory,
-                evaluatedEnding?.id ?? string.Empty
+                evaluatedEnding?.id ?? string.Empty,
+                decisionsCount,
+                finalPopularity
             );
+
+            SaveSystem.DeleteRunSave();
 
             if (bindings.DecisionOverlayPresenter != null)
             {

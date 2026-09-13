@@ -86,20 +86,11 @@ namespace Mandato.Presentation
             {
                 uiDocument = GetComponentInParent<UIDocument>();
             }
-
-            if (uiDocument == null)
-            {
-                uiDocument = FindFirstObjectByType<UIDocument>();
-            }
         }
 
         if (interactionCamera == null)
         {
             interactionCamera = Camera.main;
-            if (interactionCamera == null)
-            {
-                interactionCamera = FindFirstObjectByType<Camera>();
-            }
         }
     }
 
@@ -155,7 +146,7 @@ namespace Mandato.Presentation
 
         if (interactionCamera == null)
         {
-            interactionCamera = Camera.main ?? FindFirstObjectByType<Camera>();
+            interactionCamera = Camera.main;
             if (interactionCamera == null) return;
         }
 

@@ -31,22 +31,8 @@ namespace Mandato.UI
 
         private void Awake()
         {
-            DisableLegacyCanvases();
             EnsureDocument();
             CacheElements();
-        }
-
-        private void DisableLegacyCanvases()
-        {
-            var canvases = FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (var canvas in canvases)
-            {
-                if (canvas == null) continue;
-                if (canvas.renderMode != RenderMode.WorldSpace)
-                {
-                    canvas.gameObject.SetActive(false);
-                }
-            }
         }
 
         private void OnEnable()

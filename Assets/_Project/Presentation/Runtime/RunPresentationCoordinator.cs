@@ -227,20 +227,6 @@ namespace Mandato.Presentation
         {
             StopActiveRoutine();
 
-            // Fallback: se activeNpcController estiver nulo, busca qualquer INpcController ativo na cena
-            if (activeNpcController == null && activeNpcGameObject == null)
-            {
-                foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
-                {
-                    if (mb is INpcController ctrl)
-                    {
-                        activeNpcController = ctrl;
-                        activeNpcGameObject = mb.gameObject;
-                        break;
-                    }
-                }
-            }
-
             if (gameObject != null && !gameObject.activeSelf)
             {
                 gameObject.SetActive(true);
@@ -252,21 +238,6 @@ namespace Mandato.Presentation
 
         private IEnumerator DismissProposalRoutine(bool isPositive, Action onDismissed)
         {
-            // Fallback de busca dentro da coroutine
-            if (activeNpcController == null && activeNpcGameObject == null)
-            {
-                foreach (var mb in FindObjectsByType<MonoBehaviour>(FindObjectsSortMode.None))
-                {
-                    if (mb is INpcController ctrl)
-                    {
-                        activeNpcController = ctrl;
-                        activeNpcGameObject = mb.gameObject;
-                        Debug.Log($"<color=#ffaa00>[RunPresentationCoordinator]</color> 🔍 INpcController encontrado via fallback: {mb.gameObject.name}");
-                        break;
-                    }
-                }
-            }
-
             yield return StartCoroutine(DismissNpcRoutine(isPositive));
 
             // Aguarda 1 frame para garantir que a coroutine retorne ao Unity antes de disparar o callback

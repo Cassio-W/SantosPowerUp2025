@@ -86,8 +86,6 @@ namespace Mandato.Presentation
             Instance = this;
 
             SetupSkyMaterial();
-            FindPollutionVolumeIfNeeded();
-            FindCorruptionVolumeIfNeeded();
         }
 
         private void OnDisable()
@@ -145,7 +143,6 @@ namespace Mandato.Presentation
 
         private void UpdatePollutionVolume(float climateValue, bool instant)
         {
-            FindPollutionVolumeIfNeeded();
             if (pollutionVolume == null) return;
 
             float pollutionFactor = 0f;
@@ -174,7 +171,6 @@ namespace Mandato.Presentation
 
         private void UpdateCorruptionVolume(float corruptionValue, bool instant)
         {
-            FindCorruptionVolumeIfNeeded();
             if (corruptionVolume == null) return;
 
             float corruptionFactor = 0f;
@@ -358,46 +354,6 @@ namespace Mandato.Presentation
                 _initialSkyColor = skyMaterial.GetColor(_tintPropName);
                 Color.RGBToHSV(_initialSkyColor, out _initialHue, out _initialSaturation, out _initialValue);
                 _hasSkyColorSaved = true;
-            }
-        }
-
-        private void FindPollutionVolumeIfNeeded()
-        {
-            if (pollutionVolume != null) return;
-
-            var allVolumes = FindObjectsByType<Volume>(FindObjectsSortMode.None);
-            foreach (var v in allVolumes)
-            {
-                if (v == null) continue;
-                string objName = v.name.ToLower();
-                string profName = v.sharedProfile != null ? v.sharedProfile.name.ToLower() : "";
-
-                if (objName.Contains("polu") || objName.Contains("pollut") || objName.Contains("smog") ||
-                    profName.Contains("polu") || profName.Contains("pollut") || profName.Contains("smog"))
-                {
-                    pollutionVolume = v;
-                    break;
-                }
-            }
-        }
-
-        private void FindCorruptionVolumeIfNeeded()
-        {
-            if (corruptionVolume != null) return;
-
-            var allVolumes = FindObjectsByType<Volume>(FindObjectsSortMode.None);
-            foreach (var v in allVolumes)
-            {
-                if (v == null) continue;
-                string objName = v.name.ToLower();
-                string profName = v.sharedProfile != null ? v.sharedProfile.name.ToLower() : "";
-
-                if (objName.Contains("corrup") || objName.Contains("corrupt") || objName.Contains("morb") || objName.Contains("evil") ||
-                    profName.Contains("corrup") || profName.Contains("corrupt") || profName.Contains("morb") || profName.Contains("evil"))
-                {
-                    corruptionVolume = v;
-                    break;
-                }
             }
         }
 

@@ -8,8 +8,14 @@ namespace Mandato.Infrastructure
     {
         public ProfileState CurrentProfile { get; private set; }
 
-        public ProfileState InitializeProfile()
+        public ProfileState InitializeProfile(ProfileState explicitProfile = null)
         {
+            if (explicitProfile != null)
+            {
+                CurrentProfile = explicitProfile;
+                return CurrentProfile;
+            }
+
             try
             {
                 CurrentProfile = SaveSystem.LoadProfile() ?? new ProfileState();
@@ -23,7 +29,7 @@ namespace Mandato.Infrastructure
             return CurrentProfile;
         }
 
-        public void RecordRunCompleted(bool victory, string endingId = null)
+        public void RecordRunCompleted(bool victory, string endingId = null, int decisionsCount = 0, int finalPopularity = 0)
         {
             if (CurrentProfile == null)
             {
@@ -32,7 +38,7 @@ namespace Mandato.Infrastructure
 
             try
             {
-                CurrentProfile.RecordRunCompleted(victory, endingId);
+                CurrentProfile.RecordRunCompleted(victory, endingId, decisionsCount, finalPopularity);
                 SaveSystem.SaveProfile(CurrentProfile);
             }
             catch (Exception ex)

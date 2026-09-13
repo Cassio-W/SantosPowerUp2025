@@ -23,6 +23,9 @@ namespace Mandato.Presentation
     [Tooltip("Camera a ser movimentada. Se deixada vazia, utiliza a Camera.main automaticamente.")]
     [SerializeField] private Camera targetCamera;
 
+    [Tooltip("Documentos de UI de tela monitorados para bloquear cliques 3D.")]
+    [SerializeField] private List<UIDocument> screenUIDocuments = new List<UIDocument>();
+
     [Tooltip("Transform que define a posicao/rotacao inicial padrao da camera. Se vazio, captura a posicao inicial da camera na cena.")]
     [SerializeField] private Transform defaultCameraAnchor;
 
@@ -94,15 +97,7 @@ namespace Mandato.Presentation
 
         if (targetCamera == null)
         {
-            targetCamera = Camera.main;
-            if (targetCamera == null)
-            {
-                targetCamera = GetComponent<Camera>();
-            }
-            if (targetCamera == null)
-            {
-                targetCamera = FindFirstObjectByType<Camera>();
-            }
+            targetCamera = GetComponent<Camera>() ?? Camera.main;
         }
 
         if (targetCamera != null)
@@ -125,18 +120,6 @@ namespace Mandato.Presentation
     /// </summary>
     public static CameraFocusManager EnsureExists()
     {
-        if (Instance != null) return Instance;
-
-        Camera cam = Camera.main != null ? Camera.main : FindFirstObjectByType<Camera>();
-        if (cam != null)
-        {
-            Instance = cam.gameObject.AddComponent<CameraFocusManager>();
-            Instance.targetCamera = cam;
-            return Instance;
-        }
-
-        GameObject go = new GameObject("CameraFocusManager");
-        Instance = go.AddComponent<CameraFocusManager>();
         return Instance;
     }
 
@@ -256,22 +239,31 @@ namespace Mandato.Presentation
         }
     }
 
+    public void RegisterUIDocument(UIDocument doc)
+    {
+        if (doc != null && !screenUIDocuments.Contains(doc))
+        {
+            screenUIDocuments.Add(doc);
+        }
+    }
+
     /// <summary>
     /// Verifica de forma precisa se o mouse está sobre um controle interativo de UI (Botão, Slider, etc.).
-    /// Evita que telas vazias, containers transparentes, imagens estáticas ou painéis de tela cheia do UI Toolkit / uGUI
-    /// bloqueiem indevidamente o raio de interação 3D com objetos do cenário (como o computador),
-    /// enquanto garante que cliques em botões de UI nunca causem desfoque acidental da câmera.
     /// </summary>
     public bool IsPointerOverInteractiveUI()
     {
-        // 1. Verificação direta em todos os UIDocuments ativos de tela (UI Toolkit)
-        UIDocument[] uiDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
-        foreach (var doc in uiDocs)
+        // 1. Verificação direta nos UIDocuments registrados de tela (UI Toolkit)
+        for (int i = screenUIDocuments.Count - 1; i >= 0; i--)
         {
-            if (doc != null && doc.isActiveAndEnabled && doc.rootVisualElement != null && doc.rootVisualElement.panel != null)
+            var doc = screenUIDocuments[i];
+            if (doc == null)
             {
-                // Se for um painel em RenderTexture / WorldSpace (ex: folha de papel física 3D ou tela do monitor),
-                // a interação ocorre via Raycast 3D no FocusableObject, então ignora aqui.
+                screenUIDocuments.RemoveAt(i);
+                continue;
+            }
+
+            if (doc.isActiveAndEnabled && doc.rootVisualElement != null && doc.rootVisualElement.panel != null)
+            {
                 if (doc.panelSettings != null && doc.panelSettings.targetTexture != null)
                 {
                     continue;
@@ -286,7 +278,6 @@ namespace Mandato.Presentation
 
                 if (picked != null && picked != doc.rootVisualElement)
                 {
-                    // Se for um botão, campo de texto ou botão de decisão interativo
                     if (picked is UnityEngine.UIElements.Button ||
                         picked.GetFirstAncestorOfType<UnityEngine.UIElements.Button>() != null ||
                         picked is UnityEngine.UIElements.TextField ||
@@ -299,28 +290,9 @@ namespace Mandato.Presentation
             }
         }
 
-        // 3. Verificação precisa para uGUI (Canvas) - apenas componentes interativos reais (Selectable: Buttons, Sliders, etc.)
-        if (EventSystem.current != null)
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
         {
-            PointerEventData eventData = new PointerEventData(EventSystem.current)
-            {
-                position = Input.mousePosition
-            };
-
-            var results = new List<RaycastResult>();
-            EventSystem.current.RaycastAll(eventData, results);
-
-            foreach (var hit in results)
-            {
-                if (hit.gameObject != null)
-                {
-                    var selectable = hit.gameObject.GetComponentInParent<UnityEngine.UI.Selectable>();
-                    if (selectable != null && selectable.interactable && selectable.enabled)
-                    {
-                        return true;
-                    }
-                }
-            }
+            return true;
         }
 
         return false;
@@ -473,23 +445,6 @@ namespace Mandato.Presentation
             }
         }
 
-        // Tenta encontrar um Volume cujo nome de GameObject ou de Profile contenha "focus" ou "foco"
-        var allVolumes = FindObjectsByType<Volume>(FindObjectsSortMode.None);
-        foreach (var v in allVolumes)
-        {
-            if (v != null)
-            {
-                string objName = v.name.ToLower();
-                string profName = v.sharedProfile != null ? v.sharedProfile.name.ToLower() : "";
-                if (objName.Contains("focus") || objName.Contains("foco") || profName.Contains("focus") || profName.Contains("foco"))
-                {
-                    focusVolume = v;
-                    return focusVolume;
-                }
-            }
-        }
-
-        focusVolume = FindFirstObjectByType<Volume>();
         return focusVolume;
     }
 

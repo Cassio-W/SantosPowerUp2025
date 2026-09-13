@@ -83,7 +83,6 @@ namespace Mandato.Infrastructure
                 Instance = this;
             }
 
-            DisableLegacyCanvases();
             ValidateBindingsOnAwake();
 
             // 1. Inicializa Catálogo, Perfil e Máquina de Estados
@@ -175,19 +174,6 @@ namespace Mandato.Infrastructure
         public void OpenFlipPhone() => flipPhoneCoordinator?.OpenPhone();
         public void CloseFlipPhone() => flipPhoneCoordinator?.ClosePhone();
         public void AuthorizeNextVisitor() => flowCoordinator?.AuthorizeNextVisitor();
-
-        private void DisableLegacyCanvases()
-        {
-            var canvases = FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (var canvas in canvases)
-            {
-                if (canvas == null) continue;
-                if (canvas.renderMode != RenderMode.WorldSpace)
-                {
-                    canvas.gameObject.SetActive(false);
-                }
-            }
-        }
 
 #if UNITY_EDITOR
         private void OnValidate()
