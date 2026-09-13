@@ -84,5 +84,63 @@ namespace Mandato.Infrastructure.Tests
 
             UnityEngine.Object.DestroyImmediate(card);
         }
+
+        [Test]
+        public void CameraFocusManager_RaycastOcclusion_FrontObjectBlocksFocusableBehind()
+        {
+            var camGo = new GameObject("TestCamera");
+            var cam = camGo.AddComponent<Camera>();
+            camGo.transform.position = new Vector3(0, 0, -5);
+            camGo.transform.forward = Vector3.forward;
+
+            var manager = camGo.AddComponent<CameraFocusManager>();
+
+            // Objeto na frente (ex: celular) com colisor, SEM FocusableObject
+            var frontObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            frontObj.transform.position = new Vector3(0, 0, 0);
+
+            // Objeto ao fundo (ex: computador) com colisor E FocusableObject
+            var backObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            backObj.transform.position = new Vector3(0, 0, 5);
+            var focusable = backObj.AddComponent<FocusableObject>();
+
+            Ray ray = new Ray(camGo.transform.position, Vector3.forward);
+            RaycastHit[] hits = Physics.RaycastAll(ray, 100f, ~0, QueryTriggerInteraction.Collide);
+            Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+            FocusableObject hitFocusable = null;
+            bool hasHitObstacle = false;
+
+            foreach (var h in hits)
+            {
+                if (h.collider == null) continue;
+
+                bool isInteractiveTrigger = h.collider.isTrigger && (
+                    h.collider.GetComponentInParent<WorldSpaceUIInteraction>() != null ||
+                    h.collider.GetComponentInParent<FocusableObject>() != null
+                );
+
+                if (h.collider.isTrigger && !isInteractiveTrigger) continue;
+
+                hasHitObstacle = true;
+                var fo = h.collider.GetComponentInParent<FocusableObject>();
+                if (fo != null && fo.enabled && fo.gameObject.activeInHierarchy)
+                {
+                    hitFocusable = fo;
+                }
+                else
+                {
+                    hitFocusable = null;
+                }
+                break;
+            }
+
+            Assert.IsTrue(hasHitObstacle, "Deveria ter atingido o objeto da frente.");
+            Assert.IsNull(hitFocusable, "O FocusableObject ao fundo NÃO deve ser selecionado quando há um objeto na frente.");
+
+            UnityEngine.Object.DestroyImmediate(frontObj);
+            UnityEngine.Object.DestroyImmediate(backObj);
+            UnityEngine.Object.DestroyImmediate(camGo);
+        }
     }
 }

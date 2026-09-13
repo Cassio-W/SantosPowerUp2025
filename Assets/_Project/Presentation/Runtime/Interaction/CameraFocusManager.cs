@@ -113,6 +113,33 @@ namespace Mandato.Presentation
     private void Start()
     {
         CaptureDefaultCameraTransform();
+        EnsureScreenUIDocuments();
+    }
+
+    /// <summary>
+    /// Garante que os UIDocuments de tela ativos sejam monitorados caso a lista não tenha sido preenchida no Inspector.
+    /// </summary>
+    private void EnsureScreenUIDocuments()
+    {
+        if (screenUIDocuments == null)
+        {
+            screenUIDocuments = new List<UIDocument>();
+        }
+
+        if (screenUIDocuments.Count == 0)
+        {
+            var allDocs = FindObjectsByType<UIDocument>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+            foreach (var doc in allDocs)
+            {
+                if (doc != null && (doc.panelSettings == null || doc.panelSettings.targetTexture == null))
+                {
+                    if (!screenUIDocuments.Contains(doc))
+                    {
+                        screenUIDocuments.Add(doc);
+                    }
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -172,12 +199,14 @@ namespace Mandato.Presentation
 
     /// <summary>
     /// Processa o raio do mouse para deteccao de hover e clique nos objetos interativos.
+    /// Respeita a oclusão física: se houver outro objeto sólido ou elemento interativo na frente (ex: celular ligado, 3D UI, obstáculo),
+    /// o raio não perfura o objeto em primeiro plano para focar elementos ao fundo.
     /// </summary>
     private void HandleMouseRaycast()
     {
         if (targetCamera == null) return;
 
-        // Se o mouse estiver sobre um elemento de UI interativo real, cancela o raio 3D
+        // Se o mouse estiver sobre um elemento de UI interativo real de tela, cancela o raio 3D
         if (IsPointerOverInteractiveUI())
         {
             ClearHover();
@@ -185,18 +214,44 @@ namespace Mandato.Presentation
         }
 
         Ray ray = targetCamera.ScreenPointToRay(Input.mousePosition);
-        RaycastHit[] hits = Physics.RaycastAll(ray, raycastDistance, interactableLayers);
+        RaycastHit[] hits = Physics.RaycastAll(ray, raycastDistance, interactableLayers, QueryTriggerInteraction.Collide);
         Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
         FocusableObject hitFocusable = null;
+        bool hasHitObstacle = false;
+
         foreach (var h in hits)
         {
+            if (h.collider == null) continue;
+
+            // Ignora triggers puros que não possuem scripts interativos (como volumes de som/área)
+            bool isInteractiveTrigger = h.collider.isTrigger && (
+                h.collider.GetComponentInParent<WorldSpaceUIInteraction>() != null ||
+                h.collider.GetComponentInParent<FocusableObject>() != null
+            );
+
+            if (h.collider.isTrigger && !isInteractiveTrigger)
+            {
+                continue;
+            }
+
+            // O primeiro colisor sólido ou interativo encontrado ao longo do raio define o obstáculo frontal
+            hasHitObstacle = true;
+
             var fo = h.collider.GetComponentInParent<FocusableObject>();
             if (fo != null && fo.enabled && fo.gameObject.activeInHierarchy)
             {
                 hitFocusable = fo;
-                break;
             }
+            else
+            {
+                // Há um objeto na frente (ex: celular ligado, 3D UI, tela) que não é FocusableObject.
+                // Como está mais próximo da câmera, ele oclui / bloqueia qualquer FocusableObject ao fundo.
+                hitFocusable = null;
+            }
+
+            // Para no primeiro colisor válido (não permite que o raio perfure objetos em primeiro plano)
+            break;
         }
 
         // Atualizacao de Hover
@@ -219,7 +274,7 @@ namespace Mandato.Presentation
             {
                 hitFocusable.NotifyClicked();
             }
-            else if (unfocusOnEmptyClick && HasActiveFocus)
+            else if (unfocusOnEmptyClick && HasActiveFocus && !hasHitObstacle)
             {
                 Unfocus();
             }
