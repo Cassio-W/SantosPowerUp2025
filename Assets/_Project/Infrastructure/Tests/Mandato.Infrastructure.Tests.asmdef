@@ -5,6 +5,8 @@
         "Mandato.Core",
         "Mandato.Content",
         "Mandato.Run",
+        "Mandato.Presentation",
+        "Mandato.UI",
         "Mandato.Infrastructure"
     ],
     "includePlatforms": [

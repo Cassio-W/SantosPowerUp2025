@@ -47,14 +47,12 @@ namespace Mandato.UI
         {
             EnsureReferences();
             CacheElements();
-            SubscribeFocusEvents();
         }
 
         private void OnEnable()
         {
             EnsureReferences();
             CacheElements();
-            SubscribeFocusEvents();
         }
 
         private void EnsureReferences()
@@ -433,76 +431,11 @@ namespace Mandato.UI
             }
         }
 
-        private void SubscribeFocusEvents()
-        {
-            try
-            {
-                Type focusType = null;
-                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-                {
-                    focusType = asm.GetType("CameraFocusManager");
-                    if (focusType != null) break;
-                }
-
-                if (focusType != null)
-                {
-                    var eventInfo = focusType.GetEvent("OnObjectFocusChanged");
-                    if (eventInfo != null)
-                    {
-                        var instanceProp = focusType.GetProperty("Instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                        var inst = instanceProp?.GetValue(null) ?? FindFirstObjectByType(focusType);
-                        if (inst != null)
-                        {
-                            var handler = Delegate.CreateDelegate(eventInfo.EventHandlerType, this, typeof(DecisionOverlayPresenter).GetMethod(nameof(HandleCameraFocusChanged), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance));
-                            eventInfo.RemoveEventHandler(inst, handler);
-                            eventInfo.AddEventHandler(inst, handler);
-                        }
-                    }
-                }
-            }
-            catch { }
-        }
-
-        private void HandleCameraFocusChanged(object focusedObject)
-        {
-            if (isChoicePending && decisionContainer != null)
-            {
-                decisionContainer.RemoveFromClassList("hidden");
-                decisionContainer.style.display = DisplayStyle.Flex;
-            }
-        }
-
         private void OnDestroy()
         {
             if (btnLeft != null) btnLeft.clicked -= OnLeftClicked;
             if (btnRight != null) btnRight.clicked -= OnRightClicked;
             if (btnContinue != null) btnContinue.clicked -= OnContinueClicked;
-
-            try
-            {
-                Type focusType = null;
-                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-                {
-                    focusType = asm.GetType("CameraFocusManager");
-                    if (focusType != null) break;
-                }
-
-                if (focusType != null)
-                {
-                    var eventInfo = focusType.GetEvent("OnObjectFocusChanged");
-                    if (eventInfo != null)
-                    {
-                        var instanceProp = focusType.GetProperty("Instance", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                        var inst = instanceProp?.GetValue(null);
-                        if (inst != null)
-                        {
-                            var handler = Delegate.CreateDelegate(eventInfo.EventHandlerType, this, typeof(DecisionOverlayPresenter).GetMethod(nameof(HandleCameraFocusChanged), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance));
-                            eventInfo.RemoveEventHandler(inst, handler);
-                        }
-                    }
-                }
-            }
-            catch { }
         }
     }
 }

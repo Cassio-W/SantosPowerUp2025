@@ -18,7 +18,6 @@ namespace Mandato.Infrastructure
         private RunProfileService profileService;
         private ScenePresentationBindings bindings;
         private FlipPhoneCoordinator flipPhoneCoordinator;
-        private LegacyCompatibilityBridge legacyBridge;
         private UIModalCoordinator modalCoordinator;
 
         [Header("Configuração de Fluxo")]
@@ -39,7 +38,6 @@ namespace Mandato.Infrastructure
             RunProfileService profileService,
             ScenePresentationBindings bindings,
             FlipPhoneCoordinator flipPhoneCoordinator,
-            LegacyCompatibilityBridge legacyBridge = null,
             bool requireSpace = true,
             KeyCode callKey = KeyCode.Space,
             float delayBetween = 1.5f,
@@ -51,7 +49,6 @@ namespace Mandato.Infrastructure
             this.profileService = profileService;
             this.bindings = bindings;
             this.flipPhoneCoordinator = flipPhoneCoordinator;
-            this.legacyBridge = legacyBridge;
             this.modalCoordinator = modalCoordinator ?? new UIModalCoordinator();
             this.requireSpaceToCallNextNpc = requireSpace;
             this.callNextNpcKey = callKey;
@@ -138,7 +135,7 @@ namespace Mandato.Infrastructure
             RefreshPerksUI();
             if (stateMachine != null)
             {
-                legacyBridge?.SyncCameraEffects(stateMachine.RunState.stats, instant: true);
+                bindings.CameraEffects?.ApplyAttributeEffects(stateMachine.RunState.stats, instant: true);
             }
             DrawFirstProposal();
         }
@@ -194,8 +191,6 @@ namespace Mandato.Infrastructure
                 bindings.RetroMonitorPresenter.NotifyNewProposal(card);
                 bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
             }
-
-            legacyBridge?.SyncCanvasUI(stateMachine.RunState.stats, displayDate);
         }
 
         private void HandlePlayerChoiceSubmitted(int choiceIndex)
@@ -215,7 +210,7 @@ namespace Mandato.Infrastructure
                     bindings.PaperPresenter.SetPaperInteractable(false);
                 }
 
-                legacyBridge?.NotifyCameraUnfocus();
+                bindings.CameraFocus?.Unfocus();
             }
             else
             {
@@ -248,7 +243,7 @@ namespace Mandato.Infrastructure
             }
 
             RefreshPerksUI();
-            legacyBridge?.SyncCameraEffects(stateMachine.RunState.stats);
+            bindings.CameraEffects?.ApplyAttributeEffects(stateMachine.RunState.stats);
 
             // Se não há coordenador 3D para animar saída, avança diretamente
             if (bindings.PresentationCoordinator == null)
@@ -278,7 +273,7 @@ namespace Mandato.Infrastructure
 
             if (monthlyReport != null && stateMachine != null)
             {
-                legacyBridge?.SyncCameraEffects(stateMachine.RunState.stats, instant: false);
+                bindings.CameraEffects?.ApplyAttributeEffects(stateMachine.RunState.stats, instant: false);
             }
 
             if (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory)

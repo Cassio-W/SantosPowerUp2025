@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Mandato.Content;
 using Mandato.Core;
+using Mandato.Presentation;
 using Mandato.Run;
 using Mandato.UI;
 using UnityEngine;
@@ -57,10 +58,6 @@ namespace Mandato.Infrastructure
         [Tooltip("RunFlowCoordinator já presente na cena como componente. Deve ser atribuído no Inspector.")]
         [SerializeField] private RunFlowCoordinator flowCoordinatorRef;
 
-        [Header("Configuração de UI")]
-        [Tooltip("Se verdadeiro, desativa os elementos visuais do Canvas legado para rodar em UI Toolkit.")]
-        public bool disableLegacyCanvas = true;
-
         public RunStateMachine StateMachine => bootstrapResult?.StateMachine;
         public RunCatalog Catalog => bootstrapResult?.Catalog;
         public IReadOnlyDictionary<string, CardDefinition> CardCatalog => bootstrapResult?.Catalog.Cards;
@@ -78,7 +75,6 @@ namespace Mandato.Infrastructure
         private RunBootstrapResult bootstrapResult;
         private RunFlowCoordinator flowCoordinator;
         private FlipPhoneCoordinator flipPhoneCoordinator;
-        private LegacyCompatibilityBridge legacyBridge;
 
         private void Awake()
         {
@@ -88,9 +84,6 @@ namespace Mandato.Infrastructure
             }
 
             ValidateBindingsOnAwake();
-
-            legacyBridge = new LegacyCompatibilityBridge();
-            legacyBridge.SuppressLegacyCanvas(disableLegacyCanvas);
 
             // 1. Inicializa Catálogo, Perfil e Máquina de Estados
             bootstrapResult = RunBootstrap.CreateAndInitializeRun(
@@ -116,9 +109,6 @@ namespace Mandato.Infrastructure
             );
 
             // 3. Inicializa o Coordenador de Fluxo da Run
-            // flowCoordinatorRef deve ser um componente já presente na cena e atribuído no Inspector.
-            // GetComponent é o único fallback aceito — AddComponent dinâmico foi removido para evitar
-            // MissingReferenceException no Inspector ao entrar em Play Mode.
             flowCoordinator = flowCoordinatorRef != null
                 ? flowCoordinatorRef
                 : GetComponent<RunFlowCoordinator>();
@@ -128,13 +118,13 @@ namespace Mandato.Infrastructure
                 Debug.LogError("[MandatoBootstrap] RunFlowCoordinator não encontrado! Adicione o componente ao GameObject na cena e atribua o campo 'Flow Coordinator Ref' no Inspector.", this);
                 return;
             }
+
             flowCoordinator.Initialize(
                 bootstrapResult.StateMachine,
                 bootstrapResult.Catalog,
                 bootstrapResult.ProfileService,
                 presentationBindings,
                 flipPhoneCoordinator,
-                legacyBridge,
                 requireSpaceToCallNextNpc,
                 callNextNpcKey,
                 delayBetweenProposals,
@@ -146,7 +136,7 @@ namespace Mandato.Infrastructure
 
         private void Start()
         {
-            legacyBridge?.SyncCameraEffects(StateMachine?.RunState?.stats, instant: true);
+            presentationBindings?.CameraEffects?.ApplyAttributeEffects(StateMachine?.RunState?.stats, instant: true);
             flowCoordinator?.StartFlow();
         }
 
@@ -169,37 +159,16 @@ namespace Mandato.Infrastructure
 
         private void HookPhoneFocusableObject()
         {
-            try
+            if (presentationBindings?.FlipPhoneObject == null) return;
+
+            var focusComp = presentationBindings.FlipPhoneObject.GetComponent<FocusableObject>();
+            if (focusComp != null)
             {
-                Type focusType = null;
-                foreach (var asm in AppDomain.CurrentDomain.GetAssemblies())
-                {
-                    focusType = asm.GetType("FocusableObject");
-                    if (focusType != null) break;
-                }
-
-                if (focusType != null && presentationBindings.FlipPhoneObject != null)
-                {
-                    var focusComp = presentationBindings.FlipPhoneObject.GetComponent(focusType) as MonoBehaviour;
-                    if (focusComp != null)
-                    {
-                        var onFocusedField = focusType.GetField("onFocused");
-                        var onUnfocusedField = focusType.GetField("onUnfocused");
-
-                        if (onFocusedField?.GetValue(focusComp) is UnityEngine.Events.UnityEvent onFocused)
-                        {
-                            onFocused.RemoveListener(OpenFlipPhone);
-                            onFocused.AddListener(OpenFlipPhone);
-                        }
-                        if (onUnfocusedField?.GetValue(focusComp) is UnityEngine.Events.UnityEvent onUnfocused)
-                        {
-                            onUnfocused.RemoveListener(CloseFlipPhone);
-                            onUnfocused.AddListener(CloseFlipPhone);
-                        }
-                    }
-                }
+                focusComp.onFocused.RemoveListener(OpenFlipPhone);
+                focusComp.onFocused.AddListener(OpenFlipPhone);
+                focusComp.onUnfocused.RemoveListener(CloseFlipPhone);
+                focusComp.onUnfocused.AddListener(CloseFlipPhone);
             }
-            catch { }
         }
 
         public void OpenFlipPhone() => flipPhoneCoordinator?.OpenPhone();

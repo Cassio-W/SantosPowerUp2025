@@ -151,25 +151,5 @@ namespace Mandato.Infrastructure
             if (isTutorial) card.isTutorial = true;
             cards[card.id] = card;
         }
-
-        /// <summary>
-        /// Registra um ScriptableObject legado via LegacyDealAdapter.
-        /// Uso restrito a ferramentas de editor e testes de compatibilidade.
-        /// NÃO deve ser chamado no fluxo V2 de produção.
-        /// </summary>
-        public CardDefinition RegisterLegacyAsset(ScriptableObject asset, bool isTutorial = false)
-        {
-            if (asset == null) return null;
-
-            CardDefinition card = asset is CardDefinition cd ? cd : LegacyDealAdapter.ConvertToCardDefinition(asset);
-
-            if (card != null && !string.IsNullOrEmpty(card.id))
-            {
-                if (isTutorial) card.isTutorial = true;
-                cards[card.id] = card;
-            }
-
-            return card;
-        }
     }
 }

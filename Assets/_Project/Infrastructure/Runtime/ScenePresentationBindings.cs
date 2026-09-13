@@ -23,6 +23,10 @@ namespace Mandato.Infrastructure
         [SerializeField] private string dealAnimationReverseName = "";
         [SerializeField] private string defaultAnimationName = "None";
 
+        [Header("Efeitos de Ambiente & Câmera")]
+        [SerializeField] private AttributeCameraEffects cameraEffects;
+        [SerializeField] private CameraFocusManager cameraFocus;
+
         [Header("Objeto 3D do Celular")]
         [SerializeField] private GameObject flipPhoneObject;
 
@@ -33,6 +37,8 @@ namespace Mandato.Infrastructure
         public EndScreenPresenter EndScreenPresenter => endScreenPresenter;
         public FlipPhonePresenter FlipPhonePresenter => flipPhonePresenter;
         public Animator PlayerAnimator => playerAnimator;
+        public AttributeCameraEffects CameraEffects => cameraEffects != null ? cameraEffects : AttributeCameraEffects.Instance;
+        public CameraFocusManager CameraFocus => cameraFocus != null ? cameraFocus : CameraFocusManager.Instance;
         public GameObject FlipPhoneObject => flipPhoneObject;
 
         public bool Validate(out List<string> missingErrors)

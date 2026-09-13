@@ -392,7 +392,7 @@ namespace Mandato.Editor
             var paper = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.PaperDocumentPresenter>(FindObjectsInactive.Include);
             if (paper == null)
             {
-                var go = GameObject.Find("PhysicalPaperUI") ?? GameObject.Find("Papel") ?? GameObject.Find("Paper") ?? GameObject.Find("Documento") ?? bootstrap.gameObject;
+                var go = GameObject.Find("PaperPresenter") ?? GameObject.Find("Papel") ?? GameObject.Find("Paper") ?? GameObject.Find("Documento") ?? bootstrap.gameObject;
                 paper = Undo.AddComponent<Mandato.UI.PaperDocumentPresenter>(go);
             }
 
@@ -400,7 +400,7 @@ namespace Mandato.Editor
             var monitor = UnityEngine.Object.FindFirstObjectByType<Mandato.UI.RetroMonitorPresenter>(FindObjectsInactive.Include);
             if (monitor == null)
             {
-                var go = GameObject.Find("RetroMonitorUI") ?? GameObject.Find("RetroMonitor") ?? GameObject.Find("Monitor") ?? GameObject.Find("Computador") ?? bootstrap.gameObject;
+                var go = GameObject.Find("RetroMonitorPresenter") ?? GameObject.Find("RetroMonitor") ?? GameObject.Find("Monitor") ?? GameObject.Find("Computador") ?? bootstrap.gameObject;
                 monitor = Undo.AddComponent<Mandato.UI.RetroMonitorPresenter>(go);
             }
 
@@ -512,6 +512,50 @@ namespace Mandato.Editor
             else
             {
                 Debug.Log("<color=#00ffaa><b>[MandatoValidator] ✅ Cena de Menu válida!</b></color> MainMenuPresenter configurado em UI Toolkit.");
+            }
+        }
+
+        [MenuItem("Mandato/Validação/Executar Pipeline Completo (Local e CI)")]
+        public static bool ValidatePipelineCI()
+        {
+            Debug.Log("<color=#00ccff><b>[MandatoValidator] 🚀 Iniciando Pipeline de Validação Completo...</b></color>");
+            int errorCount = 0;
+
+            // 1. Validar Catálogo
+            ValidateAllContent();
+
+            // 2. Validar Ausência de Legado
+            string[] legacyForbiddenTypes = new[] { "GameManager", "UIManager", "PhysicalPaperUI", "RetroMonitorUI", "LegacyDealAdapter", "LegacyCompatibilityBridge" };
+            foreach (var typeName in legacyForbiddenTypes)
+            {
+                var foundType = Type.GetType(typeName);
+                if (foundType != null)
+                {
+                    Debug.LogError($"[MandatoValidator] ❌ Tipo legado proibido encontrado no domínio C#: '{typeName}'");
+                    errorCount++;
+                }
+            }
+
+            // 3. Validar Cena Atual
+            var activeScene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
+            if (activeScene.name.IndexOf("Jogo", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                ValidateSceneConfiguration();
+            }
+            else if (activeScene.name.IndexOf("Menu", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                ValidateMenuSceneConfiguration();
+            }
+
+            if (errorCount == 0)
+            {
+                Debug.Log("<color=#00ffaa><b>[MandatoValidator] 🏆 PIPELINE APROVADO! Todos os critérios da arquitetura V2 foram atendidos.</b></color>");
+                return true;
+            }
+            else
+            {
+                Debug.LogError($"<color=#ff4444><b>[MandatoValidator] ❌ PIPELINE FALHOU com {errorCount} erro(s).</b></color>");
+                return false;
             }
         }
     }

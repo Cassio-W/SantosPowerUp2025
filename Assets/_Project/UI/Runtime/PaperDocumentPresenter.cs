@@ -117,15 +117,6 @@ namespace Mandato.UI
             {
                 if (col != null) col.enabled = interactable;
             }
-
-            var focusables = targetObj.GetComponentsInChildren<MonoBehaviour>(true);
-            foreach (var comp in focusables)
-            {
-                if (comp != null && comp.GetType().Name == "FocusableObject")
-                {
-                    comp.enabled = interactable;
-                }
-            }
         }
 
         public void SetProposal(CardDefinition card, string displayDate)
