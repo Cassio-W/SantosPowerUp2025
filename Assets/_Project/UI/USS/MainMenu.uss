@@ -1,7 +1,3 @@
-/* ==========================================================================
-   MAIN MENU UI - RETRO / COMIC STYLIZED (UI TOOLKIT)
-   ========================================================================== */
-
 .main-menu-root {
     position: absolute;
     left: 0;
@@ -10,117 +6,113 @@
     bottom: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(10, 15, 26, 0.96);
+    background-color: rgba(0, 0, 0, 0);
     justify-content: center;
     align-items: center;
 }
 
-.menu-background-overlay {
+.company-logo {
     position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url('project://database/Assets/Sprites/black-concrete-wall.png');
-    -unity-background-scale-mode: scale-and-crop;
-    opacity: 0.35;
+    bottom: 40px;
+    left: 48px;
+    width: 220px;
+    height: 220px;
+    -unity-background-scale-mode: scale-to-fit;
+    background-image: url("project://database/Assets/Sprites/logo_branco.png?fileID=21300000&guid=509ec6a80302b1e4683b87844705c751&type=3#logo_branco");
+    opacity: 0.9;
+    transition-property: opacity, scale;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+}
+
+.company-logo:hover {
+    opacity: 1;
+    scale: 1.05 1.05;
+}
+
+.company-logo:active {
+    opacity: 0.8;
+    scale: 0.95 0.95;
 }
 
 .menu-main-container {
-    width: 520px;
+    width: 1200px;
+    max-width: 95%;
     align-items: center;
     justify-content: center;
-    padding: 40px;
-    background-color: rgba(18, 26, 43, 0.88);
-    border-radius: 24px;
-    border-width: 3px;
-    border-color: rgba(245, 158, 11, 0.6);
+    background-color: transparent;
+    border-width: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .menu-logo {
-    width: 340px;
-    height: 120px;
+    width: 1100px;
+    height: 266px;
+    max-width: 100%;
     -unity-background-scale-mode: scale-to-fit;
-    background-image: url('project://database/Assets/Sprites/logo_branco.png');
-    margin-bottom: 8px;
-}
-
-.menu-subtitle {
-    font-size: 16px;
-    -unity-font-style: bold;
-    color: #FBBF24;
-    letter-spacing: 3px;
-    margin-bottom: 36px;
-    -unity-text-align: middle-center;
+    background-image: url("project://database/Assets/Sprites/LOGO.png?fileID=21300000&guid=40ea74febf0b57946a2a4319bc0ffd19&type=3#LOGO");
+    margin-bottom: 52px;
 }
 
 .menu-buttons-container {
     width: 100%;
     align-items: center;
-    gap: 16px;
+    justify-content: center;
 }
 
 .menu-btn {
-    width: 100%;
-    height: 60px;
-    border-radius: 14px;
-    border-width: 3px;
-    font-size: 20px;
-    -unity-font-style: bold;
-    letter-spacing: 2px;
-    justify-content: center;
-    align-items: center;
-    transition-property: scale, background-color, border-color;
+    background-color: transparent;
+    border-width: 0;
+    border-radius: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: scale, -unity-background-image-tint-color;
     transition-duration: 0.16s;
     transition-timing-function: ease-out;
+    scale: 1 0.9;
 }
 
 .menu-btn:hover {
-    scale: 1.04 1.04;
+    scale: 1.06 0.95;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
 }
 
 .menu-btn:active {
-    scale: 0.96 0.96;
+    scale: 0.94 0.85;
+    -unity-background-image-tint-color: rgb(209, 213, 219);
 }
 
 .btn-play {
-    background-color: #10B981;
-    border-color: #34D399;
-    color: #FFFFFF;
-}
-
-.btn-play:hover {
-    background-color: #059669;
-    border-color: #6EE7B7;
+    width: 480px;
+    height: 140px;
+    margin-top: 14px;
+    margin-bottom: 18px;
+    background-image: url("project://database/Assets/Sprites/jogar.png?fileID=21300000&guid=d81ccc80383fb1347b62fa8732d61534&type=3#jogar");
 }
 
 .btn-credits {
-    background-color: rgba(30, 41, 59, 0.95);
-    border-color: #F59E0B;
-    color: #FBBF24;
-}
-
-.btn-credits:hover {
-    background-color: rgba(51, 65, 85, 0.98);
-    border-color: #FCD34D;
-    color: #FFFFFF;
+    width: 420px;
+    height: 125px;
+    margin-top: 14px;
+    margin-bottom: 18px;
+    background-image: url("project://database/Assets/Sprites/cr%C3%A9ditos.png?fileID=21300000&guid=0d16c950cb99c724891a288e8ec2d3bf&type=3#créditos");
 }
 
 .btn-quit {
-    background-color: rgba(30, 41, 59, 0.95);
-    border-color: #EF4444;
-    color: #F87171;
+    width: 420px;
+    height: 125px;
+    margin-top: 14px;
+    margin-bottom: 14px;
+    background-image: url("project://database/Assets/Sprites/sair.png?fileID=21300000&guid=9a0dc5db918be1347b2741d74719c9b3&type=3#sair");
 }
-
-.btn-quit:hover {
-    background-color: rgba(65, 18, 28, 0.98);
-    border-color: #FCA5A5;
-    color: #FFFFFF;
-}
-
-/* ==========================================================================
-   MODAL DE CRÉDITOS
-   ========================================================================== */
 
 .credits-modal-overlay {
     position: absolute;
@@ -128,7 +120,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgba(5, 10, 20, 0.88);
     justify-content: center;
     align-items: center;
     display: none;
@@ -143,55 +135,85 @@
 }
 
 .credits-modal-card {
-    width: 620px;
-    max-height: 80%;
-    background-color: #0F172A;
-    border-radius: 20px;
+    width: 820px;
+    max-height: 85%;
+    background-color: rgb(15, 23, 42);
+    border-radius: 24px;
     border-width: 3px;
-    border-color: #F59E0B;
-    padding: 32px;
+    border-color: rgb(245, 158, 11);
+    padding: 36px 44px 28px 44px;
     align-items: center;
 }
 
 .credits-title {
-    font-size: 26px;
+    font-size: 34px;
     -unity-font-style: bold;
-    color: #FBBF24;
-    letter-spacing: 2px;
-    margin-bottom: 20px;
+    color: rgb(251, 191, 36);
+    letter-spacing: 3px;
+    margin-bottom: 26px;
+    -unity-text-align: middle-center;
 }
 
 .credits-body {
     width: 100%;
-    margin-bottom: 24px;
+    margin-bottom: 8px;
 }
 
-.credits-line {
-    font-size: 16px;
-    color: #E2E8F0;
-    margin-bottom: 8px;
+.credits-section {
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.credits-role {
+    font-size: 20px;
+    color: rgb(52, 211, 153);
+    -unity-font-style: bold;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
     -unity-text-align: middle-center;
 }
 
-.credits-highlight {
-    color: #34D399;
-    -unity-font-style: bold;
+.credits-names {
+    font-size: 22px;
+    color: rgb(241, 245, 249);
+    letter-spacing: 0.5px;
+    -unity-text-align: middle-center;
+}
+
+.credits-footer {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 4px;
 }
 
 .btn-credits-close {
-    width: 180px;
-    height: 48px;
-    border-radius: 12px;
-    border-width: 2px;
-    border-color: #94A3B8;
-    background-color: #1E293B;
-    color: #FFFFFF;
-    font-size: 16px;
-    -unity-font-style: bold;
+    width: 160px;
+    height: 94px;
+    background-color: transparent;
+    border-width: 0;
+    border-radius: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    -unity-background-scale-mode: scale-to-fit;
+    background-image: url("project://database/Assets/Sprites/botao_voltar.png?fileID=21300000&guid=c4e7dd2b81bc50543b0c4723bc72ec4b&type=3#botao_voltar");
+    transition-property: scale, -unity-background-image-tint-color;
+    transition-duration: 0.16s;
+    transition-timing-function: ease-out;
+    scale: 1 0.9;
 }
 
 .btn-credits-close:hover {
-    background-color: #334155;
-    border-color: #F8FAFC;
-    scale: 1.05 1.05;
+    scale: 1.06 0.95;
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+}
+
+.btn-credits-close:active {
+    scale: 0.94 0.85;
+    -unity-background-image-tint-color: rgb(209, 213, 219);
 }
