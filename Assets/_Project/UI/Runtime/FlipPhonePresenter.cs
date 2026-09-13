@@ -30,7 +30,10 @@ namespace Mandato.UI
         [SerializeField] private bool allowKeyboardToggle = true;
         [SerializeField] private GameObject phoneGameObject;
 
-        public GameObject GetPhoneGameObject() => phoneGameObject != null ? phoneGameObject : gameObject;
+        public KeyCode ToggleKey { get => toggleKey; set => toggleKey = value; }
+        public bool AllowKeyboardToggle { get => allowKeyboardToggle; set => allowKeyboardToggle = value; }
+        public GameObject PhoneGameObject { get => phoneGameObject != null ? phoneGameObject : gameObject; set => phoneGameObject = value; }
+        public GameObject GetPhoneGameObject() => PhoneGameObject;
         public void SetPhoneGameObject(GameObject go) => phoneGameObject = go;
 
         public event Action<string> OnActionRequested;
@@ -169,6 +172,12 @@ namespace Mandato.UI
         public void Open()
         {
             IsOpen = true;
+
+            if (phoneGameObject != null)
+            {
+                phoneGameObject.SetActive(true);
+            }
+
             EnsureDocument();
             CacheVisualElements();
 
@@ -198,6 +207,11 @@ namespace Mandato.UI
             if (root != null)
             {
                 root.Blur();
+            }
+
+            if (phoneGameObject != null)
+            {
+                phoneGameObject.SetActive(false);
             }
 
             Debug.Log("<color=#6a9fb5>[FlipPhonePresenter]</color> UI Toolkit: Tela do celular ocultada.");

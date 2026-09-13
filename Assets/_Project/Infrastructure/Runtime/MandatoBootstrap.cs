@@ -140,6 +140,19 @@ namespace Mandato.Infrastructure
             flowCoordinator?.StartFlow();
         }
 
+        private void Update()
+        {
+            var phone = presentationBindings?.FlipPhonePresenter;
+            if (phone != null && phone.AllowKeyboardToggle && Input.GetKeyDown(phone.ToggleKey))
+            {
+                ToggleFlipPhone();
+            }
+            else if (phone != null && phone.IsOpen && Input.GetKeyDown(KeyCode.Escape))
+            {
+                CloseFlipPhone();
+            }
+        }
+
         private void ValidateBindingsOnAwake()
         {
             if (presentationBindings == null)
@@ -173,6 +186,7 @@ namespace Mandato.Infrastructure
 
         public void OpenFlipPhone() => flipPhoneCoordinator?.OpenPhone();
         public void CloseFlipPhone() => flipPhoneCoordinator?.ClosePhone();
+        public void ToggleFlipPhone() => flipPhoneCoordinator?.TogglePhone();
         public void AuthorizeNextVisitor() => flowCoordinator?.AuthorizeNextVisitor();
 
 #if UNITY_EDITOR

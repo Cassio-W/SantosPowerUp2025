@@ -110,6 +110,19 @@ namespace Mandato.Infrastructure
             }
         }
 
+        public void TogglePhone()
+        {
+            if (phonePresenter == null) return;
+            if (phonePresenter.IsOpen)
+            {
+                ClosePhone();
+            }
+            else
+            {
+                OpenPhone();
+            }
+        }
+
         private void HandlePhoneOpened()
         {
             RefreshPhoneActions();
