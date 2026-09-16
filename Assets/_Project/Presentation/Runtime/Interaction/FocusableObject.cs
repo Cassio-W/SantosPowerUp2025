@@ -144,20 +144,10 @@ namespace Mandato.Presentation
     /// </summary>
     public void EnsureCollider()
     {
-        // Se já possui collider no próprio GameObject, garante dimensões estritamente positivas e espessura suficiente
+        // Se já possui collider no próprio GameObject, garante que esteja ativo
         var existingCollider = GetComponent<Collider>();
         if (existingCollider != null)
         {
-            if (existingCollider is BoxCollider boxExisting)
-            {
-                float lossyY = Mathf.Abs(transform.lossyScale.y);
-                float minSizeY = lossyY > 0.001f ? (0.1f / lossyY) : 1f;
-                boxExisting.size = new Vector3(
-                    Mathf.Max(Mathf.Abs(boxExisting.size.x), 0.5f),
-                    Mathf.Max(Mathf.Abs(boxExisting.size.y), minSizeY),
-                    Mathf.Max(Mathf.Abs(boxExisting.size.z), 0.5f)
-                );
-            }
             existingCollider.enabled = true;
             return;
         }
@@ -171,59 +161,62 @@ namespace Mandato.Presentation
             return;
         }
 
-        // Caso possua renderers nele mesmo ou nos filhos, gera um BoxCollider abrangente
-        if (targetRenderers != null && targetRenderers.Count > 0)
+        // Caso possua malhas nele mesmo ou nos filhos, calcula o Bounding Box local preciso
+        // transformando os 8 vértices locais de cada malha filha para o espaço local deste Transform.
+        var meshFilters = GetComponentsInChildren<MeshFilter>(true);
+        if (meshFilters.Length > 0)
         {
-            var box = gameObject.AddComponent<BoxCollider>();
-
-            Bounds localBounds = new Bounds(Vector3.zero, Vector3.zero);
+            Bounds localBounds = new Bounds();
             bool hasBounds = false;
 
-            foreach (var rend in targetRenderers)
+            foreach (var mf in meshFilters)
             {
-                if (rend == null) continue;
+                if (mf == null || mf.sharedMesh == null) continue;
 
-                Bounds b = rend.bounds;
-                Vector3 minLocal = transform.InverseTransformPoint(b.min);
-                Vector3 maxLocal = transform.InverseTransformPoint(b.max);
+                Bounds b = mf.sharedMesh.bounds;
+                Matrix4x4 childToLocal = transform.worldToLocalMatrix * mf.transform.localToWorldMatrix;
 
-                Vector3 center = (minLocal + maxLocal) * 0.5f;
-                Vector3 size = new Vector3(
-                    Mathf.Abs(maxLocal.x - minLocal.x),
-                    Mathf.Abs(maxLocal.y - minLocal.y),
-                    Mathf.Abs(maxLocal.z - minLocal.z)
-                );
-
-                Bounds rendLocalBounds = new Bounds(center, size);
-
-                if (!hasBounds)
+                Vector3[] corners = new Vector3[8]
                 {
-                    localBounds = rendLocalBounds;
-                    hasBounds = true;
-                }
-                else
+                    childToLocal.MultiplyPoint3x4(new Vector3(b.min.x, b.min.y, b.min.z)),
+                    childToLocal.MultiplyPoint3x4(new Vector3(b.min.x, b.min.y, b.max.z)),
+                    childToLocal.MultiplyPoint3x4(new Vector3(b.min.x, b.max.y, b.min.z)),
+                    childToLocal.MultiplyPoint3x4(new Vector3(b.min.x, b.max.y, b.max.z)),
+                    childToLocal.MultiplyPoint3x4(new Vector3(b.max.x, b.min.y, b.min.z)),
+                    childToLocal.MultiplyPoint3x4(new Vector3(b.max.x, b.min.y, b.max.z)),
+                    childToLocal.MultiplyPoint3x4(new Vector3(b.max.x, b.max.y, b.min.z)),
+                    childToLocal.MultiplyPoint3x4(new Vector3(b.max.x, b.max.y, b.max.z))
+                };
+
+                foreach (var pt in corners)
                 {
-                    localBounds.Encapsulate(rendLocalBounds);
+                    if (!hasBounds)
+                    {
+                        localBounds = new Bounds(pt, Vector3.zero);
+                        hasBounds = true;
+                    }
+                    else
+                    {
+                        localBounds.Encapsulate(pt);
+                    }
                 }
             }
 
             if (hasBounds)
             {
+                var box = gameObject.AddComponent<BoxCollider>();
                 box.center = localBounds.center;
-                float lossyY = Mathf.Abs(transform.lossyScale.y);
-                float minSizeY = lossyY > 0.001f ? (0.1f / lossyY) : 0.05f;
                 box.size = new Vector3(
-                    Mathf.Max(localBounds.size.x, 0.5f),
-                    Mathf.Max(localBounds.size.y, minSizeY),
-                    Mathf.Max(localBounds.size.z, 0.5f)
+                    Mathf.Max(localBounds.size.x, 0.1f),
+                    Mathf.Max(localBounds.size.y, 0.1f),
+                    Mathf.Max(localBounds.size.z, 0.1f)
                 );
-            }
-            else
-            {
-                box.size = Vector3.one;
+                return;
             }
         }
-        else if (GetComponentInChildren<Collider>() == null)
+
+        // Fallback se não houver malhas: adiciona BoxCollider unitário
+        if (GetComponentInChildren<Collider>() == null)
         {
             var box = gameObject.AddComponent<BoxCollider>();
             box.size = Vector3.one;

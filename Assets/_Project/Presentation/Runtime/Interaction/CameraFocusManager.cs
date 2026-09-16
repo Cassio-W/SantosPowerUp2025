@@ -224,6 +224,12 @@ namespace Mandato.Presentation
         {
             if (h.collider == null) continue;
 
+            // Ignora colisores que são filhos diretos da própria câmera (como objetos recolhidos na mão do player)
+            if (h.collider.transform.IsChildOf(targetCamera.transform))
+            {
+                continue;
+            }
+
             // Ignora triggers puros que não possuem scripts interativos (como volumes de som/área)
             bool isInteractiveTrigger = h.collider.isTrigger && (
                 h.collider.GetComponentInParent<WorldSpaceUIInteraction>() != null ||
@@ -245,8 +251,7 @@ namespace Mandato.Presentation
             }
             else
             {
-                // Há um objeto na frente (ex: celular ligado, 3D UI, tela) que não é FocusableObject.
-                // Como está mais próximo da câmera, ele oclui / bloqueia qualquer FocusableObject ao fundo.
+                // Há um objeto sólido na frente (ex: celular ativo, 3D UI, obstáculo) que não é FocusableObject.
                 hitFocusable = null;
             }
 
@@ -304,9 +309,13 @@ namespace Mandato.Presentation
 
     /// <summary>
     /// Verifica de forma precisa se o mouse está sobre um controle interativo de UI (Botão, Slider, etc.).
+    /// Evita que telas vazias, containers transparentes ou painéis de tela cheia do UI Toolkit
+    /// bloqueiem indevidamente o raio de interação 3D com objetos do cenário.
     /// </summary>
     public bool IsPointerOverInteractiveUI()
     {
+        EnsureScreenUIDocuments();
+
         // 1. Verificação direta nos UIDocuments registrados de tela (UI Toolkit)
         for (int i = screenUIDocuments.Count - 1; i >= 0; i--)
         {
@@ -324,10 +333,10 @@ namespace Mandato.Presentation
                     continue;
                 }
 
-                Vector2 screenPos = Input.mousePosition;
+                // RuntimePanelUtils.ScreenToPanel espera Input.mousePosition (origem no canto inferior esquerdo)
                 Vector2 panelPos = RuntimePanelUtils.ScreenToPanel(
                     doc.rootVisualElement.panel,
-                    new Vector2(screenPos.x, Screen.height - screenPos.y)
+                    Input.mousePosition
                 );
                 var picked = doc.rootVisualElement.panel.Pick(panelPos);
 
@@ -337,17 +346,14 @@ namespace Mandato.Presentation
                         picked.GetFirstAncestorOfType<UnityEngine.UIElements.Button>() != null ||
                         picked is UnityEngine.UIElements.TextField ||
                         picked.ClassListContains("decision-btn") ||
-                        picked.GetFirstAncestorOfType<VisualElement>()?.ClassListContains("decision-btn") == true)
+                        picked.ClassListContains("selectable") ||
+                        picked.GetFirstAncestorOfType<VisualElement>()?.ClassListContains("decision-btn") == true ||
+                        picked.GetFirstAncestorOfType<VisualElement>()?.ClassListContains("selectable") == true)
                     {
                         return true;
                     }
                 }
             }
-        }
-
-        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-        {
-            return true;
         }
 
         return false;

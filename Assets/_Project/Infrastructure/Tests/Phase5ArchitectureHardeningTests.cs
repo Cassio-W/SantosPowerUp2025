@@ -142,5 +142,80 @@ namespace Mandato.Infrastructure.Tests
             UnityEngine.Object.DestroyImmediate(backObj);
             UnityEngine.Object.DestroyImmediate(camGo);
         }
+
+        [Test]
+        public void FocusableObject_EnsureCollider_RotatedHierarchy_CalculatesExactLocalBounds()
+        {
+            var root = new GameObject("RotatedRoot");
+            root.transform.position = new Vector3(10, 2, 5);
+            root.transform.rotation = Quaternion.Euler(0, -119.13f, 0);
+
+            var child = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            child.name = "ChildMesh";
+            child.transform.SetParent(root.transform, false);
+            child.transform.localPosition = new Vector3(0, 0, 0);
+            child.transform.localScale = new Vector3(1, 1, 1);
+
+            // Remove o colisor do próprio cubo para testar a geração no pai FocusableObject
+            UnityEngine.Object.DestroyImmediate(child.GetComponent<Collider>());
+
+            var focusable = root.AddComponent<FocusableObject>();
+            focusable.EnsureCollider();
+
+            var box = root.GetComponent<BoxCollider>();
+            Assert.IsNotNull(box, "Deveria ter gerado um BoxCollider no FocusableObject pai.");
+            Assert.Less(Vector3.Distance(box.center, Vector3.zero), 0.01f, "O centro do BoxCollider deve coincidir com o cubo local.");
+            Assert.GreaterOrEqual(box.size.x, 0.99f);
+            Assert.GreaterOrEqual(box.size.y, 0.99f);
+            Assert.GreaterOrEqual(box.size.z, 0.99f);
+
+            UnityEngine.Object.DestroyImmediate(child);
+            UnityEngine.Object.DestroyImmediate(root);
+        }
+
+        [Test]
+        public void CameraFocusManager_Raycast_CameraChildColliders_IgnoredDuringRaycast()
+        {
+            var camGo = new GameObject("TestCamera");
+            var cam = camGo.AddComponent<Camera>();
+            camGo.transform.position = new Vector3(0, 0, 0);
+            camGo.transform.forward = Vector3.forward;
+
+            // Objeto filho da câmera (ex: celular flip recolhido na mão)
+            var camChild = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            camChild.transform.SetParent(camGo.transform, false);
+            camChild.transform.localPosition = new Vector3(0, 0, 0.2f); // Bem na frente da lente
+            camChild.transform.localScale = new Vector3(0.5f, 0.5f, 0.1f);
+
+            // Objeto 3D no cenário do jogo ao fundo
+            var worldTarget = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            worldTarget.transform.position = new Vector3(0, 0, 3f);
+            var focusable = worldTarget.AddComponent<FocusableObject>();
+
+            Ray ray = new Ray(camGo.transform.position, Vector3.forward);
+            RaycastHit[] hits = Physics.RaycastAll(ray, 100f, ~0, QueryTriggerInteraction.Collide);
+            Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+            FocusableObject hitFocusable = null;
+            foreach (var h in hits)
+            {
+                if (h.collider == null) continue;
+                if (h.collider.transform.IsChildOf(camGo.transform)) continue;
+
+                var fo = h.collider.GetComponentInParent<FocusableObject>();
+                if (fo != null && fo.enabled && fo.gameObject.activeInHierarchy)
+                {
+                    hitFocusable = fo;
+                    break;
+                }
+            }
+
+            Assert.IsNotNull(hitFocusable, "Deveria ter atingido o FocusableObject do cenário, ignorando o colisor filho da câmera.");
+            Assert.AreSame(focusable, hitFocusable);
+
+            UnityEngine.Object.DestroyImmediate(camChild);
+            UnityEngine.Object.DestroyImmediate(worldTarget);
+            UnityEngine.Object.DestroyImmediate(camGo);
+        }
     }
 }
