@@ -44,7 +44,7 @@ Material:
     - _ScanlineIntensity: 0.1
     - _ScanlineSpeed: 0.4
     - _ShadowMaskIntensity: 0.18
-    - _VignetteIntensity: 0.4
+    - _VignetteIntensity: 0
     m_Colors:
     - _ColorTint: {r: 0.8160377, g: 0.98222643, b: 1, a: 1}
   m_BuildTextureStacks: []
