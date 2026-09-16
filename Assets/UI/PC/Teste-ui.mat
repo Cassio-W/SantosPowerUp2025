@@ -29,9 +29,9 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Brightness: 1.15
+    - _Brightness: 1
     - _ChromaticAberration: 0.0071
-    - _Contrast: 1.05
+    - _Contrast: 1
     - _CornerSmoothness: 0.0112
     - _Curvature: 0
     - _GlitchBurst: 0
@@ -46,6 +46,6 @@ Material:
     - _ShadowMaskIntensity: 0.18
     - _VignetteIntensity: 0.4
     m_Colors:
-    - _ColorTint: {r: 0.61, g: 0.961, b: 1, a: 1}
+    - _ColorTint: {r: 0.8160377, g: 0.98222643, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
