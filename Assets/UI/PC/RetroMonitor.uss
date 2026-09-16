@@ -1,7 +1,9 @@
-/* ============================================================
-   RETRO CRT MONITOR OS STYLESHEET
-   FONT: RETROTECH.ttf | CLEAN ICON + VALUE LAYOUT
-   ============================================================ */
+/* ========================================================================= */
+/* MANDATO — RETRO CRT WORKSTATION MONITOR OS (SISGOV)                       */
+/*                                                                           */
+/* FONT: RETROTECH.ttf                                                       */
+/* Design Limpo, Alto Contraste, Bevels 2D Retrô, Estados Instantâneos        */
+/* ========================================================================= */
 
 :root {
     -unity-font: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
@@ -9,8 +11,8 @@
 
     width: 100%;
     height: 100%;
-    background-color: #03070a;
-    padding: 16px;
+    background-color: #03070b;
+    padding: 10px;
     box-sizing: border-box;
     justify-content: space-between;
 }
@@ -18,8 +20,8 @@
 .screen-root {
     width: 100%;
     height: 100%;
-    background-color: #03070a;
-    padding: 16px;
+    background-color: #03070b;
+    padding: 10px;
     box-sizing: border-box;
     justify-content: space-between;
 }
@@ -27,21 +29,36 @@
 Label {
     -unity-font: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
     -unity-font-definition: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+    margin: 0;
+    padding: 0;
 }
 
-/* ============================================================
-   COMPACT TOP BAR
-   ============================================================ */
+/* ========================================================================= */
+/* TOP SYSTEM BAR                                                            */
+/* ========================================================================= */
+
 .top-compact-bar {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    background-color: rgba(6, 16, 22, 0.95);
-    border-width: 2px;
-    border-color: #1a4454;
-    border-radius: 6px;
-    padding: 6px 18px;
-    margin-bottom: 14px;
+    background-color: #0a1622;
+    height: 38px;
+    min-height: 38px;
+
+    /* Raised Bevel Border */
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #2b4c6b;
+    border-left-color: #2b4c6b;
+    border-right-color: #04080d;
+    border-bottom-color: #04080d;
+    border-radius: 0;
+
+    padding: 0 14px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
 }
 
 .system-tag-box {
@@ -50,43 +67,90 @@ Label {
 }
 
 .system-status-led {
-    width: 14px;
-    height: 14px;
-    border-radius: 7px;
+    width: 10px;
+    height: 10px;
     background-color: #22c55e;
-    margin-right: 12px;
-    border-width: 2px;
-    border-color: #86efac;
+    margin-right: 10px;
+
+    border-top-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-top-color: #86efac;
+    border-left-color: #86efac;
+    border-right-color: #14532d;
+    border-bottom-color: #14532d;
+    border-radius: 0;
 }
 
 .system-compact-title {
-    font-size: 20px;
+    font-size: 18px;
     color: #38bdf8;
     letter-spacing: 2px;
+    -unity-font-style: bold;
+    margin-right: 16px;
+}
+
+/* SITUAÇÃO (Eixo político / Estado de Governo) */
+.situation-box {
+    background-color: #050d14;
+    padding: 3px 12px;
+    border-top-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-top-color: #02060a;
+    border-left-color: #02060a;
+    border-right-color: #1a3a54;
+    border-bottom-color: #1a3a54;
+    border-radius: 0;
+}
+
+.situation-label {
+    font-size: 13px;
+    color: #4ade80;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+}
+
+.system-top-right-box {
+    flex-direction: row;
+    align-items: center;
 }
 
 .date-compact-chip {
-    font-size: 18px;
+    font-size: 16px;
     color: #99f6e4;
-    background-color: rgba(15, 23, 42, 0.9);
-    border-width: 1px;
-    border-color: #0284c7;
-    border-radius: 4px;
+    background-color: #050e17;
+
+    border-top-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-top-color: #02060b;
+    border-left-color: #02060b;
+    border-right-color: #0284c7;
+    border-bottom-color: #0284c7;
+    border-radius: 0;
+
     padding: 3px 14px;
+    -unity-font-style: bold;
 }
 
-/* ============================================================
-   MAIN VIEWPORT (APPS GRID + CORRUPTION PILLAR)
-   ============================================================ */
+/* ========================================================================= */
+/* MAIN WORKSPACE                                                            */
+/* ========================================================================= */
+
 .main-workspace {
     flex-direction: row;
     flex-grow: 1;
     justify-content: space-between;
 }
 
-/* ============================================================
-   76% APPS CONTAINER (2 ROWS OF 2 CARDS)
-   ============================================================ */
+/* ========================================================================= */
+/* 76% APPS GRID CONTAINER (2 ROWS OF 2 CARDS)                               */
+/* ========================================================================= */
+
 .apps-grid-container {
     width: 76%;
     height: 100%;
@@ -97,32 +161,33 @@ Label {
 .cards-row {
     flex-direction: row;
     width: 100%;
-    height: 48%;
+    height: 48.5%;
     justify-content: space-between;
 }
 
-/* ============================================================
-   GIANT CARD
-   ============================================================ */
+/* ========================================================================= */
+/* GIANT CARD                                                                */
+/* ========================================================================= */
+
 .giant-card {
-    width: 48.5%;
+    width: 48.8%;
     height: 100%;
     position: relative;
-    background-color: rgba(8, 20, 28, 0.95);
-    border-width: 3px;
-    border-color: #1e3a4a;
-    border-radius: 12px;
+    background-color: #09131c;
+
+    border-width: 2px;
+    border-radius: 0;
     overflow: hidden;
     justify-content: flex-end; /* Preenchimento cresce de baixo para cima */
-    transition-property: border-color, scale;
-    transition-duration: 0.15s;
 }
 
+/* Instant hover states (Tech UI: sem transitions) */
 .giant-card:hover {
-    scale: 1.015 1.015;
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
 }
 
-/* Background Fill de nível */
+/* Background Level Fill */
 .card-bg-fill {
     width: 100%;
     position: absolute;
@@ -133,25 +198,25 @@ Label {
 
 .fill-nature-bg {
     background-color: rgba(34, 197, 94, 0.42);
-    border-top-width: 5px;
+    border-top-width: 4px;
     border-top-color: #4ade80;
 }
 
 .fill-economy-bg {
     background-color: rgba(234, 179, 8, 0.42);
-    border-top-width: 5px;
+    border-top-width: 4px;
     border-top-color: #facc15;
 }
 
 .fill-relations-bg {
     background-color: rgba(56, 189, 248, 0.42);
-    border-top-width: 5px;
+    border-top-width: 4px;
     border-top-color: #7dd3fc;
 }
 
 .fill-people-bg {
     background-color: rgba(244, 114, 182, 0.42);
-    border-top-width: 5px;
+    border-top-width: 4px;
     border-top-color: #f472b6;
 }
 
@@ -166,53 +231,108 @@ Label {
 }
 
 .giant-icon {
-    width: 130px;
-    height: 130px;
+    width: 120px;
+    height: 120px;
     -unity-background-scale-mode: scale-to-fit;
     -unity-background-image-tint-color: #ffffff;
 }
 
 .giant-value {
-    font-size: 54px;
+    font-size: 50px;
     color: #ffffff;
-    background-color: rgba(2, 6, 12, 0.94);
-    border-width: 2px;
-    border-radius: 10px;
-    padding: 8px 24px;
+    background-color: #03080e;
+
+    /* Sunken LCD Readout Bevel */
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #010408;
+    border-left-color: #010408;
+    border-right-color: #1e364e;
+    border-bottom-color: #1e364e;
+    border-radius: 0;
+
+    padding: 8px 22px;
     letter-spacing: 2px;
+    -unity-font-style: bold;
 }
 
-/* Cores específicas de bordas e valores */
-.card-nature { border-color: #22c55e; }
-.card-nature .giant-value { color: #4ade80; border-color: #22c55e; }
-.card-nature:hover { border-color: #4ade80; }
+/* Cores específicas de bordas e valores por setor */
+.card-nature {
+    border-top-color: #4ade80;
+    border-left-color: #4ade80;
+    border-right-color: #0f4024;
+    border-bottom-color: #0f4024;
+}
+.card-nature .giant-value {
+    color: #4ade80;
+    border-right-color: #22c55e;
+    border-bottom-color: #22c55e;
+}
 
-.card-economy { border-color: #eab308; }
-.card-economy .giant-value { color: #facc15; border-color: #eab308; }
-.card-economy:hover { border-color: #facc15; }
+.card-economy {
+    border-top-color: #facc15;
+    border-left-color: #facc15;
+    border-right-color: #52400a;
+    border-bottom-color: #52400a;
+}
+.card-economy .giant-value {
+    color: #facc15;
+    border-right-color: #eab308;
+    border-bottom-color: #eab308;
+}
 
-.card-relations { border-color: #38bdf8; }
-.card-relations .giant-value { color: #7dd3fc; border-color: #38bdf8; }
-.card-relations:hover { border-color: #7dd3fc; }
+.card-relations {
+    border-top-color: #7dd3fc;
+    border-left-color: #7dd3fc;
+    border-right-color: #0c3954;
+    border-bottom-color: #0c3954;
+}
+.card-relations .giant-value {
+    color: #7dd3fc;
+    border-right-color: #38bdf8;
+    border-bottom-color: #38bdf8;
+}
 
-.card-people { border-color: #f472b6; }
-.card-people .giant-value { color: #f472b6; border-color: #f472b6; }
-.card-people:hover { border-color: #f472b6; }
+.card-people {
+    border-top-color: #f472b6;
+    border-left-color: #f472b6;
+    border-right-color: #52183c;
+    border-bottom-color: #52183c;
+}
+.card-people .giant-value {
+    color: #f472b6;
+    border-right-color: #f472b6;
+    border-bottom-color: #f472b6;
+}
 
 /* ============================================================
-   21% VERTICAL CORRUPTION PILLAR (FULL HEIGHT)
+   21% VERTICAL CORRUPTION PILLAR (RIGHT PANEL)
    ============================================================ */
 .giant-corruption-pillar {
-    width: 21%;
+    width: 21.5%;
     height: 100%;
-    margin-left: 18px;
     position: relative;
-    background-color: rgba(26, 4, 8, 0.95);
-    border-width: 3px;
-    border-color: #dc2626;
-    border-radius: 12px;
+    background-color: #1a0609;
+
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #ff3344;
+    border-left-color: #ff3344;
+    border-right-color: #4a080f;
+    border-bottom-color: #4a080f;
+    border-radius: 0;
+
     overflow: hidden;
-    justify-content: flex-end; /* Preenchimento cresce de baixo para cima */
+    justify-content: flex-end;
+}
+
+.giant-corruption-pillar:hover {
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
 }
 
 .corruption-bg-fill {
@@ -222,28 +342,37 @@ Label {
     left: 0;
     right: 0;
     background-color: rgba(220, 38, 38, 0.65);
-    border-top-width: 6px;
+    border-top-width: 5px;
     border-top-color: #ff2244;
 }
 
 .corruption-foreground {
     width: 100%;
     height: 100%;
-    padding: 16px 10px;
+    padding: 14px 10px;
     justify-content: space-between;
     align-items: center;
 }
 
 .giant-corruption-value {
-    font-size: 50px;
+    font-size: 46px;
     color: #ff3344;
-    background-color: rgba(10, 2, 4, 0.94);
-    border-width: 2px;
-    border-color: #ef4444;
-    border-radius: 10px;
+    background-color: #0a0204;
+
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #040102;
+    border-left-color: #040102;
+    border-right-color: #ef4444;
+    border-bottom-color: #ef4444;
+    border-radius: 0;
+
     padding: 6px 18px;
-    margin-top: 8px;
+    margin-top: 4px;
     letter-spacing: 2px;
+    -unity-font-style: bold;
 }
 
 .corruption-center-box {
@@ -254,8 +383,8 @@ Label {
 }
 
 .giant-corruption-icon {
-    width: 100px;
-    height: 100px;
+    width: 95px;
+    height: 95px;
     -unity-background-scale-mode: scale-to-fit;
     -unity-background-image-tint-color: #ffffff;
 }
@@ -267,14 +396,23 @@ Label {
     position: absolute;
     top: 6px;
     right: 6px;
-    width: 56px;
-    height: 56px;
-    border-radius: 8px;
-    background-color: rgba(6, 10, 16, 0.94);
-    border-width: 3px;
+    width: 46px;
+    height: 46px;
+    background-color: #060b12;
+
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #3b5670;
+    border-left-color: #3b5670;
+    border-right-color: #020508;
+    border-bottom-color: #020508;
+    border-radius: 0;
+
     justify-content: center;
     align-items: center;
-    font-size: 38px;
+    font-size: 30px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     opacity: 0;
@@ -290,7 +428,6 @@ Label {
     color: #ef4444;
 }
 
-/* Para corrupção: ▲ = piora (vermelho), ▼ = melhora (verde) */
 .attr-arrow.arrow-up-bad {
     border-color: #ef4444;
     color: #ef4444;
@@ -302,7 +439,7 @@ Label {
 }
 
 /* ============================================================
-   GHOST FILL — preenchimento fantasma de variação
+   GHOST FILL — Preenchimento Fantasma
    ============================================================ */
 .ghost-fill {
     position: absolute;
@@ -314,31 +451,31 @@ Label {
 
 .ghost-nature {
     background-color: rgba(34, 197, 94, 0.22);
-    border-top-width: 4px;
+    border-top-width: 3px;
     border-top-color: rgba(74, 222, 128, 0.65);
 }
 
 .ghost-economy {
     background-color: rgba(234, 179, 8, 0.22);
-    border-top-width: 4px;
+    border-top-width: 3px;
     border-top-color: rgba(250, 204, 21, 0.65);
 }
 
 .ghost-relations {
     background-color: rgba(56, 189, 248, 0.22);
-    border-top-width: 4px;
+    border-top-width: 3px;
     border-top-color: rgba(125, 211, 252, 0.65);
 }
 
 .ghost-people {
     background-color: rgba(244, 114, 182, 0.22);
-    border-top-width: 4px;
+    border-top-width: 3px;
     border-top-color: rgba(244, 114, 182, 0.65);
 }
 
 .ghost-corruption {
     background-color: rgba(220, 38, 38, 0.22);
-    border-top-width: 4px;
+    border-top-width: 3px;
     border-top-color: rgba(255, 34, 68, 0.65);
 }
 
@@ -351,21 +488,66 @@ Label {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.72);
+    background-color: rgba(15, 2, 4, 0.9);
+    border-width: 2px;
+    border-color: #ef4444;
+    border-radius: 0;
     justify-content: center;
     align-items: center;
 }
 
 .dead-x-label {
-    font-size: 72px;
+    font-size: 68px;
     color: #ef4444;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    -unity-background-image-tint-color: #ef4444;
 }
 
 /* ============================================================
-   ESTADO ZERADO — card-dead
+   BOTTOM STATUS BAR (Terminal Log + Versão do Sistema)
+   ============================================================ */
+.bottom-status-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #08121a;
+    height: 28px;
+    min-height: 28px;
+
+    /* Inset Terminal Bevel */
+    border-top-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-top-color: #03070b;
+    border-left-color: #03070b;
+    border-right-color: #1e364e;
+    border-bottom-color: #1e364e;
+    border-radius: 0;
+
+    padding: 0 12px;
+    margin-top: 8px;
+    flex-shrink: 0;
+}
+
+.dynamic-log-label {
+    font-size: 12px;
+    color: #4ade80;
+    letter-spacing: 1px;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.system-version-label {
+    font-size: 11px;
+    color: #64748b;
+    letter-spacing: 1px;
+    margin-left: 12px;
+}
+
+/* ============================================================
+   ESTADOS AUXILIARES & SHAKE
    ============================================================ */
 .card-dead {
     border-color: #5a0000;
@@ -375,37 +557,20 @@ Label {
     background-color: rgba(100, 0, 0, 0.55);
 }
 
-/* ============================================================
-   ESTADO 100% — card-full (brilho pulsante APENAS na borda)
-   ============================================================ */
 .card-full {
     border-color: rgba(255, 255, 255, 0.85);
-    transition-property: border-color;
-    transition-duration: 0.6s;
-    transition-timing-function: ease-in-out;
 }
 
 .card-full-glow {
-    border-color: rgba(255, 255, 255, 0.25);
-    transition-property: border-color;
-    transition-duration: 0.6s;
-    transition-timing-function: ease-in-out;
+    border-color: rgba(255, 255, 255, 0.35);
 }
 
-/* ============================================================
-   HELPER — hidden
-   ============================================================ */
 .hidden {
+    display: none;
     visibility: hidden;
     opacity: 0;
 }
 
-/* ============================================================
-   SHAKE — classe aplicada e removida via script
-   ============================================================ */
 .card-shaking {
     translate: 5px 0;
-    transition-property: translate;
-    transition-duration: 0.05s;
-    transition-timing-function: ease-in-out;
 }

@@ -44,6 +44,7 @@ namespace Mandato.UI
 
         // Header, Data & Logs
         private Label dateLabel;
+        private Label situationLabel;
         private Label dynamicLogEntry;
 
         // Valores interpolados
@@ -152,6 +153,7 @@ namespace Mandato.UI
 
             // Header & Data
             dateLabel = root.Q<Label>("date-display") ?? root.Q<Label>("monitor-date") ?? root.Q<Label>("date-label");
+            situationLabel = root.Q<Label>("situation-label") ?? root.Q<Label>("situation-display");
             dynamicLogEntry = root.Q<Label>("dynamic-log-entry");
         }
 
@@ -300,6 +302,16 @@ namespace Mandato.UI
             if (dateLabel != null && !string.IsNullOrEmpty(displayDate))
             {
                 dateLabel.text = $"MANDATO: {displayDate}";
+            }
+        }
+
+        public void UpdateSituation(string situationText)
+        {
+            if (situationLabel != null && !string.IsNullOrEmpty(situationText))
+            {
+                situationLabel.text = situationText.StartsWith("SITUAÇÃO:", StringComparison.OrdinalIgnoreCase)
+                    ? situationText
+                    : $"SITUAÇÃO: {situationText}";
             }
         }
 
