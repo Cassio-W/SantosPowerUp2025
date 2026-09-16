@@ -563,3 +563,38 @@ Label {
 .card-shaking {
     translate: 5px 0;
 }
+
+/* ============================================================
+   FEEDBACK DE HOVER 3D (WorldSpaceUIInteraction)
+   ============================================================ */
+.giant-card.hovered {
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
+    border-right-color: #3b5670;
+    border-bottom-color: #3b5670;
+    background-color: #0f1e2c;
+}
+
+.giant-card.hovered .giant-value {
+    background-color: #050f18;
+    border-top-color: #0a1622;
+    border-left-color: #0a1622;
+    border-right-color: #ffffff;
+    border-bottom-color: #ffffff;
+}
+
+.giant-corruption-pillar.hovered {
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
+    border-right-color: #7f1d1d;
+    border-bottom-color: #7f1d1d;
+    background-color: #2b080c;
+}
+
+.giant-corruption-pillar.hovered .giant-corruption-value {
+    background-color: #120306;
+    border-top-color: #1a0609;
+    border-left-color: #1a0609;
+    border-right-color: #ffffff;
+    border-bottom-color: #ffffff;
+}

@@ -64,6 +64,7 @@ namespace Mandato.Presentation
     public Vector2 LastHitUV => _lastHitUV;
     public Vector2 LastPanelPosition => _lastPanelPosition;
     public VisualElement LastHoveredElement => _lastHoveredElement;
+    public Collider ScreenCollider => _collider;
 
     private void Awake()
     {
@@ -72,6 +73,12 @@ namespace Mandato.Presentation
     }
 
     private void OnEnable()
+    {
+        EnsureCollider();
+        EnsureReferences();
+    }
+
+    private void Start()
     {
         EnsureCollider();
         EnsureReferences();
@@ -154,21 +161,40 @@ namespace Mandato.Presentation
         bool hitFound = false;
         RaycastHit validHit = default;
 
-        // 1. Raycast de cena com Physics.Raycast (obtém hit.textureCoord nativo exato do PhysX)
-        if (Physics.Raycast(ray, out RaycastHit sceneHit, maxRaycastDistance, interactableLayers))
+        // 1. Se CameraFocusManager estiver ativo, consome a resolução centralizada de raycast de primeiro plano
+        if (CameraFocusManager.Instance != null)
         {
-            if (sceneHit.collider == _collider || sceneHit.transform == transform || sceneHit.transform.IsChildOf(transform))
+            if (CameraFocusManager.Instance.ActiveWorldSpaceUI == this ||
+                (CameraFocusManager.Instance.ActiveWorldSpaceUI != null &&
+                 CameraFocusManager.Instance.ActiveWorldSpaceUI.transform.IsChildOf(transform)))
             {
-                validHit = sceneHit;
                 hitFound = true;
+                validHit = CameraFocusManager.Instance.ActiveRaycastHit;
             }
         }
-
-        // 2. Fallback de colisor direto caso haja layers ou triggers no caminho
-        if (!hitFound && _collider != null && _collider.Raycast(ray, out RaycastHit directHit, maxRaycastDistance))
+        else
         {
-            validHit = directHit;
-            hitFound = true;
+            // Fallback autônomo (ex: cenas de teste unitário isoladas sem CameraFocusManager)
+            RaycastHit[] hits = Physics.RaycastAll(ray, maxRaycastDistance, interactableLayers, QueryTriggerInteraction.Collide);
+            Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+            foreach (var h in hits)
+            {
+                if (h.collider == null) continue;
+
+                if (h.collider == _collider || h.transform == transform || h.transform.IsChildOf(transform))
+                {
+                    validHit = h;
+                    hitFound = true;
+                    break;
+                }
+            }
+
+            if (!hitFound && _collider != null && _collider.Raycast(ray, out RaycastHit directHit, maxRaycastDistance))
+            {
+                validHit = directHit;
+                hitFound = true;
+            }
         }
 
         _isCurrentlyHit = hitFound;
@@ -176,7 +202,7 @@ namespace Mandato.Presentation
         if (hitFound)
         {
             _lastHitWorldPoint = validHit.point;
-            Vector2 rawUV = CalculateUV(validHit);
+            Vector2 rawUV = CalculateUV(validHit, ray);
             Vector2 calibratedUV = ApplyUVCalibration(rawUV);
 
             _lastHitUV = calibratedUV;
@@ -227,15 +253,27 @@ namespace Mandato.Presentation
         }
     }
 
-    private Vector2 CalculateUV(RaycastHit hit)
+    private Vector2 CalculateUV(RaycastHit hit, Ray ray)
     {
-        // 1. Se o colisor for MeshCollider, PhysX calcula a interpolação exata dos vértices da malha
+        // 1. Se o colisor atingido for o MeshCollider deste componente, usa o textureCoord exato do PhysX
+        if (hit.collider is MeshCollider && (hit.collider == _collider || hit.transform == transform))
+        {
+            return hit.textureCoord;
+        }
+
+        // 2. Se temos um MeshCollider configurado neste componente, faz raycast direto para obter textureCoord nativo
+        if (_collider is MeshCollider meshCol && _collider.Raycast(ray, out RaycastHit screenHit, maxRaycastDistance))
+        {
+            return screenHit.textureCoord;
+        }
+
+        // 3. Se hit.collider for outro MeshCollider filho/válido:
         if (hit.collider is MeshCollider)
         {
             return hit.textureCoord;
         }
 
-        // 2. Fallback para BoxCollider ou outros: calcula UV baseado nas dimensões locais da face atingida
+        // 4. Fallback para BoxCollider ou planos: calcula UV baseado nas dimensões locais da face atingida
         Vector3 localPoint = transform.InverseTransformPoint(hit.point);
         Vector3 localNormal = transform.InverseTransformDirection(hit.normal);
 
@@ -327,6 +365,8 @@ namespace Mandato.Presentation
         {
             if (_lastHoveredElement != null)
             {
+                SetHoverClass(_lastHoveredElement, false);
+
                 using var outEvent = MouseOutEvent.GetPooled();
                 outEvent.target = _lastHoveredElement;
                 _lastHoveredElement.SendEvent(outEvent);
@@ -338,8 +378,10 @@ namespace Mandato.Presentation
 
             _lastHoveredElement = target;
 
-            if (target != null)
+            if (target != null && target != uiDocument.rootVisualElement)
             {
+                SetHoverClass(target, true);
+
                 using var overEvent = MouseOverEvent.GetPooled();
                 overEvent.target = target;
                 target.SendEvent(overEvent);
@@ -355,7 +397,7 @@ namespace Mandato.Presentation
             }
         }
 
-        if (target != null)
+        if (target != null && target != uiDocument.rootVisualElement)
         {
             using var moveEvent = PointerMoveEvent.GetPooled();
             moveEvent.target = target;
@@ -367,10 +409,43 @@ namespace Mandato.Presentation
         }
     }
 
+    private void SetHoverClass(VisualElement el, bool isHovered)
+    {
+        if (el == null || uiDocument == null || el == uiDocument.rootVisualElement) return;
+
+        if (isHovered)
+        {
+            el.AddToClassList("hovered");
+        }
+        else
+        {
+            el.RemoveFromClassList("hovered");
+        }
+
+        // Também aplica/remove nos ancestrais diretos que possam conter regras de estilo (ex: .giant-card, .giant-corruption-pillar, .app-tile, Button)
+        var ancestor = el.parent;
+        while (ancestor != null && ancestor != uiDocument.rootVisualElement)
+        {
+            if (ancestor.ClassListContains("giant-card") ||
+                ancestor.ClassListContains("giant-corruption-pillar") ||
+                ancestor.ClassListContains("app-tile") ||
+                ancestor is Button)
+            {
+                if (isHovered)
+                    ancestor.AddToClassList("hovered");
+                else
+                    ancestor.RemoveFromClassList("hovered");
+            }
+            ancestor = ancestor.parent;
+        }
+    }
+
     private void ClearHover()
     {
         if (_lastHoveredElement != null)
         {
+            SetHoverClass(_lastHoveredElement, false);
+
             using var outEvent = MouseOutEvent.GetPooled();
             outEvent.target = _lastHoveredElement;
             _lastHoveredElement.SendEvent(outEvent);

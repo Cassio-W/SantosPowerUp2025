@@ -5528,7 +5528,7 @@ MonoBehaviour:
   unfocusSound: {fileID: 0}
   unfocusSoundVolume: 0.8
   allowClickToFocus: 1
-  unfocusOnSecondClick: 0
+  unfocusOnSecondClick: 1
   onHoverEnter:
     m_PersistentCalls:
       m_Calls: []

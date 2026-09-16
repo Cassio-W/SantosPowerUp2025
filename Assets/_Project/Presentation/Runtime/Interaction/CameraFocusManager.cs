@@ -78,11 +78,19 @@ namespace Mandato.Presentation
 
     private FocusableObject _currentFocusedObject;
     private FocusableObject _currentHoveredObject;
+    private WorldSpaceUIInteraction _activeWorldSpaceUI;
+    private FocusableObject _activeFocusable;
+    private RaycastHit _activeRaycastHit;
+    private bool _hasActiveInteractiveHit;
     private Coroutine _cameraMoveCoroutine;
     private Coroutine _effectCoroutine;
 
     public FocusableObject CurrentFocusedObject => _currentFocusedObject;
     public FocusableObject CurrentHoveredObject => _currentHoveredObject;
+    public WorldSpaceUIInteraction ActiveWorldSpaceUI => _activeWorldSpaceUI;
+    public FocusableObject ActiveFocusable => _activeFocusable;
+    public RaycastHit ActiveRaycastHit => _activeRaycastHit;
+    public bool HasActiveInteractiveHit => _hasActiveInteractiveHit;
     public bool HasActiveFocus => _currentFocusedObject != null;
     public Camera TargetCamera => targetCamera;
 
@@ -198,9 +206,9 @@ namespace Mandato.Presentation
     }
 
     /// <summary>
-    /// Processa o raio do mouse para deteccao de hover e clique nos objetos interativos.
-    /// Respeita a oclusão física: se houver outro objeto sólido ou elemento interativo na frente (ex: celular ligado, 3D UI, obstáculo),
-    /// o raio não perfura o objeto em primeiro plano para focar elementos ao fundo.
+    /// Processa o raio do mouse para deteccao centralizada de hover e clique nos objetos interativos.
+    /// Respeita a oclusão física: o primeiro objeto sólido ou interativo encontrado ao longo do raio (ex: celular ligado em primeiro plano)
+    /// impede que o raio perfure e atinja objetos interativos ao fundo (ex: PC).
     /// </summary>
     private void HandleMouseRaycast()
     {
@@ -218,21 +226,31 @@ namespace Mandato.Presentation
         Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
 
         FocusableObject hitFocusable = null;
+        WorldSpaceUIInteraction hitWorldSpaceUI = null;
+        RaycastHit selectedHit = default;
+        RaycastHit uiHit = default;
         bool hasHitObstacle = false;
 
         foreach (var h in hits)
         {
             if (h.collider == null) continue;
 
-            // Ignora colisores que são filhos diretos da própria câmera (como objetos recolhidos na mão do player)
-            if (h.collider.transform.IsChildOf(targetCamera.transform))
+            // Ignora colisores que são filhos diretos da câmera e NÃO possuem scripts interativos (ex: mãos/corpo do jogador)
+            if (targetCamera != null && h.collider.transform.IsChildOf(targetCamera.transform))
             {
-                continue;
+                var camWsUI = h.collider.GetComponentInParent<WorldSpaceUIInteraction>() ??
+                              h.collider.GetComponentInChildren<WorldSpaceUIInteraction>();
+                var camFo = h.collider.GetComponentInParent<FocusableObject>();
+                if (camWsUI == null && camFo == null)
+                {
+                    continue;
+                }
             }
 
             // Ignora triggers puros que não possuem scripts interativos (como volumes de som/área)
             bool isInteractiveTrigger = h.collider.isTrigger && (
                 h.collider.GetComponentInParent<WorldSpaceUIInteraction>() != null ||
+                h.collider.GetComponentInChildren<WorldSpaceUIInteraction>() != null ||
                 h.collider.GetComponentInParent<FocusableObject>() != null
             );
 
@@ -242,27 +260,59 @@ namespace Mandato.Presentation
             }
 
             // O primeiro colisor sólido ou interativo encontrado ao longo do raio define o obstáculo frontal
-            hasHitObstacle = true;
-
-            var fo = h.collider.GetComponentInParent<FocusableObject>();
-            if (fo != null && fo.enabled && fo.gameObject.activeInHierarchy)
+            if (!hasHitObstacle)
             {
-                hitFocusable = fo;
+                hasHitObstacle = true;
+                selectedHit = h;
+
+                var wsUI = h.collider.GetComponentInParent<WorldSpaceUIInteraction>() ??
+                           h.collider.GetComponentInChildren<WorldSpaceUIInteraction>();
+                var fo = h.collider.GetComponentInParent<FocusableObject>();
+
+                if (wsUI != null && wsUI.enabled && wsUI.gameObject.activeInHierarchy)
+                {
+                    hitWorldSpaceUI = wsUI;
+                    uiHit = h;
+                }
+
+                if (fo != null && fo.enabled && fo.gameObject.activeInHierarchy)
+                {
+                    hitFocusable = fo;
+                }
+            }
+
+            // Se a entidade possui WorldSpaceUIInteraction, busca entre os hits dessa mesma entidade o hit exato no colisor da tela
+            if (hitWorldSpaceUI != null)
+            {
+                if (h.collider == hitWorldSpaceUI.ScreenCollider ||
+                    h.transform == hitWorldSpaceUI.transform ||
+                    h.transform.IsChildOf(hitWorldSpaceUI.transform))
+                {
+                    uiHit = h;
+                    break;
+                }
             }
             else
             {
-                // Há um objeto sólido na frente (ex: celular ativo, 3D UI, obstáculo) que não é FocusableObject.
-                hitFocusable = null;
+                // Se não há WorldSpaceUIInteraction na entidade frontal, encerra no primeiro colisor
+                break;
             }
-
-            // Para no primeiro colisor válido (não permite que o raio perfure objetos em primeiro plano)
-            break;
         }
 
-        // Atualizacao de Hover
+        _activeWorldSpaceUI = hitWorldSpaceUI;
+        _activeFocusable = hitFocusable;
+        _activeRaycastHit = (hitWorldSpaceUI != null && uiHit.collider != null) ? uiHit : selectedHit;
+        _hasActiveInteractiveHit = (hitWorldSpaceUI != null || hitFocusable != null);
+
+        // Atualizacao de Hover para FocusableObject
         if (hitFocusable != _currentHoveredObject)
         {
-            ClearHover();
+            if (_currentHoveredObject != null)
+            {
+                _currentHoveredObject.NotifyHoverExit();
+                OnObjectHoverChanged?.Invoke(_currentHoveredObject, false);
+                _currentHoveredObject = null;
+            }
 
             if (hitFocusable != null && hitFocusable.enabled)
             {
@@ -275,7 +325,20 @@ namespace Mandato.Presentation
         // Clique do Mouse
         if (Input.GetMouseButtonDown(0))
         {
-            if (hitFocusable != null && hitFocusable.enabled)
+            if (hitWorldSpaceUI != null)
+            {
+                // Se estamos focando um objeto (ex: computador) a partir da visão distante e clicamos nele:
+                if (hitFocusable != null && hitFocusable.enabled && (!HasActiveFocus || CurrentFocusedObject != hitFocusable))
+                {
+                    if (hitFocusable.AllowClickToFocus)
+                    {
+                        hitFocusable.NotifyClicked();
+                    }
+                }
+                // Se já estiver focado no objeto ou se for um objeto puramente de UI (ex: Flip Phone),
+                // a interação ocorre diretamente no WorldSpaceUIInteraction sem interferir no foco da câmera.
+            }
+            else if (hitFocusable != null && hitFocusable.enabled)
             {
                 hitFocusable.NotifyClicked();
             }
@@ -291,6 +354,10 @@ namespace Mandato.Presentation
     /// </summary>
     public void ClearHover()
     {
+        _activeWorldSpaceUI = null;
+        _activeFocusable = null;
+        _hasActiveInteractiveHit = false;
+
         if (_currentHoveredObject != null)
         {
             _currentHoveredObject.NotifyHoverExit();

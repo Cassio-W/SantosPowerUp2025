@@ -28,7 +28,7 @@
                 <ui:VisualElement class="cards-row" picking-mode="Ignore">
                     
                     <!-- CARD 1: NATUREZA / CLIMA -->
-                    <ui:VisualElement name="app-nature" class="giant-card card-nature" picking-mode="Ignore">
+                    <ui:VisualElement name="app-nature" class="giant-card card-nature" picking-mode="Position">
                         <!-- Fill Principal -->
                         <ui:VisualElement name="fill-nature" class="card-bg-fill fill-nature-bg" style="height: 50%;" picking-mode="Ignore" />
                         <!-- Ghost Fill -->
@@ -50,7 +50,7 @@
                     </ui:VisualElement>
 
                     <!-- CARD 2: ECONOMIA -->
-                    <ui:VisualElement name="app-economy" class="giant-card card-economy" picking-mode="Ignore">
+                    <ui:VisualElement name="app-economy" class="giant-card card-economy" picking-mode="Position">
                         <ui:VisualElement name="fill-economy" class="card-bg-fill fill-economy-bg" style="height: 50%;" picking-mode="Ignore" />
                         <ui:VisualElement name="ghost-fill-economy" class="ghost-fill ghost-economy" style="height: 50%; opacity: 0;" picking-mode="Ignore" />
                         
@@ -71,7 +71,7 @@
                 <ui:VisualElement class="cards-row" picking-mode="Ignore">
                     
                     <!-- CARD 3: RELAÇÕES INTERNACIONAIS -->
-                    <ui:VisualElement name="app-relations" class="giant-card card-relations" picking-mode="Ignore">
+                    <ui:VisualElement name="app-relations" class="giant-card card-relations" picking-mode="Position">
                         <ui:VisualElement name="fill-relations" class="card-bg-fill fill-relations-bg" style="height: 50%;" picking-mode="Ignore" />
                         <ui:VisualElement name="ghost-fill-relations" class="ghost-fill ghost-relations" style="height: 50%; opacity: 0;" picking-mode="Ignore" />
                         
@@ -88,7 +88,7 @@
                     </ui:VisualElement>
 
                     <!-- CARD 4: POPULAÇÃO -->
-                    <ui:VisualElement name="app-people" class="giant-card card-people" picking-mode="Ignore">
+                    <ui:VisualElement name="app-people" class="giant-card card-people" picking-mode="Position">
                         <ui:VisualElement name="fill-people" class="card-bg-fill fill-people-bg" style="height: 50%;" picking-mode="Ignore" />
                         <ui:VisualElement name="ghost-fill-people" class="ghost-fill ghost-people" style="height: 50%; opacity: 0;" picking-mode="Ignore" />
                         
@@ -107,7 +107,7 @@
             </ui:VisualElement>
 
             <!-- GIANT VERTICAL CORRUPTION PILLAR -->
-            <ui:VisualElement name="corruption-pillar" class="giant-corruption-pillar" picking-mode="Ignore">
+            <ui:VisualElement name="corruption-pillar" class="giant-corruption-pillar" picking-mode="Position">
                 <ui:VisualElement name="fill-corruption" class="corruption-bg-fill" style="height: 0%;" picking-mode="Ignore" />
                 <ui:VisualElement name="ghost-fill-corruption" class="ghost-fill ghost-corruption" style="height: 0%; opacity: 0;" picking-mode="Ignore" />
                 

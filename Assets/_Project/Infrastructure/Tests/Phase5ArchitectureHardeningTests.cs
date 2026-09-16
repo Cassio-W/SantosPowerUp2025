@@ -95,14 +95,18 @@ namespace Mandato.Infrastructure.Tests
 
             var manager = camGo.AddComponent<CameraFocusManager>();
 
-            // Objeto na frente (ex: celular) com colisor, SEM FocusableObject
+            // Objeto na frente (ex: celular) com colisor, SEM FocusableObject e SEM WorldSpaceUIInteraction
             var frontObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            frontObj.name = "FrontObstacle";
             frontObj.transform.position = new Vector3(0, 0, 0);
 
             // Objeto ao fundo (ex: computador) com colisor E FocusableObject
             var backObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            backObj.name = "BackgroundPC";
             backObj.transform.position = new Vector3(0, 0, 5);
             var focusable = backObj.AddComponent<FocusableObject>();
+
+            Physics.SyncTransforms();
 
             Ray ray = new Ray(camGo.transform.position, Vector3.forward);
             RaycastHit[] hits = Physics.RaycastAll(ray, 100f, ~0, QueryTriggerInteraction.Collide);
@@ -114,6 +118,15 @@ namespace Mandato.Infrastructure.Tests
             foreach (var h in hits)
             {
                 if (h.collider == null) continue;
+
+                // Ignora colisores que são filhos diretos da câmera sem scripts interativos
+                if (h.collider.transform.IsChildOf(camGo.transform))
+                {
+                    var camWsUI = h.collider.GetComponentInParent<WorldSpaceUIInteraction>() ??
+                                  h.collider.GetComponentInChildren<WorldSpaceUIInteraction>();
+                    var camFo = h.collider.GetComponentInParent<FocusableObject>();
+                    if (camWsUI == null && camFo == null) continue;
+                }
 
                 bool isInteractiveTrigger = h.collider.isTrigger && (
                     h.collider.GetComponentInParent<WorldSpaceUIInteraction>() != null ||
@@ -192,6 +205,8 @@ namespace Mandato.Infrastructure.Tests
             worldTarget.transform.position = new Vector3(0, 0, 3f);
             var focusable = worldTarget.AddComponent<FocusableObject>();
 
+            Physics.SyncTransforms();
+
             Ray ray = new Ray(camGo.transform.position, Vector3.forward);
             RaycastHit[] hits = Physics.RaycastAll(ray, 100f, ~0, QueryTriggerInteraction.Collide);
             Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
@@ -200,7 +215,13 @@ namespace Mandato.Infrastructure.Tests
             foreach (var h in hits)
             {
                 if (h.collider == null) continue;
-                if (h.collider.transform.IsChildOf(camGo.transform)) continue;
+                if (h.collider.transform.IsChildOf(camGo.transform))
+                {
+                    var camWsUI = h.collider.GetComponentInParent<WorldSpaceUIInteraction>() ??
+                                  h.collider.GetComponentInChildren<WorldSpaceUIInteraction>();
+                    var camFo = h.collider.GetComponentInParent<FocusableObject>();
+                    if (camWsUI == null && camFo == null) continue;
+                }
 
                 var fo = h.collider.GetComponentInParent<FocusableObject>();
                 if (fo != null && fo.enabled && fo.gameObject.activeInHierarchy)
@@ -215,6 +236,113 @@ namespace Mandato.Infrastructure.Tests
 
             UnityEngine.Object.DestroyImmediate(camChild);
             UnityEngine.Object.DestroyImmediate(worldTarget);
+            UnityEngine.Object.DestroyImmediate(camGo);
+        }
+
+        [Test]
+        public void WorldSpaceUIInteraction_RaycastAll_DetectsChildColliderEvenWhenParentHasBoxCollider()
+        {
+            var parentGo = new GameObject("ParentPC");
+            parentGo.transform.position = new Vector3(0, 0, 5);
+            var parentBox = parentGo.AddComponent<BoxCollider>();
+            parentBox.size = new Vector3(2, 2, 2);
+
+            var childScreen = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            childScreen.name = "Screen";
+            childScreen.transform.SetParent(parentGo.transform, false);
+            childScreen.transform.localPosition = new Vector3(0, 0, 0);
+            childScreen.transform.localRotation = Quaternion.identity;
+
+            var wsUI = childScreen.AddComponent<WorldSpaceUIInteraction>();
+            wsUI.EnsureCollider();
+
+            Physics.SyncTransforms();
+
+            Ray ray = new Ray(new Vector3(0, 0, 0), Vector3.forward);
+            RaycastHit[] hits = Physics.RaycastAll(ray, 100f, ~0, QueryTriggerInteraction.Collide);
+            Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+            Collider childCollider = childScreen.GetComponent<Collider>();
+            RaycastHit validHit = default;
+            bool hitFound = false;
+
+            foreach (var h in hits)
+            {
+                if (h.collider == null) continue;
+                if (h.collider == childCollider || h.transform == childScreen.transform || h.transform.IsChildOf(childScreen.transform))
+                {
+                    validHit = h;
+                    hitFound = true;
+                    break;
+                }
+            }
+
+            Assert.IsTrue(hitFound, "RaycastAll deve detectar o colisor da tela filha mesmo com BoxCollider no pai.");
+            Assert.AreSame(childCollider, validHit.collider);
+
+            UnityEngine.Object.DestroyImmediate(parentGo);
+        }
+
+        [Test]
+        public void CameraFocusManager_ForegroundWorldSpaceUI_BlocksBackgroundFocusableObjectFromFocus()
+        {
+            var camGo = new GameObject("TestCamera");
+            var cam = camGo.AddComponent<Camera>();
+            camGo.transform.position = new Vector3(0, 0, 0);
+            camGo.transform.forward = Vector3.forward;
+
+            // Objeto em primeiro plano (ex: Flip Phone com WorldSpaceUIInteraction ativo)
+            var foregroundPhone = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            foregroundPhone.name = "ForegroundPhone";
+            foregroundPhone.transform.position = new Vector3(0, 0, 0.5f);
+            foregroundPhone.transform.rotation = Quaternion.identity;
+            var phoneUI = foregroundPhone.AddComponent<WorldSpaceUIInteraction>();
+            phoneUI.EnsureCollider();
+
+            // Objeto ao fundo (ex: PC com FocusableObject)
+            var backgroundPC = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            backgroundPC.name = "BackgroundPC";
+            backgroundPC.transform.position = new Vector3(0, 0, 3.0f);
+            var pcFocus = backgroundPC.AddComponent<FocusableObject>();
+            pcFocus.EnsureCollider();
+
+            Physics.SyncTransforms();
+
+            Ray ray = new Ray(camGo.transform.position, Vector3.forward);
+            RaycastHit[] hits = Physics.RaycastAll(ray, 100f, ~0, QueryTriggerInteraction.Collide);
+            Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+            FocusableObject hitFocusable = null;
+            WorldSpaceUIInteraction hitWorldSpaceUI = null;
+
+            foreach (var h in hits)
+            {
+                if (h.collider == null) continue;
+
+                var wsUI = h.collider.GetComponentInParent<WorldSpaceUIInteraction>() ??
+                           h.collider.GetComponentInChildren<WorldSpaceUIInteraction>();
+                var fo = h.collider.GetComponentInParent<FocusableObject>();
+
+                if (wsUI != null && wsUI.enabled && wsUI.gameObject.activeInHierarchy)
+                {
+                    hitWorldSpaceUI = wsUI;
+                }
+
+                if (fo != null && fo.enabled && fo.gameObject.activeInHierarchy)
+                {
+                    hitFocusable = fo;
+                }
+
+                // Primeiro colisor frontal sólido/interativo encerra a busca
+                break;
+            }
+
+            Assert.IsNotNull(hitWorldSpaceUI, "O WorldSpaceUI do celular em primeiro plano deve ser atingido.");
+            Assert.AreSame(phoneUI, hitWorldSpaceUI);
+            Assert.IsNull(hitFocusable, "O FocusableObject do PC ao fundo NÃO deve ser selecionado quando o celular está na frente.");
+
+            UnityEngine.Object.DestroyImmediate(foregroundPhone);
+            UnityEngine.Object.DestroyImmediate(backgroundPC);
             UnityEngine.Object.DestroyImmediate(camGo);
         }
     }
