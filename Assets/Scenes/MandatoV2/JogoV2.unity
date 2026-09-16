@@ -187,6 +187,30 @@ PrefabInstance:
       propertyPath: m_Name
       value: pc_finall
       objectReference: {fileID: 0}
+    - target: {fileID: 7322221540929516324, guid: d3a227e701432154ab7a4e01e47aff45, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.7974548
+      objectReference: {fileID: 0}
+    - target: {fileID: 7322221540929516324, guid: d3a227e701432154ab7a4e01e47aff45, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.9107731
+      objectReference: {fileID: 0}
+    - target: {fileID: 7322221540929516324, guid: d3a227e701432154ab7a4e01e47aff45, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.9952736
+      objectReference: {fileID: 0}
+    - target: {fileID: 7322221540929516324, guid: d3a227e701432154ab7a4e01e47aff45, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.94
+      objectReference: {fileID: 0}
+    - target: {fileID: 7322221540929516324, guid: d3a227e701432154ab7a4e01e47aff45, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.243
+      objectReference: {fileID: 0}
+    - target: {fileID: 7322221540929516324, guid: d3a227e701432154ab7a4e01e47aff45, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
