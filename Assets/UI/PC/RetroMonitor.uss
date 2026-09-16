@@ -181,12 +181,6 @@ Label {
     justify-content: flex-end; /* Preenchimento cresce de baixo para cima */
 }
 
-/* Instant hover states (Tech UI: sem transitions) */
-.giant-card:hover {
-    border-top-color: #ffffff;
-    border-left-color: #ffffff;
-}
-
 /* Background Level Fill */
 .card-bg-fill {
     width: 100%;
@@ -328,11 +322,6 @@ Label {
 
     overflow: hidden;
     justify-content: flex-end;
-}
-
-.giant-corruption-pillar:hover {
-    border-top-color: #ffffff;
-    border-left-color: #ffffff;
 }
 
 .corruption-bg-fill {

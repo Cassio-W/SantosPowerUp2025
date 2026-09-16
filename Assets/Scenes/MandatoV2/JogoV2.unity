@@ -180,6 +180,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -1589733591955578659, guid: d3a227e701432154ab7a4e01e47aff45, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -1589733591955578659, guid: d3a227e701432154ab7a4e01e47aff45, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: a6b2a2920c7fcd74bb77e0e616e8e2bb, type: 2}
@@ -5524,7 +5528,7 @@ MonoBehaviour:
   unfocusSound: {fileID: 0}
   unfocusSoundVolume: 0.8
   allowClickToFocus: 1
-  unfocusOnSecondClick: 1
+  unfocusOnSecondClick: 0
   onHoverEnter:
     m_PersistentCalls:
       m_Calls: []
@@ -7627,9 +7631,9 @@ MonoBehaviour:
   animationSpeed: 5
   arrowDuration: 2
   triggerGlitchOnChanges: 1
-  uiDocument: {fileID: 0}
-  uxmlAsset: {fileID: 0}
-  panelSettings: {fileID: 0}
+  uiDocument: {fileID: 1001529930}
+  uxmlAsset: {fileID: 9197481963319205126, guid: a89f30b91e234857b28f73167a5cb691, type: 3}
+  panelSettings: {fileID: 11400000, guid: 0dc7f1d143196174e9d2141b5588f668, type: 2}
 --- !u!1 &1024815123
 GameObject:
   m_ObjectHideFlags: 0
