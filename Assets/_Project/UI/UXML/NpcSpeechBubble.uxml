@@ -1,34 +1,22 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/_Project/UI/USS/NpcSpeechBubble.uss" />
-    
-    <!-- HUD ROOT (Tela Toda) -->
-    <ui:VisualElement name="speech-hud-root" class="speech-hud-root" picking-mode="Ignore">
-        
-        <!-- FOOTER CONTAINER (30% Altura da Tela, 100% Largura) -->
+    <Style src="project://database/Assets/_Project/UI/USS/NpcSpeechBubble.uss?fileID=7433441132597879392&amp;guid=068193c9a87abf74fb8f74adbf595d27&amp;type=3#NpcSpeechBubble"/>
+    <ui:VisualElement name="speech-hud-root" picking-mode="Ignore" class="speech-hud-root">
         <ui:VisualElement name="speech-footer-container" class="speech-footer-container">
-            
-            <!-- FUNDO DO BALÃO (Sprite invertido horizontalmente) -->
-            <ui:VisualElement name="speech-bubble-bg" class="speech-bubble-bg" picking-mode="Ignore" />
-            
-            <!-- CAMADA DE CONTEÚDO (Texto e Controles) -->
+            <ui:VisualElement name="speech-bubble-bg" picking-mode="Ignore" class="speech-bubble-bg"/>
             <ui:VisualElement name="speech-bubble-content" class="speech-bubble-content">
-                
-                <!-- CABEÇALHO DO INTERLOCUTOR -->
-                <ui:VisualElement name="speech-header-row" class="speech-header-row">
-                    <ui:Label name="speaker-badge" text="NOME DO NPC" class="speaker-badge" />
+                <ui:VisualElement name="speech-text-area" class="speech-text-area">
+                    <ui:VisualElement name="speech-header-row" class="speech-header-row">
+                        <ui:Label name="speaker-badge" text="NOME DO NPC" class="speaker-badge"/>
+                    </ui:VisualElement>
+                    <ui:ScrollView name="speech-scroll-view" class="speech-scroll-view">
+                        <ui:Label name="speech-text-label" text="Texto de diálogo do NPC recebido via script..." class="speech-text-label"/>
+                    </ui:ScrollView>
                 </ui:VisualElement>
-                
-                <!-- CORPO DO DIÁLOGO -->
-                <ui:ScrollView name="speech-scroll-view" class="speech-scroll-view">
-                    <ui:Label name="speech-text-label" text="Texto de diálogo do NPC recebido via script..." class="speech-text-label" />
-                </ui:ScrollView>
-                
-                <!-- RODAPÉ DE AVANÇO -->
-                <ui:VisualElement name="speech-footer-row" class="speech-footer-row">
-                    <ui:Label name="speech-prompt-label" text="[ ESPAÇO ] / CLIQUE PARA AVANÇAR ▸" class="speech-prompt-label" />
-                    <ui:Button name="speech-advance-btn" text="AVANÇAR ▸" class="speech-advance-btn" />
+                <ui:VisualElement name="speech-action-area" picking-mode="Ignore" class="speech-action-area">
+                    <ui:Button name="btn-continue" picking-mode="Position" class="decision-btn decision-btn-circle btn-continue speech-advance-btn" style="height: 119px; width: 124px; background-color: rgb(211, 150, 95); border-left-color: rgb(192, 125, 65); border-right-color: rgb(192, 125, 65); border-top-color: rgb(192, 125, 65); border-bottom-color: rgb(192, 125, 65);">
+                        <ui:VisualElement picking-mode="Ignore" class="decision-icon icon-continue" style="width: 81px; height: 70px; -unity-background-image-tint-color: rgb(192, 125, 65); border-left-color: rgb(192, 125, 65); border-right-color: rgb(192, 125, 65); border-top-color: rgb(192, 125, 65); border-bottom-color: rgb(192, 125, 65);"/>
+                    </ui:Button>
                 </ui:VisualElement>
-                
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

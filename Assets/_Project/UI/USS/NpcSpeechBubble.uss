@@ -1,7 +1,8 @@
 /* =========================================================================
    MANDATO — NPC Speech Bubble HUD (UI Toolkit)
    Estilização de balão de fala posicionado como footer (30% altura da tela)
-   com largura total (100%) e fundo invertido horizontalmente.
+   com largura total (100%), botão de continuar estilizado do DecisionUI
+   encaixado no canto direito e área de texto delimitada sem sobreposição.
    ========================================================================= */
 
 /* --- ROOT CONTAINER (Tela Toda / HUD) --- */
@@ -24,16 +25,16 @@
     position: relative;
     width: 100%;
     height: 30%;
-    min-height: 160px;
-    max-height: 340px;
-    padding: 8px 16px 12px 16px;
+    min-height: 180px;
+    max-height: 360px;
+    padding: 10px 24px 16px 24px;
     box-sizing: border-box;
     opacity: 1;
     translate: 0 0;
     transition-property: opacity, translate;
     transition-duration: 0.22s;
     transition-timing-function: ease-out;
-    pointer-events: auto;
+    pointer-events: none;
 }
 
 .speech-footer-container.hidden {
@@ -42,35 +43,46 @@
     translate: 0 30px;
 }
 
-/* --- BALÃO DE FALA — FUNDO COM SPRITE INVERTIDO --- */
+/* --- BALÃO DE FALA — FUNDO COM SPRITE --- */
 .speech-bubble-bg {
     position: absolute;
     top: 0;
     left: 12px;
     right: 12px;
     bottom: 6px;
-    background-image: url('project://database/Assets/Sprites/speech-bubble-md.png?fileID=2800000&guid=9a1e2e92cfd4c5748bc1c71b781dca56&type=3#speech-bubble-md');
+    background-image: url('project://database/Assets/Sprites/papeis-pergunta.png?fileID=21300000&guid=e09be14377a08b64fbba6f4c66361c5d&type=3#papeis-pergunta');
     -unity-background-scale-mode: stretch-to-fill;
-    
-    /* Inversão Horizontal do Sprite (aponta o rabicho do balão para o lado esquerdo/NPC) */
-    scale: -1 1;
-    transform-origin: center;
     pointer-events: none;
 }
 
-/* Caso queira inverter de volta para o lado direito via script ou classe */
-.speech-bubble-bg.flip-right {
-    scale: 1 1;
+/* Caso queira inverter horizontalmente via script ou classe */
+.speech-bubble-bg.flip-left {
+    scale: -1 1;
+    transform-origin: center;
 }
 
-/* --- CAMADA DE CONTEÚDO (Não espelhada, frontal) --- */
+/* --- CAMADA DE CONTEÚDO (Layout horizontal com proteção de bordas do papel) --- */
 .speech-bubble-content {
     position: relative;
     width: 100%;
     height: 100%;
-    padding: 24px 36px 16px 36px;
+    padding-top: 32px;
+    padding-bottom: 26px;
+    padding-left: 56px;
+    padding-right: 56px;
     box-sizing: border-box;
+    flex-direction: row;
+    align-items: center;
     justify-content: space-between;
+}
+
+/* --- ÁREA DE TEXTO (Limitada para nunca colidir com o botão da direita) --- */
+.speech-text-area {
+    flex-grow: 1;
+    flex-shrink: 1;
+    height: 100%;
+    margin-right: 24px;
+    justify-content: center;
     flex-direction: column;
 }
 
@@ -101,8 +113,8 @@
 /* --- CORPO DO TEXTO DE DIÁLOGO --- */
 .speech-scroll-view {
     flex-grow: 1;
-    margin-top: 4px;
-    margin-bottom: 4px;
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 .speech-text-label {
@@ -114,35 +126,77 @@
     line-height: 26px;
 }
 
-/* --- LINHA DE RODAPÉ / INDICADOR DE AVANÇO --- */
-.speech-footer-row {
-    flex-direction: row;
-    justify-content: flex-end;
+/* =========================================================================
+   ÁREA DO BOTÃO CONTINUAR — CANTO DIREITO CENTRALIZADO (Estilo DecisionUI)
+   ========================================================================= */
+
+.speech-action-area {
+    flex-shrink: 0;
+    justify-content: center;
     align-items: center;
-    padding-top: 2px;
+    height: 100%;
+    padding-right: 8px;
+    pointer-events: auto;
 }
 
-.speech-prompt-label {
-    color: #4B5563;
-    font-size: 11px;
-    -unity-font-style: bold;
-    letter-spacing: 0.5px;
+.decision-btn {
+    /* Base para interoperabilidade */
 }
 
-.speech-advance-btn {
-    background-color: transparent;
-    border-width: 0;
-    padding: 2px 8px;
-    color: #374151;
-    font-size: 12px;
-    -unity-font-style: bold;
-    cursor: link;
+.decision-btn-circle {
+    width: 76px;
+    height: 76px;
+    border-radius: 38px;
+    border-width: 3.5px;
+    justify-content: center;
+    align-items: center;
+    padding-top: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    transition-property: scale, border-color, background-color;
+    transition-duration: 0.16s;
+    transition-timing-function: ease-out;
+    scale: 1 1;
 }
 
-.speech-advance-btn:hover {
-    color: #111827;
+.decision-btn-circle:hover {
+    scale: 1.08 1.08;
 }
 
-.speech-advance-btn:active {
-    color: #000000;
+.decision-btn-circle:active {
+    scale: 0.92 0.92;
+}
+
+.btn-continue {
+    border-color: #94A3B8;
+    background-color: rgba(30, 41, 59, 0.94);
+}
+
+.btn-continue:hover {
+    border-color: #F8FAFC;
+    background-color: rgba(51, 65, 85, 0.98);
+}
+
+.decision-icon {
+    width: 42px;
+    height: 42px;
+    -unity-background-scale-mode: scale-to-fit;
+    transition-property: -unity-background-image-tint-color, scale;
+    transition-duration: 0.16s;
+    transition-timing-function: ease-out;
+}
+
+.icon-continue {
+    background-image: url('project://database/Assets/Sprites/white-arrow.png?fileID=2800000&guid=13a8b3e5edbbfb14889ba1dd7b595f97&type=3#white-arrow');
+    -unity-background-image-tint-color: #E2E8F0;
+    scale: -1 1; /* Espelha a seta horizontalmente para apontar para a direita */
+}
+
+.btn-continue:hover .icon-continue {
+    -unity-background-image-tint-color: #FFFFFF;
 }

@@ -16,6 +16,7 @@ namespace Mandato.Infrastructure
         [SerializeField] private DecisionOverlayPresenter decisionOverlayPresenter;
         [SerializeField] private EndScreenPresenter endScreenPresenter;
         [SerializeField] private FlipPhonePresenter flipPhonePresenter;
+        [SerializeField] private NpcSpeechBubblePresenter speechBubblePresenter;
 
         [Header("Animação do Jogador (Mão)")]
         [SerializeField] private Animator playerAnimator;
@@ -39,6 +40,7 @@ namespace Mandato.Infrastructure
         public DecisionOverlayPresenter DecisionOverlayPresenter => decisionOverlayPresenter;
         public EndScreenPresenter EndScreenPresenter => endScreenPresenter;
         public FlipPhonePresenter FlipPhonePresenter => flipPhonePresenter;
+        public NpcSpeechBubblePresenter SpeechBubblePresenter => speechBubblePresenter;
         public Animator PlayerAnimator => playerAnimator;
         public AttributeCameraEffects CameraEffects => cameraEffects;
         public CameraFocusManager CameraFocus => cameraFocus;

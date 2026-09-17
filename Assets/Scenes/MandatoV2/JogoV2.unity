@@ -8023,6 +8023,7 @@ MonoBehaviour:
     decisionOverlayPresenter: {fileID: 2096242969}
     endScreenPresenter: {fileID: 1390507337}
     flipPhonePresenter: {fileID: 163448384}
+    speechBubblePresenter: {fileID: 0}
     playerAnimator: {fileID: 1834763903}
     dealAnimationName: LevantaMao
     dealAnimationReverseName: 
@@ -8787,7 +8788,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1998875936
 Transform:
   m_ObjectHideFlags: 0

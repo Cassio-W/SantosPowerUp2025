@@ -433,6 +433,14 @@ namespace Mandato.Editor
                 phone = Undo.AddComponent<FlipPhonePresenter>(go);
             }
 
+            // 6.1 Speech Bubble Presenter (Tutorial e Balão de Fala)
+            var speechBubble = UnityEngine.Object.FindFirstObjectByType<NpcSpeechBubblePresenter>(FindObjectsInactive.Include);
+            if (speechBubble == null)
+            {
+                var go = GameObject.Find("UI_Npc") ?? GameObject.Find("SpeechBubble") ?? GameObject.Find("BalaoFala") ?? bootstrap.gameObject;
+                speechBubble = Undo.AddComponent<NpcSpeechBubblePresenter>(go);
+            }
+
             // 7. Camera Effects & Focus
             var camEffects = UnityEngine.Object.FindFirstObjectByType<AttributeCameraEffects>(FindObjectsInactive.Include);
             var camFocus = UnityEngine.Object.FindFirstObjectByType<CameraFocusManager>(FindObjectsInactive.Include);
@@ -475,6 +483,9 @@ namespace Mandato.Editor
                 var pPhone = bindingsProp.FindPropertyRelative("flipPhonePresenter");
                 if (pPhone != null) pPhone.objectReferenceValue = phone;
 
+                var pSpeechBubble = bindingsProp.FindPropertyRelative("speechBubblePresenter");
+                if (pSpeechBubble != null && speechBubble != null) pSpeechBubble.objectReferenceValue = speechBubble;
+
                 var pCamEffects = bindingsProp.FindPropertyRelative("cameraEffects");
                 if (pCamEffects != null && camEffects != null) pCamEffects.objectReferenceValue = camEffects;
 
@@ -499,6 +510,7 @@ namespace Mandato.Editor
             bindingsType.GetField("decisionOverlayPresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, overlay);
             bindingsType.GetField("endScreenPresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, endScreen);
             bindingsType.GetField("flipPhonePresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, phone);
+            if (speechBubble != null) bindingsType.GetField("speechBubblePresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, speechBubble);
             if (camEffects != null) bindingsType.GetField("cameraEffects", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, camEffects);
             if (camFocus != null) bindingsType.GetField("cameraFocus", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, camFocus);
             if (playerAnim != null) bindingsType.GetField("playerAnimator", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, playerAnim);

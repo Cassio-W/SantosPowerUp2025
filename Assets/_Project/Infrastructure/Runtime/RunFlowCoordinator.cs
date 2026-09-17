@@ -19,6 +19,7 @@ namespace Mandato.Infrastructure
         private ScenePresentationBindings bindings;
         private FlipPhoneCoordinator flipPhoneCoordinator;
         private UIModalCoordinator modalCoordinator;
+        private TutorialManager tutorialManager;
 
         [Header("Configuração de Fluxo")]
         [SerializeField] private bool requireSpaceToCallNextNpc = true;
@@ -35,6 +36,7 @@ namespace Mandato.Infrastructure
         public bool IsAwaitingSpaceForNextNpc => isAwaitingSpaceForNextNpc;
         public bool IsPcFocused => isPcFocused;
         public UIModalCoordinator ModalCoordinator => modalCoordinator;
+        public TutorialManager TutorialManager => tutorialManager;
         public bool EnableDecisionHoverPreview
         {
             get => enableDecisionHoverPreview;
@@ -63,6 +65,19 @@ namespace Mandato.Infrastructure
             this.callNextNpcKey = callKey;
             this.delayBetweenProposals = delayBetween;
             this.mainMenuSceneName = string.IsNullOrEmpty(menuScene) ? "MenuV2" : menuScene;
+
+            var speechBubble = (bindings != null && bindings.SpeechBubblePresenter != null)
+                ? bindings.SpeechBubblePresenter
+                : FindFirstObjectByType<NpcSpeechBubblePresenter>(FindObjectsInactive.Include);
+
+            this.tutorialManager = new TutorialManager();
+            this.tutorialManager.Initialize(
+                stateMachine,
+                catalog,
+                speechBubble,
+                bindings?.PaperPresenter,
+                bindings?.DecisionOverlayPresenter
+            );
 
             Bind();
         }
@@ -390,6 +405,32 @@ namespace Mandato.Infrastructure
             if (card == null || stateMachine == null) return;
 
             string displayDate = stateMachine.RunState.calendar.DisplayDate;
+            int monthIndex = stateMachine.RunState.calendar.CurrentMonthIndex;
+
+            // 0. Propostas de tutorial são exibidas via TutorialManager no NpcSpeechBubblePresenter
+            if (tutorialManager != null && tutorialManager.IsTutorialCard(card))
+            {
+                if (isPlayerHandRaised)
+                {
+                    bindings.PlayDealAnimationReverse();
+                    isPlayerHandRaised = false;
+                }
+
+                tutorialManager.PresentTutorialStep(card);
+
+                if (bindings.RetroMonitorPresenter != null)
+                {
+                    bindings.RetroMonitorPresenter.NotifyNewProposal(card);
+                    bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
+                }
+                return;
+            }
+
+            // Garante finalização do tutorial se passou para carta normal
+            if (tutorialManager != null && tutorialManager.IsTutorialActive)
+            {
+                tutorialManager.CompleteTutorial();
+            }
 
             // 1. Exibe papel físico 3D
             if (bindings.PaperPresenter != null)
@@ -407,8 +448,9 @@ namespace Mandato.Infrastructure
             // 3. Exibe botões de decisão e atualiza data no overlay
             if (bindings.DecisionOverlayPresenter != null)
             {
+                bindings.DecisionOverlayPresenter.SetVisible(true);
                 bindings.DecisionOverlayPresenter.PresentChoices(card);
-                bindings.DecisionOverlayPresenter.UpdateDateDisplay(displayDate, stateMachine.RunState.calendar.CurrentMonthIndex);
+                bindings.DecisionOverlayPresenter.UpdateDateDisplay(displayDate, monthIndex);
             }
 
             RefreshPerksUI();
@@ -540,13 +582,18 @@ namespace Mandato.Infrastructure
 
             if (wasTutorial && hasMoreTutorial)
             {
-                // No tutorial: o papel permanece ativo na mesa e avança diretamente sem exigir Espaço
+                // No tutorial: avança diretamente para a próxima fala do tutorial
                 isAwaitingSpaceForNextNpc = false;
                 StartCoroutine(DrawNextProposalRoutine(0.05f));
             }
             else
             {
-                // Fora do tutorial (ou fim do tutorial): recolhe o papel e aguarda a chamada do próximo visitante
+                if (wasTutorial && !hasMoreTutorial)
+                {
+                    tutorialManager?.CompleteTutorial();
+                }
+
+                // Fora do tutorial: recolhe o papel e aguarda a chamada do próximo visitante
                 if (bindings.PaperPresenter != null)
                 {
                     bindings.PaperPresenter.SetPaperActive(false);
@@ -618,22 +665,24 @@ namespace Mandato.Infrastructure
 
         public bool IsTutorialCard(CardDefinition card)
         {
+            if (tutorialManager != null) return tutorialManager.IsTutorialCard(card);
             if (card == null) return false;
             if (card.isTutorial) return true;
-            return catalog.IsTutorialCardId(card.id) ||
+            return (catalog != null && catalog.IsTutorialCardId(card.id)) ||
                    card.categoryTag.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
                    card.title.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         public bool HasRemainingTutorialCards()
         {
+            if (tutorialManager != null) return tutorialManager.HasRemainingTutorialCards();
             if (stateMachine == null || stateMachine.DeckState == null) return false;
 
             if (stateMachine.DeckState.priorityDrawPile != null)
             {
                 foreach (var cardId in stateMachine.DeckState.priorityDrawPile)
                 {
-                    if (catalog.IsTutorialCardId(cardId)) return true;
+                    if (catalog != null && catalog.IsTutorialCardId(cardId)) return true;
                 }
             }
 

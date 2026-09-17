@@ -18,7 +18,7 @@ namespace Mandato.UI
 
         [Header("Configurações Visuais")]
         [Tooltip("Quando ativado, o fundo do balão é invertido horizontalmente para apontar para a esquerda/NPC.")]
-        [SerializeField] private bool flipHorizontal = true;
+        [SerializeField] private bool flipHorizontal = false;
 
         [Tooltip("Exibir botão de avançar além do prompt de atalho.")]
         [SerializeField] private bool showAdvanceButton = true;
@@ -145,7 +145,7 @@ namespace Mandato.UI
             speakerBadge = root.Q<Label>("speaker-badge");
             speechTextLabel = root.Q<Label>("speech-text-label");
             speechPromptLabel = root.Q<Label>("speech-prompt-label");
-            speechAdvanceBtn = root.Q<Button>("speech-advance-btn");
+            speechAdvanceBtn = root.Q<Button>("btn-continue") ?? root.Q<Button>("speech-advance-btn");
         }
 
         private void SubscribeEvents()
@@ -155,12 +155,6 @@ namespace Mandato.UI
                 speechAdvanceBtn.clicked -= HandleAdvanceAction;
                 speechAdvanceBtn.clicked += HandleAdvanceAction;
             }
-
-            if (footerContainer != null)
-            {
-                footerContainer.UnregisterCallback<ClickEvent>(HandleContainerClicked);
-                footerContainer.RegisterCallback<ClickEvent>(HandleContainerClicked);
-            }
         }
 
         private void UnsubscribeEvents()
@@ -169,17 +163,6 @@ namespace Mandato.UI
             {
                 speechAdvanceBtn.clicked -= HandleAdvanceAction;
             }
-
-            if (footerContainer != null)
-            {
-                footerContainer.UnregisterCallback<ClickEvent>(HandleContainerClicked);
-            }
-        }
-
-        private void HandleContainerClicked(ClickEvent evt)
-        {
-            OnBubbleClicked?.Invoke();
-            HandleAdvanceAction();
         }
 
         /// <summary>
