@@ -30,8 +30,10 @@ namespace Mandato.Infrastructure
 
         private bool isAwaitingSpaceForNextNpc = false;
         private bool isPlayerHandRaised = false;
+        private bool isPcFocused = false;
 
         public bool IsAwaitingSpaceForNextNpc => isAwaitingSpaceForNextNpc;
+        public bool IsPcFocused => isPcFocused;
         public UIModalCoordinator ModalCoordinator => modalCoordinator;
         public bool EnableDecisionHoverPreview
         {
@@ -120,6 +122,12 @@ namespace Mandato.Infrastructure
             {
                 bindings.DeskCallButton.OnCallRequested += AuthorizeNextVisitor;
             }
+
+            // 8. Foco de Câmera (PC / Monitor)
+            if (bindings.CameraFocus != null)
+            {
+                bindings.CameraFocus.OnObjectFocusChanged += HandleObjectFocusChanged;
+            }
         }
 
         private void OnDestroy()
@@ -132,6 +140,91 @@ namespace Mandato.Infrastructure
             if (bindings != null && bindings.DeskCallButton != null)
             {
                 bindings.DeskCallButton.OnCallRequested -= AuthorizeNextVisitor;
+            }
+
+            if (bindings != null && bindings.CameraFocus != null)
+            {
+                bindings.CameraFocus.OnObjectFocusChanged -= HandleObjectFocusChanged;
+            }
+        }
+
+        private void HandleObjectFocusChanged(FocusableObject focusedObject)
+        {
+            bool isPc = IsMonitorFocusable(focusedObject);
+            SetPcFocusState(isPc);
+        }
+
+        public bool IsMonitorFocusable(FocusableObject obj)
+        {
+            if (obj == null) return false;
+
+            if (bindings != null && bindings.RetroMonitorPresenter != null)
+            {
+                if (obj.gameObject == bindings.RetroMonitorPresenter.gameObject ||
+                    obj.transform.IsChildOf(bindings.RetroMonitorPresenter.transform) ||
+                    bindings.RetroMonitorPresenter.transform.IsChildOf(obj.transform))
+                {
+                    return true;
+                }
+            }
+
+            string name = obj.name.ToLowerInvariant();
+            return name.Contains("pc") || name.Contains("monitor") || name.Contains("computador") || name.Contains("computer") || name.Contains("tela");
+        }
+
+        public void SetPcFocusState(bool isFocused)
+        {
+            if (isPcFocused == isFocused) return;
+
+            isPcFocused = isFocused;
+            modalCoordinator?.SetModalState(UIModalCoordinator.MODAL_PC_FOCUS, isFocused);
+
+            if (isFocused)
+            {
+                // 1. Celular desativado: se estiver aberto, fecha e bloqueia novas aberturas
+                flipPhoneCoordinator?.ClosePhone();
+                if (bindings != null)
+                {
+                    if (bindings.FlipPhonePresenter != null)
+                    {
+                        bindings.FlipPhonePresenter.SetInteractable(false);
+                    }
+
+                    // 2. DecisionUI desativada
+                    if (bindings.DecisionOverlayPresenter != null)
+                    {
+                        bindings.DecisionOverlayPresenter.SetVisible(false);
+                    }
+
+                    // 3. Botão de mesa (chamar visitante) desativado
+                    if (bindings.DeskCallButton != null)
+                    {
+                        bindings.DeskCallButton.SetInteractable(false);
+                    }
+                }
+            }
+            else
+            {
+                // 1. Reativa celular (permite abrir quando o jogador desejar, mas NÃO abre automaticamente)
+                if (bindings != null)
+                {
+                    if (bindings.FlipPhonePresenter != null)
+                    {
+                        bindings.FlipPhonePresenter.SetInteractable(true);
+                    }
+
+                    // 2. Reativa DecisionUI
+                    if (bindings.DecisionOverlayPresenter != null)
+                    {
+                        bindings.DecisionOverlayPresenter.SetVisible(true);
+                    }
+
+                    // 3. Reativa botão de mesa
+                    if (bindings.DeskCallButton != null)
+                    {
+                        bindings.DeskCallButton.SetInteractable(true);
+                    }
+                }
             }
         }
 
@@ -229,17 +322,18 @@ namespace Mandato.Infrastructure
 
             if (spaceOrEnter)
             {
-                // Se o telefone ou a tela final estiverem abertos, ignora
+                // Se o monitor estiver focado, modal aberto, celular ou tela final abertos, ignora
+                if (isPcFocused) return;
+                if (modalCoordinator != null && !modalCoordinator.CanCallNextVisitor()) return;
                 if (bindings.EndScreenPresenter != null && bindings.EndScreenPresenter.IsVisible) return;
                 if (bindings.FlipPhonePresenter != null && bindings.FlipPhonePresenter.IsOpen) return;
 
-                // Sempre executa os efeitos audiovisuais (som + animação) do botão físico
+                // Executa os efeitos audiovisuais (som + animação) do botão físico apenas se o botão for interativo
                 bindings.DeskCallButton?.PlayPressEffects();
 
                 // Se o fluxo estiver aguardando o próximo visitante, avança
                 if (isAwaitingSpaceForNextNpc)
                 {
-                    if (modalCoordinator != null && !modalCoordinator.CanCallNextVisitor()) return;
                     AuthorizeNextVisitor();
                 }
             }
@@ -280,9 +374,11 @@ namespace Mandato.Infrastructure
 
         public void AuthorizeNextVisitor()
         {
+            if (isPcFocused) return;
             if (!isAwaitingSpaceForNextNpc) return;
             if (bindings.FlipPhonePresenter != null && bindings.FlipPhonePresenter.IsOpen) return;
             if (bindings.EndScreenPresenter != null && bindings.EndScreenPresenter.IsVisible) return;
+            if (modalCoordinator != null && !modalCoordinator.CanCallNextVisitor()) return;
 
             isAwaitingSpaceForNextNpc = false;
             bindings.DeskCallButton?.PlayPressEffects();

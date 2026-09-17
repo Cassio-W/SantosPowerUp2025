@@ -200,6 +200,8 @@ namespace Mandato.Presentation
         /// </summary>
         public void PlayPressEffects()
         {
+            if (!interactable) return;
+
             PlayPressSound();
             PlayAnimatorPress();
             PlayProceduralPress();

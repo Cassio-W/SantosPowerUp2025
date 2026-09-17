@@ -53,6 +53,24 @@ namespace Mandato.UI.Tests
         }
 
         [Test]
+        public void UIModalCoordinator_WhenPcFocused_BlocksDecisionShortcutsAndCallVisitor()
+        {
+            var coordinator = new UIModalCoordinator();
+
+            coordinator.SetModalState(UIModalCoordinator.MODAL_PC_FOCUS, true);
+
+            Assert.IsTrue(coordinator.IsModalOpen(UIModalCoordinator.MODAL_PC_FOCUS));
+            Assert.IsFalse(coordinator.CanProcessDecisionShortcuts());
+            Assert.IsFalse(coordinator.CanCallNextVisitor());
+
+            coordinator.SetModalState(UIModalCoordinator.MODAL_PC_FOCUS, false);
+
+            Assert.IsFalse(coordinator.IsModalOpen(UIModalCoordinator.MODAL_PC_FOCUS));
+            Assert.IsTrue(coordinator.CanProcessDecisionShortcuts());
+            Assert.IsTrue(coordinator.CanCallNextVisitor());
+        }
+
+        [Test]
         public void UIModalCoordinator_CloseAllModals_ClearsAllAndFiresEvents()
         {
             var coordinator = new UIModalCoordinator();
@@ -267,6 +285,37 @@ namespace Mandato.UI.Tests
             Object.DestroyImmediate(go);
         }
 
+        [Test]
+        public void FlipPhonePresenter_SetInteractable_False_ClosesAndBlocksOpening()
+        {
+            var go = new GameObject("FlipPhoneTest");
+            var presenter = go.AddComponent<FlipPhonePresenter>();
+
+            Assert.IsTrue(presenter.IsInteractable);
+
+            presenter.Open();
+            Assert.IsTrue(presenter.IsOpen);
+
+            presenter.SetInteractable(false);
+            Assert.IsFalse(presenter.IsInteractable);
+            Assert.IsFalse(presenter.IsOpen);
+
+            // Tentar abrir quando não interativo deve ser bloqueado
+            presenter.Open();
+            Assert.IsFalse(presenter.IsOpen);
+
+            presenter.Toggle();
+            Assert.IsFalse(presenter.IsOpen);
+
+            // Reativar
+            presenter.SetInteractable(true);
+            Assert.IsTrue(presenter.IsInteractable);
+            presenter.Open();
+            Assert.IsTrue(presenter.IsOpen);
+
+            Object.DestroyImmediate(go);
+        }
+
         // ── DecisionOverlayPresenter Date Display Tests ───────────
 
         [Test]
@@ -277,6 +326,23 @@ namespace Mandato.UI.Tests
 
             Assert.DoesNotThrow(() => presenter.UpdateDateDisplay("01/2026", 1, 48));
             Assert.DoesNotThrow(() => presenter.UpdateDateDisplay("12/2029", 48, 48));
+
+            Object.DestroyImmediate(go);
+        }
+
+        [Test]
+        public void DecisionOverlayPresenter_SetVisible_UpdatesState()
+        {
+            var go = new GameObject("DecisionOverlayTest");
+            var presenter = go.AddComponent<DecisionOverlayPresenter>();
+
+            Assert.IsTrue(presenter.IsVisible);
+
+            presenter.SetVisible(false);
+            Assert.IsFalse(presenter.IsVisible);
+
+            presenter.SetVisible(true);
+            Assert.IsTrue(presenter.IsVisible);
 
             Object.DestroyImmediate(go);
         }

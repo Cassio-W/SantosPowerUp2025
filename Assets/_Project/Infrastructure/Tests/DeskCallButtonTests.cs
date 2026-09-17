@@ -66,6 +66,10 @@ namespace Mandato.Infrastructure.Tests
         {
             Assert.DoesNotThrow(() => deskButton.PlayPressEffects(),
                 "PlayPressEffects deve executar com segurança sem lançar exceções mesmo sem AudioSource ou Animator configurados.");
+
+            deskButton.SetInteractable(false);
+            Assert.DoesNotThrow(() => deskButton.PlayPressEffects(),
+                "PlayPressEffects deve retornar com segurança sem executar efeitos quando inativo.");
         }
 
         [Test]

@@ -14,6 +14,7 @@ namespace Mandato.UI
         public const string MODAL_END_SCREEN = "EndScreen";
         public const string MODAL_PERK_TOOLTIP = "PerkTooltip";
         public const string MODAL_CREDITS = "Credits";
+        public const string MODAL_PC_FOCUS = "PCFocus";
 
         private readonly HashSet<string> openModals = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -63,13 +64,14 @@ namespace Mandato.UI
 
         /// <summary>
         /// Determina se os atalhos de decisão da proposta (A, D, Espaço, 1, 2, Setas) podem ser processados.
-        /// Retorna false se qualquer modal com bloqueio de input (Celular, Fim de Jogo, etc.) estiver aberto.
+        /// Retorna false se qualquer modal com bloqueio de input (Celular, Fim de Jogo, Foco no PC, etc.) estiver aberto.
         /// </summary>
         public bool CanProcessDecisionShortcuts()
         {
             if (IsModalOpen(MODAL_FLIP_PHONE)) return false;
             if (IsModalOpen(MODAL_END_SCREEN)) return false;
             if (IsModalOpen(MODAL_CREDITS)) return false;
+            if (IsModalOpen(MODAL_PC_FOCUS)) return false;
 
             return true;
         }

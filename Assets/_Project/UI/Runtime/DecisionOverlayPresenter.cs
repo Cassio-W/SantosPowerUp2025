@@ -47,6 +47,21 @@ namespace Mandato.UI
 
         private bool isChoicePending = false;
         private bool isSingleChoiceMode = false;
+        private bool isVisible = true;
+
+        public bool IsVisible => isVisible;
+
+        public void SetVisible(bool visible)
+        {
+            isVisible = visible;
+            EnsureReferences();
+            CacheElements();
+
+            if (uiDocument != null && uiDocument.rootVisualElement != null)
+            {
+                uiDocument.rootVisualElement.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+        }
 
         private void Awake()
         {
@@ -457,7 +472,7 @@ namespace Mandato.UI
 
         private void Update()
         {
-            if (!enableKeyboardShortcuts || !isChoicePending) return;
+            if (!isVisible || !enableKeyboardShortcuts || !isChoicePending) return;
             if (modalCoordinator != null && !modalCoordinator.CanProcessDecisionShortcuts()) return;
 
             if (isSingleChoiceMode)

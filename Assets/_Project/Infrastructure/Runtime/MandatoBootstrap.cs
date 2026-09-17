@@ -132,6 +132,7 @@ namespace Mandato.Infrastructure
             );
 
             HookPhoneFocusableObject();
+            HookMonitorFocusableObject();
         }
 
         private void Start()
@@ -143,7 +144,7 @@ namespace Mandato.Infrastructure
         private void Update()
         {
             var phone = presentationBindings?.FlipPhonePresenter;
-            if (phone != null && phone.AllowKeyboardToggle && Input.GetKeyDown(phone.ToggleKey))
+            if (phone != null && phone.AllowKeyboardToggle && phone.IsInteractable && Input.GetKeyDown(phone.ToggleKey))
             {
                 ToggleFlipPhone();
             }
@@ -183,6 +184,26 @@ namespace Mandato.Infrastructure
                 focusComp.onUnfocused.AddListener(CloseFlipPhone);
             }
         }
+
+        private void HookMonitorFocusableObject()
+        {
+            if (presentationBindings?.RetroMonitorPresenter == null) return;
+
+            var focusComp = presentationBindings.RetroMonitorPresenter.GetComponent<FocusableObject>() ??
+                            presentationBindings.RetroMonitorPresenter.GetComponentInChildren<FocusableObject>() ??
+                            presentationBindings.RetroMonitorPresenter.GetComponentInParent<FocusableObject>();
+
+            if (focusComp != null)
+            {
+                focusComp.onFocused.RemoveListener(OnMonitorFocused);
+                focusComp.onFocused.AddListener(OnMonitorFocused);
+                focusComp.onUnfocused.RemoveListener(OnMonitorUnfocused);
+                focusComp.onUnfocused.AddListener(OnMonitorUnfocused);
+            }
+        }
+
+        private void OnMonitorFocused() => flowCoordinator?.SetPcFocusState(true);
+        private void OnMonitorUnfocused() => flowCoordinator?.SetPcFocusState(false);
 
         public void OpenFlipPhone() => flipPhoneCoordinator?.OpenPhone();
         public void CloseFlipPhone() => flipPhoneCoordinator?.ClosePhone();

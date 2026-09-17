@@ -28,13 +28,24 @@ namespace Mandato.UI
         [SerializeField] private PanelSettings panelSettings;
         [SerializeField] private KeyCode toggleKey = KeyCode.F;
         [SerializeField] private bool allowKeyboardToggle = true;
+        [SerializeField] private bool isInteractable = true;
         [SerializeField] private GameObject phoneGameObject;
 
         public KeyCode ToggleKey { get => toggleKey; set => toggleKey = value; }
         public bool AllowKeyboardToggle { get => allowKeyboardToggle; set => allowKeyboardToggle = value; }
+        public bool IsInteractable { get => isInteractable; set => SetInteractable(value); }
         public GameObject PhoneGameObject { get => phoneGameObject != null ? phoneGameObject : gameObject; set => phoneGameObject = value; }
         public GameObject GetPhoneGameObject() => PhoneGameObject;
         public void SetPhoneGameObject(GameObject go) => phoneGameObject = go;
+
+        public void SetInteractable(bool value)
+        {
+            isInteractable = value;
+            if (!value && (IsOpen || IsPhoneOpen()))
+            {
+                Close();
+            }
+        }
 
         public event Action<string> OnActionRequested;
         public event Action OnPhoneOpened;
@@ -92,6 +103,8 @@ namespace Mandato.UI
 
         private void Update()
         {
+            if (!isInteractable) return;
+
             if (IsOpen && Input.GetKeyDown(KeyCode.Escape))
             {
                 if (isModalOpen)
@@ -184,6 +197,8 @@ namespace Mandato.UI
 
         public void Open()
         {
+            if (!isInteractable) return;
+
             IsOpen = true;
 
             if (phoneGameObject != null)
@@ -235,6 +250,7 @@ namespace Mandato.UI
 
         public void Toggle()
         {
+            if (!isInteractable) return;
             if (IsPhoneOpen()) Close();
             else Open();
         }
