@@ -1,0 +1,148 @@
+/* =========================================================================
+   MANDATO — NPC Speech Bubble HUD (UI Toolkit)
+   Estilização de balão de fala posicionado como footer (30% altura da tela)
+   com largura total (100%) e fundo invertido horizontalmente.
+   ========================================================================= */
+
+/* --- ROOT CONTAINER (Tela Toda / HUD) --- */
+.speech-hud-root {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: flex-end;
+    align-items: stretch;
+    background-color: rgba(0, 0, 0, 0);
+    pointer-events: none;
+}
+
+/* --- FOOTER CONTAINER (30% Altura da Tela, 100% Largura) --- */
+.speech-footer-container {
+    position: relative;
+    width: 100%;
+    height: 30%;
+    min-height: 160px;
+    max-height: 340px;
+    padding: 8px 16px 12px 16px;
+    box-sizing: border-box;
+    opacity: 1;
+    translate: 0 0;
+    transition-property: opacity, translate;
+    transition-duration: 0.22s;
+    transition-timing-function: ease-out;
+    pointer-events: auto;
+}
+
+.speech-footer-container.hidden {
+    display: none;
+    opacity: 0;
+    translate: 0 30px;
+}
+
+/* --- BALÃO DE FALA — FUNDO COM SPRITE INVERTIDO --- */
+.speech-bubble-bg {
+    position: absolute;
+    top: 0;
+    left: 12px;
+    right: 12px;
+    bottom: 6px;
+    background-image: url('project://database/Assets/Sprites/speech-bubble-md.png?fileID=2800000&guid=9a1e2e92cfd4c5748bc1c71b781dca56&type=3#speech-bubble-md');
+    -unity-background-scale-mode: stretch-to-fill;
+    
+    /* Inversão Horizontal do Sprite (aponta o rabicho do balão para o lado esquerdo/NPC) */
+    scale: -1 1;
+    transform-origin: center;
+    pointer-events: none;
+}
+
+/* Caso queira inverter de volta para o lado direito via script ou classe */
+.speech-bubble-bg.flip-right {
+    scale: 1 1;
+}
+
+/* --- CAMADA DE CONTEÚDO (Não espelhada, frontal) --- */
+.speech-bubble-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 24px 36px 16px 36px;
+    box-sizing: border-box;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+/* --- CABEÇALHO DO INTERLOCUTOR (Nome do NPC / Cargo) --- */
+.speech-header-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    margin-bottom: 4px;
+}
+
+.speaker-badge {
+    background-color: #18181B;
+    color: #F4F4F5;
+    padding: 3px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    border-width: 1px;
+    border-color: #27272A;
+}
+
+.speaker-badge.hidden {
+    display: none;
+}
+
+/* --- CORPO DO TEXTO DE DIÁLOGO --- */
+.speech-scroll-view {
+    flex-grow: 1;
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.speech-text-label {
+    color: #111827;
+    font-size: 20px;
+    -unity-font-style: bold;
+    white-space: normal;
+    -unity-text-align: middle-left;
+    line-height: 26px;
+}
+
+/* --- LINHA DE RODAPÉ / INDICADOR DE AVANÇO --- */
+.speech-footer-row {
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: 2px;
+}
+
+.speech-prompt-label {
+    color: #4B5563;
+    font-size: 11px;
+    -unity-font-style: bold;
+    letter-spacing: 0.5px;
+}
+
+.speech-advance-btn {
+    background-color: transparent;
+    border-width: 0;
+    padding: 2px 8px;
+    color: #374151;
+    font-size: 12px;
+    -unity-font-style: bold;
+    cursor: link;
+}
+
+.speech-advance-btn:hover {
+    color: #111827;
+}
+
+.speech-advance-btn:active {
+    color: #000000;
+}
