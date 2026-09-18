@@ -224,19 +224,13 @@ namespace Mandato.UI
 
             if (card != null)
             {
-                bool isTutorial = card.isTutorial ||
-                                  card.id.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                  card.categoryTag.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                  card.title.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0;
-
                 string leftText = card.leftChoice != null && !string.IsNullOrEmpty(card.leftChoice.label) ? card.leftChoice.label : "Aceitar";
                 string rightText = card.rightChoice != null && !string.IsNullOrEmpty(card.rightChoice.label) ? card.rightChoice.label : "Recusar";
 
-                // Se a carta for de tutorial ou de 1 escolha (ou sem rejeição):
-                bool hasOnlyOneOption = isTutorial ||
-                                         string.Equals(leftText, rightText, StringComparison.OrdinalIgnoreCase) ||
-                                         leftText.IndexOf("Continuar", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                         rightText.IndexOf("Continuar", StringComparison.OrdinalIgnoreCase) >= 0;
+                // Se a carta for de apenas 1 escolha (ou sem rejeição):
+                bool hasOnlyOneOption = string.Equals(leftText, rightText, StringComparison.OrdinalIgnoreCase) ||
+                                        leftText.IndexOf("Continuar", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                                        rightText.IndexOf("Continuar", StringComparison.OrdinalIgnoreCase) >= 0;
 
                 isSingleChoiceMode = hasOnlyOneOption;
 

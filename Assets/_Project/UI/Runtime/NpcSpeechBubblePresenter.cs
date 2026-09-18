@@ -61,6 +61,7 @@ namespace Mandato.UI
         {
             EnsureDocument();
             CacheElements();
+            SetVisible(false);
         }
 
         private void OnEnable()
@@ -69,6 +70,10 @@ namespace Mandato.UI
             CacheElements();
             SubscribeEvents();
             ApplyOrientation();
+            if (!isVisible)
+            {
+                SetVisible(false);
+            }
         }
 
         private void OnDisable()

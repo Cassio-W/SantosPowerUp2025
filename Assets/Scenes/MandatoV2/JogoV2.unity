@@ -324,7 +324,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: c0448892e786caa46a313cad9dfce0af, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1049842388}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c0448892e786caa46a313cad9dfce0af, type: 3}
       insertIndex: -1
@@ -5615,6 +5618,39 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &234970435
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 234970436}
+  m_Layer: 0
+  m_Name: Managers
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &234970436
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 234970435}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1189659388}
+  - {fileID: 1929583930}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &258025043
 GameObject:
   m_ObjectHideFlags: 0
@@ -7358,8 +7394,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47f23b4d8a481cf41ba672c9f368b3c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FocusableObject
-  cameraFocusPoint: {fileID: 0}
-  fallbackFocusOffset: {x: 0, y: 0.5, z: -2.5}
+  cameraFocusPoint: {fileID: 1049842388}
+  fallbackFocusOffset: {x: -2.8, y: 1.87, z: 0.14}
   customTransitionDuration: -1
   targetCameraFov: 45
   enableCameraEffectOnFocus: 0
@@ -7891,6 +7927,68 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1024815123}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1049842387
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1049842388}
+  m_Layer: 0
+  m_Name: botao_FocusPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1049842388
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1049842387}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.15615381, y: 0.45864245, z: -0.07658362, w: 0.8714345}
+  m_LocalPosition: {x: -1.2940361, y: 0.5344864, z: -0.82554233}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 756163004}
+  m_LocalEulerAnglesHint: {x: 0, y: 21.347, z: 0}
+--- !u!1 &1120059265
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1120059266}
+  m_Layer: 0
+  m_Name: PosicaoCameraTutorial
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1120059266
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1120059265}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.0160003, z: -2.928}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1189659386
 GameObject:
   m_ObjectHideFlags: 0
@@ -7922,15 +8020,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e9597012d370e9440bc101870503feb7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Mandato.Infrastructure::Mandato.Infrastructure.MandatoBootstrap
-  playTutorial: 1
-  tutorialCards:
-  - {fileID: 11400000, guid: 180e2a98c88a92f43ac763eec3b99537, type: 2}
-  - {fileID: 11400000, guid: 1dca47bc38f966b4bacb38c7303b9337, type: 2}
-  - {fileID: 11400000, guid: e050271e2abb0cf46b251b43b3bc4907, type: 2}
-  - {fileID: 11400000, guid: a8c34a1dc525a1a4db95c4f240a92cfb, type: 2}
-  - {fileID: 11400000, guid: 0273e0eb5ffc4964399a9e8cdad1ac2d, type: 2}
-  - {fileID: 11400000, guid: 8b6bdd6be56c45b40ba77c9d69e0a29a, type: 2}
-  - {fileID: 11400000, guid: 3b0e8410f35dfcd49baf504d6ca0d4fd, type: 2}
   startingCards:
   - {fileID: 11400000, guid: 1cff78574d1305741b48caf48d962e84, type: 2}
   - {fileID: 11400000, guid: 228466c43dce5054dadad717d02a33d7, type: 2}
@@ -8023,7 +8112,8 @@ MonoBehaviour:
     decisionOverlayPresenter: {fileID: 2096242969}
     endScreenPresenter: {fileID: 1390507337}
     flipPhonePresenter: {fileID: 163448384}
-    speechBubblePresenter: {fileID: 0}
+    speechBubblePresenter: {fileID: 1998875938}
+    tutorialManager: {fileID: 1929583931}
     playerAnimator: {fileID: 1834763903}
     dealAnimationName: LevantaMao
     dealAnimationReverseName: 
@@ -8042,11 +8132,11 @@ Transform:
   m_GameObject: {fileID: 1189659386}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.75239, y: -0, z: -3.2922}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 234970436}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1189659389
 MonoBehaviour:
@@ -8698,6 +8788,124 @@ MonoBehaviour:
   blendDistance: 0
   weight: 0
   sharedProfile: {fileID: 11400000, guid: ea443d4388205cc4cbd4a7707e809dd1, type: 2}
+--- !u!1 &1929583929
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1929583930}
+  - component: {fileID: 1929583931}
+  m_Layer: 0
+  m_Name: TutorialManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1929583930
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1929583929}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 234970436}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1929583931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1929583929}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c50161e3910afac4e874d6fedfd65776, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mandato.Infrastructure::Mandato.Infrastructure.TutorialManager
+  playTutorial: 1
+  tutorialNpcName: Lula
+  tutorialNpcPrefab: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
+  spawnPoint: {fileID: 0}
+  tableTargetPoint: {fileID: 0}
+  exitTargetPoint: {fileID: 0}
+  fallbackSpawnPosition: {x: 5.85, y: 0, z: 3.65}
+  fallbackTablePosition: {x: 0, y: 0, z: -1.5}
+  fallbackExitPosition: {x: 5.85, y: 0, z: 3.65}
+  arrivalAnimation: 
+  exitAnimation: 
+  walkArrivalTimeout: 15
+  exitTimeout: 12
+  stepConfigurations:
+  - card: {fileID: 11400000, guid: 180e2a98c88a92f43ac763eec3b99537, type: 2}
+    npcAnimationState: 
+    animationDelay: 0
+    cameraFocusPoint: {fileID: 1120059266}
+    focusableTarget: {fileID: 0}
+    targetCameraFov: 0
+    cameraTransitionDuration: -1
+    enableCameraEffect: 0
+  - card: {fileID: 11400000, guid: 1dca47bc38f966b4bacb38c7303b9337, type: 2}
+    npcAnimationState: 
+    animationDelay: 0
+    cameraFocusPoint: {fileID: 1120059266}
+    focusableTarget: {fileID: 0}
+    targetCameraFov: 0
+    cameraTransitionDuration: -1
+    enableCameraEffect: 0
+  - card: {fileID: 11400000, guid: e050271e2abb0cf46b251b43b3bc4907, type: 2}
+    npcAnimationState: 
+    animationDelay: 0
+    cameraFocusPoint: {fileID: 1120059266}
+    focusableTarget: {fileID: 756163003}
+    targetCameraFov: 0
+    cameraTransitionDuration: -1
+    enableCameraEffect: 0
+  - card: {fileID: 11400000, guid: a8c34a1dc525a1a4db95c4f240a92cfb, type: 2}
+    npcAnimationState: 
+    animationDelay: 0
+    cameraFocusPoint: {fileID: 1120059266}
+    focusableTarget: {fileID: 189416728}
+    targetCameraFov: 0
+    cameraTransitionDuration: -1
+    enableCameraEffect: 0
+  - card: {fileID: 11400000, guid: 0273e0eb5ffc4964399a9e8cdad1ac2d, type: 2}
+    npcAnimationState: 
+    animationDelay: 0
+    cameraFocusPoint: {fileID: 0}
+    focusableTarget: {fileID: 0}
+    targetCameraFov: 0
+    cameraTransitionDuration: -1
+    enableCameraEffect: 0
+  - card: {fileID: 11400000, guid: 8b6bdd6be56c45b40ba77c9d69e0a29a, type: 2}
+    npcAnimationState: 
+    animationDelay: 0
+    cameraFocusPoint: {fileID: 0}
+    focusableTarget: {fileID: 0}
+    targetCameraFov: 0
+    cameraTransitionDuration: -1
+    enableCameraEffect: 0
+  - card: {fileID: 11400000, guid: 3b0e8410f35dfcd49baf504d6ca0d4fd, type: 2}
+    npcAnimationState: 
+    animationDelay: 0
+    cameraFocusPoint: {fileID: 0}
+    focusableTarget: {fileID: 0}
+    targetCameraFov: 0
+    cameraTransitionDuration: -1
+    enableCameraEffect: 0
+  speechBubble: {fileID: 1998875938}
+  cameraFocusManager: {fileID: 963194232}
+  paperPresenter: {fileID: 474556747}
+  decisionOverlay: {fileID: 2096242969}
 --- !u!1001 &1993208596
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8842,9 +9050,9 @@ MonoBehaviour:
   uiDocument: {fileID: 1998875937}
   uxmlAsset: {fileID: 9197481963319205126, guid: 04687e7de351ceb4f8508cd1bdc13656, type: 3}
   panelSettings: {fileID: 11400000, guid: 7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d, type: 2}
-  flipHorizontal: 1
+  flipHorizontal: 0
   showAdvanceButton: 1
-  enableTypewriter: 0
+  enableTypewriter: 1
   charactersPerSecond: 45
   enableKeyboardShortcuts: 1
   primaryAdvanceKey: 32
@@ -8874,7 +9082,7 @@ Transform:
   m_GameObject: {fileID: 2058087739}
   serializedVersion: 2
   m_LocalRotation: {x: -0.024654752, y: -0.7048722, z: 0.02749695, w: -0.70837224}
-  m_LocalPosition: {x: -1.9700004, y: 0.34000006, z: -0.00000047683716}
+  m_LocalPosition: {x: -2.28, y: 0.36, z: -0}
   m_LocalScale: {x: 134, y: 76.521225, z: 132.84038}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -16629,5 +16837,6 @@ SceneRoots:
   - {fileID: 1234727010}
   - {fileID: 1409442304}
   - {fileID: 167788168}
-  - {fileID: 1189659388}
   - {fileID: 2124481895}
+  - {fileID: 234970436}
+  - {fileID: 1120059266}

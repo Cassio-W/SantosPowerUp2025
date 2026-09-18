@@ -266,17 +266,17 @@ namespace Mandato.Editor
 
             var bootstrapType = typeof(MandatoBootstrap);
 
-            // 2. Verifica campos de cartas via reflexão (campos são serialized private)
+            // 2. Verifica campos de cartas via reflexão
             var startingField = bootstrapType.GetField("startingCards", BindingFlags.NonPublic | BindingFlags.Instance);
-            var tutorialField = bootstrapType.GetField("tutorialCards", BindingFlags.NonPublic | BindingFlags.Instance);
             var catalogField = bootstrapType.GetField("catalogCards", BindingFlags.NonPublic | BindingFlags.Instance);
 
             var startingCards = startingField?.GetValue(bootstrap) as System.Collections.IList;
-            var tutorialCards = tutorialField?.GetValue(bootstrap) as System.Collections.IList;
             var catalogCards = catalogField?.GetValue(bootstrap) as System.Collections.IList;
 
+            var managerTutCards = bootstrap.PresentationBindings?.TutorialManager?.GetConfiguredCards()
+                ?? UnityEngine.Object.FindFirstObjectByType<TutorialManager>(FindObjectsInactive.Include)?.GetConfiguredCards();
+            int tutorialCount = managerTutCards?.Count ?? 0;
             int startingCount = startingCards?.Count ?? 0;
-            int tutorialCount = tutorialCards?.Count ?? 0;
             int catalogCount = catalogCards?.Count ?? 0;
 
             if (startingCount == 0)
@@ -289,7 +289,7 @@ namespace Mandato.Editor
                 Debug.Log($"[MandatoValidator] ✅ startingCards: {startingCount} carta(s) configurada(s).");
             }
 
-            Debug.Log($"[MandatoValidator] 📝 tutorialCards: {tutorialCount} carta(s) | catalogCards (injetáveis): {catalogCount} carta(s).");
+            Debug.Log($"[MandatoValidator] 📝 tutorialCards (TutorialManager): {tutorialCount} carta(s) | catalogCards (injetáveis): {catalogCount} carta(s).");
 
             // 3. Constrói conjunto de IDs registrados (deck + catálogo)
             var allCardIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -304,7 +304,7 @@ namespace Mandato.Editor
                 }
             }
 
-            AddCardsFromList(tutorialCards);
+            AddCardsFromList(managerTutCards);
             AddCardsFromList(startingCards);
             AddCardsFromList(catalogCards);
 
@@ -334,7 +334,7 @@ namespace Mandato.Editor
                 }
             }
 
-            CheckCardInjects(tutorialCards, "Tutorial");
+            CheckCardInjects(managerTutCards, "TutorialManager");
             CheckCardInjects(startingCards, "Starting");
             CheckCardInjects(catalogCards, "Catalog");
 
@@ -441,6 +441,14 @@ namespace Mandato.Editor
                 speechBubble = Undo.AddComponent<NpcSpeechBubblePresenter>(go);
             }
 
+            // 6.2 Tutorial Manager
+            var tutManager = UnityEngine.Object.FindFirstObjectByType<TutorialManager>(FindObjectsInactive.Include);
+            if (tutManager == null)
+            {
+                var go = GameObject.Find("TutorialManager") ?? GameObject.Find("Tutorial") ?? bootstrap.gameObject;
+                tutManager = Undo.AddComponent<TutorialManager>(go);
+            }
+
             // 7. Camera Effects & Focus
             var camEffects = UnityEngine.Object.FindFirstObjectByType<AttributeCameraEffects>(FindObjectsInactive.Include);
             var camFocus = UnityEngine.Object.FindFirstObjectByType<CameraFocusManager>(FindObjectsInactive.Include);
@@ -486,6 +494,9 @@ namespace Mandato.Editor
                 var pSpeechBubble = bindingsProp.FindPropertyRelative("speechBubblePresenter");
                 if (pSpeechBubble != null && speechBubble != null) pSpeechBubble.objectReferenceValue = speechBubble;
 
+                var pTutManager = bindingsProp.FindPropertyRelative("tutorialManager");
+                if (pTutManager != null && tutManager != null) pTutManager.objectReferenceValue = tutManager;
+
                 var pCamEffects = bindingsProp.FindPropertyRelative("cameraEffects");
                 if (pCamEffects != null && camEffects != null) pCamEffects.objectReferenceValue = camEffects;
 
@@ -511,6 +522,7 @@ namespace Mandato.Editor
             bindingsType.GetField("endScreenPresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, endScreen);
             bindingsType.GetField("flipPhonePresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, phone);
             if (speechBubble != null) bindingsType.GetField("speechBubblePresenter", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, speechBubble);
+            if (tutManager != null) bindingsType.GetField("tutorialManager", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, tutManager);
             if (camEffects != null) bindingsType.GetField("cameraEffects", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, camEffects);
             if (camFocus != null) bindingsType.GetField("cameraFocus", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, camFocus);
             if (playerAnim != null) bindingsType.GetField("playerAnimator", BindingFlags.NonPublic | BindingFlags.Instance)?.SetValue(bindings, playerAnim);

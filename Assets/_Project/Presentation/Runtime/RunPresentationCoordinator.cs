@@ -83,10 +83,12 @@ namespace Mandato.Presentation
 
         private IEnumerator PresentProposalRoutine(CardDefinition card)
         {
-            // Propostas de tutorial não usam NPC caminhando na porta
-            bool isTutorialCard = card.id.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                  card.categoryTag.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                  card.title.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0;
+            // Propostas de tutorial não usam NPC caminhando na porta (gerenciado pelo TutorialManager)
+            bool isTutorialCard = card != null && (
+                card.isTutorial ||
+                card.id.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                card.categoryTag.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                card.title.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0);
 
             if (isTutorialCard)
             {

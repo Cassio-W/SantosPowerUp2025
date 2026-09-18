@@ -18,13 +18,7 @@ namespace Mandato.Infrastructure
     {
         public static MandatoBootstrap Instance { get; private set; }
 
-        [Header("Tutorial e Conteúdo da Partida")]
-        [Tooltip("Se verdadeiro, a partida inicia pelas propostas do tutorial.")]
-        [SerializeField] private bool playTutorial = true;
-
-        [Tooltip("Cartas de tutorial (CardDefinition). São exibidas com prioridade no início da run.")]
-        [SerializeField] private List<CardDefinition> tutorialCards = new List<CardDefinition>();
-
+        [Header("Conteúdo da Partida")]
         [Tooltip("Cartas iniciais do baralho principal (CardDefinition).")]
         [SerializeField] private List<CardDefinition> startingCards = new List<CardDefinition>();
 
@@ -85,9 +79,15 @@ namespace Mandato.Infrastructure
 
             ValidateBindingsOnAwake();
 
+            // Obtém as cartas de tutorial e estado de ativação exclusivamente do TutorialManager
+            bool shouldPlayTutorial = presentationBindings?.TutorialManager != null && presentationBindings.TutorialManager.PlayTutorial;
+            var activeTutorialCards = presentationBindings?.TutorialManager != null
+                ? presentationBindings.TutorialManager.GetConfiguredCards()
+                : new List<CardDefinition>();
+
             // 1. Inicializa Catálogo, Perfil e Máquina de Estados
             bootstrapResult = RunBootstrap.CreateAndInitializeRun(
-                tutorialCards,
+                activeTutorialCards,
                 startingCards,
                 catalogCards,
                 perksCatalog,
@@ -95,7 +95,7 @@ namespace Mandato.Infrastructure
                 questsCatalog,
                 endingsCatalog,
                 startingActions,
-                playTutorial,
+                shouldPlayTutorial,
                 customSeed
             );
 

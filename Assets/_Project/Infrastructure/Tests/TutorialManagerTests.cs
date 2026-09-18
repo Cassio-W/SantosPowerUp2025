@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Mandato.Content;
 using Mandato.Core;
 using Mandato.Infrastructure;
+using Mandato.Presentation;
 using Mandato.Run;
 using Mandato.UI;
 using NUnit.Framework;
@@ -15,14 +16,15 @@ namespace Mandato.Infrastructure.Tests
         private GameObject speechGo;
         private GameObject paperGo;
         private GameObject decisionGo;
+        private GameObject tutorialGo;
 
         private NpcSpeechBubblePresenter speechBubble;
         private PaperDocumentPresenter paperPresenter;
         private DecisionOverlayPresenter decisionOverlay;
+        private TutorialManager tutorialManager;
 
         private RunCatalog catalog;
         private RunStateMachine stateMachine;
-        private TutorialManager tutorialManager;
 
         private CardDefinition tutCard1;
         private CardDefinition tutCard2;
@@ -39,6 +41,9 @@ namespace Mandato.Infrastructure.Tests
 
             decisionGo = new GameObject("TestDecision");
             decisionOverlay = decisionGo.AddComponent<DecisionOverlayPresenter>();
+
+            tutorialGo = new GameObject("TestTutorialManager");
+            tutorialManager = tutorialGo.AddComponent<TutorialManager>();
 
             tutCard1 = CardDefinition.CreateRuntimeInstance("tut_1", "Bem-vindo ao Mandato", "Explicação 1", new ChoiceDefinition("Continuar"), new ChoiceDefinition("Continuar"), isTutorial: true);
             tutCard2 = CardDefinition.CreateRuntimeInstance("tut_2", "Gerenciando Ministérios", "Explicação 2", new ChoiceDefinition("Continuar"), new ChoiceDefinition("Continuar"), isTutorial: true);
@@ -60,7 +65,6 @@ namespace Mandato.Infrastructure.Tests
             stateMachine = new RunStateMachine(seed: 42);
             stateMachine.StartRun(catalog.MainDeckCardIds, 42, catalog.TutorialCardIds);
 
-            tutorialManager = new TutorialManager();
             tutorialManager.Initialize(stateMachine, catalog, speechBubble, paperPresenter, decisionOverlay);
         }
 
@@ -70,6 +74,7 @@ namespace Mandato.Infrastructure.Tests
             if (speechGo != null) Object.DestroyImmediate(speechGo);
             if (paperGo != null) Object.DestroyImmediate(paperGo);
             if (decisionGo != null) Object.DestroyImmediate(decisionGo);
+            if (tutorialGo != null) Object.DestroyImmediate(tutorialGo);
         }
 
         [Test]
@@ -91,12 +96,13 @@ namespace Mandato.Infrastructure.Tests
         {
             bool stepStartedInvoked = false;
             tutorialManager.OnTutorialStepStarted += (card, step) => stepStartedInvoked = true;
+            tutorialManager.TutorialNpcName = "ASSESSOR CHEFE";
 
             tutorialManager.PresentTutorialStep(tutCard1);
 
             Assert.IsTrue(tutorialManager.IsTutorialActive);
             Assert.IsTrue(speechBubble.IsVisible);
-            Assert.AreEqual("Bem-vindo ao Mandato", speechBubble.CurrentSpeaker);
+            Assert.AreEqual("ASSESSOR CHEFE", speechBubble.CurrentSpeaker);
             Assert.AreEqual("Explicação 1", speechBubble.CurrentText);
             Assert.IsFalse(decisionOverlay.IsVisible);
             Assert.IsTrue(stepStartedInvoked);
@@ -112,6 +118,32 @@ namespace Mandato.Infrastructure.Tests
             speechBubble.HandleAdvanceAction();
 
             Assert.AreEqual(1, tutorialManager.CurrentStepIndex);
+        }
+
+        [Test]
+        public void StepConfigurations_CanBeConfiguredAndQueried()
+        {
+            tutorialManager.PlayTutorial = true;
+            Assert.IsTrue(tutorialManager.PlayTutorial);
+
+            var step0 = new TutorialStepConfig
+            {
+                card = tutCard1,
+                npcAnimationState = "Talking",
+                targetCameraFov = 45f,
+                enableCameraEffect = true
+            };
+            tutorialManager.StepConfigurations.Add(step0);
+
+            Assert.AreEqual(1, tutorialManager.StepConfigurations.Count);
+            Assert.AreEqual(tutCard1, tutorialManager.StepConfigurations[0].card);
+            Assert.AreEqual("Talking", tutorialManager.StepConfigurations[0].npcAnimationState);
+            Assert.AreEqual(45f, tutorialManager.StepConfigurations[0].targetCameraFov);
+            Assert.IsTrue(tutorialManager.StepConfigurations[0].enableCameraEffect);
+
+            var cards = tutorialManager.GetConfiguredCards();
+            Assert.AreEqual(1, cards.Count);
+            Assert.AreEqual(tutCard1, cards[0]);
         }
 
         [Test]

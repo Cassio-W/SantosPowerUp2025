@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CardDefinition
   id: Tutorial04
   title: Tutorial04
-  description: "Atrav\xE9s das \xFAltimas pesquisas com a ODS 2030, chegamos \xE0
-    conclus\xE3o das 4 coisas que o pais mais precisa tomar cuidado: Clima, Rela\xE7\xF5es
+  description: "No seu computador voc\xEA pode conferir o estado do pa\xEDs, aqui
+    est\xE3o as 4 coisas que precisamos ter mais aten\xE7\xE3o: Meio Ambiente, Rela\xE7\xF5es
     Internacionais, Aprova\xE7\xE3o Populacional e Economia. "
   npcId: Vice-Presidente
   npcPrefab: {fileID: 7410145720240828870, guid: b126acb8a7a673f439f5ec19e17dfd59, type: 3}

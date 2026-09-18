@@ -15,7 +15,7 @@ MonoBehaviour:
   id: Tutorial02
   title: Tutorial02
   description: "Parab\xE9ns por ter vencido as elei\xE7\xF5es. Hoje \xE9 seu primeiro
-    dia de mandato e o Brasil j\xE1 est\xE1 um caos. Nosso objetivo \xE9 fazer esse
+    dia de mandato e o pa\xEDs j\xE1 est\xE1 um caos. Nosso objetivo \xE9 fazer esse
     pa\xEDs aguentar at\xE9 2030."
   npcId: Vice-Presidente
   npcPrefab: {fileID: 7410145720240828870, guid: b126acb8a7a673f439f5ec19e17dfd59, type: 3}

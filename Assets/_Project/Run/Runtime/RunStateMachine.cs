@@ -148,6 +148,7 @@ namespace Mandato.Run
 
             // Não avança o mês caso a proposta seja do tutorial
             bool isTutorialCard = CurrentCard != null && (
+                CurrentCard.isTutorial ||
                 CurrentCard.id.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 CurrentCard.categoryTag.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0 ||
                 CurrentCard.title.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0);

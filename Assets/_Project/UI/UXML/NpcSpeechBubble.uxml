@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/_Project/UI/USS/NpcSpeechBubble.uss?fileID=7433441132597879392&amp;guid=068193c9a87abf74fb8f74adbf595d27&amp;type=3#NpcSpeechBubble"/>
     <ui:VisualElement name="speech-hud-root" picking-mode="Ignore" class="speech-hud-root">
-        <ui:VisualElement name="speech-footer-container" class="speech-footer-container">
+        <ui:VisualElement name="speech-footer-container" class="speech-footer-container hidden" style="display: none;">
             <ui:VisualElement name="speech-bubble-bg" picking-mode="Ignore" class="speech-bubble-bg"/>
             <ui:VisualElement name="speech-bubble-content" class="speech-bubble-content">
                 <ui:VisualElement name="speech-text-area" class="speech-text-area">

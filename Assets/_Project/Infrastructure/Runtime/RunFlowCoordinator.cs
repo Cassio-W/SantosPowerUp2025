@@ -66,17 +66,25 @@ namespace Mandato.Infrastructure
             this.delayBetweenProposals = delayBetween;
             this.mainMenuSceneName = string.IsNullOrEmpty(menuScene) ? "MenuV2" : menuScene;
 
+            this.tutorialManager = (bindings != null && bindings.TutorialManager != null)
+                ? bindings.TutorialManager
+                : GetComponent<TutorialManager>() ?? FindFirstObjectByType<TutorialManager>(FindObjectsInactive.Include) ?? gameObject.AddComponent<TutorialManager>();
+
             var speechBubble = (bindings != null && bindings.SpeechBubblePresenter != null)
                 ? bindings.SpeechBubblePresenter
                 : FindFirstObjectByType<NpcSpeechBubblePresenter>(FindObjectsInactive.Include);
 
-            this.tutorialManager = new TutorialManager();
+            var cameraFocus = (bindings != null && bindings.CameraFocus != null)
+                ? bindings.CameraFocus
+                : CameraFocusManager.Instance ?? FindFirstObjectByType<CameraFocusManager>(FindObjectsInactive.Include);
+
             this.tutorialManager.Initialize(
                 stateMachine,
                 catalog,
                 speechBubble,
                 bindings?.PaperPresenter,
-                bindings?.DecisionOverlayPresenter
+                bindings?.DecisionOverlayPresenter,
+                cameraFocus
             );
 
             Bind();

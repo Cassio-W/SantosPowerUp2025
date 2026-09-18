@@ -464,15 +464,44 @@ namespace Mandato.Presentation
     }
 
     /// <summary>
+    /// Foca a câmera diretamente em um Transform âncora arbitrário com FOV e duração customizáveis.
+    /// </summary>
+    public void FocusPoint(Transform targetPoint, float targetFov = -1f, float duration = -1f, bool enableCameraEffect = false, float effectWeight = 1f)
+    {
+        if (targetPoint == null)
+        {
+            Unfocus(duration);
+            return;
+        }
+
+        if (_currentFocusedObject != null)
+        {
+            _currentFocusedObject.SetFocused(false);
+            _currentFocusedObject = null;
+        }
+
+        float fov = targetFov > 0f ? targetFov : _defaultFov;
+        float dur = duration > 0f ? duration : transitionDuration;
+
+        float targetEffectWeight = enableCameraEffect ? effectWeight : 0f;
+        SetFocusCameraEffect(targetEffectWeight, dur);
+
+        MoveCameraTo(targetPoint.position, targetPoint.rotation, fov, dur);
+
+        onFocusChanged?.Invoke(null);
+        OnObjectFocusChanged?.Invoke(null);
+    }
+
+    /// <summary>
     /// Retorna a camera para a posicao e rotacao padrao da cena.
     /// </summary>
     public void Unfocus(float customDuration = -1f)
     {
-        if (_currentFocusedObject == null) return;
-
-        FocusableObject prev = _currentFocusedObject;
-        _currentFocusedObject.SetFocused(false);
-        _currentFocusedObject = null;
+        if (_currentFocusedObject != null)
+        {
+            _currentFocusedObject.SetFocused(false);
+            _currentFocusedObject = null;
+        }
 
         float duration = customDuration > 0f ? customDuration : transitionDuration;
 
