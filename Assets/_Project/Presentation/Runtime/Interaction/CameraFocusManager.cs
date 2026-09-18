@@ -77,6 +77,7 @@ namespace Mandato.Presentation
     private float _defaultFov = 60f;
 
     private FocusableObject _currentFocusedObject;
+    private Transform _currentAnchorPoint;
     private FocusableObject _currentHoveredObject;
     private WorldSpaceUIInteraction _activeWorldSpaceUI;
     private FocusableObject _activeFocusable;
@@ -205,6 +206,24 @@ namespace Mandato.Presentation
         }
     }
 
+    private void LateUpdate()
+    {
+        // Se a câmera não está em transição ativa, mantém a câmera continuamente alinhada ao alvo focado
+        if (_cameraMoveCoroutine == null && targetCamera != null)
+        {
+            if (_currentFocusedObject != null && _currentFocusedObject.gameObject != null)
+            {
+                targetCamera.transform.position = _currentFocusedObject.GetCameraTargetPosition();
+                targetCamera.transform.rotation = _currentFocusedObject.GetCameraTargetRotation();
+            }
+            else if (_currentAnchorPoint != null && _currentAnchorPoint.gameObject != null)
+            {
+                targetCamera.transform.position = _currentAnchorPoint.position;
+                targetCamera.transform.rotation = _currentAnchorPoint.rotation;
+            }
+        }
+    }
+
     /// <summary>
     /// Processa o raio do mouse para deteccao centralizada de hover e clique nos objetos interativos.
     /// Respeita a oclusão física: o primeiro objeto sólido ou interativo encontrado ao longo do raio (ex: celular ligado em primeiro plano)
@@ -325,6 +344,16 @@ namespace Mandato.Presentation
         // Clique do Mouse
         if (Input.GetMouseButtonDown(0))
         {
+            // Se o objeto atualmente focado não permite sair do foco ao clicar fora:
+            if (_currentFocusedObject != null && !_currentFocusedObject.AllowUnfocusOnClickOutside)
+            {
+                if (hitFocusable == _currentFocusedObject)
+                {
+                    _currentFocusedObject.NotifyClicked();
+                }
+                return;
+            }
+
             if (hitWorldSpaceUI != null)
             {
                 // Se estamos focando um objeto (ex: computador) a partir da visão distante e clicamos nele:
@@ -427,7 +456,7 @@ namespace Mandato.Presentation
     }
 
     /// <summary>
-    /// Move a camera suavemente para focar o objeto especificado.
+    /// Move a camera suavemente para focar o objeto especificado, acompanhando dinamicamente o alvo mesmo em movimento.
     /// </summary>
     public void Focus(FocusableObject target)
     {
@@ -446,10 +475,9 @@ namespace Mandato.Presentation
         }
 
         _currentFocusedObject = target;
+        _currentAnchorPoint = null;
         _currentFocusedObject.SetFocused(true);
 
-        Vector3 targetPos = target.GetCameraTargetPosition();
-        Quaternion targetRot = target.GetCameraTargetRotation();
         float targetFov = target.TargetCameraFov > 0f ? target.TargetCameraFov : _defaultFov;
         float duration = target.CustomTransitionDuration > 0f ? target.CustomTransitionDuration : transitionDuration;
 
@@ -457,7 +485,12 @@ namespace Mandato.Presentation
         float targetEffectWeight = target.EnableCameraEffectOnFocus ? target.CameraEffectWeight : 0f;
         SetFocusCameraEffect(targetEffectWeight, duration);
 
-        MoveCameraTo(targetPos, targetRot, targetFov, duration);
+        MoveCameraTo(
+            () => _currentFocusedObject != null ? _currentFocusedObject.GetCameraTargetPosition() : _defaultPosition,
+            () => _currentFocusedObject != null ? _currentFocusedObject.GetCameraTargetRotation() : _defaultRotation,
+            targetFov,
+            duration
+        );
 
         onFocusChanged?.Invoke(_currentFocusedObject);
         OnObjectFocusChanged?.Invoke(_currentFocusedObject);
@@ -480,13 +513,20 @@ namespace Mandato.Presentation
             _currentFocusedObject = null;
         }
 
+        _currentAnchorPoint = targetPoint;
+
         float fov = targetFov > 0f ? targetFov : _defaultFov;
         float dur = duration > 0f ? duration : transitionDuration;
 
         float targetEffectWeight = enableCameraEffect ? effectWeight : 0f;
         SetFocusCameraEffect(targetEffectWeight, dur);
 
-        MoveCameraTo(targetPoint.position, targetPoint.rotation, fov, dur);
+        MoveCameraTo(
+            () => _currentAnchorPoint != null ? _currentAnchorPoint.position : _defaultPosition,
+            () => _currentAnchorPoint != null ? _currentAnchorPoint.rotation : _defaultRotation,
+            fov,
+            dur
+        );
 
         onFocusChanged?.Invoke(null);
         OnObjectFocusChanged?.Invoke(null);
@@ -503,15 +543,19 @@ namespace Mandato.Presentation
             _currentFocusedObject = null;
         }
 
+        _currentAnchorPoint = null;
+
         float duration = customDuration > 0f ? customDuration : transitionDuration;
 
         // Desativa o efeito de camera / pos-processamento ao retornar para a visao geral
         SetFocusCameraEffect(0f, duration);
 
-        Vector3 targetPos = defaultCameraAnchor != null ? defaultCameraAnchor.position : _defaultPosition;
-        Quaternion targetRot = defaultCameraAnchor != null ? defaultCameraAnchor.rotation : _defaultRotation;
-
-        MoveCameraTo(targetPos, targetRot, _defaultFov, duration);
+        MoveCameraTo(
+            () => defaultCameraAnchor != null ? defaultCameraAnchor.position : _defaultPosition,
+            () => defaultCameraAnchor != null ? defaultCameraAnchor.rotation : _defaultRotation,
+            _defaultFov,
+            duration
+        );
 
         onFocusChanged?.Invoke(null);
         OnObjectFocusChanged?.Invoke(null);
@@ -621,9 +665,9 @@ namespace Mandato.Presentation
     }
 
     /// <summary>
-    /// Inicia a animacao suave da camera para as coordenadas alvos.
+    /// Inicia a animacao suave da camera para as coordenadas alvos avaliadas dinamicamente a cada frame.
     /// </summary>
-    private void MoveCameraTo(Vector3 targetPos, Quaternion targetRot, float targetFov, float duration)
+    private void MoveCameraTo(Func<Vector3> getTargetPos, Func<Quaternion> getTargetRot, float targetFov, float duration)
     {
         if (targetCamera == null) return;
 
@@ -632,10 +676,15 @@ namespace Mandato.Presentation
             StopCoroutine(_cameraMoveCoroutine);
         }
 
-        _cameraMoveCoroutine = StartCoroutine(CameraTransitionRoutine(targetPos, targetRot, targetFov, duration));
+        _cameraMoveCoroutine = StartCoroutine(CameraTransitionRoutine(getTargetPos, getTargetRot, targetFov, duration));
     }
 
-    private IEnumerator CameraTransitionRoutine(Vector3 endPos, Quaternion endRot, float endFov, float duration)
+    private void MoveCameraTo(Vector3 targetPos, Quaternion targetRot, float targetFov, float duration)
+    {
+        MoveCameraTo(() => targetPos, () => targetRot, targetFov, duration);
+    }
+
+    private IEnumerator CameraTransitionRoutine(Func<Vector3> getTargetPos, Func<Quaternion> getTargetRot, float endFov, float duration)
     {
         Transform camTransform = targetCamera.transform;
         Vector3 startPos = camTransform.position;
@@ -653,15 +702,21 @@ namespace Mandato.Presentation
             float t = Mathf.Clamp01(elapsed / duration);
             float curveT = transitionCurve != null ? transitionCurve.Evaluate(t) : Mathf.SmoothStep(0f, 1f, t);
 
-            camTransform.position = Vector3.Lerp(startPos, endPos, curveT);
-            camTransform.rotation = Quaternion.Slerp(startRot, endRot, curveT);
+            Vector3 currentEndPos = getTargetPos != null ? getTargetPos() : startPos;
+            Quaternion currentEndRot = getTargetRot != null ? getTargetRot() : startRot;
+
+            camTransform.position = Vector3.Lerp(startPos, currentEndPos, curveT);
+            camTransform.rotation = Quaternion.Slerp(startRot, currentEndRot, curveT);
             targetCamera.fieldOfView = Mathf.Lerp(startFov, endFov, curveT);
 
             yield return null;
         }
 
-        camTransform.position = endPos;
-        camTransform.rotation = endRot;
+        Vector3 finalPos = getTargetPos != null ? getTargetPos() : camTransform.position;
+        Quaternion finalRot = getTargetRot != null ? getTargetRot() : camTransform.rotation;
+
+        camTransform.position = finalPos;
+        camTransform.rotation = finalRot;
         targetCamera.fieldOfView = endFov;
         _cameraMoveCoroutine = null;
     }

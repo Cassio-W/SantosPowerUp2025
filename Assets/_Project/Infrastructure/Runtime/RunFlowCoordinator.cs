@@ -31,9 +31,14 @@ namespace Mandato.Infrastructure
 
         private bool isAwaitingSpaceForNextNpc = false;
         private bool isPlayerHandRaised = false;
+        private bool isPaperFocused = false;
+        private bool isDismissingProposal = false;
         private bool isPcFocused = false;
 
         public bool IsAwaitingSpaceForNextNpc => isAwaitingSpaceForNextNpc;
+        public bool IsPlayerHandRaised => isPlayerHandRaised;
+        public bool IsPaperFocused => isPaperFocused;
+        public bool IsDismissingProposal => isDismissingProposal;
         public bool IsPcFocused => isPcFocused;
         public UIModalCoordinator ModalCoordinator => modalCoordinator;
         public TutorialManager TutorialManager => tutorialManager;
@@ -119,6 +124,7 @@ namespace Mandato.Infrastructure
                 bindings.DecisionOverlayPresenter.OnChoiceSelected += HandlePlayerChoiceSubmitted;
                 bindings.DecisionOverlayPresenter.OnChoiceHovered += HandlePlayerChoiceHovered;
                 bindings.DecisionOverlayPresenter.OnChoiceUnhovered += HandlePlayerChoiceUnhovered;
+                bindings.DecisionOverlayPresenter.OnBackRequested += HandleDecisionBackRequested;
             }
 
             // 5. Modais e Ações do Celular
@@ -146,7 +152,7 @@ namespace Mandato.Infrastructure
                 bindings.DeskCallButton.OnCallRequested += AuthorizeNextVisitor;
             }
 
-            // 8. Foco de Câmera (PC / Monitor)
+            // 8. Foco de Câmera (PC / Monitor / Papel)
             if (bindings.CameraFocus != null)
             {
                 bindings.CameraFocus.OnObjectFocusChanged += HandleObjectFocusChanged;
@@ -155,6 +161,11 @@ namespace Mandato.Infrastructure
 
         private void OnDestroy()
         {
+            if (bindings != null && bindings.DecisionOverlayPresenter != null)
+            {
+                bindings.DecisionOverlayPresenter.OnBackRequested -= HandleDecisionBackRequested;
+            }
+
             if (flipPhoneCoordinator != null)
             {
                 flipPhoneCoordinator.OnActionExecuted -= HandleFlipPhoneActionExecuted;
@@ -171,10 +182,87 @@ namespace Mandato.Infrastructure
             }
         }
 
-        private void HandleObjectFocusChanged(FocusableObject focusedObject)
+        private void HandleDecisionBackRequested()
+        {
+            if (CameraFocusManager.Instance != null && CameraFocusManager.Instance.HasActiveFocus)
+            {
+                CameraFocusManager.Instance.Unfocus();
+            }
+            else if (bindings != null && bindings.CameraFocus != null && bindings.CameraFocus.HasActiveFocus)
+            {
+                bindings.CameraFocus.Unfocus();
+            }
+        }
+
+        public void HandleObjectFocusChanged(FocusableObject focusedObject)
         {
             bool isPc = IsMonitorFocusable(focusedObject);
             SetPcFocusState(isPc);
+
+            bool isPaper = focusedObject is PaperFocusableObject;
+            bool isPaperOrNonPc = isPaper || (focusedObject != null && !isPc);
+
+            if (isPaper)
+            {
+                isPaperFocused = true;
+                // Desativa a animação do braço levantado instantaneamente ao focar no papel
+                if (bindings != null)
+                {
+                    bindings.ResetPlayerHandImmediate();
+                    isPlayerHandRaised = false;
+                }
+            }
+            else if (focusedObject == null)
+            {
+                // Só restaura a mão levantada se estávamos especificamente com foco ativo no papel,
+                // e a proposta continua ativa aguardando decisão na partida (não sendo descartada/respondida)
+                if (isPaperFocused)
+                {
+                    isPaperFocused = false;
+
+                    if (IsProposalActive() && !isPcFocused && !isDismissingProposal)
+                    {
+                        if (bindings != null && !isPlayerHandRaised)
+                        {
+                            bindings.PlayDealAnimation();
+                            isPlayerHandRaised = true;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                isPaperFocused = false;
+            }
+
+            if (bindings != null && bindings.DecisionOverlayPresenter != null)
+            {
+                bindings.DecisionOverlayPresenter.SetBackVisible(isPaper);
+            }
+        }
+
+        /// <summary>
+        /// Verifica se há uma proposta ativa na mesa aguardando decisão do jogador.
+        /// </summary>
+        public bool IsProposalActive()
+        {
+            if (stateMachine == null || stateMachine.CurrentCard == null)
+                return false;
+
+            if (stateMachine.RunState != null && (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory))
+                return false;
+
+            if (isAwaitingSpaceForNextNpc || isDismissingProposal)
+                return false;
+
+            if (tutorialManager != null && tutorialManager.IsTutorialActive)
+                return false;
+
+            if (IsTutorialCard(stateMachine.CurrentCard))
+                return false;
+
+            return stateMachine.CurrentPhase == RunPhase.PresentingProposal ||
+                   stateMachine.CurrentPhase == RunPhase.AwaitingChoice;
         }
 
         public bool IsMonitorFocusable(FocusableObject obj)
@@ -265,6 +353,9 @@ namespace Mandato.Infrastructure
         {
             if (stateMachine == null || stateMachine.CurrentCard == null) return;
 
+            isDismissingProposal = true;
+            isPaperFocused = false;
+
             // 1. Limpa monitor e botões de decisão
             bindings.RetroMonitorPresenter?.ClearPreviewImpacts();
             if (bindings.DecisionOverlayPresenter != null)
@@ -325,6 +416,8 @@ namespace Mandato.Infrastructure
                 bindings.RetroMonitorPresenter.UpdateSnapshot(stateMachine.RunState.GetSnapshot());
                 bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
             }
+
+            isDismissingProposal = false;
 
             if (requireSpaceToCallNextNpc)
             {
@@ -418,6 +511,9 @@ namespace Mandato.Infrastructure
             // 0. Propostas de tutorial são exibidas via TutorialManager no NpcSpeechBubblePresenter
             if (tutorialManager != null && tutorialManager.IsTutorialCard(card))
             {
+                isDismissingProposal = false;
+                isPaperFocused = false;
+
                 if (isPlayerHandRaised)
                 {
                     bindings.PlayDealAnimationReverse();
@@ -439,6 +535,9 @@ namespace Mandato.Infrastructure
             {
                 tutorialManager.CompleteTutorial();
             }
+
+            isDismissingProposal = false;
+            isPaperFocused = false;
 
             // 1. Exibe papel físico 3D
             if (bindings.PaperPresenter != null)
@@ -492,6 +591,9 @@ namespace Mandato.Infrastructure
         private void HandlePlayerChoiceSubmitted(int choiceIndex)
         {
             if (stateMachine == null) return;
+
+            isDismissingProposal = true;
+            isPaperFocused = false;
 
             bindings.RetroMonitorPresenter?.ClearPreviewImpacts();
 
@@ -606,6 +708,8 @@ namespace Mandato.Infrastructure
                 {
                     bindings.PaperPresenter.SetPaperActive(false);
                 }
+
+                isDismissingProposal = false;
 
                 if (requireSpaceToCallNextNpc)
                 {

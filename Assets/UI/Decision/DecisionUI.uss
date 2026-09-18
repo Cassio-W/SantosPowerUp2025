@@ -1,5 +1,5 @@
 /* ==========================================================================
-   DECISION UI - BOTÕES CIRCULARES COMIC / RETRO STYLIZED (UI TOOLKIT)
+   DECISION UI - BOTÃO VOLTAR E HUD DE GABINETE (UI TOOLKIT)
    ========================================================================== */
 
 .decision-screen {
@@ -11,17 +11,21 @@
     width: 100%;
     height: 100%;
     justify-content: flex-end;
-    align-items: flex-end;
+    align-items: flex-start;
     background-color: rgba(0, 0, 0, 0);
 }
 
-.decision-container {
+/* ==========================================================================
+   BACK CONTAINER - CANTO INFERIOR ESQUERDO
+   ========================================================================== */
+
+.back-container {
     position: absolute;
     bottom: 40px;
-    right: 48px;
-    left: auto;
+    left: 48px;
+    right: auto;
     flex-direction: row;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: flex-start;
     transition-property: translate, opacity;
     transition-duration: 0.35s;
@@ -31,7 +35,7 @@
 }
 
 /* Estado Oculto (Slide-down com Fade) */
-.decision-container.hidden {
+.back-container.hidden {
     translate: 0 160px;
     opacity: 0;
     display: none;
@@ -50,7 +54,7 @@
 }
 
 .decision-btn {
-    /* Base para interoperabilidade com scripts */
+    /* Base para interoperabilidade com scripts e raycast */
 }
 
 .decision-btn-circle {
@@ -96,53 +100,35 @@
 }
 
 /* ==========================================================================
-   BOTÃO ACEITAR (VERDE ESMERALDA / CHECKMARK)
+   BOTÃO VOLTAR (CANTO INFERIOR ESQUERDO)
    ========================================================================== */
 
-.btn-approve {
-    border-color: #10B981;
-    background-color: rgba(12, 36, 26, 0.94);
+.btn-back {
+    border-color: #64748B;
+    background-color: rgba(15, 23, 42, 0.94);
 }
 
-.btn-approve:hover {
-    border-color: #34D399;
-    background-color: rgba(16, 56, 38, 0.98);
+.btn-back:hover {
+    border-color: #94A3B8;
+    background-color: rgba(30, 41, 59, 0.98);
 }
 
-.icon-approve {
-    background-image: url('project://database/Assets/Sprites/Gemini_Generated_Image_l7ja3ml7ja3ml7ja-removebg-preview.png?fileID=21300000&guid=8fe4466972b92db4b871a18536e036bd&type=3#Gemini_Generated_Image_l7ja3ml7ja3ml7ja-removebg-preview');
-    -unity-background-image-tint-color: #34D399;
+.btn-back:active {
+    border-color: #CBD5E1;
+    background-color: rgba(51, 65, 85, 0.98);
 }
 
-.btn-approve:hover .icon-approve {
+.icon-back {
+    background-image: url('project://database/Assets/Sprites/botao_voltar.png?fileID=21300000&guid=c4e7dd2b81bc50543b0c4723bc72ec4b&type=3#botao_voltar');
+    -unity-background-image-tint-color: #CBD5E1;
+}
+
+.btn-back:hover .icon-back {
     -unity-background-image-tint-color: #FFFFFF;
 }
 
 /* ==========================================================================
-   BOTÃO RECUSAR (VERMELHO RUBI / X)
-   ========================================================================== */
-
-.btn-reject {
-    border-color: #EF4444;
-    background-color: rgba(45, 14, 20, 0.94);
-}
-
-.btn-reject:hover {
-    border-color: #F87171;
-    background-color: rgba(65, 18, 28, 0.98);
-}
-
-.icon-reject {
-    background-image: url('project://database/Assets/Sprites/Gemini_Generated_Image_elpjelpjelpjelpj-removebg-preview_1.png?fileID=21300000&guid=edca1ba3ccc5e0d49afa69481546bde0&type=3#Gemini_Generated_Image_elpjelpjelpjelpj-removebg-preview_1');
-    -unity-background-image-tint-color: #F87171;
-}
-
-.btn-reject:hover .icon-reject {
-    -unity-background-image-tint-color: #FFFFFF;
-}
-
-/* ==========================================================================
-   LABEL INFORMATIVO / DESCRITIVO ABAIXO DO BOTÃO ("ACEITAR" / "RECUSAR")
+   LABEL INFORMATIVO ABAIXO DO BOTÃO ("VOLTAR")
    ========================================================================== */
 
 .decision-btn-label {
@@ -155,40 +141,8 @@
     letter-spacing: 1.5px;
 }
 
-.label-approve {
-    color: #34D399;
-}
-
-.label-reject {
-    color: #F87171;
-}
-
-/* ==========================================================================
-   BOTÃO CONTINUAR (NEUTRO / SETA ESPELHADA - MODO TUTORIAL)
-   ========================================================================== */
-
-.btn-continue {
-    border-color: #94A3B8;
-    background-color: rgba(30, 41, 59, 0.94);
-}
-
-.btn-continue:hover {
-    border-color: #F8FAFC;
-    background-color: rgba(51, 65, 85, 0.98);
-}
-
-.icon-continue {
-    background-image: url('project://database/Assets/Sprites/white-arrow.png');
-    -unity-background-image-tint-color: #E2E8F0;
-    scale: -1 1; /* Espelha a seta horizontalmente para apontar para a direita */
-}
-
-.btn-continue:hover .icon-continue {
-    -unity-background-image-tint-color: #FFFFFF;
-}
-
-.label-continue {
-    color: #E2E8F0;
+.label-back {
+    color: #CBD5E1;
 }
 
 /* ==========================================================================
@@ -347,5 +301,3 @@
     padding-left: 0;
     padding-right: 0;
 }
-
-

@@ -14,12 +14,15 @@ namespace Mandato.UI
         public event Action<int> OnChoiceSelected;
         public event Action<ChoiceDefinition> OnChoiceHovered;
         public event Action OnChoiceUnhovered;
+        public event Action OnBackRequested;
+        public event Action OnBackClicked;
 
         [SerializeField] private UIDocument uiDocument;
         [SerializeField] private VisualTreeAsset uxmlAsset;
         [SerializeField] private PanelSettings panelSettings;
         private UIModalCoordinator modalCoordinator;
         private VisualElement decisionContainer;
+        private VisualElement backContainer;
         private VisualElement vignetteCorruption;
         private VisualElement perksContainer;
         private VisualElement perkModalPopup;
@@ -35,12 +38,15 @@ namespace Mandato.UI
             modalCoordinator = coordinator;
         }
 
+        private VisualElement wrapperBack;
         private VisualElement wrapperApprove;
         private VisualElement wrapperReject;
         private VisualElement wrapperContinue;
+        private Button btnBack;
         private Button btnLeft;
         private Button btnRight;
         private Button btnContinue;
+        private Label lblBack;
         private Label lblLeftChoice;
         private Label lblRightChoice;
         private Label lblContinue;
@@ -67,12 +73,14 @@ namespace Mandato.UI
         {
             EnsureReferences();
             CacheElements();
+            SetBackVisible(false);
         }
 
         private void OnEnable()
         {
             EnsureReferences();
             CacheElements();
+            SetBackVisible(false);
         }
 
         private void EnsureReferences()
@@ -125,6 +133,7 @@ namespace Mandato.UI
             VisualElement root = uiDocument.rootVisualElement;
 
             decisionContainer = root.Q<VisualElement>("decision-container");
+            backContainer = root.Q<VisualElement>("back-container") ?? decisionContainer;
             vignetteCorruption = root.Q<VisualElement>("vignette-corruption");
             perksContainer = root.Q<VisualElement>("perks-container");
             perkModalPopup = root.Q<VisualElement>("perk-modal-popup");
@@ -139,9 +148,13 @@ namespace Mandato.UI
                 perkModalPopup.style.display = DisplayStyle.None;
             }
 
+            wrapperBack = root.Q<VisualElement>("wrapper-back");
             wrapperApprove = root.Q<VisualElement>("wrapper-approve");
             wrapperReject = root.Q<VisualElement>("wrapper-reject");
             wrapperContinue = root.Q<VisualElement>("wrapper-continue");
+
+            btnBack = root.Q<Button>("btn-back") ?? root.Q<Button>("btn-return");
+            lblBack = root.Q<Label>("lbl-back-text");
 
             btnLeft = root.Q<Button>("btn-approve") ?? root.Q<Button>("btn-left");
             btnRight = root.Q<Button>("btn-reject") ?? root.Q<Button>("btn-right");
@@ -150,6 +163,12 @@ namespace Mandato.UI
             lblLeftChoice = root.Q<Label>("lbl-approve-text") ?? root.Q<Label>("label-left-choice") ?? root.Q<Label>("txt-left");
             lblRightChoice = root.Q<Label>("lbl-reject-text") ?? root.Q<Label>("label-right-choice") ?? root.Q<Label>("txt-right");
             lblContinue = root.Q<Label>("lbl-continue-text") ?? root.Q<Label>("txt-continue");
+
+            if (btnBack != null)
+            {
+                btnBack.clicked -= OnBackButtonClicked;
+                btnBack.clicked += OnBackButtonClicked;
+            }
 
             if (btnLeft != null)
             {
@@ -182,6 +201,33 @@ namespace Mandato.UI
             }
         }
 
+        private void OnBackButtonClicked()
+        {
+            OnBackClicked?.Invoke();
+            OnBackRequested?.Invoke();
+        }
+
+        public void SetBackVisible(bool visible)
+        {
+            EnsureReferences();
+            CacheElements();
+
+            var target = backContainer ?? decisionContainer;
+            if (target != null)
+            {
+                if (visible)
+                {
+                    target.RemoveFromClassList("hidden");
+                    target.style.display = DisplayStyle.Flex;
+                }
+                else
+                {
+                    target.AddToClassList("hidden");
+                    target.style.display = DisplayStyle.None;
+                }
+            }
+        }
+
         private void OnLeftPointerEnter(PointerEnterEvent evt)
         {
             if (!isChoicePending || currentCard == null) return;
@@ -208,7 +254,6 @@ namespace Mandato.UI
             OnChoiceUnhovered?.Invoke();
         }
 
-
         public void PresentChoices(CardDefinition card)
         {
             EnsureReferences();
@@ -216,11 +261,8 @@ namespace Mandato.UI
             isChoicePending = true;
             currentCard = card;
 
-            if (decisionContainer != null)
-            {
-                decisionContainer.RemoveFromClassList("hidden");
-                decisionContainer.style.display = DisplayStyle.Flex;
-            }
+            // O botão voltar só deve ser exibido quando o papel estiver em foco (via SetBackVisible)
+            SetBackVisible(false);
 
             if (card != null)
             {
@@ -258,10 +300,11 @@ namespace Mandato.UI
             currentCard = null;
             OnChoiceUnhovered?.Invoke();
 
-            if (decisionContainer != null)
+            var target = backContainer ?? decisionContainer;
+            if (target != null)
             {
-                decisionContainer.AddToClassList("hidden");
-                decisionContainer.style.display = DisplayStyle.None;
+                target.AddToClassList("hidden");
+                target.style.display = DisplayStyle.None;
             }
         }
 
@@ -466,8 +509,21 @@ namespace Mandato.UI
 
         private void Update()
         {
-            if (!isVisible || !enableKeyboardShortcuts || !isChoicePending) return;
+            if (!isVisible || !enableKeyboardShortcuts) return;
             if (modalCoordinator != null && !modalCoordinator.CanProcessDecisionShortcuts()) return;
+
+            // Atalho de teclado para voltar
+            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace))
+            {
+                var target = backContainer ?? decisionContainer;
+                if (target != null && target.style.display != DisplayStyle.None && !target.ClassListContains("hidden"))
+                {
+                    OnBackButtonClicked();
+                    return;
+                }
+            }
+
+            if (!isChoicePending) return;
 
             if (isSingleChoiceMode)
             {
@@ -495,6 +551,10 @@ namespace Mandato.UI
 
         private void OnDestroy()
         {
+            if (btnBack != null)
+            {
+                btnBack.clicked -= OnBackButtonClicked;
+            }
             if (btnLeft != null)
             {
                 btnLeft.clicked -= OnLeftClicked;

@@ -83,6 +83,9 @@ namespace Mandato.Presentation
     [Tooltip("Clicar novamente no objeto quando ele ja esta focado faz a camera desfocar (retornar).")]
     [SerializeField] private bool unfocusOnSecondClick = true;
 
+    [Tooltip("Permite sair do foco ao clicar em áreas vazias ou em outros objetos do cenário.")]
+    [SerializeField] private bool allowUnfocusOnClickOutside = true;
+
     [Header("--- Eventos Unity ---")]
     public UnityEvent onHoverEnter = new UnityEvent();
     public UnityEvent onHoverExit = new UnityEvent();
@@ -91,30 +94,31 @@ namespace Mandato.Presentation
     public UnityEvent onClicked = new UnityEvent();
 
     // Estados internos
-    private bool _isHovered;
-    private bool _isFocused;
-    private Vector3 _originalLocalPos;
-    private Vector3 _originalLocalScale;
-    private Vector3 _currentHoverPosOffset;
-    private Vector3 _currentHoverScaleMultiplier = Vector3.one;
-    private float _currentHighlightWeight = 0f;
+    protected bool _isHovered;
+    protected bool _isFocused;
+    protected Vector3 _originalLocalPos;
+    protected Vector3 _originalLocalScale;
+    protected Vector3 _currentHoverPosOffset;
+    protected Vector3 _currentHoverScaleMultiplier = Vector3.one;
+    protected float _currentHighlightWeight = 0f;
 
     public bool IsHovered => _isHovered;
     public bool IsFocused => _isFocused;
     public float CurrentHighlightWeight => _currentHighlightWeight;
     public Vector3 FallbackFocusOffset => fallbackFocusOffset;
-    public float CustomTransitionDuration => customTransitionDuration;
+    public float CustomTransitionDuration { get => customTransitionDuration; set => customTransitionDuration = value; }
     public bool OverrideCameraFov => targetCameraFov > 0f;
-    public float TargetCameraFov => targetCameraFov;
+    public float TargetCameraFov { get => targetCameraFov; set => targetCameraFov = value; }
     public bool EnableCameraEffectOnFocus { get => enableCameraEffectOnFocus; set => enableCameraEffectOnFocus = value; }
     public float CameraEffectWeight { get => cameraEffectWeight; set => cameraEffectWeight = Mathf.Clamp01(value); }
-    public bool AllowClickToFocus => allowClickToFocus;
-    public bool UnfocusOnSecondClick => unfocusOnSecondClick;
+    public bool AllowClickToFocus { get => allowClickToFocus; set => allowClickToFocus = value; }
+    public virtual bool UnfocusOnSecondClick { get => unfocusOnSecondClick; set => unfocusOnSecondClick = value; }
+    public virtual bool AllowUnfocusOnClickOutside { get => allowUnfocusOnClickOutside; set => allowUnfocusOnClickOutside = value; }
     public bool EnableOutlineHighlight => enableOutlineHighlight;
     public Color HighlightOutlineColor => highlightOutlineColor;
     public List<Renderer> TargetRenderers => targetRenderers;
 
-    private void Awake()
+    protected virtual void Awake()
     {
         _originalLocalPos = transform.localPosition;
         _originalLocalScale = transform.localScale;
@@ -223,7 +227,7 @@ namespace Mandato.Presentation
         }
     }
 
-    private void Start()
+    protected virtual void Start()
     {
         if (CameraFocusManager.Instance == null)
         {
@@ -237,7 +241,7 @@ namespace Mandato.Presentation
         }
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         UpdateHoverTransform(Time.unscaledDeltaTime);
     }
@@ -245,7 +249,7 @@ namespace Mandato.Presentation
     /// <summary>
     /// Interpola suavemente a posicao e escala do objeto para dar resposta tatil no hover.
     /// </summary>
-    private void UpdateHoverTransform(float dt)
+    protected virtual void UpdateHoverTransform(float dt)
     {
         if (dt <= 0.0001f) return;
 
@@ -282,7 +286,7 @@ namespace Mandato.Presentation
             ActiveHighlightedObjects.Remove(this);
         }
 
-        if (enableHoverScale || hoverLiftOffset.sqrMagnitude > 0.0001f)
+        if (!_isFocused && (enableHoverScale || hoverLiftOffset.sqrMagnitude > 0.0001f))
         {
             transform.localPosition = _originalLocalPos + _currentHoverPosOffset;
             transform.localScale = Vector3.Scale(_originalLocalScale, _currentHoverScaleMultiplier);
@@ -380,7 +384,7 @@ namespace Mandato.Presentation
     /// <summary>
     /// Define o estado de foco deste objeto.
     /// </summary>
-    public void SetFocused(bool focused)
+    public virtual void SetFocused(bool focused)
     {
         if (_isFocused == focused) return;
         _isFocused = focused;
@@ -471,7 +475,7 @@ namespace Mandato.Presentation
         return Quaternion.identity;
     }
 
-    private void PlaySound(AudioClip clip, float volume)
+    protected void PlaySound(AudioClip clip, float volume)
     {
         if (clip == null) return;
 
@@ -485,7 +489,7 @@ namespace Mandato.Presentation
         }
     }
 
-    private void OnDisable()
+    protected virtual void OnDisable()
     {
         if (_isHovered)
         {
@@ -504,7 +508,7 @@ namespace Mandato.Presentation
         }
     }
 
-    private void OnDestroy()
+    protected virtual void OnDestroy()
     {
         _currentHighlightWeight = 0f;
         ActiveHighlightedObjects.Remove(this);
@@ -519,7 +523,7 @@ namespace Mandato.Presentation
         }
     }
 
-    private void OnDrawGizmosSelected()
+    protected virtual void OnDrawGizmosSelected()
     {
         Vector3 targetCamPos = GetCameraTargetPosition();
         Quaternion targetCamRot = GetCameraTargetRotation();

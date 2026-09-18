@@ -198,5 +198,33 @@ namespace Mandato.Infrastructure.Tests
             Object.DestroyImmediate(otherGo);
             Object.DestroyImmediate(randomGo);
         }
+
+        [Test]
+        public void UnfocusingNonPaperObject_DoesNotRaisePlayerHand()
+        {
+            var otherGo = new GameObject("OtherObject");
+            var focusable = otherGo.AddComponent<FocusableObject>();
+
+            flowCoordinator.HandleObjectFocusChanged(focusable);
+            Assert.IsFalse(flowCoordinator.IsPaperFocused);
+            Assert.IsFalse(flowCoordinator.IsPlayerHandRaised);
+
+            flowCoordinator.HandleObjectFocusChanged(null);
+            Assert.IsFalse(flowCoordinator.IsPlayerHandRaised);
+
+            Object.DestroyImmediate(otherGo);
+        }
+
+        [Test]
+        public void DismissCurrentProposal_LowersPlayerHand_AndDoesNotReRaiseOnUnfocus()
+        {
+            flowCoordinator.DismissCurrentProposal();
+
+            Assert.IsFalse(flowCoordinator.IsPlayerHandRaised);
+            Assert.IsFalse(flowCoordinator.IsPaperFocused);
+
+            flowCoordinator.HandleObjectFocusChanged(null);
+            Assert.IsFalse(flowCoordinator.IsPlayerHandRaised);
+        }
     }
 }

@@ -106,5 +106,17 @@ namespace Mandato.Infrastructure
             }
             catch { }
         }
+
+        public void ResetPlayerHandImmediate()
+        {
+            if (playerAnimator == null) return;
+            try
+            {
+                string targetState = !string.IsNullOrEmpty(defaultAnimationName) ? defaultAnimationName : "None";
+                playerAnimator.Play(targetState, 0, 0f);
+                playerAnimator.Update(0f);
+            }
+            catch { }
+        }
     }
 }
