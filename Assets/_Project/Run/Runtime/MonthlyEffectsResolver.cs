@@ -156,13 +156,29 @@ namespace Mandato.Run
             // 7. Cooldowns de Ações do Flip-Phone
             runState.TickActionCooldowns();
 
-            // 8. Avanço do Calendário
+            // 8. Decremento de Suspensão de NPCs
+            if (runState.npcStates != null)
+            {
+                foreach (var npc in runState.npcStates.Values)
+                {
+                    if (npc != null && npc.suspendedMonths > 0)
+                    {
+                        npc.suspendedMonths--;
+                    }
+                }
+            }
+
+            // 9. Reset de Vantagens Mensais Temporárias
+            runState.preventStatLossThisMonth = false;
+            runState.isPreviewAttributesActive = false;
+
+            // 10. Avanço do Calendário
             runState.calendar.Advance();
 
-            // 9. Avaliação e Aplicação de Resgate Emergencial de Perks
+            // 11. Avaliação e Aplicação de Resgate Emergencial de Perks
             runState.CheckAndApplyEmergencyRescue(perkCatalog);
 
-            // 10. Avaliação das Regras Terminais
+            // 12. Avaliação das Regras Terminais
             runState.UpdateTermination();
 
             report.statsAfter = runState.stats.Clone();

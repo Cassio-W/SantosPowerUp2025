@@ -23,6 +23,8 @@ namespace Mandato.Run
         public Dictionary<string, int> actionCooldowns = new Dictionary<string, int>();
         public List<string> consumedSingleUseActions = new List<string>();
         public string activeCharacterId = string.Empty;
+        public bool preventStatLossThisMonth = false;
+        public bool isPreviewAttributesActive = false;
         public int seed;
 
         public RunState(int seed = 0)
@@ -47,6 +49,8 @@ namespace Mandato.Run
             actionCooldowns.Clear();
             consumedSingleUseActions.Clear();
             activeCharacterId = string.Empty;
+            preventStatLossThisMonth = false;
+            isPreviewAttributesActive = false;
         }
 
         public NpcRunState GetOrCreateNpcState(string npcId)
@@ -65,6 +69,17 @@ namespace Mandato.Run
         {
             if (string.IsNullOrEmpty(npcId)) return 0;
             return npcStates.TryGetValue(npcId, out var state) ? state.relationScore : 0;
+        }
+
+        public bool IsNpcAvailable(string npcId)
+        {
+            if (string.IsNullOrEmpty(npcId)) return true;
+            if (npcStates.TryGetValue(npcId, out var state) && state != null)
+            {
+                if (state.isDead || state.isRemoved || state.isSuspended)
+                    return false;
+            }
+            return true;
         }
 
         public QuestRunState GetOrCreateQuestState(string questId)
@@ -206,6 +221,11 @@ namespace Mandato.Run
         {
             if (!termination.IsOngoing) return;
 
+            if (preventStatLossThisMonth && delta < 0 && id != StatId.Corruption)
+            {
+                return;
+            }
+
             stats.ApplyDelta(id, delta);
             UpdateTermination();
         }
@@ -214,7 +234,20 @@ namespace Mandato.Run
         {
             if (!termination.IsOngoing || impacts == null) return;
 
-            stats.ApplyImpacts(impacts, hasCorruptionMods);
+            if (preventStatLossThisMonth)
+            {
+                var safeImpacts = impacts.Clone();
+                if (safeImpacts.climaticChanges < 0) safeImpacts.climaticChanges = 0;
+                if (safeImpacts.economy < 0) safeImpacts.economy = 0;
+                if (safeImpacts.internationalRelations < 0) safeImpacts.internationalRelations = 0;
+                if (safeImpacts.popularApproval < 0) safeImpacts.popularApproval = 0;
+                stats.ApplyImpacts(safeImpacts, hasCorruptionMods);
+            }
+            else
+            {
+                stats.ApplyImpacts(impacts, hasCorruptionMods);
+            }
+
             UpdateTermination();
         }
 

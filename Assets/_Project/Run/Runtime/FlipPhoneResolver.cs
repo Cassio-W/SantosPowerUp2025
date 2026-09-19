@@ -23,10 +23,13 @@ namespace Mandato.Run
         public List<string> injectedCardIds = new List<string>();
         public List<string> removedCardIds = new List<string>();
         public List<string> removedNpcIds = new List<string>();
+        public List<string> suspendedNpcIds = new List<string>();
         public List<string> grantedPerkIds = new List<string>();
         public List<string> triggeredEventIds = new List<string>();
 
         public bool dismissedCurrentProposal = false;
+        public bool revealedMonthImpacts = false;
+        public bool preventedStatLoss = false;
         public RunTermination resultingTermination;
     }
 
@@ -70,13 +73,17 @@ namespace Mandato.Run
                 return new FlipPhoneUseReport { success = false, failReason = $"Ação em recarga ({remaining} turno(s) restante(s))." };
             }
 
-            // 5. Valida efeitos que requerem proposta ativa
+            // 5. Valida efeitos que requerem proposta ou visitante ativo
             if (action.effects != null)
             {
-                bool requiresProposal = action.effects.Exists(e => e != null && e.effectType == FlipPhoneEffectType.DismissCurrentProposal);
+                bool requiresProposal = action.effects.Exists(e => e != null && (
+                    e.effectType == FlipPhoneEffectType.DismissCurrentProposal ||
+                    (e.effectType == FlipPhoneEffectType.RemoveNpcFromGame && string.IsNullOrEmpty(e.targetId)) ||
+                    (e.effectType == FlipPhoneEffectType.SuspendNpc && string.IsNullOrEmpty(e.targetId))
+                ));
                 if (requiresProposal && currentCard == null)
                 {
-                    return new FlipPhoneUseReport { success = false, failReason = "Nenhuma proposta ativa para dispensar." };
+                    return new FlipPhoneUseReport { success = false, failReason = "Nenhuma proposta ativa para esta ação." };
                 }
             }
 
@@ -139,9 +146,10 @@ namespace Mandato.Run
                             break;
 
                         case FlipPhoneEffectType.RemoveNpcFromGame:
-                            if (!string.IsNullOrEmpty(effect.targetId))
+                            string targetRemoveNpc = !string.IsNullOrEmpty(effect.targetId) ? effect.targetId : (currentCard != null ? currentCard.npcId : string.Empty);
+                            if (!string.IsNullOrEmpty(targetRemoveNpc))
                             {
-                                var npcState = runState.GetOrCreateNpcState(effect.targetId);
+                                var npcState = runState.GetOrCreateNpcState(targetRemoveNpc);
                                 if (npcState != null)
                                 {
                                     npcState.relationScore = -100;
@@ -151,15 +159,38 @@ namespace Mandato.Run
 
                                 if (deckState != null && catalog != null)
                                 {
-                                    var removed = deckState.RemoveCardsByNpc(effect.targetId, catalog);
+                                    var removed = deckState.RemoveCardsByNpc(targetRemoveNpc, catalog);
                                     if (removed != null)
                                     {
                                         report.removedCardIds.AddRange(removed);
                                     }
                                 }
 
-                                report.removedNpcIds.Add(effect.targetId);
+                                report.removedNpcIds.Add(targetRemoveNpc);
                             }
+                            break;
+
+                        case FlipPhoneEffectType.SuspendNpc:
+                            string targetSuspendNpc = !string.IsNullOrEmpty(effect.targetId) ? effect.targetId : (currentCard != null ? currentCard.npcId : string.Empty);
+                            if (!string.IsNullOrEmpty(targetSuspendNpc))
+                            {
+                                var npcState = runState.GetOrCreateNpcState(targetSuspendNpc);
+                                if (npcState != null)
+                                {
+                                    npcState.suspendedMonths = effect.duration > 0 ? effect.duration : 24;
+                                }
+                                report.suspendedNpcIds.Add(targetSuspendNpc);
+                            }
+                            break;
+
+                        case FlipPhoneEffectType.PeekStatImpacts:
+                            runState.isPreviewAttributesActive = true;
+                            report.revealedMonthImpacts = true;
+                            break;
+
+                        case FlipPhoneEffectType.PreventStatLoss:
+                            runState.preventStatLossThisMonth = true;
+                            report.preventedStatLoss = true;
                             break;
 
                         case FlipPhoneEffectType.GrantPerk:

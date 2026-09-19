@@ -5596,7 +5596,7 @@ MonoBehaviour:
   customTransitionDuration: -1
   targetCameraFov: 70
   enableCameraEffectOnFocus: 1
-  cameraEffectWeight: 1
+  cameraEffectWeight: 0.8
   enableHoverScale: 0
   hoverScaleMultiplier: 1.08
   hoverLiftOffset: {x: 0, y: 0, z: 0}
@@ -7007,8 +7007,13 @@ MonoBehaviour:
   eventsCatalog: []
   questsCatalog: []
   startingActions:
-  - {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0001a, type: 2}
+  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00002, type: 2}
+  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00005, type: 2}
+  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00001, type: 2}
   - {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0002b, type: 2}
+  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00004, type: 2}
+  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00003, type: 2}
+  - {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0001a, type: 2}
   customSeed: 0
   mainMenuSceneName: MenuV2
   delayBetweenProposals: 1.5

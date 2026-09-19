@@ -64,7 +64,8 @@ namespace Mandato.Run
             IEnumerable<string> activePerkIds = null,
             PoliticalAxis politicalAxis = null,
             Func<string, int> getNpcRelation = null,
-            Func<string, (int step, bool completed, bool failed)> getQuestState = null)
+            Func<string, (int step, bool completed, bool failed)> getQuestState = null,
+            Func<string, bool> isNpcAvailable = null)
         {
             if (catalog == null)
                 return null;
@@ -80,7 +81,8 @@ namespace Mandato.Run
                 string priorityId = priorityDrawPile[i];
                 if (catalog.TryGetValue(priorityId, out CardDefinition priorityCard) && priorityCard != null)
                 {
-                    if (priorityCard.AreConditionsMet(stats, currentMonth, activePerkIds, politicalAxis, getNpcRelation, getQuestState))
+                    bool npcOk = isNpcAvailable == null || string.IsNullOrEmpty(priorityCard.npcId) || isNpcAvailable(priorityCard.npcId);
+                    if (npcOk && priorityCard.AreConditionsMet(stats, currentMonth, activePerkIds, politicalAxis, getNpcRelation, getQuestState))
                     {
                         priorityDrawPile.RemoveAt(i);
                         discardPile.Add(priorityId);
@@ -98,7 +100,7 @@ namespace Mandato.Run
                 ReshuffleDiscardIntoDraw(rng);
             }
 
-            CardDefinition drawn = TryDrawEligibleCard(catalog, stats, currentMonth, rng, activePerkIds, politicalAxis, getNpcRelation, getQuestState);
+            CardDefinition drawn = TryDrawEligibleCard(catalog, stats, currentMonth, rng, activePerkIds, politicalAxis, getNpcRelation, getQuestState, isNpcAvailable);
             if (drawn != null)
             {
                 return drawn;
@@ -108,7 +110,7 @@ namespace Mandato.Run
             if (discardPile.Count > 0)
             {
                 ReshuffleDiscardIntoDraw(rng);
-                return TryDrawEligibleCard(catalog, stats, currentMonth, rng, activePerkIds, politicalAxis, getNpcRelation, getQuestState);
+                return TryDrawEligibleCard(catalog, stats, currentMonth, rng, activePerkIds, politicalAxis, getNpcRelation, getQuestState, isNpcAvailable);
             }
 
             return null;
@@ -122,7 +124,8 @@ namespace Mandato.Run
             IEnumerable<string> activePerkIds,
             PoliticalAxis politicalAxis,
             Func<string, int> getNpcRelation,
-            Func<string, (int step, bool completed, bool failed)> getQuestState)
+            Func<string, (int step, bool completed, bool failed)> getQuestState,
+            Func<string, bool> isNpcAvailable)
         {
             if (drawPile.Count == 0) return null;
 
@@ -135,7 +138,8 @@ namespace Mandato.Run
                 string cardId = drawPile[i];
                 if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
                 {
-                    if (card.AreConditionsMet(stats, currentMonth, activePerkIds, politicalAxis, getNpcRelation, getQuestState))
+                    bool npcOk = isNpcAvailable == null || string.IsNullOrEmpty(card.npcId) || isNpcAvailable(card.npcId);
+                    if (npcOk && card.AreConditionsMet(stats, currentMonth, activePerkIds, politicalAxis, getNpcRelation, getQuestState))
                     {
                         eligibleIndices.Add(i);
                         int weight = Math.Max(1, card.baseWeight);

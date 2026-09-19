@@ -318,5 +318,227 @@ namespace Mandato.Run.Tests
             Assert.IsFalse(reportSecondUse.success);
             StringAssert.Contains("consumida", reportSecondUse.failReason.ToLower());
         }
+
+        [Test]
+        public void EliteMundial_EnablesPreviewForCurrentMonth_AndApplies10Corruption_With6TurnsCooldown()
+        {
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_elite_mundial",
+                "Elite Mundial",
+                "Permite saber como os atributos serão afetados em cada resposta deste mês (+10 de corrupção).",
+                cooldownType: FlipPhoneCooldownType.Turns,
+                cooldownTurns: 6,
+                unlockByDefault: false
+            );
+            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 0, 0, 10)));
+            action.effects.Add(FlipPhoneEffect.CreatePeekImpacts());
+
+            // Bloqueada inicialmente
+            var reportFail = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsFalse(reportFail.success);
+
+            // Desbloqueia na run
+            runState.UnlockAction(action.id);
+            int initCorruption = runState.stats.corruption;
+
+            var reportSuccess = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsTrue(reportSuccess.success);
+            Assert.AreEqual(initCorruption + 10, runState.stats.corruption);
+            Assert.IsTrue(reportSuccess.revealedMonthImpacts);
+            Assert.IsTrue(runState.isPreviewAttributesActive);
+            Assert.IsTrue(runState.IsActionOnCooldown(action.id));
+            Assert.AreEqual(6, runState.GetActionCooldown(action.id));
+
+            // Ao avançar o mês, a flag de preview temporária é resetada
+            runState.AdvanceMonth();
+            Assert.IsFalse(runState.isPreviewAttributesActive);
+        }
+
+        [Test]
+        public void AssassinoDeAluguel_PermanentlyRemovesCurrentNpc_DismissesProposal_AndApplies30Corruption()
+        {
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_assassino_aluguel",
+                "Assassino de Aluguel",
+                "Retira o personagem da run permanentemente (+30 de corrupção).",
+                cooldownType: FlipPhoneCooldownType.SingleUse,
+                unlockByDefault: false
+            );
+            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 0, 0, 30)));
+            action.effects.Add(FlipPhoneEffect.CreateRemoveNpcFromGame(""));
+            action.effects.Add(FlipPhoneEffect.CreateDismissProposal());
+
+            runState.UnlockAction(action.id);
+            var currentCard = catalog["card_a"]; // npcId = "MinistroEco"
+            int initCorruption = runState.stats.corruption;
+
+            var report = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog, currentCard: currentCard);
+            Assert.IsTrue(report.success);
+            Assert.AreEqual(initCorruption + 30, runState.stats.corruption);
+            Assert.IsTrue(report.dismissedCurrentProposal);
+            Assert.Contains("MinistroEco", report.removedNpcIds);
+
+            var npcState = runState.GetOrCreateNpcState("MinistroEco");
+            Assert.IsTrue(npcState.isDead);
+            Assert.IsTrue(npcState.isRemoved);
+            Assert.IsFalse(runState.IsNpcAvailable("MinistroEco"));
+
+            // Cartas removidas do baralho
+            Assert.IsFalse(deckState.drawPile.Contains("card_a"));
+            Assert.IsFalse(deckState.drawPile.Contains("card_b"));
+            Assert.IsTrue(runState.IsActionConsumed(action.id));
+        }
+
+        [Test]
+        public void PoliciaFederal_SuspendsNpcFor24Months_DismissesProposal_AndApplies20Corruption()
+        {
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_policia_federal",
+                "Polícia Federal",
+                "Retira o NPC da run por 2 anos (+20 de corrupção).",
+                cooldownType: FlipPhoneCooldownType.SingleUse,
+                unlockByDefault: false
+            );
+            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 0, 0, 20)));
+            action.effects.Add(FlipPhoneEffect.CreateSuspendNpc(24, ""));
+            action.effects.Add(FlipPhoneEffect.CreateDismissProposal());
+
+            runState.UnlockAction(action.id);
+            var currentCard = catalog["card_a"]; // npcId = "MinistroEco"
+            int initCorruption = runState.stats.corruption;
+
+            var report = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog, currentCard: currentCard);
+            Assert.IsTrue(report.success);
+            Assert.AreEqual(initCorruption + 20, runState.stats.corruption);
+            Assert.IsTrue(report.dismissedCurrentProposal);
+            Assert.Contains("MinistroEco", report.suspendedNpcIds);
+
+            var npcState = runState.GetOrCreateNpcState("MinistroEco");
+            Assert.AreEqual(24, npcState.suspendedMonths);
+            Assert.IsTrue(npcState.isSuspended);
+            Assert.IsFalse(runState.IsNpcAvailable("MinistroEco"));
+
+            // Avança 1 mês: suspensão decrementa para 23
+            runState.AdvanceMonth();
+            Assert.AreEqual(23, npcState.suspendedMonths);
+            Assert.IsFalse(runState.IsNpcAvailable("MinistroEco"));
+
+            // Avança os 23 meses restantes
+            for (int m = 0; m < 23; m++)
+            {
+                runState.AdvanceMonth();
+            }
+
+            Assert.AreEqual(0, npcState.suspendedMonths);
+            Assert.IsFalse(npcState.isSuspended);
+            Assert.IsTrue(runState.IsNpcAvailable("MinistroEco"));
+        }
+
+        [Test]
+        public void PoliciaFederal_SuspendedNpcCardsNotDrawnUntil24MonthsElapsed()
+        {
+            var stateMachine = new RunStateMachine(seed: 42);
+            // Deck inicial possui card_a e card_b (MinistroEco) e card_c (Deputado)
+            stateMachine.StartRun(new[] { "card_a", "card_b", "card_c" });
+
+            // Suspende MinistroEco por 24 meses
+            var npcState = stateMachine.RunState.GetOrCreateNpcState("MinistroEco");
+            npcState.suspendedMonths = 24;
+
+            // Tentativas de puxar cartas: só pode vir a carta do Deputado (card_c) ou rotina neutra
+            var drawn1 = stateMachine.DrawAndPresentProposal(catalog);
+            Assert.IsTrue(drawn1);
+            Assert.AreEqual("card_c", stateMachine.CurrentCard.id);
+
+            // Próximo sorteio recicla o descarte e continua só podendo vir a única carta elegível (card_c do Deputado)
+            var drawn2 = stateMachine.DrawAndPresentProposal(catalog);
+            Assert.IsTrue(drawn2);
+            Assert.AreEqual("card_c", stateMachine.CurrentCard.id);
+
+            // Passam 24 meses
+            for (int i = 0; i < 24; i++)
+            {
+                stateMachine.RunState.AdvanceMonth();
+            }
+
+            Assert.AreEqual(0, npcState.suspendedMonths);
+            Assert.IsTrue(stateMachine.RunState.IsNpcAvailable("MinistroEco"));
+
+            // Agora as cartas do Ministro voltam a ser elegíveis (injetando no topo para testar)
+            stateMachine.DeckState.InjectCard("card_a", onTop: true);
+            var drawn3 = stateMachine.DrawAndPresentProposal(catalog);
+            Assert.IsTrue(drawn3);
+            Assert.AreEqual("card_a", stateMachine.CurrentCard.id);
+        }
+
+        [Test]
+        public void IndicesDePesquisa_PreventsStatLossDuringCurrentMonth_AndApplies25Corruption_With6TurnsCooldown()
+        {
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_indices_pesquisa",
+                "Índices de Pesquisa",
+                "Não perde atributos este mês (+25 de corrupção).",
+                cooldownType: FlipPhoneCooldownType.Turns,
+                cooldownTurns: 6,
+                unlockByDefault: false
+            );
+            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 0, 0, 25)));
+            action.effects.Add(FlipPhoneEffect.CreatePreventStatLoss());
+
+            runState.UnlockAction(action.id);
+            int initCorruption = runState.stats.corruption;
+            int initEco = runState.stats.economy;
+            int initPop = runState.stats.popularApproval;
+
+            var report = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsTrue(report.success);
+            Assert.AreEqual(initCorruption + 25, runState.stats.corruption);
+            Assert.IsTrue(report.preventedStatLoss);
+            Assert.IsTrue(runState.preventStatLossThisMonth);
+
+            // Tenta aplicar um impacto fortemente negativo
+            runState.ApplyStatImpacts(new StatBlock(-30, -30, -30, -30, 0));
+
+            // Atributos não diminuíram
+            Assert.AreEqual(initEco, runState.stats.economy);
+            Assert.AreEqual(initPop, runState.stats.popularApproval);
+
+            // Ganhos positivos continuam sendo aplicados
+            runState.ApplyStatImpacts(new StatBlock(10, 10, 10, 10, 0));
+            Assert.AreEqual(initEco + 10, runState.stats.economy);
+
+            // Ao avançar o mês, a proteção expira
+            runState.AdvanceMonth();
+            Assert.IsFalse(runState.preventStatLossThisMonth);
+
+            // Agora impactos negativos funcionam normalmente após o mês passar
+            runState.ApplyStatImpacts(new StatBlock(-10, -10, -10, -10, 0));
+            Assert.AreEqual(initEco, runState.stats.economy);
+        }
+
+        [Test]
+        public void ComprarInfluencers_Grants20Popularity_AndApplies15Corruption_With6TurnsCooldown()
+        {
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_comprar_influencers",
+                "Comprar Influencers",
+                "Obtém +20 de Popularidade e +15 de corrupção.",
+                cooldownType: FlipPhoneCooldownType.Turns,
+                cooldownTurns: 6,
+                unlockByDefault: false
+            );
+            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 20, 0, 15)));
+
+            runState.UnlockAction(action.id);
+            int initPop = runState.stats.popularApproval;
+            int initCorrupt = runState.stats.corruption;
+
+            var report = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsTrue(report.success);
+            Assert.AreEqual(initPop + 20, runState.stats.popularApproval);
+            Assert.AreEqual(initCorrupt + 15, runState.stats.corruption);
+            Assert.IsTrue(runState.IsActionOnCooldown(action.id));
+            Assert.AreEqual(6, runState.GetActionCooldown(action.id));
+        }
     }
 }

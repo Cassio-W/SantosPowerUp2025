@@ -71,7 +71,8 @@ namespace Mandato.Run
                 RunState.activePerkIds,
                 RunState.politicalAxis,
                 id => RunState.GetNpcRelation(id),
-                id => RunState.GetQuestState(id)
+                id => RunState.GetQuestState(id),
+                id => RunState.IsNpcAvailable(id)
             );
 
             if (CurrentCard == null)

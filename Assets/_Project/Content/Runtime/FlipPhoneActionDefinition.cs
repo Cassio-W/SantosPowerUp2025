@@ -21,7 +21,10 @@ namespace Mandato.Content
         RemoveNpcFromGame,
         GrantPerk,
         TriggerEvent,
-        DismissCurrentProposal
+        DismissCurrentProposal,
+        SuspendNpc,
+        PeekStatImpacts,
+        PreventStatLoss
     }
 
     [Serializable]
@@ -42,10 +45,13 @@ namespace Mandato.Content
         public static FlipPhoneEffect CreateInjectCard(string cardId, bool onTop = true) => new FlipPhoneEffect { effectType = FlipPhoneEffectType.InjectCard, targetId = cardId, injectOnTop = onTop };
         public static FlipPhoneEffect CreateRemoveCard(string cardId) => new FlipPhoneEffect { effectType = FlipPhoneEffectType.RemoveCard, targetId = cardId };
         public static FlipPhoneEffect CreateRemoveNpc(string npcId) => new FlipPhoneEffect { effectType = FlipPhoneEffectType.RemoveNpcFromGame, targetId = npcId };
-        public static FlipPhoneEffect CreateRemoveNpcFromGame(string npcId) => new FlipPhoneEffect { effectType = FlipPhoneEffectType.RemoveNpcFromGame, targetId = npcId };
+        public static FlipPhoneEffect CreateRemoveNpcFromGame(string npcId = "") => new FlipPhoneEffect { effectType = FlipPhoneEffectType.RemoveNpcFromGame, targetId = npcId };
         public static FlipPhoneEffect CreateGrantPerk(string perkId, int duration = 0) => new FlipPhoneEffect { effectType = FlipPhoneEffectType.GrantPerk, targetId = perkId, duration = duration };
         public static FlipPhoneEffect CreateTriggerEvent(string eventId, int duration = 3) => new FlipPhoneEffect { effectType = FlipPhoneEffectType.TriggerEvent, targetId = eventId, duration = duration };
         public static FlipPhoneEffect CreateDismissProposal() => new FlipPhoneEffect { effectType = FlipPhoneEffectType.DismissCurrentProposal };
+        public static FlipPhoneEffect CreateSuspendNpc(int duration = 24, string npcId = "") => new FlipPhoneEffect { effectType = FlipPhoneEffectType.SuspendNpc, duration = duration, targetId = npcId };
+        public static FlipPhoneEffect CreatePeekImpacts() => new FlipPhoneEffect { effectType = FlipPhoneEffectType.PeekStatImpacts };
+        public static FlipPhoneEffect CreatePreventStatLoss() => new FlipPhoneEffect { effectType = FlipPhoneEffectType.PreventStatLoss };
     }
 
     [Serializable]

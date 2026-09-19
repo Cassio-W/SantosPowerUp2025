@@ -13,7 +13,10 @@ namespace Mandato.Run
         public bool isMet = false;
         public bool isDead = false;
         public bool isRemoved = false;
+        public int suspendedMonths = 0;
         public int interactionCount = 0;
+
+        public bool isSuspended => suspendedMonths > 0;
 
         public int relationship
         {
