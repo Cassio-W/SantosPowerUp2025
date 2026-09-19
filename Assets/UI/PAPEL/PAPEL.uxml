@@ -35,5 +35,8 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <!-- CAMADA DE ESTAMPAS E CARIMBOS APLICADOS -->
+        <ui:VisualElement name="stamp-layer" class="stamp-layer" picking-mode="Ignore" />
+
     </ui:VisualElement>
 </ui:UXML>

@@ -35,6 +35,11 @@ namespace Mandato.Infrastructure
         [Header("Botão de Mesa (Chamar Visitante)")]
         [SerializeField] private DeskCallButton deskCallButton;
 
+        [Header("Carimbo e Almofadas de Tinta 3D")]
+        [SerializeField] private StampTool3D stampTool;
+        [SerializeField] private InkPad3D approveInkPad;
+        [SerializeField] private InkPad3D rejectInkPad;
+
         public RunPresentationCoordinator PresentationCoordinator => presentationCoordinator;
         public PaperDocumentPresenter PaperPresenter => paperPresenter;
         public RetroMonitorPresenter RetroMonitorPresenter => retroMonitorPresenter;
@@ -48,6 +53,9 @@ namespace Mandato.Infrastructure
         public CameraFocusManager CameraFocus => cameraFocus;
         public GameObject FlipPhoneObject => flipPhoneObject;
         public DeskCallButton DeskCallButton => deskCallButton;
+        public StampTool3D StampTool => stampTool;
+        public InkPad3D ApproveInkPad => approveInkPad;
+        public InkPad3D RejectInkPad => rejectInkPad;
 
         public bool Validate(out List<string> missingErrors)
         {
@@ -99,9 +107,9 @@ namespace Mandato.Infrastructure
                 {
                     playerAnimator.Play(dealAnimationReverseName, 0, 0f);
                 }
-                else if (!string.IsNullOrEmpty(defaultAnimationName))
+                else
                 {
-                    playerAnimator.Play(defaultAnimationName, 0, 0f);
+                    ResetPlayerHandImmediate();
                 }
             }
             catch { }
@@ -112,9 +120,8 @@ namespace Mandato.Infrastructure
             if (playerAnimator == null) return;
             try
             {
-                string targetState = !string.IsNullOrEmpty(defaultAnimationName) ? defaultAnimationName : "None";
-                playerAnimator.Play(targetState, 0, 0f);
-                playerAnimator.Update(0f);
+                string state = !string.IsNullOrEmpty(defaultAnimationName) ? defaultAnimationName : "None";
+                playerAnimator.Play(state, 0, 0f);
             }
             catch { }
         }

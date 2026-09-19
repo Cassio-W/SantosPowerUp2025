@@ -182,6 +182,16 @@ namespace Mandato.Presentation
 
             if (enableMouseInteraction)
             {
+                // Se a câmera está focada no papel da proposta, o StampTool3D assume o controle exclusivo do hover/interação
+                if (_currentFocusedObject is PaperFocusableObject)
+                {
+                    if (_currentHoveredObject != null)
+                    {
+                        ClearHover();
+                    }
+                    return;
+                }
+
                 HandleMouseRaycast();
             }
         }
@@ -241,6 +251,9 @@ namespace Mandato.Presentation
                 );
 
                 if (h.collider.isTrigger && !isInteractiveTrigger) continue;
+
+                // Ignora colisores do carimbo 3D que flutua em frente à câmera
+                if (h.collider.GetComponentInParent<StampTool3D>() != null) continue;
 
                 if (!hasHitObstacle)
                 {

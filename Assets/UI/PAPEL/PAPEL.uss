@@ -25,6 +25,7 @@
     padding: 32px 36px;
     justify-content: space-between;
     box-sizing: border-box;
+    position: relative;
 }
 
 /* ------------------------------------------------------------
@@ -149,5 +150,67 @@
     -unity-text-align: middle-center;
 }
 
+/* ------------------------------------------------------------
+   CAMADA E ELEMENTOS DE CARIMBO / ESTAMPA DE DECISÃO
+   ------------------------------------------------------------ */
+.stamp-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: visible;
+}
 
+.stamp-mark {
+    position: absolute;
+    border-width: 6px;
+    border-radius: 12px;
+    padding: 12px 28px;
+    align-items: center;
+    justify-content: center;
+}
+
+.stamp-mark-text {
+    font-size: 48px;
+    -unity-font-style: bold;
+    letter-spacing: 4px;
+    -unity-text-align: middle-center;
+}
+
+.stamp-mark-subtext {
+    font-size: 16px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    -unity-text-align: middle-center;
+    margin-top: 4px;
+}
+
+/* Carimbo de Aprovação (Verde Chancelaria) */
+.stamp-approved {
+    border-color: #1B5E20;
+    background-color: rgba(27, 94, 32, 0.16);
+}
+
+.stamp-approved .stamp-mark-text,
+.stamp-approved .stamp-mark-subtext {
+    color: #1B5E20;
+}
+
+/* Carimbo de Rejeição (Vermelho Veto) */
+.stamp-rejected {
+    border-color: #B71C1C;
+    background-color: rgba(183, 28, 28, 0.16);
+}
+
+.stamp-rejected .stamp-mark-text,
+.stamp-rejected .stamp-mark-subtext {
+    color: #B71C1C;
+}
+
+/* Carimbo Fantasma / Preview translúcido antes de carimbar */
+.stamp-preview {
+    opacity: 0.35;
+    border-style: dashed;
+}
 

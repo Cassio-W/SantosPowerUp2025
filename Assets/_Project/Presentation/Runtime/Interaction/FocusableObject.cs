@@ -114,8 +114,11 @@ namespace Mandato.Presentation
     public bool AllowClickToFocus { get => allowClickToFocus; set => allowClickToFocus = value; }
     public virtual bool UnfocusOnSecondClick { get => unfocusOnSecondClick; set => unfocusOnSecondClick = value; }
     public virtual bool AllowUnfocusOnClickOutside { get => allowUnfocusOnClickOutside; set => allowUnfocusOnClickOutside = value; }
-    public bool EnableOutlineHighlight => enableOutlineHighlight;
-    public Color HighlightOutlineColor => highlightOutlineColor;
+    public bool EnableOutlineHighlight { get => enableOutlineHighlight; set => enableOutlineHighlight = value; }
+    public Color HighlightOutlineColor { get => highlightOutlineColor; set => highlightOutlineColor = value; }
+    public bool EnableHoverScale { get => enableHoverScale; set => enableHoverScale = value; }
+    public float HoverScaleMultiplier { get => hoverScaleMultiplier; set => hoverScaleMultiplier = value; }
+    public Vector3 HoverLiftOffset { get => hoverLiftOffset; set => hoverLiftOffset = value; }
     public List<Renderer> TargetRenderers => targetRenderers;
 
     protected virtual void Awake()

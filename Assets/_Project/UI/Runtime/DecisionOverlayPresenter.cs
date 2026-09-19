@@ -9,11 +9,12 @@ using UnityEngine.UIElements;
 
 namespace Mandato.UI
 {
+    /// <summary>
+    /// Presenter do overlay de HUD na tela (Data/Calendário, Corrupção, Perks e Botão Voltar).
+    /// As decisões de propostas foram migradas integralmente para o sistema diegético de Carimbo 3D no papel.
+    /// </summary>
     public class DecisionOverlayPresenter : MonoBehaviour
     {
-        [Header("Configuração de Atalhos")]
-        public bool enableKeyboardShortcuts = true;
-
         public event Action<int> OnChoiceSelected;
         public event Action<ChoiceDefinition> OnChoiceHovered;
         public event Action OnChoiceUnhovered;
@@ -35,23 +36,9 @@ namespace Mandato.UI
         private Label lblPerkDesc;
         private Label headerDateLabel;
         private Label headerMonthLabel;
+        private Button btnBack;
         private CardDefinition currentCard;
 
-        private VisualElement wrapperBack;
-        private VisualElement wrapperApprove;
-        private VisualElement wrapperReject;
-        private VisualElement wrapperContinue;
-        private Button btnBack;
-        private Button btnLeft;
-        private Button btnRight;
-        private Button btnContinue;
-        private Label lblBack;
-        private Label lblLeftChoice;
-        private Label lblRightChoice;
-        private Label lblContinue;
-
-        private bool isChoicePending = false;
-        private bool isSingleChoiceMode = false;
         private bool isVisible = true;
 
         public bool IsVisible => isVisible;
@@ -160,41 +147,11 @@ namespace Mandato.UI
                 perkModalPopup.style.display = DisplayStyle.None;
             }
 
-            wrapperBack = root.Q<VisualElement>("wrapper-back");
-            wrapperApprove = root.Q<VisualElement>("wrapper-approve");
-            wrapperReject = root.Q<VisualElement>("wrapper-reject");
-            wrapperContinue = root.Q<VisualElement>("wrapper-continue");
-
             btnBack = root.Q<Button>("btn-back") ?? root.Q<Button>("btn-return");
-            lblBack = root.Q<Label>("lbl-back-text");
-
-            btnLeft = root.Q<Button>("btn-approve") ?? root.Q<Button>("btn-left");
-            btnRight = root.Q<Button>("btn-reject") ?? root.Q<Button>("btn-right");
-            btnContinue = root.Q<Button>("btn-continue");
-
-            lblLeftChoice = root.Q<Label>("lbl-approve-text") ?? root.Q<Label>("label-left-choice") ?? root.Q<Label>("txt-left");
-            lblRightChoice = root.Q<Label>("lbl-reject-text") ?? root.Q<Label>("label-right-choice") ?? root.Q<Label>("txt-right");
-            lblContinue = root.Q<Label>("lbl-continue-text") ?? root.Q<Label>("txt-continue");
-
-            BindButton(btnBack, OnBackButtonClicked);
-            BindButton(btnLeft, OnLeftClicked, () => OnChoiceHover(0), OnChoiceLeave);
-            BindButton(btnRight, OnRightClicked, () => OnChoiceHover(1), OnChoiceLeave);
-            BindButton(btnContinue, OnContinueClicked, () => OnChoiceHover(0), OnChoiceLeave);
-        }
-
-        private void BindButton(Button btn, Action onClick, Action onEnter = null, Action onLeave = null)
-        {
-            if (btn == null) return;
-            btn.clicked -= onClick;
-            btn.clicked += onClick;
-
-            if (onEnter != null)
+            if (btnBack != null)
             {
-                btn.RegisterCallback<PointerEnterEvent>(_ => onEnter());
-            }
-            if (onLeave != null)
-            {
-                btn.RegisterCallback<PointerLeaveEvent>(_ => onLeave());
+                btnBack.clicked -= OnBackButtonClicked;
+                btnBack.clicked += OnBackButtonClicked;
             }
         }
 
@@ -225,60 +182,14 @@ namespace Mandato.UI
             }
         }
 
-        private void OnChoiceHover(int index)
-        {
-            if (!isChoicePending || currentCard == null) return;
-            ChoiceDefinition choice = (index == 0) ? currentCard.leftChoice : currentCard.rightChoice;
-            OnChoiceHovered?.Invoke(choice);
-        }
-
-        private void OnChoiceLeave()
-        {
-            if (!isChoicePending) return;
-            OnChoiceUnhovered?.Invoke();
-        }
-
         public void PresentChoices(CardDefinition card)
         {
-            EnsureReferences();
-            CacheElements();
-            isChoicePending = true;
             currentCard = card;
-
             SetBackVisible(false);
-
-            if (card != null)
-            {
-                string leftText = !string.IsNullOrEmpty(card.leftChoice?.label) ? card.leftChoice.label : "Aceitar";
-                string rightText = !string.IsNullOrEmpty(card.rightChoice?.label) ? card.rightChoice.label : "Recusar";
-
-                bool hasOnlyOneOption = string.Equals(leftText, rightText, StringComparison.OrdinalIgnoreCase) ||
-                                        leftText.IndexOf("Continuar", StringComparison.OrdinalIgnoreCase) >= 0 ||
-                                        rightText.IndexOf("Continuar", StringComparison.OrdinalIgnoreCase) >= 0;
-
-                isSingleChoiceMode = hasOnlyOneOption;
-
-                if (isSingleChoiceMode && wrapperContinue != null)
-                {
-                    wrapperContinue.style.display = DisplayStyle.Flex;
-                    if (wrapperApprove != null) wrapperApprove.style.display = DisplayStyle.None;
-                    if (wrapperReject != null) wrapperReject.style.display = DisplayStyle.None;
-                    if (lblContinue != null) lblContinue.text = !string.IsNullOrEmpty(leftText) ? leftText : "Continuar";
-                }
-                else
-                {
-                    if (wrapperContinue != null) wrapperContinue.style.display = DisplayStyle.None;
-                    if (wrapperApprove != null) wrapperApprove.style.display = DisplayStyle.Flex;
-                    if (wrapperReject != null) wrapperReject.style.display = DisplayStyle.Flex;
-                    if (lblLeftChoice != null) lblLeftChoice.text = leftText;
-                    if (lblRightChoice != null) lblRightChoice.text = rightText;
-                }
-            }
         }
 
         public void ClearChoices()
         {
-            isChoicePending = false;
             currentCard = null;
             OnChoiceUnhovered?.Invoke();
 
@@ -436,64 +347,17 @@ namespace Mandato.UI
             return sb.ToString().TrimEnd();
         }
 
-        private void OnLeftClicked()
-        {
-            if (!isChoicePending) return;
-            isChoicePending = false;
-            ClearChoices();
-            OnChoiceSelected?.Invoke(0);
-        }
-
-        private void OnRightClicked()
-        {
-            if (!isChoicePending) return;
-            isChoicePending = false;
-            ClearChoices();
-            OnChoiceSelected?.Invoke(1);
-        }
-
-        private void OnContinueClicked()
-        {
-            if (!isChoicePending) return;
-            isChoicePending = false;
-            ClearChoices();
-            OnChoiceSelected?.Invoke(0);
-        }
-
         private void Update()
         {
-            if (!isVisible || !enableKeyboardShortcuts) return;
-            if (modalCoordinator != null && !modalCoordinator.CanProcessDecisionShortcuts()) return;
+            if (!isVisible) return;
 
+            // Atalho de retorno (ESC / Backspace)
             if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace))
             {
                 var target = backContainer ?? decisionContainer;
                 if (target != null && target.style.display != DisplayStyle.None && !target.ClassListContains("hidden"))
                 {
                     OnBackButtonClicked();
-                    return;
-                }
-            }
-
-            if (!isChoicePending) return;
-
-            if (isSingleChoiceMode)
-            {
-                if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter) ||
-                    Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.LeftArrow))
-                {
-                    OnContinueClicked();
-                }
-            }
-            else
-            {
-                if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.Alpha1))
-                {
-                    OnLeftClicked();
-                }
-                else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.Alpha2))
-                {
-                    OnRightClicked();
                 }
             }
         }

@@ -124,6 +124,16 @@ namespace Mandato.Infrastructure
                 bindings.DecisionOverlayPresenter.OnBackRequested += HandleDecisionBackRequested;
             }
 
+            if (bindings.StampTool != null)
+            {
+                bindings.StampTool.OnStampApplied -= HandleStampApplied;
+                bindings.StampTool.OnStampApplied += HandleStampApplied;
+                bindings.StampTool.OnStampPreviewUpdated -= HandleStampPreviewUpdated;
+                bindings.StampTool.OnStampPreviewUpdated += HandleStampPreviewUpdated;
+                bindings.StampTool.OnStampDecisionSubmitted -= HandlePlayerChoiceSubmitted;
+                bindings.StampTool.OnStampDecisionSubmitted += HandlePlayerChoiceSubmitted;
+            }
+
             if (bindings.FlipPhonePresenter != null)
             {
                 bindings.FlipPhonePresenter.SetModalCoordinator(modalCoordinator);
@@ -167,6 +177,13 @@ namespace Mandato.Infrastructure
             if (bindings?.DecisionOverlayPresenter != null)
                 bindings.DecisionOverlayPresenter.OnBackRequested -= HandleDecisionBackRequested;
 
+            if (bindings?.StampTool != null)
+            {
+                bindings.StampTool.OnStampApplied -= HandleStampApplied;
+                bindings.StampTool.OnStampPreviewUpdated -= HandleStampPreviewUpdated;
+                bindings.StampTool.OnStampDecisionSubmitted -= HandlePlayerChoiceSubmitted;
+            }
+
             if (flipPhoneCoordinator != null)
                 flipPhoneCoordinator.OnActionExecuted -= HandleFlipPhoneActionExecuted;
 
@@ -175,6 +192,20 @@ namespace Mandato.Infrastructure
 
             if (bindings?.CameraFocus != null)
                 bindings.CameraFocus.OnObjectFocusChanged -= HandleObjectFocusChanged;
+        }
+
+        private void HandleStampPreviewUpdated(bool isVisible, bool isApproved, Vector2 uv)
+        {
+            bindings?.PaperPresenter?.UpdateStampPreview(isVisible, isApproved, uv);
+        }
+
+        private void HandleStampApplied(int choiceIndex, Vector2 uv)
+        {
+            if (bindings?.PaperPresenter != null)
+            {
+                float randomAngle = UnityEngine.Random.Range(-5f, 5f);
+                bindings.PaperPresenter.AddStampMark(choiceIndex == 0, uv, randomAngle);
+            }
         }
 
         private void HandleDecisionBackRequested()
@@ -194,6 +225,7 @@ namespace Mandato.Infrastructure
             switch (newContext)
             {
                 case InteractionContext.DeskOverview:
+                    bindings?.StampTool?.SetInspectActive(false);
                     if (bindings != null)
                     {
                         bindings.FlipPhonePresenter?.SetInteractable(true);
@@ -210,6 +242,7 @@ namespace Mandato.Infrastructure
                     break;
 
                 case InteractionContext.PaperInspect:
+                    bindings?.StampTool?.SetInspectActive(true);
                     if (bindings != null)
                     {
                         bindings.ResetPlayerHandImmediate();
@@ -222,6 +255,7 @@ namespace Mandato.Infrastructure
                     break;
 
                 case InteractionContext.PcTerminal:
+                    bindings?.StampTool?.SetInspectActive(false);
                     flipPhoneCoordinator?.ClosePhone();
                     if (bindings != null)
                     {
@@ -232,6 +266,7 @@ namespace Mandato.Infrastructure
                     break;
 
                 case InteractionContext.PhoneDrawer:
+                    bindings?.StampTool?.SetInspectActive(false);
                     if (bindings != null)
                     {
                         bindings.DeskCallButton?.SetInteractable(true);
@@ -240,6 +275,7 @@ namespace Mandato.Infrastructure
                     break;
 
                 case InteractionContext.TutorialStep:
+                    bindings?.StampTool?.SetInspectActive(false);
                     if (bindings != null)
                     {
                         bindings.FlipPhonePresenter?.SetInteractable(false);
@@ -249,6 +285,7 @@ namespace Mandato.Infrastructure
                     break;
 
                 case InteractionContext.EndSummary:
+                    bindings?.StampTool?.SetInspectActive(false);
                     flipPhoneCoordinator?.ClosePhone();
                     if (bindings != null)
                     {
@@ -334,6 +371,7 @@ namespace Mandato.Infrastructure
             if (stateMachine?.CurrentCard == null) return;
 
             isDismissingProposal = true;
+            bindings?.StampTool?.SetInspectActive(false);
             modalCoordinator?.SetContext(InteractionContext.DeskOverview);
 
             bindings?.RetroMonitorPresenter?.ClearPreviewImpacts();
@@ -498,13 +536,14 @@ namespace Mandato.Infrastructure
             bindings?.RetroMonitorPresenter?.ClearPreviewImpacts();
         }
 
-        private void HandlePlayerChoiceSubmitted(int choiceIndex)
+        public void HandlePlayerChoiceSubmitted(int choiceIndex)
         {
             if (stateMachine == null) return;
 
             isDismissingProposal = true;
             isPaperFocused = false;
 
+            bindings?.StampTool?.SetInspectActive(false);
             bindings?.RetroMonitorPresenter?.ClearPreviewImpacts();
 
             bool isTutorial = IsTutorialCard(stateMachine.CurrentCard);

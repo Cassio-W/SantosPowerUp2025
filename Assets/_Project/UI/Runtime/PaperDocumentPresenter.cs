@@ -29,6 +29,13 @@ namespace Mandato.UI
         private Label descriptionLabel;
         private Label authorLabel;
         private Label dateLabel;
+        private VisualElement stampLayer;
+        private VisualElement stampPreviewElement;
+        private Label previewTextLabel;
+        private Label previewSubLabel;
+        private string currentFormattedDate = "01/2026";
+
+        public RenderTexture PaperRenderTexture => paperRenderTexture;
 
         private void Awake()
         {
@@ -89,12 +96,18 @@ namespace Mandato.UI
 
         private void CacheUIElements()
         {
-            if (uiDocument == null || uiDocument.rootVisualElement == null) return;
-
-            VisualElement root = uiDocument.rootVisualElement;
-            descriptionLabel = root.Q<Label>(descriptionLabelName) ?? root.Q<Label>("description-label") ?? root.Q<Label>("txt-description");
-            authorLabel = root.Q<Label>(authorLabelName) ?? root.Q<Label>("author-label") ?? root.Q<Label>("txt-author");
-            dateLabel = root.Q<Label>(dateLabelName) ?? root.Q<Label>("date-label") ?? root.Q<Label>("txt-date");
+            if (uiDocument?.rootVisualElement != null)
+            {
+                VisualElement root = uiDocument.rootVisualElement;
+                descriptionLabel = root.Q<Label>(descriptionLabelName) ?? root.Q<Label>("description-label") ?? root.Q<Label>("txt-description");
+                authorLabel = root.Q<Label>(authorLabelName) ?? root.Q<Label>("author-label") ?? root.Q<Label>("txt-author");
+                dateLabel = root.Q<Label>(dateLabelName) ?? root.Q<Label>("date-label") ?? root.Q<Label>("txt-date");
+                stampLayer = root.Q<VisualElement>("stamp-layer") ?? root.Q<VisualElement>("paper-container") ?? root;
+            }
+            else
+            {
+                stampLayer ??= new VisualElement { name = "stamp-layer" };
+            }
         }
 
         public void SetPaperActive(bool active)
@@ -125,11 +138,12 @@ namespace Mandato.UI
             SetPaperActive(true);
             SetPaperInteractable(true);
             CacheUIElements();
+            ClearStamps();
 
             string desc = card != null ? card.FormattedDescription : string.Empty;
             string author = card != null ? (!string.IsNullOrEmpty(card.npcId) ? card.npcId : card.title) : string.Empty;
-            string formattedDate = !string.IsNullOrEmpty(displayDate) ? displayDate : "01/2026";
-            string dateLoc = $"{defaultLocation}, {formattedDate}";
+            currentFormattedDate = !string.IsNullOrEmpty(displayDate) ? displayDate : "01/2026";
+            string dateLoc = $"{defaultLocation}, {currentFormattedDate}";
 
             // 1. UI Toolkit nativo
             if (descriptionLabel != null) descriptionLabel.text = desc;
@@ -164,9 +178,171 @@ namespace Mandato.UI
             }
         }
 
+        public Vector2 MapUVToPanelCoordinates(Vector2 uvCoord)
+        {
+            float panelWidth = 1024f;
+            float panelHeight = 1440f;
+
+            if (uiDocument?.rootVisualElement?.panel != null)
+            {
+                var visualWidth = uiDocument.rootVisualElement.resolvedStyle.width;
+                var visualHeight = uiDocument.rootVisualElement.resolvedStyle.height;
+                if (visualWidth > 0 && visualHeight > 0)
+                {
+                    panelWidth = visualWidth;
+                    panelHeight = visualHeight;
+                }
+            }
+            else if (paperRenderTexture != null)
+            {
+                panelWidth = paperRenderTexture.width;
+                panelHeight = paperRenderTexture.height;
+            }
+
+            // Desespelha X e Y para corresponder exatamente à visão da câmera sobre o papel
+            float panelX = Mathf.Clamp((1f - uvCoord.x) * panelWidth, 80f, panelWidth - 80f);
+            float panelY = Mathf.Clamp(uvCoord.y * panelHeight, 80f, panelHeight - 80f);
+
+            return new Vector2(panelX, panelY);
+        }
+
+        /// <summary>
+        /// Atualiza ou oculta o preview translúcido do carimbo na folha enquanto o jogador mira.
+        /// </summary>
+        public void UpdateStampPreview(bool isVisible, bool isApproved, Vector2 uvCoord)
+        {
+            if (!isVisible)
+            {
+                if (stampPreviewElement != null)
+                {
+                    stampPreviewElement.style.display = DisplayStyle.None;
+                }
+                return;
+            }
+
+            EnsureReferences();
+            CacheUIElements();
+
+            if (stampLayer == null)
+            {
+                stampLayer = new VisualElement { name = "stamp-layer" };
+                if (uiDocument?.rootVisualElement != null)
+                {
+                    uiDocument.rootVisualElement.Add(stampLayer);
+                }
+            }
+
+            if (stampPreviewElement == null)
+            {
+                stampPreviewElement = new VisualElement();
+                stampPreviewElement.AddToClassList("stamp-mark");
+                stampPreviewElement.AddToClassList("stamp-preview");
+
+                previewTextLabel = new Label();
+                previewTextLabel.AddToClassList("stamp-mark-text");
+                stampPreviewElement.Add(previewTextLabel);
+
+                previewSubLabel = new Label();
+                previewSubLabel.AddToClassList("stamp-mark-subtext");
+                stampPreviewElement.Add(previewSubLabel);
+
+                stampLayer.Add(stampPreviewElement);
+            }
+
+            Vector2 panelPos = MapUVToPanelCoordinates(uvCoord);
+
+            stampPreviewElement.EnableInClassList("stamp-approved", isApproved);
+            stampPreviewElement.EnableInClassList("stamp-rejected", !isApproved);
+
+            if (previewTextLabel != null)
+            {
+                previewTextLabel.text = isApproved ? "APROVADO" : "REJEITADO";
+            }
+            if (previewSubLabel != null)
+            {
+                previewSubLabel.text = $"GABINETE PRESIDENCIAL • {currentFormattedDate}";
+            }
+
+            stampPreviewElement.style.display = DisplayStyle.Flex;
+            stampPreviewElement.style.position = Position.Absolute;
+            stampPreviewElement.style.left = panelPos.x - 160f;
+            stampPreviewElement.style.top = panelPos.y - 50f;
+            stampPreviewElement.style.rotate = new Rotate(Angle.Degrees(0f));
+        }
+
+        /// <summary>
+        /// Adiciona uma marca visual definitiva de carimbo (Stamp Mark) na coordenada UV do papel.
+        /// </summary>
+        public VisualElement AddStampMark(bool isApproved, Vector2 uvCoord, float rotationAngle = 0f)
+        {
+            EnsureReferences();
+            CacheUIElements();
+            UpdateStampPreview(false, false, Vector2.zero);
+
+            if (stampLayer == null)
+            {
+                stampLayer = new VisualElement { name = "stamp-layer" };
+                if (uiDocument?.rootVisualElement != null)
+                {
+                    uiDocument.rootVisualElement.Add(stampLayer);
+                }
+            }
+
+            Vector2 panelPos = MapUVToPanelCoordinates(uvCoord);
+
+            var stampEl = new VisualElement();
+            stampEl.AddToClassList("stamp-mark");
+            stampEl.AddToClassList(isApproved ? "stamp-approved" : "stamp-rejected");
+
+            var textLabel = new Label(isApproved ? "APROVADO" : "REJEITADO");
+            textLabel.AddToClassList("stamp-mark-text");
+            stampEl.Add(textLabel);
+
+            var subLabel = new Label($"GABINETE PRESIDENCIAL • {currentFormattedDate}");
+            subLabel.AddToClassList("stamp-mark-subtext");
+            stampEl.Add(subLabel);
+
+            stampEl.style.position = Position.Absolute;
+            stampEl.style.left = panelPos.x - 160f;
+            stampEl.style.top = panelPos.y - 50f;
+
+            if (Mathf.Abs(rotationAngle) > 0.01f)
+            {
+                stampEl.style.rotate = new Rotate(Angle.Degrees(rotationAngle));
+            }
+
+            stampLayer.Add(stampEl);
+            return stampEl;
+        }
+
+        public void ClearStamps()
+        {
+            UpdateStampPreview(false, false, Vector2.zero);
+
+            if (stampLayer != null && stampLayer.name == "stamp-layer")
+            {
+                stampLayer.Clear();
+                stampPreviewElement = null;
+                previewTextLabel = null;
+                previewSubLabel = null;
+            }
+            else if (stampLayer != null)
+            {
+                var marks = stampLayer.Query<VisualElement>(className: "stamp-mark").ToList();
+                foreach (var m in marks)
+                {
+                    if (m != stampPreviewElement)
+                    {
+                        m.RemoveFromHierarchy();
+                    }
+                }
+            }
+        }
+
         public void Clear()
         {
             SetProposal(null, string.Empty);
+            ClearStamps();
             SetPaperActive(false);
             SetPaperInteractable(false);
         }

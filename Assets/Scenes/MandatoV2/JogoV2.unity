@@ -280,7 +280,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c0448892e786caa46a313cad9dfce0af, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.94
+      value: 1.252
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c0448892e786caa46a313cad9dfce0af, type: 3}
       propertyPath: m_LocalPosition.y
@@ -288,7 +288,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c0448892e786caa46a313cad9dfce0af, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -4.019
+      value: -4.028
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c0448892e786caa46a313cad9dfce0af, type: 3}
       propertyPath: m_LocalRotation.w
@@ -5941,7 +5941,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 507986956941369564, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -1.587
       objectReference: {fileID: 0}
     - target: {fileID: 507986956941369564, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
       propertyPath: m_LocalPosition.y
@@ -5949,7 +5949,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 507986956941369564, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.19
+      value: 1.281
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
       propertyPath: m_Name
@@ -6286,8 +6286,10 @@ GameObject:
   - component: {fileID: 407384065}
   - component: {fileID: 407384067}
   - component: {fileID: 407384066}
+  - component: {fileID: 407384069}
+  - component: {fileID: 407384068}
   m_Layer: 0
-  m_Name: PortaCaneta (2)
+  m_Name: RejectInk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6302,8 +6304,8 @@ Transform:
   m_GameObject: {fileID: 407384064}
   serializedVersion: 2
   m_LocalRotation: {x: -0.69559216, y: 0.1270593, z: 0.12733369, w: 0.69555277}
-  m_LocalPosition: {x: 1.6699251, y: 0.7360733, z: -2.6297748}
-  m_LocalScale: {x: 31.057, y: 31.057, z: 31.057}
+  m_LocalPosition: {x: 2.609, y: 0.22618, z: -1.82}
+  m_LocalScale: {x: 66.741486, y: 66.741486, z: 66.741486}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 407171343}
@@ -6365,6 +6367,81 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 407384064}
   m_Mesh: {fileID: -5072332894024413014, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
+--- !u!114 &407384068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 407384064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 693317e533b322a4eba935e66d4cdd29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mandato.Presentation::Mandato.Presentation.InkPad3D
+  cameraFocusPoint: {fileID: 0}
+  fallbackFocusOffset: {x: 0, y: 0.5, z: -2.5}
+  customTransitionDuration: -1
+  targetCameraFov: 45
+  enableCameraEffectOnFocus: 1
+  cameraEffectWeight: 1
+  enableHoverScale: 1
+  hoverScaleMultiplier: 1.08
+  hoverLiftOffset: {x: 0, y: 0.08, z: 0}
+  hoverTransitionSpeed: 12
+  enableOutlineHighlight: 1
+  highlightOutlineColor: {r: 1, g: 0.85, b: 0.15, a: 1}
+  targetRenderers: []
+  audioSource: {fileID: 0}
+  hoverSound: {fileID: 0}
+  hoverSoundVolume: 0.8
+  focusSound: {fileID: 0}
+  focusSoundVolume: 1
+  unfocusSound: {fileID: 0}
+  unfocusSoundVolume: 0.8
+  allowClickToFocus: 1
+  unfocusOnSecondClick: 1
+  allowUnfocusOnClickOutside: 1
+  onHoverEnter:
+    m_PersistentCalls:
+      m_Calls: []
+  onHoverExit:
+    m_PersistentCalls:
+      m_Calls: []
+  onFocused:
+    m_PersistentCalls:
+      m_Calls: []
+  onUnfocused:
+    m_PersistentCalls:
+      m_Calls: []
+  onClicked:
+    m_PersistentCalls:
+      m_Calls: []
+  inkType: 1
+  dipSound: {fileID: 0}
+  spongeTransform: {fileID: 0}
+  spongePressOffset: -0.005
+--- !u!65 &407384069
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 407384064}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.0026893895, y: 0.0026893879, z: 0.0019954196}
+  m_Center: {x: -0.012764517, y: 0.042526275, z: 0.014298249}
 --- !u!1 &474556739
 GameObject:
   m_ObjectHideFlags: 0
@@ -6546,7 +6623,7 @@ MonoBehaviour:
   cameraEffectWeight: 1
   enableHoverScale: 0
   hoverScaleMultiplier: 1.08
-  hoverLiftOffset: {x: 0, y: 0.08, z: 0}
+  hoverLiftOffset: {x: 0, y: 0, z: 0}
   hoverTransitionSpeed: 12
   enableOutlineHighlight: 1
   highlightOutlineColor: {r: 1, g: 0.85, b: 0.15, a: 1}
@@ -8330,6 +8407,9 @@ MonoBehaviour:
     cameraFocus: {fileID: 963194232}
     flipPhoneObject: {fileID: 116235397}
     deskCallButton: {fileID: 756163005}
+    stampTool: {fileID: 7794165996475813415}
+    approveInkPad: {fileID: 2101845561}
+    rejectInkPad: {fileID: 407384068}
   flowCoordinatorRef: {fileID: 1189659390}
 --- !u!4 &1189659388
 Transform:
@@ -9040,7 +9120,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c50161e3910afac4e874d6fedfd65776, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Mandato.Infrastructure::Mandato.Infrastructure.TutorialManager
-  playTutorial: 1
+  playTutorial: 0
   tutorialNpcName: Lula
   tutorialNpcPrefab: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
   spawnPoint: {fileID: 0}
@@ -9395,7 +9475,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07bcae9283a167c48b8af06cfc1dc341, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Mandato.UI::Mandato.UI.DecisionOverlayPresenter
-  enableKeyboardShortcuts: 1
   uiDocument: {fileID: 2096242967}
   uxmlAsset: {fileID: 9197481963319205126, guid: 8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e, type: 3}
   panelSettings: {fileID: 11400000, guid: 7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d, type: 2}
@@ -9410,8 +9489,10 @@ GameObject:
   - component: {fileID: 2101845557}
   - component: {fileID: 2101845559}
   - component: {fileID: 2101845558}
+  - component: {fileID: 2101845561}
+  - component: {fileID: 2101845562}
   m_Layer: 0
-  m_Name: PortaCaneta (1)
+  m_Name: AcceptInk
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9426,8 +9507,8 @@ Transform:
   m_GameObject: {fileID: 2101845556}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: -0, w: 0.7071067}
-  m_LocalPosition: {x: 1.232, y: 0.73576, z: -2.288}
-  m_LocalScale: {x: 31.057, y: 31.057, z: 31.057}
+  m_LocalPosition: {x: 1.6656, y: 0.22551, z: -0.78841}
+  m_LocalScale: {x: 66.741486, y: 66.741486, z: 66.741486}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 407171343}
@@ -9489,6 +9570,81 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2101845556}
   m_Mesh: {fileID: -5072332894024413014, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
+--- !u!114 &2101845561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2101845556}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 693317e533b322a4eba935e66d4cdd29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mandato.Presentation::Mandato.Presentation.InkPad3D
+  cameraFocusPoint: {fileID: 0}
+  fallbackFocusOffset: {x: 0, y: 0.5, z: -2.5}
+  customTransitionDuration: -1
+  targetCameraFov: 45
+  enableCameraEffectOnFocus: 1
+  cameraEffectWeight: 1
+  enableHoverScale: 1
+  hoverScaleMultiplier: 1.08
+  hoverLiftOffset: {x: 0, y: 0.08, z: 0}
+  hoverTransitionSpeed: 12
+  enableOutlineHighlight: 1
+  highlightOutlineColor: {r: 1, g: 0.85, b: 0.15, a: 1}
+  targetRenderers: []
+  audioSource: {fileID: 0}
+  hoverSound: {fileID: 0}
+  hoverSoundVolume: 0.8
+  focusSound: {fileID: 0}
+  focusSoundVolume: 1
+  unfocusSound: {fileID: 0}
+  unfocusSoundVolume: 0.8
+  allowClickToFocus: 1
+  unfocusOnSecondClick: 1
+  allowUnfocusOnClickOutside: 1
+  onHoverEnter:
+    m_PersistentCalls:
+      m_Calls: []
+  onHoverExit:
+    m_PersistentCalls:
+      m_Calls: []
+  onFocused:
+    m_PersistentCalls:
+      m_Calls: []
+  onUnfocused:
+    m_PersistentCalls:
+      m_Calls: []
+  onClicked:
+    m_PersistentCalls:
+      m_Calls: []
+  inkType: 0
+  dipSound: {fileID: 0}
+  spongeTransform: {fileID: 0}
+  spongePressOffset: -0.005
+--- !u!65 &2101845562
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2101845556}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.0026893895, y: 0.0026893872, z: 0.0019954187}
+  m_Center: {x: -0.012764517, y: 0.04252626, z: 0.014298246}
 --- !u!1 &2124481894
 GameObject:
   m_ObjectHideFlags: 0
@@ -11846,13 +12002,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5105403751155388427}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.704494, y: -0.060730677, z: -0.060730677, w: 0.704494}
-  m_LocalPosition: {x: 0.99, y: 1.111, z: -3.561}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalRotation: {x: -0.6492077, y: -0.28023094, z: -0.28023094, w: 0.6492077}
+  m_LocalPosition: {x: 0.863, y: 1.1106, z: -3.813}
+  m_LocalScale: {x: 2.6175, y: 2.6175, z: 2.6175}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -90, y: 0, z: -46.695}
 --- !u!1 &2771687885158152490
 GameObject:
   m_ObjectHideFlags: 0
@@ -13646,6 +13802,8 @@ GameObject:
   - component: {fileID: 2715537621291211094}
   - component: {fileID: 936261272600286810}
   - component: {fileID: 7794165996475813414}
+  - component: {fileID: 7794165996475813415}
+  - component: {fileID: 7794165996475813416}
   m_Layer: 0
   m_Name: stamp_low
   m_TagString: Untagged
@@ -16004,6 +16162,58 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &7794165996475813415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5105403751155388427}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e51c35c4f472a6146a711846007c3e91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Mandato.Presentation::Mandato.Presentation.StampTool3D
+  restAnchor: {fileID: 0}
+  targetCamera: {fileID: 963194227}
+  hoverHeight: 0.05
+  stampTouchOffset: 0
+  followSpeed: 22
+  interactionLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  inkHeadRenderer: {fileID: 0}
+  approveInkMaterial: {fileID: 0}
+  rejectInkMaterial: {fileID: 0}
+  dryInkMaterial: {fileID: 0}
+  approveColor: {r: 0.1, g: 0.6, b: 0.2, a: 1}
+  rejectColor: {r: 0.8, g: 0.15, b: 0.15, a: 1}
+  dryColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+  audioSource: {fileID: 0}
+  stampSuccessSound: {fileID: 0}
+  stampDrySound: {fileID: 0}
+  dipSound: {fileID: 0}
+--- !u!65 &7794165996475813416
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5105403751155388427}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.039655484, y: 0.1597255, z: 0.03920063}
+  m_Center: {x: 0.000000018629695, y: -0.000036288056, z: 0.00022539683}
 --- !u!23 &7825750348484778496
 MeshRenderer:
   m_ObjectHideFlags: 0
