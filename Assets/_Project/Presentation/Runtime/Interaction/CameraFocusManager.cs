@@ -3,736 +3,642 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 
 namespace Mandato.Presentation
 {
     /// <summary>
-    /// Gerenciador central de foco da camera e interacoes com objetos 3D.
-    /// Move e rotaciona a camera suavemente entre o estado padrao e as posicoes de foco dos objetos.
+    /// Gerenciador central de foco da câmera e interações com objetos 3D.
+    /// Move e rotaciona a câmera suavemente entre o estado padrão e as posições de foco dos objetos.
     /// </summary>
     [DisallowMultipleComponent]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class CameraFocusManager : MonoBehaviour
-{
-    public static CameraFocusManager Instance { get; private set; }
-
-    [Header("--- Referencias de Camera ---")]
-    [Tooltip("Camera a ser movimentada. Se deixada vazia, utiliza a Camera.main automaticamente.")]
-    [SerializeField] private Camera targetCamera;
-
-    [Tooltip("Documentos de UI de tela monitorados para bloquear cliques 3D.")]
-    [SerializeField] private List<UIDocument> screenUIDocuments = new List<UIDocument>();
-
-    [Tooltip("Transform que define a posicao/rotacao inicial padrao da camera. Se vazio, captura a posicao inicial da camera na cena.")]
-    [SerializeField] private Transform defaultCameraAnchor;
-
-    [Tooltip("Se ativo, reduz o Near Clip Plane da camera para evitar que a mao ou objetos proximos sumam / sejam cortados.")]
-    [SerializeField] private bool autoAdjustNearClipPlane = true;
-
-    [Tooltip("Valor do Near Clip Plane aplicado automaticamente (ex: 0.02 = 2cm).")]
-    [SerializeField] [Range(0.005f, 0.3f)] private float targetNearClipPlane = 0.02f;
-
-    [Header("--- Animacao e Interpolacao ---")]
-    [Tooltip("Duracao da transicao da camera em segundos.")]
-    [SerializeField] private float transitionDuration = 0.65f;
-
-    [Tooltip("Curva de interpolacao do movimento da camera.")]
-    [SerializeField] private AnimationCurve transitionCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
-
-    [Tooltip("Se ativo, as animacoes de camera funcionam mesmo se Time.timeScale for 0 (jogo pausado).")]
-    [SerializeField] private bool useUnscaledTime = true;
-
-    [Header("--- Configuracoes de Raycast / Interacao ---")]
-    [Tooltip("Habilita deteccao automatica de hover e clique do mouse em FocusableObjects.")]
-    [SerializeField] private bool enableMouseInteraction = true;
-
-    [Tooltip("LayerMask dos objetos interativos.")]
-    [SerializeField] private LayerMask interactableLayers = ~0;
-
-    [Tooltip("Distancia maxima do raio de colisao do mouse.")]
-    [SerializeField] private float raycastDistance = 100f;
-
-    [Tooltip("Se ativo, clicar em uma area vazia da cena desfaz o foco atual.")]
-    [SerializeField] private bool unfocusOnEmptyClick = true;
-
-    [Tooltip("Tecla para cancelar o foco e retornar a camera para a posicao padrao.")]
-    [SerializeField] private KeyCode unfocusKey = KeyCode.Escape;
-
-    [Header("--- Pos-Processamento / Volume ---")]
-    [Tooltip("Volume responsavel pelo efeito de foco (desfoque, vignetting, etc.). Se vazio, tentara encontrar automaticamente.")]
-    [SerializeField] private Volume focusVolume;
-
-    [Header("--- Eventos Globais ---")]
-    public UnityEvent<FocusableObject> onFocusChanged = new UnityEvent<FocusableObject>();
-
-    public event Action<FocusableObject> OnObjectFocusChanged;
-    public event Action<FocusableObject, bool> OnObjectHoverChanged;
-
-    // Estados
-    private Vector3 _defaultPosition;
-    private Quaternion _defaultRotation;
-    private float _defaultFov = 60f;
-
-    private FocusableObject _currentFocusedObject;
-    private Transform _currentAnchorPoint;
-    private FocusableObject _currentHoveredObject;
-    private WorldSpaceUIInteraction _activeWorldSpaceUI;
-    private FocusableObject _activeFocusable;
-    private RaycastHit _activeRaycastHit;
-    private bool _hasActiveInteractiveHit;
-    private Coroutine _cameraMoveCoroutine;
-    private Coroutine _effectCoroutine;
-
-    public FocusableObject CurrentFocusedObject => _currentFocusedObject;
-    public FocusableObject CurrentHoveredObject => _currentHoveredObject;
-    public WorldSpaceUIInteraction ActiveWorldSpaceUI => _activeWorldSpaceUI;
-    public FocusableObject ActiveFocusable => _activeFocusable;
-    public RaycastHit ActiveRaycastHit => _activeRaycastHit;
-    public bool HasActiveInteractiveHit => _hasActiveInteractiveHit;
-    public bool HasActiveFocus => _currentFocusedObject != null;
-    public Camera TargetCamera => targetCamera;
-
-    private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(this);
-            return;
-        }
-        Instance = this;
+        public static CameraFocusManager Instance { get; private set; }
 
-        if (targetCamera == null)
-        {
-            targetCamera = GetComponent<Camera>() ?? Camera.main;
-        }
+        [Header("--- Referencias de Camera ---")]
+        [Tooltip("Camera a ser movimentada. Se deixada vazia, utiliza a Camera.main automaticamente.")]
+        [SerializeField] private Camera targetCamera;
 
-        if (targetCamera != null)
+        [Tooltip("Documentos de UI de tela monitorados para bloquear cliques 3D.")]
+        [SerializeField] private List<UIDocument> screenUIDocuments = new List<UIDocument>();
+
+        [Tooltip("Transform que define a posicao/rotacao inicial padrao da camera. Se vazio, captura a posicao inicial da camera na cena.")]
+        [SerializeField] private Transform defaultCameraAnchor;
+
+        [Tooltip("Se ativo, reduz o Near Clip Plane da camera para evitar que a mao ou objetos proximos sumam / sejam cortados.")]
+        [SerializeField] private bool autoAdjustNearClipPlane = true;
+
+        [Tooltip("Valor do Near Clip Plane aplicado automaticamente (ex: 0.02 = 2cm).")]
+        [SerializeField] [Range(0.005f, 0.3f)] private float targetNearClipPlane = 0.02f;
+
+        [Header("--- Animacao e Interpolacao ---")]
+        [Tooltip("Duracao da transicao da camera em segundos.")]
+        [SerializeField] private float transitionDuration = 0.65f;
+
+        [Tooltip("Curva de interpolacao do movimento da camera.")]
+        [SerializeField] private AnimationCurve transitionCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
+
+        [Tooltip("Se ativo, as animacoes de camera funcionam mesmo se Time.timeScale for 0 (jogo pausado).")]
+        [SerializeField] private bool useUnscaledTime = true;
+
+        [Header("--- Configuracoes de Raycast / Interacao ---")]
+        [Tooltip("Habilita deteccao automatica de hover e clique do mouse em FocusableObjects.")]
+        [SerializeField] private bool enableMouseInteraction = true;
+
+        [Tooltip("LayerMask dos objetos interativos.")]
+        [SerializeField] private LayerMask interactableLayers = ~0;
+
+        [Tooltip("Distancia maxima do raio de colisao do mouse.")]
+        [SerializeField] private float raycastDistance = 100f;
+
+        [Tooltip("Se ativo, clicar em uma area vazia da cena desfaz o foco atual.")]
+        [SerializeField] private bool unfocusOnEmptyClick = true;
+
+        [Tooltip("Tecla para cancelar o foco e retornar a camera para a posicao padrao.")]
+        [SerializeField] private KeyCode unfocusKey = KeyCode.Escape;
+
+        [Header("--- Pos-Processamento / Volume ---")]
+        [Tooltip("Volume responsavel pelo efeito de foco (desfoque, vignetting, etc.). Se vazio, tentara encontrar automaticamente.")]
+        [SerializeField] private Volume focusVolume;
+
+        [Header("--- Eventos Globais ---")]
+        public UnityEvent<FocusableObject> onFocusChanged = new UnityEvent<FocusableObject>();
+
+        public event Action<FocusableObject> OnObjectFocusChanged;
+        public event Action<FocusableObject, bool> OnObjectHoverChanged;
+
+        private Vector3 _defaultPosition;
+        private Quaternion _defaultRotation;
+        private float _defaultFov = 60f;
+
+        private FocusableObject _currentFocusedObject;
+        private Transform _currentAnchorPoint;
+        private FocusableObject _currentHoveredObject;
+        private WorldSpaceUIInteraction _activeWorldSpaceUI;
+        private FocusableObject _activeFocusable;
+        private RaycastHit _activeRaycastHit;
+        private bool _hasActiveInteractiveHit;
+        private Coroutine _cameraMoveCoroutine;
+        private Coroutine _effectCoroutine;
+
+        public FocusableObject CurrentFocusedObject => _currentFocusedObject;
+        public FocusableObject CurrentHoveredObject => _currentHoveredObject;
+        public WorldSpaceUIInteraction ActiveWorldSpaceUI => _activeWorldSpaceUI;
+        public FocusableObject ActiveFocusable => _activeFocusable;
+        public RaycastHit ActiveRaycastHit => _activeRaycastHit;
+        public bool HasActiveInteractiveHit => _hasActiveInteractiveHit;
+        public bool HasActiveFocus => _currentFocusedObject != null;
+        public Camera TargetCamera => targetCamera;
+
+        private void Awake()
         {
-            _defaultFov = targetCamera.fieldOfView;
-            if (autoAdjustNearClipPlane && targetCamera.nearClipPlane > targetNearClipPlane)
+            if (Instance != null && Instance != this)
             {
-                targetCamera.nearClipPlane = targetNearClipPlane;
+                Destroy(this);
+                return;
+            }
+            Instance = this;
+
+            if (targetCamera == null)
+            {
+                targetCamera = GetComponent<Camera>() ?? Camera.main;
+            }
+
+            if (targetCamera != null)
+            {
+                _defaultFov = targetCamera.fieldOfView;
+                if (autoAdjustNearClipPlane && targetCamera.nearClipPlane > targetNearClipPlane)
+                {
+                    targetCamera.nearClipPlane = targetNearClipPlane;
+                }
             }
         }
-    }
 
-    private void Start()
-    {
-        CaptureDefaultCameraTransform();
-        EnsureScreenUIDocuments();
-    }
-
-    /// <summary>
-    /// Garante que os UIDocuments de tela ativos sejam monitorados caso a lista não tenha sido preenchida no Inspector.
-    /// </summary>
-    private void EnsureScreenUIDocuments()
-    {
-        if (screenUIDocuments == null)
+        private void Start()
         {
-            screenUIDocuments = new List<UIDocument>();
+            CaptureDefaultCameraTransform();
+            EnsureScreenUIDocuments();
         }
 
-        if (screenUIDocuments.Count == 0)
+        private void EnsureScreenUIDocuments()
         {
-            var allDocs = FindObjectsByType<UIDocument>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-            foreach (var doc in allDocs)
+            screenUIDocuments ??= new List<UIDocument>();
+
+            if (screenUIDocuments.Count == 0)
             {
-                if (doc != null && (doc.panelSettings == null || doc.panelSettings.targetTexture == null))
+                var allDocs = FindObjectsByType<UIDocument>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+                foreach (var doc in allDocs)
                 {
-                    if (!screenUIDocuments.Contains(doc))
+                    if (doc != null && (doc.panelSettings == null || doc.panelSettings.targetTexture == null))
                     {
-                        screenUIDocuments.Add(doc);
+                        if (!screenUIDocuments.Contains(doc))
+                        {
+                            screenUIDocuments.Add(doc);
+                        }
                     }
                 }
             }
         }
-    }
 
-    /// <summary>
-    /// Garante que o CameraFocusManager exista na cena ativa.
-    /// </summary>
-    public static CameraFocusManager EnsureExists()
-    {
-        return Instance;
-    }
+        public static CameraFocusManager EnsureExists() => Instance;
 
-    /// <summary>
-    /// Captura a posicao e rotacao padrao da camera (ou usa o defaultCameraAnchor).
-    /// </summary>
-    public void CaptureDefaultCameraTransform()
-    {
-        if (defaultCameraAnchor != null)
+        public void CaptureDefaultCameraTransform()
         {
-            _defaultPosition = defaultCameraAnchor.position;
-            _defaultRotation = defaultCameraAnchor.rotation;
-        }
-        else if (targetCamera != null)
-        {
-            _defaultPosition = targetCamera.transform.position;
-            _defaultRotation = targetCamera.transform.rotation;
-            _defaultFov = targetCamera.fieldOfView;
-        }
-    }
-
-    /// <summary>
-    /// Define um novo ponto ancora padrao para a camera retornar.
-    /// </summary>
-    public void SetDefaultCameraAnchor(Transform anchor)
-    {
-        defaultCameraAnchor = anchor;
-        if (anchor != null)
-        {
-            _defaultPosition = anchor.position;
-            _defaultRotation = anchor.rotation;
-        }
-    }
-
-    private void Update()
-    {
-        if (unfocusKey != KeyCode.None && Input.GetKeyDown(unfocusKey))
-        {
-            if (HasActiveFocus)
+            if (defaultCameraAnchor != null)
             {
-                Unfocus();
+                _defaultPosition = defaultCameraAnchor.position;
+                _defaultRotation = defaultCameraAnchor.rotation;
+            }
+            else if (targetCamera != null)
+            {
+                _defaultPosition = targetCamera.transform.position;
+                _defaultRotation = targetCamera.transform.rotation;
+                _defaultFov = targetCamera.fieldOfView;
             }
         }
 
-        if (enableMouseInteraction)
+        public void SetDefaultCameraAnchor(Transform anchor)
         {
-            HandleMouseRaycast();
-        }
-    }
-
-    private void LateUpdate()
-    {
-        // Se a câmera não está em transição ativa, mantém a câmera continuamente alinhada ao alvo focado
-        if (_cameraMoveCoroutine == null && targetCamera != null)
-        {
-            if (_currentFocusedObject != null && _currentFocusedObject.gameObject != null)
+            defaultCameraAnchor = anchor;
+            if (anchor != null)
             {
-                targetCamera.transform.position = _currentFocusedObject.GetCameraTargetPosition();
-                targetCamera.transform.rotation = _currentFocusedObject.GetCameraTargetRotation();
-            }
-            else if (_currentAnchorPoint != null && _currentAnchorPoint.gameObject != null)
-            {
-                targetCamera.transform.position = _currentAnchorPoint.position;
-                targetCamera.transform.rotation = _currentAnchorPoint.rotation;
+                _defaultPosition = anchor.position;
+                _defaultRotation = anchor.rotation;
             }
         }
-    }
 
-    /// <summary>
-    /// Processa o raio do mouse para deteccao centralizada de hover e clique nos objetos interativos.
-    /// Respeita a oclusão física: o primeiro objeto sólido ou interativo encontrado ao longo do raio (ex: celular ligado em primeiro plano)
-    /// impede que o raio perfure e atinja objetos interativos ao fundo (ex: PC).
-    /// </summary>
-    private void HandleMouseRaycast()
-    {
-        if (targetCamera == null) return;
-
-        // Se o mouse estiver sobre um elemento de UI interativo real de tela, cancela o raio 3D
-        if (IsPointerOverInteractiveUI())
+        private void Update()
         {
-            ClearHover();
-            return;
-        }
-
-        Ray ray = targetCamera.ScreenPointToRay(Input.mousePosition);
-        RaycastHit[] hits = Physics.RaycastAll(ray, raycastDistance, interactableLayers, QueryTriggerInteraction.Collide);
-        Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-
-        FocusableObject hitFocusable = null;
-        WorldSpaceUIInteraction hitWorldSpaceUI = null;
-        RaycastHit selectedHit = default;
-        RaycastHit uiHit = default;
-        bool hasHitObstacle = false;
-
-        foreach (var h in hits)
-        {
-            if (h.collider == null) continue;
-
-            // Ignora colisores que são filhos diretos da câmera e NÃO possuem scripts interativos (ex: mãos/corpo do jogador)
-            if (targetCamera != null && h.collider.transform.IsChildOf(targetCamera.transform))
+            if (unfocusKey != KeyCode.None && Input.GetKeyDown(unfocusKey))
             {
-                var camWsUI = h.collider.GetComponentInParent<WorldSpaceUIInteraction>() ??
-                              h.collider.GetComponentInChildren<WorldSpaceUIInteraction>();
-                var camFo = h.collider.GetComponentInParent<FocusableObject>();
-                if (camWsUI == null && camFo == null)
+                if (HasActiveFocus)
                 {
-                    continue;
+                    Unfocus();
                 }
             }
 
-            // Ignora triggers puros que não possuem scripts interativos (como volumes de som/área)
-            bool isInteractiveTrigger = h.collider.isTrigger && (
-                h.collider.GetComponentInParent<WorldSpaceUIInteraction>() != null ||
-                h.collider.GetComponentInChildren<WorldSpaceUIInteraction>() != null ||
-                h.collider.GetComponentInParent<FocusableObject>() != null
-            );
-
-            if (h.collider.isTrigger && !isInteractiveTrigger)
+            if (enableMouseInteraction)
             {
-                continue;
+                HandleMouseRaycast();
             }
+        }
 
-            // O primeiro colisor sólido ou interativo encontrado ao longo do raio define o obstáculo frontal
-            if (!hasHitObstacle)
+        private void LateUpdate()
+        {
+            if (_cameraMoveCoroutine == null && targetCamera != null)
             {
-                hasHitObstacle = true;
-                selectedHit = h;
-
-                var wsUI = h.collider.GetComponentInParent<WorldSpaceUIInteraction>() ??
-                           h.collider.GetComponentInChildren<WorldSpaceUIInteraction>();
-                var fo = h.collider.GetComponentInParent<FocusableObject>();
-
-                if (wsUI != null && wsUI.enabled && wsUI.gameObject.activeInHierarchy)
+                if (_currentFocusedObject != null && _currentFocusedObject.gameObject != null)
                 {
-                    hitWorldSpaceUI = wsUI;
-                    uiHit = h;
+                    targetCamera.transform.position = _currentFocusedObject.GetCameraTargetPosition();
+                    targetCamera.transform.rotation = _currentFocusedObject.GetCameraTargetRotation();
                 }
-
-                if (fo != null && fo.enabled && fo.gameObject.activeInHierarchy)
+                else if (_currentAnchorPoint != null && _currentAnchorPoint.gameObject != null)
                 {
-                    hitFocusable = fo;
+                    targetCamera.transform.position = _currentAnchorPoint.position;
+                    targetCamera.transform.rotation = _currentAnchorPoint.rotation;
                 }
             }
+        }
 
-            // Se a entidade possui WorldSpaceUIInteraction, busca entre os hits dessa mesma entidade o hit exato no colisor da tela
-            if (hitWorldSpaceUI != null)
+        private void HandleMouseRaycast()
+        {
+            if (targetCamera == null) return;
+
+            if (IsPointerOverInteractiveUI())
             {
-                if (h.collider == hitWorldSpaceUI.ScreenCollider ||
-                    h.transform == hitWorldSpaceUI.transform ||
-                    h.transform.IsChildOf(hitWorldSpaceUI.transform))
+                ClearHover();
+                return;
+            }
+
+            Ray ray = targetCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit[] hits = Physics.RaycastAll(ray, raycastDistance, interactableLayers, QueryTriggerInteraction.Collide);
+            Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+            FocusableObject hitFocusable = null;
+            WorldSpaceUIInteraction hitWorldSpaceUI = null;
+            RaycastHit selectedHit = default;
+            RaycastHit uiHit = default;
+            bool hasHitObstacle = false;
+
+            foreach (var h in hits)
+            {
+                if (h.collider == null) continue;
+
+                if (targetCamera != null && h.collider.transform.IsChildOf(targetCamera.transform))
                 {
-                    uiHit = h;
+                    var camWsUI = h.collider.GetComponentInParent<WorldSpaceUIInteraction>() ?? h.collider.GetComponentInChildren<WorldSpaceUIInteraction>();
+                    var camFo = h.collider.GetComponentInParent<FocusableObject>();
+                    if (camWsUI == null && camFo == null) continue;
+                }
+
+                bool isInteractiveTrigger = h.collider.isTrigger && (
+                    h.collider.GetComponentInParent<WorldSpaceUIInteraction>() != null ||
+                    h.collider.GetComponentInChildren<WorldSpaceUIInteraction>() != null ||
+                    h.collider.GetComponentInParent<FocusableObject>() != null
+                );
+
+                if (h.collider.isTrigger && !isInteractiveTrigger) continue;
+
+                if (!hasHitObstacle)
+                {
+                    hasHitObstacle = true;
+                    selectedHit = h;
+
+                    var wsUI = h.collider.GetComponentInParent<WorldSpaceUIInteraction>() ?? h.collider.GetComponentInChildren<WorldSpaceUIInteraction>();
+                    var fo = h.collider.GetComponentInParent<FocusableObject>();
+
+                    if (wsUI != null && wsUI.enabled && wsUI.gameObject.activeInHierarchy)
+                    {
+                        hitWorldSpaceUI = wsUI;
+                        uiHit = h;
+                    }
+
+                    if (fo != null && fo.enabled && fo.gameObject.activeInHierarchy)
+                    {
+                        hitFocusable = fo;
+                    }
+                }
+
+                if (hitWorldSpaceUI != null)
+                {
+                    if (h.collider == hitWorldSpaceUI.ScreenCollider ||
+                        h.transform == hitWorldSpaceUI.transform ||
+                        h.transform.IsChildOf(hitWorldSpaceUI.transform))
+                    {
+                        uiHit = h;
+                        break;
+                    }
+                }
+                else
+                {
                     break;
                 }
             }
-            else
+
+            _activeWorldSpaceUI = hitWorldSpaceUI;
+            _activeFocusable = hitFocusable;
+            _activeRaycastHit = (hitWorldSpaceUI != null && uiHit.collider != null) ? uiHit : selectedHit;
+            _hasActiveInteractiveHit = (hitWorldSpaceUI != null || hitFocusable != null);
+
+            if (hitFocusable != _currentHoveredObject)
             {
-                // Se não há WorldSpaceUIInteraction na entidade frontal, encerra no primeiro colisor
-                break;
+                if (_currentHoveredObject != null)
+                {
+                    _currentHoveredObject.NotifyHoverExit();
+                    OnObjectHoverChanged?.Invoke(_currentHoveredObject, false);
+                    _currentHoveredObject = null;
+                }
+
+                if (hitFocusable != null && hitFocusable.enabled)
+                {
+                    _currentHoveredObject = hitFocusable;
+                    _currentHoveredObject.NotifyHoverEnter();
+                    OnObjectHoverChanged?.Invoke(_currentHoveredObject, true);
+                }
+            }
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (_currentFocusedObject != null && !_currentFocusedObject.AllowUnfocusOnClickOutside)
+                {
+                    if (hitFocusable == _currentFocusedObject)
+                    {
+                        _currentFocusedObject.NotifyClicked();
+                    }
+                    return;
+                }
+
+                if (hitWorldSpaceUI != null)
+                {
+                    if (hitFocusable != null && hitFocusable.enabled && (!HasActiveFocus || CurrentFocusedObject != hitFocusable))
+                    {
+                        if (hitFocusable.AllowClickToFocus)
+                        {
+                            hitFocusable.NotifyClicked();
+                        }
+                    }
+                }
+                else if (hitFocusable != null && hitFocusable.enabled)
+                {
+                    hitFocusable.NotifyClicked();
+                }
+                else if (unfocusOnEmptyClick && HasActiveFocus && !hasHitObstacle)
+                {
+                    Unfocus();
+                }
             }
         }
 
-        _activeWorldSpaceUI = hitWorldSpaceUI;
-        _activeFocusable = hitFocusable;
-        _activeRaycastHit = (hitWorldSpaceUI != null && uiHit.collider != null) ? uiHit : selectedHit;
-        _hasActiveInteractiveHit = (hitWorldSpaceUI != null || hitFocusable != null);
-
-        // Atualizacao de Hover para FocusableObject
-        if (hitFocusable != _currentHoveredObject)
+        public void ClearHover()
         {
+            _activeWorldSpaceUI = null;
+            _activeFocusable = null;
+            _hasActiveInteractiveHit = false;
+
             if (_currentHoveredObject != null)
             {
                 _currentHoveredObject.NotifyHoverExit();
                 OnObjectHoverChanged?.Invoke(_currentHoveredObject, false);
                 _currentHoveredObject = null;
             }
+        }
 
-            if (hitFocusable != null && hitFocusable.enabled)
+        public void RegisterUIDocument(UIDocument doc)
+        {
+            if (doc != null && !screenUIDocuments.Contains(doc))
             {
-                _currentHoveredObject = hitFocusable;
-                _currentHoveredObject.NotifyHoverEnter();
-                OnObjectHoverChanged?.Invoke(_currentHoveredObject, true);
+                screenUIDocuments.Add(doc);
             }
         }
 
-        // Clique do Mouse
-        if (Input.GetMouseButtonDown(0))
+        public bool IsPointerOverInteractiveUI()
         {
-            // Se o objeto atualmente focado não permite sair do foco ao clicar fora:
-            if (_currentFocusedObject != null && !_currentFocusedObject.AllowUnfocusOnClickOutside)
+            EnsureScreenUIDocuments();
+
+            for (int i = screenUIDocuments.Count - 1; i >= 0; i--)
             {
-                if (hitFocusable == _currentFocusedObject)
+                var doc = screenUIDocuments[i];
+                if (doc == null)
                 {
-                    _currentFocusedObject.NotifyClicked();
-                }
-                return;
-            }
-
-            if (hitWorldSpaceUI != null)
-            {
-                // Se estamos focando um objeto (ex: computador) a partir da visão distante e clicamos nele:
-                if (hitFocusable != null && hitFocusable.enabled && (!HasActiveFocus || CurrentFocusedObject != hitFocusable))
-                {
-                    if (hitFocusable.AllowClickToFocus)
-                    {
-                        hitFocusable.NotifyClicked();
-                    }
-                }
-                // Se já estiver focado no objeto ou se for um objeto puramente de UI (ex: Flip Phone),
-                // a interação ocorre diretamente no WorldSpaceUIInteraction sem interferir no foco da câmera.
-            }
-            else if (hitFocusable != null && hitFocusable.enabled)
-            {
-                hitFocusable.NotifyClicked();
-            }
-            else if (unfocusOnEmptyClick && HasActiveFocus && !hasHitObstacle)
-            {
-                Unfocus();
-            }
-        }
-    }
-
-    /// <summary>
-    /// Limpa o estado atual de hover e notifica o objeto anterior.
-    /// </summary>
-    public void ClearHover()
-    {
-        _activeWorldSpaceUI = null;
-        _activeFocusable = null;
-        _hasActiveInteractiveHit = false;
-
-        if (_currentHoveredObject != null)
-        {
-            _currentHoveredObject.NotifyHoverExit();
-            OnObjectHoverChanged?.Invoke(_currentHoveredObject, false);
-            _currentHoveredObject = null;
-        }
-    }
-
-    public void RegisterUIDocument(UIDocument doc)
-    {
-        if (doc != null && !screenUIDocuments.Contains(doc))
-        {
-            screenUIDocuments.Add(doc);
-        }
-    }
-
-    /// <summary>
-    /// Verifica de forma precisa se o mouse está sobre um controle interativo de UI (Botão, Slider, etc.).
-    /// Evita que telas vazias, containers transparentes ou painéis de tela cheia do UI Toolkit
-    /// bloqueiem indevidamente o raio de interação 3D com objetos do cenário.
-    /// </summary>
-    public bool IsPointerOverInteractiveUI()
-    {
-        EnsureScreenUIDocuments();
-
-        // 1. Verificação direta nos UIDocuments registrados de tela (UI Toolkit)
-        for (int i = screenUIDocuments.Count - 1; i >= 0; i--)
-        {
-            var doc = screenUIDocuments[i];
-            if (doc == null)
-            {
-                screenUIDocuments.RemoveAt(i);
-                continue;
-            }
-
-            if (doc.isActiveAndEnabled && doc.rootVisualElement != null && doc.rootVisualElement.panel != null)
-            {
-                if (doc.panelSettings != null && doc.panelSettings.targetTexture != null)
-                {
+                    screenUIDocuments.RemoveAt(i);
                     continue;
                 }
 
-                // RuntimePanelUtils.ScreenToPanel espera Input.mousePosition (origem no canto inferior esquerdo)
-                Vector2 panelPos = RuntimePanelUtils.ScreenToPanel(
-                    doc.rootVisualElement.panel,
-                    Input.mousePosition
-                );
-                var picked = doc.rootVisualElement.panel.Pick(panelPos);
-
-                if (picked != null && picked != doc.rootVisualElement)
+                if (doc.isActiveAndEnabled && doc.rootVisualElement?.panel != null)
                 {
-                    if (picked is UnityEngine.UIElements.Button ||
-                        picked.GetFirstAncestorOfType<UnityEngine.UIElements.Button>() != null ||
-                        picked is UnityEngine.UIElements.TextField ||
-                        picked.ClassListContains("decision-btn") ||
-                        picked.ClassListContains("selectable") ||
-                        picked.GetFirstAncestorOfType<VisualElement>()?.ClassListContains("decision-btn") == true ||
-                        picked.GetFirstAncestorOfType<VisualElement>()?.ClassListContains("selectable") == true)
+                    if (doc.panelSettings?.targetTexture != null) continue;
+
+                    Vector2 panelPos = RuntimePanelUtils.ScreenToPanel(doc.rootVisualElement.panel, Input.mousePosition);
+                    var picked = doc.rootVisualElement.panel.Pick(panelPos);
+
+                    if (picked != null && picked != doc.rootVisualElement)
                     {
-                        return true;
+                        if (picked is Button || picked is TextField ||
+                            picked.GetFirstAncestorOfType<Button>() != null ||
+                            picked.ClassListContains("decision-btn") || picked.ClassListContains("selectable") ||
+                            picked.GetFirstAncestorOfType<VisualElement>()?.ClassListContains("decision-btn") == true ||
+                            picked.GetFirstAncestorOfType<VisualElement>()?.ClassListContains("selectable") == true)
+                        {
+                            return true;
+                        }
                     }
                 }
             }
+
+            return false;
         }
 
-        return false;
-    }
-
-    /// <summary>
-    /// Move a camera suavemente para focar o objeto especificado, acompanhando dinamicamente o alvo mesmo em movimento.
-    /// </summary>
-    public void Focus(FocusableObject target)
-    {
-        if (target == null)
+        public void Focus(FocusableObject target)
         {
-            Unfocus();
-            return;
+            if (target == null)
+            {
+                Unfocus();
+                return;
+            }
+
+            if (_currentFocusedObject == target) return;
+
+            if (_currentFocusedObject != null)
+            {
+                _currentFocusedObject.SetFocused(false);
+            }
+
+            _currentFocusedObject = target;
+            _currentAnchorPoint = null;
+            _currentFocusedObject.SetFocused(true);
+
+            float targetFov = target.TargetCameraFov > 0f ? target.TargetCameraFov : _defaultFov;
+            float duration = target.CustomTransitionDuration > 0f ? target.CustomTransitionDuration : transitionDuration;
+            float targetEffectWeight = target.EnableCameraEffectOnFocus ? target.CameraEffectWeight : 0f;
+
+            SetFocusCameraEffect(targetEffectWeight, duration);
+
+            MoveCameraTo(
+                () => _currentFocusedObject != null ? _currentFocusedObject.GetCameraTargetPosition() : _defaultPosition,
+                () => _currentFocusedObject != null ? _currentFocusedObject.GetCameraTargetRotation() : _defaultRotation,
+                targetFov,
+                duration
+            );
+
+            onFocusChanged?.Invoke(_currentFocusedObject);
+            OnObjectFocusChanged?.Invoke(_currentFocusedObject);
         }
 
-        if (_currentFocusedObject == target) return;
-
-        // Desfoca o anterior se houver
-        if (_currentFocusedObject != null)
+        public void FocusPoint(Transform targetPoint, float targetFov = -1f, float duration = -1f, bool enableCameraEffect = false, float effectWeight = 1f)
         {
-            _currentFocusedObject.SetFocused(false);
+            if (targetPoint == null)
+            {
+                Unfocus(duration);
+                return;
+            }
+
+            if (_currentFocusedObject != null)
+            {
+                _currentFocusedObject.SetFocused(false);
+                _currentFocusedObject = null;
+            }
+
+            _currentAnchorPoint = targetPoint;
+
+            float fov = targetFov > 0f ? targetFov : _defaultFov;
+            float dur = duration > 0f ? duration : transitionDuration;
+            float targetEffectWeight = enableCameraEffect ? effectWeight : 0f;
+
+            SetFocusCameraEffect(targetEffectWeight, dur);
+
+            MoveCameraTo(
+                () => _currentAnchorPoint != null ? _currentAnchorPoint.position : _defaultPosition,
+                () => _currentAnchorPoint != null ? _currentAnchorPoint.rotation : _defaultRotation,
+                fov,
+                dur
+            );
+
+            onFocusChanged?.Invoke(null);
+            OnObjectFocusChanged?.Invoke(null);
         }
 
-        _currentFocusedObject = target;
-        _currentAnchorPoint = null;
-        _currentFocusedObject.SetFocused(true);
-
-        float targetFov = target.TargetCameraFov > 0f ? target.TargetCameraFov : _defaultFov;
-        float duration = target.CustomTransitionDuration > 0f ? target.CustomTransitionDuration : transitionDuration;
-
-        // Ativa ou desativa o efeito de camera / pos-processamento baseado na flag e peso do objeto focado
-        float targetEffectWeight = target.EnableCameraEffectOnFocus ? target.CameraEffectWeight : 0f;
-        SetFocusCameraEffect(targetEffectWeight, duration);
-
-        MoveCameraTo(
-            () => _currentFocusedObject != null ? _currentFocusedObject.GetCameraTargetPosition() : _defaultPosition,
-            () => _currentFocusedObject != null ? _currentFocusedObject.GetCameraTargetRotation() : _defaultRotation,
-            targetFov,
-            duration
-        );
-
-        onFocusChanged?.Invoke(_currentFocusedObject);
-        OnObjectFocusChanged?.Invoke(_currentFocusedObject);
-    }
-
-    /// <summary>
-    /// Foca a câmera diretamente em um Transform âncora arbitrário com FOV e duração customizáveis.
-    /// </summary>
-    public void FocusPoint(Transform targetPoint, float targetFov = -1f, float duration = -1f, bool enableCameraEffect = false, float effectWeight = 1f)
-    {
-        if (targetPoint == null)
+        public void Unfocus(float customDuration = -1f)
         {
-            Unfocus(duration);
-            return;
+            if (_currentFocusedObject != null)
+            {
+                _currentFocusedObject.SetFocused(false);
+                _currentFocusedObject = null;
+            }
+
+            _currentAnchorPoint = null;
+            float duration = customDuration > 0f ? customDuration : transitionDuration;
+
+            SetFocusCameraEffect(0f, duration);
+
+            MoveCameraTo(
+                () => defaultCameraAnchor != null ? defaultCameraAnchor.position : _defaultPosition,
+                () => defaultCameraAnchor != null ? defaultCameraAnchor.rotation : _defaultRotation,
+                _defaultFov,
+                duration
+            );
+
+            onFocusChanged?.Invoke(null);
+            OnObjectFocusChanged?.Invoke(null);
         }
 
-        if (_currentFocusedObject != null)
+        public void SetFocusCameraEffect(float targetWeight, float duration = 0.65f)
         {
-            _currentFocusedObject.SetFocused(false);
-            _currentFocusedObject = null;
+            if (_effectCoroutine != null)
+            {
+                StopCoroutine(_effectCoroutine);
+                _effectCoroutine = null;
+            }
+
+            Volume vol = GetFocusVolume();
+            float currentBlur = Shader.GetGlobalFloat("_EdgeBlurIntensity");
+            float currentVol = vol != null ? vol.weight : currentBlur;
+            float startVal = Mathf.Max(currentBlur, currentVol);
+
+            float targetVal = Mathf.Clamp01(targetWeight);
+            duration = Mathf.Max(duration, 0.05f);
+
+            if (Mathf.Abs(startVal - targetVal) < 0.001f || !gameObject.activeInHierarchy)
+            {
+                if (vol != null) vol.weight = targetVal;
+                Shader.SetGlobalFloat("_EdgeBlurIntensity", targetVal);
+                return;
+            }
+
+            _effectCoroutine = StartCoroutine(AnimateFocusEffectRoutine(startVal, targetVal, duration));
         }
 
-        _currentAnchorPoint = targetPoint;
-
-        float fov = targetFov > 0f ? targetFov : _defaultFov;
-        float dur = duration > 0f ? duration : transitionDuration;
-
-        float targetEffectWeight = enableCameraEffect ? effectWeight : 0f;
-        SetFocusCameraEffect(targetEffectWeight, dur);
-
-        MoveCameraTo(
-            () => _currentAnchorPoint != null ? _currentAnchorPoint.position : _defaultPosition,
-            () => _currentAnchorPoint != null ? _currentAnchorPoint.rotation : _defaultRotation,
-            fov,
-            dur
-        );
-
-        onFocusChanged?.Invoke(null);
-        OnObjectFocusChanged?.Invoke(null);
-    }
-
-    /// <summary>
-    /// Retorna a camera para a posicao e rotacao padrao da cena.
-    /// </summary>
-    public void Unfocus(float customDuration = -1f)
-    {
-        if (_currentFocusedObject != null)
+        private IEnumerator AnimateFocusEffectRoutine(float startVal, float targetVal, float duration)
         {
-            _currentFocusedObject.SetFocused(false);
-            _currentFocusedObject = null;
-        }
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                float delta = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
+                elapsed += delta;
+                float t = Mathf.Clamp01(elapsed / duration);
+                float curveT = Mathf.SmoothStep(0f, 1f, t);
+                float current = Mathf.Lerp(startVal, targetVal, curveT);
 
-        _currentAnchorPoint = null;
+                Volume vol = GetFocusVolume();
+                if (vol != null) vol.weight = current;
+                Shader.SetGlobalFloat("_EdgeBlurIntensity", current);
 
-        float duration = customDuration > 0f ? customDuration : transitionDuration;
+                yield return null;
+            }
 
-        // Desativa o efeito de camera / pos-processamento ao retornar para a visao geral
-        SetFocusCameraEffect(0f, duration);
-
-        MoveCameraTo(
-            () => defaultCameraAnchor != null ? defaultCameraAnchor.position : _defaultPosition,
-            () => defaultCameraAnchor != null ? defaultCameraAnchor.rotation : _defaultRotation,
-            _defaultFov,
-            duration
-        );
-
-        onFocusChanged?.Invoke(null);
-        OnObjectFocusChanged?.Invoke(null);
-    }
-
-    /// <summary>
-    /// Transiciona suavemente o efeito de camera / pos-processamento (Volume e Edge Blur no ToonOutlineFeature).
-    /// </summary>
-    public void SetFocusCameraEffect(float targetWeight, float duration = 0.65f)
-    {
-        if (_effectCoroutine != null)
-        {
-            StopCoroutine(_effectCoroutine);
+            Volume finalVol = GetFocusVolume();
+            if (finalVol != null) finalVol.weight = targetVal;
+            Shader.SetGlobalFloat("_EdgeBlurIntensity", targetVal);
             _effectCoroutine = null;
         }
 
-        Volume vol = GetFocusVolume();
-        float currentBlur = Shader.GetGlobalFloat("_EdgeBlurIntensity");
-        float currentVol = vol != null ? vol.weight : currentBlur;
-        float startVal = Mathf.Max(currentBlur, currentVol);
-
-        float targetVal = Mathf.Clamp01(targetWeight);
-        duration = Mathf.Max(duration, 0.05f);
-
-        if (Mathf.Abs(startVal - targetVal) < 0.001f || !gameObject.activeInHierarchy)
+        public void SetFocusCameraEffect(bool enable, float duration = 0.65f)
         {
-            if (vol != null) vol.weight = targetVal;
-            Shader.SetGlobalFloat("_EdgeBlurIntensity", targetVal);
-            return;
+            SetFocusCameraEffect(enable ? 1f : 0f, duration);
         }
 
-        _effectCoroutine = StartCoroutine(AnimateFocusEffectRoutine(startVal, targetVal, duration));
-    }
-
-    private IEnumerator AnimateFocusEffectRoutine(float startVal, float targetVal, float duration)
-    {
-        float elapsed = 0f;
-        while (elapsed < duration)
+        private Volume GetFocusVolume()
         {
-            float delta = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
-            elapsed += delta;
-            float t = Mathf.Clamp01(elapsed / duration);
-            float curveT = Mathf.SmoothStep(0f, 1f, t);
-            float current = Mathf.Lerp(startVal, targetVal, curveT);
+            if (focusVolume != null) return focusVolume;
 
-            Volume vol = GetFocusVolume();
-            if (vol != null) vol.weight = current;
-            Shader.SetGlobalFloat("_EdgeBlurIntensity", current);
-
-            yield return null;
-        }
-
-        Volume finalVol = GetFocusVolume();
-        if (finalVol != null) finalVol.weight = targetVal;
-        Shader.SetGlobalFloat("_EdgeBlurIntensity", targetVal);
-        _effectCoroutine = null;
-    }
-
-    /// <summary>
-    /// Sobrecarga para ativar ou desativar o efeito usando booleano (0f ou 1f).
-    /// </summary>
-    public void SetFocusCameraEffect(bool enable, float duration = 0.65f)
-    {
-        SetFocusCameraEffect(enable ? 1f : 0f, duration);
-    }
-
-    private Volume GetFocusVolume()
-    {
-        if (focusVolume != null) return focusVolume;
-
-        Camera cam = targetCamera != null ? targetCamera : Camera.main;
-        if (cam != null)
-        {
-            Volume[] volumes = cam.GetComponents<Volume>();
-            foreach (var v in volumes)
+            Camera cam = targetCamera != null ? targetCamera : Camera.main;
+            if (cam != null)
             {
-                if (v != null && v.sharedProfile != null && v.sharedProfile.name.Contains("1"))
+                Volume[] volumes = cam.GetComponents<Volume>();
+                foreach (var v in volumes)
                 {
-                    focusVolume = v;
+                    if (v != null && v.sharedProfile != null && v.sharedProfile.name.Contains("1"))
+                    {
+                        focusVolume = v;
+                        return focusVolume;
+                    }
+                }
+                var camVol = cam.GetComponent<Volume>();
+                if (camVol != null)
+                {
+                    focusVolume = camVol;
                     return focusVolume;
                 }
             }
-            var camVol = cam.GetComponent<Volume>();
-            if (camVol != null)
+
+            return focusVolume;
+        }
+
+        public void ToggleFocus(FocusableObject target)
+        {
+            if (_currentFocusedObject == target)
             {
-                focusVolume = camVol;
-                return focusVolume;
+                Unfocus();
+            }
+            else
+            {
+                Focus(target);
             }
         }
 
-        return focusVolume;
-    }
-
-    /// <summary>
-    /// Alterna o foco do objeto (se ja estiver focado, desfoca; caso contrario, foca).
-    /// </summary>
-    public void ToggleFocus(FocusableObject target)
-    {
-        if (_currentFocusedObject == target)
+        private void MoveCameraTo(Func<Vector3> getTargetPos, Func<Quaternion> getTargetRot, float targetFov, float duration)
         {
-            Unfocus();
-        }
-        else
-        {
-            Focus(target);
-        }
-    }
+            if (targetCamera == null) return;
 
-    /// <summary>
-    /// Inicia a animacao suave da camera para as coordenadas alvos avaliadas dinamicamente a cada frame.
-    /// </summary>
-    private void MoveCameraTo(Func<Vector3> getTargetPos, Func<Quaternion> getTargetRot, float targetFov, float duration)
-    {
-        if (targetCamera == null) return;
+            if (_cameraMoveCoroutine != null)
+            {
+                StopCoroutine(_cameraMoveCoroutine);
+            }
 
-        if (_cameraMoveCoroutine != null)
-        {
-            StopCoroutine(_cameraMoveCoroutine);
+            _cameraMoveCoroutine = StartCoroutine(CameraTransitionRoutine(getTargetPos, getTargetRot, targetFov, duration));
         }
 
-        _cameraMoveCoroutine = StartCoroutine(CameraTransitionRoutine(getTargetPos, getTargetRot, targetFov, duration));
-    }
-
-    private void MoveCameraTo(Vector3 targetPos, Quaternion targetRot, float targetFov, float duration)
-    {
-        MoveCameraTo(() => targetPos, () => targetRot, targetFov, duration);
-    }
-
-    private IEnumerator CameraTransitionRoutine(Func<Vector3> getTargetPos, Func<Quaternion> getTargetRot, float endFov, float duration)
-    {
-        Transform camTransform = targetCamera.transform;
-        Vector3 startPos = camTransform.position;
-        Quaternion startRot = camTransform.rotation;
-        float startFov = targetCamera.fieldOfView;
-
-        float elapsed = 0f;
-        duration = Mathf.Max(duration, 0.01f);
-
-        while (elapsed < duration)
+        private IEnumerator CameraTransitionRoutine(Func<Vector3> getTargetPos, Func<Quaternion> getTargetRot, float endFov, float duration)
         {
-            float dt = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
-            elapsed += dt;
+            Transform camTransform = targetCamera.transform;
+            Vector3 startPos = camTransform.position;
+            Quaternion startRot = camTransform.rotation;
+            float startFov = targetCamera.fieldOfView;
 
-            float t = Mathf.Clamp01(elapsed / duration);
-            float curveT = transitionCurve != null ? transitionCurve.Evaluate(t) : Mathf.SmoothStep(0f, 1f, t);
+            float elapsed = 0f;
+            duration = Mathf.Max(duration, 0.01f);
 
-            Vector3 currentEndPos = getTargetPos != null ? getTargetPos() : startPos;
-            Quaternion currentEndRot = getTargetRot != null ? getTargetRot() : startRot;
+            while (elapsed < duration)
+            {
+                float dt = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
+                elapsed += dt;
 
-            camTransform.position = Vector3.Lerp(startPos, currentEndPos, curveT);
-            camTransform.rotation = Quaternion.Slerp(startRot, currentEndRot, curveT);
-            targetCamera.fieldOfView = Mathf.Lerp(startFov, endFov, curveT);
+                float t = Mathf.Clamp01(elapsed / duration);
+                float curveT = transitionCurve != null ? transitionCurve.Evaluate(t) : Mathf.SmoothStep(0f, 1f, t);
 
-            yield return null;
+                Vector3 currentEndPos = getTargetPos != null ? getTargetPos() : startPos;
+                Quaternion currentEndRot = getTargetRot != null ? getTargetRot() : startRot;
+
+                camTransform.position = Vector3.Lerp(startPos, currentEndPos, curveT);
+                camTransform.rotation = Quaternion.Slerp(startRot, currentEndRot, curveT);
+                targetCamera.fieldOfView = Mathf.Lerp(startFov, endFov, curveT);
+
+                yield return null;
+            }
+
+            Vector3 finalPos = getTargetPos != null ? getTargetPos() : camTransform.position;
+            Quaternion finalRot = getTargetRot != null ? getTargetRot() : camTransform.rotation;
+
+            camTransform.position = finalPos;
+            camTransform.rotation = finalRot;
+            targetCamera.fieldOfView = endFov;
+            _cameraMoveCoroutine = null;
         }
 
-        Vector3 finalPos = getTargetPos != null ? getTargetPos() : camTransform.position;
-        Quaternion finalRot = getTargetRot != null ? getTargetRot() : camTransform.rotation;
-
-        camTransform.position = finalPos;
-        camTransform.rotation = finalRot;
-        targetCamera.fieldOfView = endFov;
-        _cameraMoveCoroutine = null;
-    }
-
-    private void OnDestroy()
-    {
-        if (_effectCoroutine != null)
+        private void OnDestroy()
         {
-            StopCoroutine(_effectCoroutine);
-            _effectCoroutine = null;
-        }
+            if (_effectCoroutine != null)
+            {
+                StopCoroutine(_effectCoroutine);
+                _effectCoroutine = null;
+            }
 
-        if (Instance == this)
-        {
-            Instance = null;
+            if (Instance == this)
+            {
+                Instance = null;
+            }
         }
     }
-}
 }

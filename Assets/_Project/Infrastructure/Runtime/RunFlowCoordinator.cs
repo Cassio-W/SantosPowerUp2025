@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using Mandato.Content;
 using Mandato.Core;
 using Mandato.Presentation;
@@ -26,7 +25,7 @@ namespace Mandato.Infrastructure
         [SerializeField] private KeyCode callNextNpcKey = KeyCode.Space;
         [SerializeField] private float delayBetweenProposals = 1.5f;
         [SerializeField] private string mainMenuSceneName = "MenuV2";
-        [Tooltip("Se verdadeiro, o hover dos botões de decisão exibe as setas de impacto no monitor (para perks/habilidades futuras).")]
+        [Tooltip("Se verdadeiro, o hover dos botões de decisão exibe as setas de impacto no monitor.")]
         [SerializeField] private bool enableDecisionHoverPreview = false;
 
         private bool isAwaitingSpaceForNextNpc = false;
@@ -71,17 +70,12 @@ namespace Mandato.Infrastructure
             this.delayBetweenProposals = delayBetween;
             this.mainMenuSceneName = string.IsNullOrEmpty(menuScene) ? "MenuV2" : menuScene;
 
-            this.tutorialManager = (bindings != null && bindings.TutorialManager != null)
+            this.tutorialManager = (bindings?.TutorialManager != null)
                 ? bindings.TutorialManager
                 : GetComponent<TutorialManager>() ?? FindFirstObjectByType<TutorialManager>(FindObjectsInactive.Include) ?? gameObject.AddComponent<TutorialManager>();
 
-            var speechBubble = (bindings != null && bindings.SpeechBubblePresenter != null)
-                ? bindings.SpeechBubblePresenter
-                : FindFirstObjectByType<NpcSpeechBubblePresenter>(FindObjectsInactive.Include);
-
-            var cameraFocus = (bindings != null && bindings.CameraFocus != null)
-                ? bindings.CameraFocus
-                : CameraFocusManager.Instance ?? FindFirstObjectByType<CameraFocusManager>(FindObjectsInactive.Include);
+            var speechBubble = bindings?.SpeechBubblePresenter ?? FindFirstObjectByType<NpcSpeechBubblePresenter>(FindObjectsInactive.Include);
+            var cameraFocus = bindings?.CameraFocus ?? CameraFocusManager.Instance ?? FindFirstObjectByType<CameraFocusManager>(FindObjectsInactive.Include);
 
             this.tutorialManager.Initialize(
                 stateMachine,
@@ -89,7 +83,8 @@ namespace Mandato.Infrastructure
                 speechBubble,
                 bindings?.PaperPresenter,
                 bindings?.DecisionOverlayPresenter,
-                cameraFocus
+                cameraFocus,
+                this.modalCoordinator
             );
 
             Bind();
@@ -99,7 +94,13 @@ namespace Mandato.Infrastructure
         {
             if (stateMachine == null || bindings == null) return;
 
-            // 1. Apresentação 3D
+            if (modalCoordinator != null)
+            {
+                modalCoordinator.OnContextChanged -= HandleContextChanged;
+                modalCoordinator.OnContextChanged += HandleContextChanged;
+                HandleContextChanged(modalCoordinator.CurrentContext, InteractionContext.DeskOverview);
+            }
+
             if (bindings.PresentationCoordinator != null)
             {
                 bindings.PresentationCoordinator.Bind(stateMachine, catalog.Cards);
@@ -111,13 +112,9 @@ namespace Mandato.Infrastructure
                 stateMachine.OnProposalReady += HandleProposalReadyOnDesk;
             }
 
-            // 2. Consequências da Máquina de Estados
             stateMachine.OnConsequencesReady += HandleConsequencesResolved;
-
-            // 3. Fim de Run
             stateMachine.OnRunTerminated += HandleRunTerminated;
 
-            // 4. Decisões do Jogador
             if (bindings.DecisionOverlayPresenter != null)
             {
                 bindings.DecisionOverlayPresenter.SetModalCoordinator(modalCoordinator);
@@ -127,11 +124,17 @@ namespace Mandato.Infrastructure
                 bindings.DecisionOverlayPresenter.OnBackRequested += HandleDecisionBackRequested;
             }
 
-            // 5. Modais e Ações do Celular
             if (bindings.FlipPhonePresenter != null)
             {
-                bindings.FlipPhonePresenter.OnPhoneOpened += () => modalCoordinator.SetModalState(UIModalCoordinator.MODAL_FLIP_PHONE, true);
-                bindings.FlipPhonePresenter.OnPhoneClosed += () => modalCoordinator.SetModalState(UIModalCoordinator.MODAL_FLIP_PHONE, false);
+                bindings.FlipPhonePresenter.SetModalCoordinator(modalCoordinator);
+                bindings.FlipPhonePresenter.OnPhoneOpened += () => modalCoordinator?.SetContext(InteractionContext.PhoneDrawer);
+                bindings.FlipPhonePresenter.OnPhoneClosed += () =>
+                {
+                    if (modalCoordinator?.CurrentContext == InteractionContext.PhoneDrawer)
+                    {
+                        modalCoordinator.SetContext(InteractionContext.DeskOverview);
+                    }
+                };
             }
 
             if (flipPhoneCoordinator != null)
@@ -139,20 +142,17 @@ namespace Mandato.Infrastructure
                 flipPhoneCoordinator.OnActionExecuted += HandleFlipPhoneActionExecuted;
             }
 
-            // 6. Botões de Fim de Jogo
             if (bindings.EndScreenPresenter != null)
             {
                 bindings.EndScreenPresenter.OnRestartRequested += RestartRun;
                 bindings.EndScreenPresenter.OnMainMenuRequested += ReturnToMenu;
             }
 
-            // 7. Botão de Mesa (Chamar Visitante)
             if (bindings.DeskCallButton != null)
             {
                 bindings.DeskCallButton.OnCallRequested += AuthorizeNextVisitor;
             }
 
-            // 8. Foco de Câmera (PC / Monitor / Papel)
             if (bindings.CameraFocus != null)
             {
                 bindings.CameraFocus.OnObjectFocusChanged += HandleObjectFocusChanged;
@@ -161,105 +161,131 @@ namespace Mandato.Infrastructure
 
         private void OnDestroy()
         {
-            if (bindings != null && bindings.DecisionOverlayPresenter != null)
-            {
+            if (modalCoordinator != null)
+                modalCoordinator.OnContextChanged -= HandleContextChanged;
+
+            if (bindings?.DecisionOverlayPresenter != null)
                 bindings.DecisionOverlayPresenter.OnBackRequested -= HandleDecisionBackRequested;
-            }
 
             if (flipPhoneCoordinator != null)
-            {
                 flipPhoneCoordinator.OnActionExecuted -= HandleFlipPhoneActionExecuted;
-            }
 
-            if (bindings != null && bindings.DeskCallButton != null)
-            {
+            if (bindings?.DeskCallButton != null)
                 bindings.DeskCallButton.OnCallRequested -= AuthorizeNextVisitor;
-            }
 
-            if (bindings != null && bindings.CameraFocus != null)
-            {
+            if (bindings?.CameraFocus != null)
                 bindings.CameraFocus.OnObjectFocusChanged -= HandleObjectFocusChanged;
-            }
         }
 
         private void HandleDecisionBackRequested()
         {
-            if (CameraFocusManager.Instance != null && CameraFocusManager.Instance.HasActiveFocus)
+            var cam = CameraFocusManager.Instance ?? bindings?.CameraFocus;
+            if (cam != null && cam.HasActiveFocus)
             {
-                CameraFocusManager.Instance.Unfocus();
-            }
-            else if (bindings != null && bindings.CameraFocus != null && bindings.CameraFocus.HasActiveFocus)
-            {
-                bindings.CameraFocus.Unfocus();
+                cam.Unfocus();
             }
         }
 
-        public void HandleObjectFocusChanged(FocusableObject focusedObject)
+        private void HandleContextChanged(InteractionContext newContext, InteractionContext oldContext)
         {
-            bool isPc = IsMonitorFocusable(focusedObject);
-            SetPcFocusState(isPc);
+            isPcFocused = (newContext == InteractionContext.PcTerminal);
+            isPaperFocused = (newContext == InteractionContext.PaperInspect);
 
-            bool isPaper = focusedObject is PaperFocusableObject;
-            bool isPaperOrNonPc = isPaper || (focusedObject != null && !isPc);
-
-            if (isPaper)
+            switch (newContext)
             {
-                isPaperFocused = true;
-                // Desativa a animação do braço levantado instantaneamente ao focar no papel
-                if (bindings != null)
-                {
-                    bindings.ResetPlayerHandImmediate();
-                    isPlayerHandRaised = false;
-                }
-            }
-            else if (focusedObject == null)
-            {
-                // Só restaura a mão levantada se estávamos especificamente com foco ativo no papel,
-                // e a proposta continua ativa aguardando decisão na partida (não sendo descartada/respondida)
-                if (isPaperFocused)
-                {
-                    isPaperFocused = false;
-
-                    if (IsProposalActive() && !isPcFocused && !isDismissingProposal)
+                case InteractionContext.DeskOverview:
+                    if (bindings != null)
                     {
-                        if (bindings != null && !isPlayerHandRaised)
+                        bindings.FlipPhonePresenter?.SetInteractable(true);
+                        bindings.DeskCallButton?.SetInteractable(true);
+                        bindings.DecisionOverlayPresenter?.SetVisible(true);
+                        bindings.DecisionOverlayPresenter?.SetBackVisible(false);
+
+                        if (oldContext == InteractionContext.PaperInspect && IsProposalActive() && !isDismissingProposal && !isPlayerHandRaised)
                         {
                             bindings.PlayDealAnimation();
                             isPlayerHandRaised = true;
                         }
                     }
-                }
-            }
-            else
-            {
-                isPaperFocused = false;
-            }
+                    break;
 
-            if (bindings != null && bindings.DecisionOverlayPresenter != null)
-            {
-                bindings.DecisionOverlayPresenter.SetBackVisible(isPaper);
+                case InteractionContext.PaperInspect:
+                    if (bindings != null)
+                    {
+                        bindings.ResetPlayerHandImmediate();
+                        isPlayerHandRaised = false;
+                        bindings.FlipPhonePresenter?.SetInteractable(false);
+                        bindings.DeskCallButton?.SetInteractable(false);
+                        bindings.DecisionOverlayPresenter?.SetVisible(true);
+                        bindings.DecisionOverlayPresenter?.SetBackVisible(true);
+                    }
+                    break;
+
+                case InteractionContext.PcTerminal:
+                    flipPhoneCoordinator?.ClosePhone();
+                    if (bindings != null)
+                    {
+                        bindings.FlipPhonePresenter?.SetInteractable(false);
+                        bindings.DecisionOverlayPresenter?.SetVisible(false);
+                        bindings.DeskCallButton?.SetInteractable(false);
+                    }
+                    break;
+
+                case InteractionContext.PhoneDrawer:
+                    if (bindings != null)
+                    {
+                        bindings.DeskCallButton?.SetInteractable(true);
+                        bindings.DecisionOverlayPresenter?.SetVisible(false);
+                    }
+                    break;
+
+                case InteractionContext.TutorialStep:
+                    if (bindings != null)
+                    {
+                        bindings.FlipPhonePresenter?.SetInteractable(false);
+                        bindings.DeskCallButton?.SetInteractable(false);
+                        bindings.DecisionOverlayPresenter?.SetBackVisible(false);
+                    }
+                    break;
+
+                case InteractionContext.EndSummary:
+                    flipPhoneCoordinator?.ClosePhone();
+                    if (bindings != null)
+                    {
+                        bindings.FlipPhonePresenter?.SetInteractable(false);
+                        bindings.DeskCallButton?.SetInteractable(false);
+                        bindings.DecisionOverlayPresenter?.SetVisible(false);
+                    }
+                    break;
             }
         }
 
-        /// <summary>
-        /// Verifica se há uma proposta ativa na mesa aguardando decisão do jogador.
-        /// </summary>
+        public void HandleObjectFocusChanged(FocusableObject focusedObject)
+        {
+            if (focusedObject == null)
+            {
+                if (modalCoordinator != null && (modalCoordinator.CurrentContext == InteractionContext.PcTerminal || modalCoordinator.CurrentContext == InteractionContext.PaperInspect))
+                {
+                    modalCoordinator.SetContext(InteractionContext.DeskOverview);
+                }
+            }
+            else if (IsMonitorFocusable(focusedObject))
+            {
+                modalCoordinator?.SetContext(InteractionContext.PcTerminal);
+            }
+            else if (focusedObject is PaperFocusableObject)
+            {
+                modalCoordinator?.SetContext(InteractionContext.PaperInspect);
+            }
+        }
+
         public bool IsProposalActive()
         {
-            if (stateMachine == null || stateMachine.CurrentCard == null)
-                return false;
-
-            if (stateMachine.RunState != null && (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory))
-                return false;
-
-            if (isAwaitingSpaceForNextNpc || isDismissingProposal)
-                return false;
-
-            if (tutorialManager != null && tutorialManager.IsTutorialActive)
-                return false;
-
-            if (IsTutorialCard(stateMachine.CurrentCard))
-                return false;
+            if (stateMachine?.CurrentCard == null) return false;
+            if (stateMachine.RunState != null && (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory)) return false;
+            if (isAwaitingSpaceForNextNpc || isDismissingProposal) return false;
+            if (tutorialManager != null && tutorialManager.IsTutorialActive) return false;
+            if (IsTutorialCard(stateMachine.CurrentCard)) return false;
 
             return stateMachine.CurrentPhase == RunPhase.PresentingProposal ||
                    stateMachine.CurrentPhase == RunPhase.AwaitingChoice;
@@ -269,7 +295,7 @@ namespace Mandato.Infrastructure
         {
             if (obj == null) return false;
 
-            if (bindings != null && bindings.RetroMonitorPresenter != null)
+            if (bindings?.RetroMonitorPresenter != null)
             {
                 if (obj.gameObject == bindings.RetroMonitorPresenter.gameObject ||
                     obj.transform.IsChildOf(bindings.RetroMonitorPresenter.transform) ||
@@ -285,65 +311,19 @@ namespace Mandato.Infrastructure
 
         public void SetPcFocusState(bool isFocused)
         {
-            if (isPcFocused == isFocused) return;
-
-            isPcFocused = isFocused;
-            modalCoordinator?.SetModalState(UIModalCoordinator.MODAL_PC_FOCUS, isFocused);
-
             if (isFocused)
             {
-                // 1. Celular desativado: se estiver aberto, fecha e bloqueia novas aberturas
-                flipPhoneCoordinator?.ClosePhone();
-                if (bindings != null)
-                {
-                    if (bindings.FlipPhonePresenter != null)
-                    {
-                        bindings.FlipPhonePresenter.SetInteractable(false);
-                    }
-
-                    // 2. DecisionUI desativada
-                    if (bindings.DecisionOverlayPresenter != null)
-                    {
-                        bindings.DecisionOverlayPresenter.SetVisible(false);
-                    }
-
-                    // 3. Botão de mesa (chamar visitante) desativado
-                    if (bindings.DeskCallButton != null)
-                    {
-                        bindings.DeskCallButton.SetInteractable(false);
-                    }
-                }
+                modalCoordinator?.SetContext(InteractionContext.PcTerminal);
             }
-            else
+            else if (modalCoordinator?.CurrentContext == InteractionContext.PcTerminal)
             {
-                // 1. Reativa celular (permite abrir quando o jogador desejar, mas NÃO abre automaticamente)
-                if (bindings != null)
-                {
-                    if (bindings.FlipPhonePresenter != null)
-                    {
-                        bindings.FlipPhonePresenter.SetInteractable(true);
-                    }
-
-                    // 2. Reativa DecisionUI
-                    if (bindings.DecisionOverlayPresenter != null)
-                    {
-                        bindings.DecisionOverlayPresenter.SetVisible(true);
-                    }
-
-                    // 3. Reativa botão de mesa
-                    if (bindings.DeskCallButton != null)
-                    {
-                        bindings.DeskCallButton.SetInteractable(true);
-                    }
-                }
+                modalCoordinator?.SetContext(InteractionContext.DeskOverview);
             }
         }
 
         private void HandleFlipPhoneActionExecuted(FlipPhoneUseReport report)
         {
-            if (report == null || !report.success) return;
-
-            if (report.dismissedCurrentProposal)
+            if (report != null && report.success && report.dismissedCurrentProposal)
             {
                 DismissCurrentProposal();
             }
@@ -351,40 +331,29 @@ namespace Mandato.Infrastructure
 
         public void DismissCurrentProposal()
         {
-            if (stateMachine == null || stateMachine.CurrentCard == null) return;
+            if (stateMachine?.CurrentCard == null) return;
 
             isDismissingProposal = true;
-            isPaperFocused = false;
+            modalCoordinator?.SetContext(InteractionContext.DeskOverview);
 
-            // 1. Limpa monitor e botões de decisão
-            bindings.RetroMonitorPresenter?.ClearPreviewImpacts();
-            if (bindings.DecisionOverlayPresenter != null)
-            {
-                bindings.DecisionOverlayPresenter.ClearChoices();
-            }
-
-            // 2. Fecha celular
+            bindings?.RetroMonitorPresenter?.ClearPreviewImpacts();
+            bindings?.DecisionOverlayPresenter?.ClearChoices();
             flipPhoneCoordinator?.ClosePhone();
 
-            // 3. Abaixa a mão do jogador e desativa papel 3D
-            bindings.PlayDealAnimationReverse();
+            bindings?.PlayDealAnimationReverse();
             isPlayerHandRaised = false;
 
-            if (bindings.PaperPresenter != null)
+            if (bindings?.PaperPresenter != null)
             {
                 bindings.PaperPresenter.SetPaperInteractable(false);
                 bindings.PaperPresenter.SetPaperActive(false);
             }
 
-            bindings.CameraFocus?.Unfocus();
+            bindings?.CameraFocus?.Unfocus();
 
-            // 4. Apresentação do NPC saindo ou avanço direto
-            if (bindings.PresentationCoordinator != null)
+            if (bindings?.PresentationCoordinator != null)
             {
-                bindings.PresentationCoordinator.DismissCurrentProposal(false, () =>
-                {
-                    FinishProposalDismissal();
-                });
+                bindings.PresentationCoordinator.DismissCurrentProposal(false, FinishProposalDismissal);
             }
             else
             {
@@ -399,24 +368,9 @@ namespace Mandato.Infrastructure
             stateMachine.DismissCurrentProposal(advanceMonth: false, catalog.Perks, catalog.Events);
 
             if (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory)
-            {
                 return;
-            }
 
-            string displayDate = stateMachine.RunState.calendar.DisplayDate;
-            int monthIndex = stateMachine.RunState.calendar.CurrentMonthIndex;
-
-            if (bindings.DecisionOverlayPresenter != null)
-            {
-                bindings.DecisionOverlayPresenter.UpdateDateDisplay(displayDate, monthIndex);
-            }
-
-            if (bindings.RetroMonitorPresenter != null)
-            {
-                bindings.RetroMonitorPresenter.UpdateSnapshot(stateMachine.RunState.GetSnapshot());
-                bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
-            }
-
+            SyncPresenters(applyCameraEffects: false);
             isDismissingProposal = false;
 
             if (requireSpaceToCallNextNpc)
@@ -438,16 +392,11 @@ namespace Mandato.Infrastructure
 
             if (spaceOrEnter)
             {
-                // Se o monitor estiver focado, modal aberto, celular ou tela final abertos, ignora
-                if (isPcFocused) return;
                 if (modalCoordinator != null && !modalCoordinator.CanCallNextVisitor()) return;
-                if (bindings.EndScreenPresenter != null && bindings.EndScreenPresenter.IsVisible) return;
-                if (bindings.FlipPhonePresenter != null && bindings.FlipPhonePresenter.IsOpen) return;
+                if (bindings?.EndScreenPresenter != null && bindings.EndScreenPresenter.IsVisible) return;
 
-                // Executa os efeitos audiovisuais (som + animação) do botão físico apenas se o botão for interativo
-                bindings.DeskCallButton?.PlayPressEffects();
+                bindings?.DeskCallButton?.PlayPressEffects();
 
-                // Se o fluxo estiver aguardando o próximo visitante, avança
                 if (isAwaitingSpaceForNextNpc)
                 {
                     AuthorizeNextVisitor();
@@ -457,32 +406,13 @@ namespace Mandato.Infrastructure
 
         public void StartFlow()
         {
-            if (stateMachine != null)
-            {
-                string displayDate = stateMachine.RunState.calendar.DisplayDate;
-                int monthIndex = stateMachine.RunState.calendar.CurrentMonthIndex;
-
-                if (bindings.RetroMonitorPresenter != null)
-                {
-                    bindings.RetroMonitorPresenter.UpdateSnapshot(stateMachine.RunState.GetSnapshot());
-                    bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
-                }
-
-                if (bindings.DecisionOverlayPresenter != null)
-                {
-                    bindings.DecisionOverlayPresenter.SetCorruptionLevel(stateMachine.RunState.stats.corruption);
-                    bindings.DecisionOverlayPresenter.UpdateDateDisplay(displayDate, monthIndex);
-                }
-                bindings.CameraEffects?.ApplyAttributeEffects(stateMachine.RunState.stats, instant: true);
-            }
-
-            RefreshPerksUI();
+            SyncPresenters(applyCameraEffects: true, instantCamera: true);
             DrawFirstProposal();
         }
 
         public void DrawFirstProposal()
         {
-            if (stateMachine != null && catalog.Cards.Count > 0)
+            if (stateMachine != null && catalog?.Cards.Count > 0)
             {
                 stateMachine.DrawAndPresentProposal(catalog.Cards);
             }
@@ -490,14 +420,12 @@ namespace Mandato.Infrastructure
 
         public void AuthorizeNextVisitor()
         {
-            if (isPcFocused) return;
             if (!isAwaitingSpaceForNextNpc) return;
-            if (bindings.FlipPhonePresenter != null && bindings.FlipPhonePresenter.IsOpen) return;
-            if (bindings.EndScreenPresenter != null && bindings.EndScreenPresenter.IsVisible) return;
             if (modalCoordinator != null && !modalCoordinator.CanCallNextVisitor()) return;
+            if (bindings?.EndScreenPresenter != null && bindings.EndScreenPresenter.IsVisible) return;
 
             isAwaitingSpaceForNextNpc = false;
-            bindings.DeskCallButton?.PlayPressEffects();
+            bindings?.DeskCallButton?.PlayPressEffects();
             StartCoroutine(DrawNextProposalRoutine(0.05f));
         }
 
@@ -508,7 +436,6 @@ namespace Mandato.Infrastructure
             string displayDate = stateMachine.RunState.calendar.DisplayDate;
             int monthIndex = stateMachine.RunState.calendar.CurrentMonthIndex;
 
-            // 0. Propostas de tutorial são exibidas via TutorialManager no NpcSpeechBubblePresenter
             if (tutorialManager != null && tutorialManager.IsTutorialCard(card))
             {
                 isDismissingProposal = false;
@@ -516,21 +443,16 @@ namespace Mandato.Infrastructure
 
                 if (isPlayerHandRaised)
                 {
-                    bindings.PlayDealAnimationReverse();
+                    bindings?.PlayDealAnimationReverse();
                     isPlayerHandRaised = false;
                 }
 
                 tutorialManager.PresentTutorialStep(card);
-
-                if (bindings.RetroMonitorPresenter != null)
-                {
-                    bindings.RetroMonitorPresenter.NotifyNewProposal(card);
-                    bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
-                }
+                bindings?.RetroMonitorPresenter?.NotifyNewProposal(card);
+                bindings?.RetroMonitorPresenter?.UpdateDateDisplay(displayDate);
                 return;
             }
 
-            // Garante finalização do tutorial se passou para carta normal
             if (tutorialManager != null && tutorialManager.IsTutorialActive)
             {
                 tutorialManager.CompleteTutorial();
@@ -539,21 +461,15 @@ namespace Mandato.Infrastructure
             isDismissingProposal = false;
             isPaperFocused = false;
 
-            // 1. Exibe papel físico 3D
-            if (bindings.PaperPresenter != null)
-            {
-                bindings.PaperPresenter.SetProposal(card, displayDate);
-            }
+            bindings?.PaperPresenter?.SetProposal(card, displayDate);
 
-            // 2. Animação do jogador levantando a mão
-            if (!isPlayerHandRaised)
+            if (!isPlayerHandRaised && bindings != null)
             {
                 bindings.PlayDealAnimation();
                 isPlayerHandRaised = true;
             }
 
-            // 3. Exibe botões de decisão e atualiza data no overlay
-            if (bindings.DecisionOverlayPresenter != null)
+            if (bindings?.DecisionOverlayPresenter != null)
             {
                 bindings.DecisionOverlayPresenter.SetVisible(true);
                 bindings.DecisionOverlayPresenter.PresentChoices(card);
@@ -562,8 +478,7 @@ namespace Mandato.Infrastructure
 
             RefreshPerksUI();
 
-            // 4. Notifica monitor retrô CRT
-            if (bindings.RetroMonitorPresenter != null)
+            if (bindings?.RetroMonitorPresenter != null)
             {
                 bindings.RetroMonitorPresenter.NotifyNewProposal(card);
                 bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
@@ -572,9 +487,7 @@ namespace Mandato.Infrastructure
 
         private void HandlePlayerChoiceHovered(ChoiceDefinition choice)
         {
-            if (!enableDecisionHoverPreview) return;
-
-            if (choice != null && bindings.RetroMonitorPresenter != null)
+            if (enableDecisionHoverPreview && choice != null && bindings?.RetroMonitorPresenter != null)
             {
                 bindings.RetroMonitorPresenter.ShowPreviewImpacts(choice.statImpacts);
             }
@@ -582,10 +495,7 @@ namespace Mandato.Infrastructure
 
         private void HandlePlayerChoiceUnhovered()
         {
-            if (bindings.RetroMonitorPresenter != null)
-            {
-                bindings.RetroMonitorPresenter.ClearPreviewImpacts();
-            }
+            bindings?.RetroMonitorPresenter?.ClearPreviewImpacts();
         }
 
         private void HandlePlayerChoiceSubmitted(int choiceIndex)
@@ -595,29 +505,21 @@ namespace Mandato.Infrastructure
             isDismissingProposal = true;
             isPaperFocused = false;
 
-            bindings.RetroMonitorPresenter?.ClearPreviewImpacts();
+            bindings?.RetroMonitorPresenter?.ClearPreviewImpacts();
 
             bool isTutorial = IsTutorialCard(stateMachine.CurrentCard);
             bool hasMoreTutorial = isTutorial && HasRemainingTutorialCards();
 
             if (!isTutorial || !hasMoreTutorial)
             {
-                bindings.PlayDealAnimationReverse();
+                bindings?.PlayDealAnimationReverse();
                 isPlayerHandRaised = false;
-
-                if (bindings.PaperPresenter != null)
-                {
-                    bindings.PaperPresenter.SetPaperInteractable(false);
-                }
-
-                bindings.CameraFocus?.Unfocus();
+                bindings?.PaperPresenter?.SetPaperInteractable(false);
+                bindings?.CameraFocus?.Unfocus();
             }
             else
             {
-                if (bindings.PaperPresenter != null)
-                {
-                    bindings.PaperPresenter.SetPaperInteractable(true);
-                }
+                bindings?.PaperPresenter?.SetPaperInteractable(true);
             }
 
             stateMachine.SubmitChoice(choiceIndex, catalog.Quests, catalog.Perks);
@@ -627,26 +529,10 @@ namespace Mandato.Infrastructure
         {
             if (report == null || stateMachine == null) return;
 
-            if (bindings.DecisionOverlayPresenter != null)
-            {
-                bindings.DecisionOverlayPresenter.ClearChoices();
-            }
+            bindings?.DecisionOverlayPresenter?.ClearChoices();
+            SyncPresenters(report: report, applyCameraEffects: true, instantCamera: false);
 
-            if (bindings.RetroMonitorPresenter != null)
-            {
-                bindings.RetroMonitorPresenter.UpdateSnapshot(stateMachine.RunState.GetSnapshot(), report);
-            }
-
-            if (bindings.DecisionOverlayPresenter != null)
-            {
-                bindings.DecisionOverlayPresenter.SetCorruptionLevel(stateMachine.RunState.stats.corruption);
-            }
-
-            RefreshPerksUI();
-            bindings.CameraEffects?.ApplyAttributeEffects(stateMachine.RunState.stats);
-
-            // Se não há coordenador 3D para animar saída, avança diretamente
-            if (bindings.PresentationCoordinator == null)
+            if (bindings?.PresentationCoordinator == null)
             {
                 HandleConsequencesFinishedAndAdvance(report);
             }
@@ -657,42 +543,19 @@ namespace Mandato.Infrastructure
             if (stateMachine == null) return;
 
             if (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory)
-            {
                 return;
-            }
 
             bool wasTutorial = IsTutorialCard(stateMachine.CurrentCard);
             bool hasMoreTutorial = HasRemainingTutorialCards();
 
             var monthlyReport = stateMachine.CompleteTurnAndAdvance(catalog.Perks, catalog.Events);
-            string displayDate = stateMachine.RunState.calendar.DisplayDate;
-            int monthIndex = stateMachine.RunState.calendar.CurrentMonthIndex;
-
-            if (bindings.DecisionOverlayPresenter != null)
-            {
-                bindings.DecisionOverlayPresenter.UpdateDateDisplay(displayDate, monthIndex);
-            }
-
-            if (monthlyReport != null && bindings.RetroMonitorPresenter != null)
-            {
-                bindings.RetroMonitorPresenter.UpdateSnapshot(stateMachine.RunState.GetSnapshot());
-                bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
-            }
-
-
-            if (monthlyReport != null && stateMachine != null)
-            {
-                bindings.CameraEffects?.ApplyAttributeEffects(stateMachine.RunState.stats, instant: false);
-            }
+            SyncPresenters(applyCameraEffects: (monthlyReport != null), instantCamera: false);
 
             if (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory)
-            {
                 return;
-            }
 
             if (wasTutorial && hasMoreTutorial)
             {
-                // No tutorial: avança diretamente para a próxima fala do tutorial
                 isAwaitingSpaceForNextNpc = false;
                 StartCoroutine(DrawNextProposalRoutine(0.05f));
             }
@@ -703,12 +566,7 @@ namespace Mandato.Infrastructure
                     tutorialManager?.CompleteTutorial();
                 }
 
-                // Fora do tutorial: recolhe o papel e aguarda a chamada do próximo visitante
-                if (bindings.PaperPresenter != null)
-                {
-                    bindings.PaperPresenter.SetPaperActive(false);
-                }
-
+                bindings?.PaperPresenter?.SetPaperActive(false);
                 isDismissingProposal = false;
 
                 if (requireSpaceToCallNextNpc)
@@ -725,7 +583,7 @@ namespace Mandato.Infrastructure
         private IEnumerator DrawNextProposalRoutine(float delay = 0.2f)
         {
             yield return new WaitForSeconds(delay);
-            if (stateMachine != null && catalog.Cards.Count > 0)
+            if (stateMachine != null && catalog?.Cards.Count > 0)
             {
                 stateMachine.DrawAndPresentProposal(catalog.Cards);
             }
@@ -736,19 +594,17 @@ namespace Mandato.Infrastructure
             if (stateMachine == null) return;
 
             isAwaitingSpaceForNextNpc = false;
+            modalCoordinator?.SetContext(InteractionContext.EndSummary);
 
             RunSnapshot finalSnapshot = stateMachine.RunState.GetSnapshot();
-            EndingDefinition evaluatedEnding = null;
-
-            if (catalog.Endings.Count > 0)
-            {
-                evaluatedEnding = EndingEvaluator.EvaluateEnding(stateMachine.RunState, catalog.Endings.Values);
-            }
+            EndingDefinition evaluatedEnding = (catalog?.Endings.Count > 0)
+                ? EndingEvaluator.EvaluateEnding(stateMachine.RunState, catalog.Endings.Values)
+                : null;
 
             int decisionsCount = stateMachine.RunState?.decisionHistory?.Count ?? 0;
             int finalPopularity = stateMachine.RunState?.stats?.popularApproval ?? 0;
 
-            profileService.RecordRunCompleted(
+            profileService?.RecordRunCompleted(
                 termination.IsVictory,
                 evaluatedEnding?.id ?? string.Empty,
                 decisionsCount,
@@ -757,22 +613,42 @@ namespace Mandato.Infrastructure
 
             SaveSystem.DeleteRunSave();
 
-            if (bindings.DecisionOverlayPresenter != null)
+            bindings?.DecisionOverlayPresenter?.ClearChoices();
+            bindings?.EndScreenPresenter?.ShowEndScreen(termination, finalSnapshot);
+        }
+
+        private void SyncPresenters(RunSnapshot snapshot = null, ResolutionReport report = null, bool applyCameraEffects = true, bool instantCamera = false)
+        {
+            if (stateMachine?.RunState == null || bindings == null) return;
+
+            var runState = stateMachine.RunState;
+            string displayDate = runState.calendar.DisplayDate;
+            int monthIndex = runState.calendar.CurrentMonthIndex;
+            snapshot ??= runState.GetSnapshot();
+
+            if (bindings.RetroMonitorPresenter != null)
             {
-                bindings.DecisionOverlayPresenter.ClearChoices();
+                bindings.RetroMonitorPresenter.UpdateSnapshot(snapshot, report);
+                bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
             }
 
-            if (bindings.EndScreenPresenter != null)
+            if (bindings.DecisionOverlayPresenter != null)
             {
-                bindings.EndScreenPresenter.ShowEndScreen(termination, finalSnapshot);
+                bindings.DecisionOverlayPresenter.SetCorruptionLevel(runState.stats.corruption);
+                bindings.DecisionOverlayPresenter.UpdateDateDisplay(displayDate, monthIndex);
+                bindings.DecisionOverlayPresenter.RefreshActivePerks(runState.activePerkIds, catalog?.Perks);
+            }
+
+            if (applyCameraEffects && bindings.CameraEffects != null)
+            {
+                bindings.CameraEffects.ApplyAttributeEffects(runState.stats, instant: instantCamera);
             }
         }
 
         public void RefreshPerksUI()
         {
-            if (bindings.DecisionOverlayPresenter == null || stateMachine == null) return;
-
-            bindings.DecisionOverlayPresenter.RefreshActivePerks(stateMachine.RunState.activePerkIds, catalog.Perks);
+            if (bindings?.DecisionOverlayPresenter == null || stateMachine?.RunState == null) return;
+            bindings.DecisionOverlayPresenter.RefreshActivePerks(stateMachine.RunState.activePerkIds, catalog?.Perks);
         }
 
         public bool IsTutorialCard(CardDefinition card)
@@ -788,16 +664,12 @@ namespace Mandato.Infrastructure
         public bool HasRemainingTutorialCards()
         {
             if (tutorialManager != null) return tutorialManager.HasRemainingTutorialCards();
-            if (stateMachine == null || stateMachine.DeckState == null) return false;
+            if (stateMachine?.DeckState?.priorityDrawPile == null || catalog == null) return false;
 
-            if (stateMachine.DeckState.priorityDrawPile != null)
+            foreach (var cardId in stateMachine.DeckState.priorityDrawPile)
             {
-                foreach (var cardId in stateMachine.DeckState.priorityDrawPile)
-                {
-                    if (catalog != null && catalog.IsTutorialCardId(cardId)) return true;
-                }
+                if (catalog.IsTutorialCardId(cardId)) return true;
             }
-
             return false;
         }
 
@@ -816,6 +688,5 @@ namespace Mandato.Infrastructure
                 SceneManager.LoadScene(mainMenuSceneName);
             }
         }
-
     }
 }

@@ -61,6 +61,13 @@ namespace Mandato.UI
             return IsOpen;
         }
 
+        private UIModalCoordinator modalCoordinator;
+
+        public void SetModalCoordinator(UIModalCoordinator coordinator)
+        {
+            modalCoordinator = coordinator;
+        }
+
         private UIDocument uiDocument;
         private VisualElement root;
         private VisualElement screenRoot;
@@ -198,6 +205,7 @@ namespace Mandato.UI
         public void Open()
         {
             if (!isInteractable) return;
+            if (modalCoordinator != null && !modalCoordinator.CanOpenFlipPhone()) return;
 
             IsOpen = true;
 

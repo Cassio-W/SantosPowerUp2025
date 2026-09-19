@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 using Mandato.Content;
+using Mandato.Core;
 using Mandato.Run;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -20,6 +23,7 @@ namespace Mandato.UI
         [SerializeField] private UIDocument uiDocument;
         [SerializeField] private VisualTreeAsset uxmlAsset;
         [SerializeField] private PanelSettings panelSettings;
+
         private UIModalCoordinator modalCoordinator;
         private VisualElement decisionContainer;
         private VisualElement backContainer;
@@ -32,11 +36,6 @@ namespace Mandato.UI
         private Label headerDateLabel;
         private Label headerMonthLabel;
         private CardDefinition currentCard;
-
-        public void SetModalCoordinator(UIModalCoordinator coordinator)
-        {
-            modalCoordinator = coordinator;
-        }
 
         private VisualElement wrapperBack;
         private VisualElement wrapperApprove;
@@ -57,13 +56,39 @@ namespace Mandato.UI
 
         public bool IsVisible => isVisible;
 
+        public void SetModalCoordinator(UIModalCoordinator coordinator)
+        {
+            if (modalCoordinator != null)
+                modalCoordinator.OnContextChanged -= HandleContextChanged;
+
+            modalCoordinator = coordinator;
+
+            if (modalCoordinator != null)
+            {
+                modalCoordinator.OnContextChanged += HandleContextChanged;
+                HandleContextChanged(modalCoordinator.CurrentContext, InteractionContext.DeskOverview);
+            }
+        }
+
+        private void HandleContextChanged(InteractionContext newContext, InteractionContext oldContext)
+        {
+            if (newContext == InteractionContext.PaperInspect)
+            {
+                SetBackVisible(true);
+            }
+            else if (newContext == InteractionContext.DeskOverview)
+            {
+                SetBackVisible(false);
+            }
+        }
+
         public void SetVisible(bool visible)
         {
             isVisible = visible;
             EnsureReferences();
             CacheElements();
 
-            if (uiDocument != null && uiDocument.rootVisualElement != null)
+            if (uiDocument?.rootVisualElement != null)
             {
                 uiDocument.rootVisualElement.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
             }
@@ -87,50 +112,37 @@ namespace Mandato.UI
         {
             if (uiDocument == null)
             {
-                uiDocument = GetComponent<UIDocument>() ?? GetComponentInChildren<UIDocument>();
+                uiDocument = GetComponent<UIDocument>() ?? GetComponentInChildren<UIDocument>() ?? gameObject.AddComponent<UIDocument>();
             }
 
-            if (uiDocument == null)
+            if (uiDocument.panelSettings == null && panelSettings != null)
             {
-                uiDocument = gameObject.AddComponent<UIDocument>();
+                uiDocument.panelSettings = panelSettings;
             }
 
+            if (uiDocument.visualTreeAsset == null && uxmlAsset != null)
+            {
+                uiDocument.visualTreeAsset = uxmlAsset;
+            }
+
+#if UNITY_EDITOR
             if (uiDocument.panelSettings == null)
             {
-                if (panelSettings != null)
-                {
-                    uiDocument.panelSettings = panelSettings;
-                }
-                else
-                {
-#if UNITY_EDITOR
-                    var screenPanel = UnityEditor.AssetDatabase.LoadAssetAtPath<PanelSettings>("Assets/UI/Decision/DecisionPanelSettings.asset");
-                    if (screenPanel != null) uiDocument.panelSettings = screenPanel;
-#endif
-                }
+                var screenPanel = UnityEditor.AssetDatabase.LoadAssetAtPath<PanelSettings>("Assets/UI/Decision/DecisionPanelSettings.asset");
+                if (screenPanel != null) uiDocument.panelSettings = screenPanel;
             }
-
             if (uiDocument.visualTreeAsset == null)
             {
-                if (uxmlAsset != null)
-                {
-                    uiDocument.visualTreeAsset = uxmlAsset;
-                }
-                else
-                {
-#if UNITY_EDITOR
-                    var uxml = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Decision/DecisionUI.uxml");
-                    if (uxml != null) uiDocument.visualTreeAsset = uxml;
-#endif
-                }
+                var uxml = UnityEditor.AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/UI/Decision/DecisionUI.uxml");
+                if (uxml != null) uiDocument.visualTreeAsset = uxml;
             }
+#endif
         }
 
         private void CacheElements()
         {
-            if (uiDocument == null || uiDocument.rootVisualElement == null) return;
-
-            VisualElement root = uiDocument.rootVisualElement;
+            if (uiDocument?.rootVisualElement == null) return;
+            var root = uiDocument.rootVisualElement;
 
             decisionContainer = root.Q<VisualElement>("decision-container");
             backContainer = root.Q<VisualElement>("back-container") ?? decisionContainer;
@@ -164,40 +176,25 @@ namespace Mandato.UI
             lblRightChoice = root.Q<Label>("lbl-reject-text") ?? root.Q<Label>("label-right-choice") ?? root.Q<Label>("txt-right");
             lblContinue = root.Q<Label>("lbl-continue-text") ?? root.Q<Label>("txt-continue");
 
-            if (btnBack != null)
-            {
-                btnBack.clicked -= OnBackButtonClicked;
-                btnBack.clicked += OnBackButtonClicked;
-            }
+            BindButton(btnBack, OnBackButtonClicked);
+            BindButton(btnLeft, OnLeftClicked, () => OnChoiceHover(0), OnChoiceLeave);
+            BindButton(btnRight, OnRightClicked, () => OnChoiceHover(1), OnChoiceLeave);
+            BindButton(btnContinue, OnContinueClicked, () => OnChoiceHover(0), OnChoiceLeave);
+        }
 
-            if (btnLeft != null)
-            {
-                btnLeft.clicked -= OnLeftClicked;
-                btnLeft.clicked += OnLeftClicked;
-                btnLeft.UnregisterCallback<PointerEnterEvent>(OnLeftPointerEnter);
-                btnLeft.RegisterCallback<PointerEnterEvent>(OnLeftPointerEnter);
-                btnLeft.UnregisterCallback<PointerLeaveEvent>(OnPointerLeave);
-                btnLeft.RegisterCallback<PointerLeaveEvent>(OnPointerLeave);
-            }
+        private void BindButton(Button btn, Action onClick, Action onEnter = null, Action onLeave = null)
+        {
+            if (btn == null) return;
+            btn.clicked -= onClick;
+            btn.clicked += onClick;
 
-            if (btnRight != null)
+            if (onEnter != null)
             {
-                btnRight.clicked -= OnRightClicked;
-                btnRight.clicked += OnRightClicked;
-                btnRight.UnregisterCallback<PointerEnterEvent>(OnRightPointerEnter);
-                btnRight.RegisterCallback<PointerEnterEvent>(OnRightPointerEnter);
-                btnRight.UnregisterCallback<PointerLeaveEvent>(OnPointerLeave);
-                btnRight.RegisterCallback<PointerLeaveEvent>(OnPointerLeave);
+                btn.RegisterCallback<PointerEnterEvent>(_ => onEnter());
             }
-
-            if (btnContinue != null)
+            if (onLeave != null)
             {
-                btnContinue.clicked -= OnContinueClicked;
-                btnContinue.clicked += OnContinueClicked;
-                btnContinue.UnregisterCallback<PointerEnterEvent>(OnContinuePointerEnter);
-                btnContinue.RegisterCallback<PointerEnterEvent>(OnContinuePointerEnter);
-                btnContinue.UnregisterCallback<PointerLeaveEvent>(OnPointerLeave);
-                btnContinue.RegisterCallback<PointerLeaveEvent>(OnPointerLeave);
+                btn.RegisterCallback<PointerLeaveEvent>(_ => onLeave());
             }
         }
 
@@ -228,28 +225,15 @@ namespace Mandato.UI
             }
         }
 
-        private void OnLeftPointerEnter(PointerEnterEvent evt)
+        private void OnChoiceHover(int index)
         {
             if (!isChoicePending || currentCard == null) return;
-            OnChoiceHovered?.Invoke(currentCard.leftChoice);
+            ChoiceDefinition choice = (index == 0) ? currentCard.leftChoice : currentCard.rightChoice;
+            OnChoiceHovered?.Invoke(choice);
         }
 
-        private void OnRightPointerEnter(PointerEnterEvent evt)
+        private void OnChoiceLeave()
         {
-            if (!isChoicePending || currentCard == null) return;
-            OnChoiceHovered?.Invoke(currentCard.rightChoice);
-        }
-
-        private void OnContinuePointerEnter(PointerEnterEvent evt)
-        {
-            if (!isChoicePending || currentCard == null) return;
-            OnChoiceHovered?.Invoke(currentCard.leftChoice);
-        }
-
-        private void OnPointerLeave(PointerLeaveEvent evt)
-        {
-            // Guard: se a escolha já foi submetida (isChoicePending=false), o PointerLeave
-            // disparado pelo ocultamento do container não deve limpar as setas de resultado.
             if (!isChoicePending) return;
             OnChoiceUnhovered?.Invoke();
         }
@@ -261,15 +245,13 @@ namespace Mandato.UI
             isChoicePending = true;
             currentCard = card;
 
-            // O botão voltar só deve ser exibido quando o papel estiver em foco (via SetBackVisible)
             SetBackVisible(false);
 
             if (card != null)
             {
-                string leftText = card.leftChoice != null && !string.IsNullOrEmpty(card.leftChoice.label) ? card.leftChoice.label : "Aceitar";
-                string rightText = card.rightChoice != null && !string.IsNullOrEmpty(card.rightChoice.label) ? card.rightChoice.label : "Recusar";
+                string leftText = !string.IsNullOrEmpty(card.leftChoice?.label) ? card.leftChoice.label : "Aceitar";
+                string rightText = !string.IsNullOrEmpty(card.rightChoice?.label) ? card.rightChoice.label : "Recusar";
 
-                // Se a carta for de apenas 1 escolha (ou sem rejeição):
                 bool hasOnlyOneOption = string.Equals(leftText, rightText, StringComparison.OrdinalIgnoreCase) ||
                                         leftText.IndexOf("Continuar", StringComparison.OrdinalIgnoreCase) >= 0 ||
                                         rightText.IndexOf("Continuar", StringComparison.OrdinalIgnoreCase) >= 0;
@@ -314,14 +296,10 @@ namespace Mandato.UI
             CacheElements();
 
             if (headerDateLabel != null && !string.IsNullOrEmpty(displayDate))
-            {
                 headerDateLabel.text = displayDate;
-            }
 
             if (headerMonthLabel != null)
-            {
                 headerMonthLabel.text = $"MÊS {monthIndex} DE {totalMonths}";
-            }
         }
 
         public void SetCorruptionLevel(int corruption)
@@ -330,12 +308,11 @@ namespace Mandato.UI
             CacheElements();
             if (vignetteCorruption == null) return;
 
-            // Começa a ficar visível a partir de 30% de corrupção, com opacidade máxima em 100%
             float factor = Mathf.Clamp01((corruption - 25f) / 75f);
             vignetteCorruption.style.opacity = factor * 0.9f;
         }
 
-        public void RefreshActivePerks(System.Collections.Generic.IEnumerable<string> activePerkIds, System.Collections.Generic.IReadOnlyDictionary<string, PerkDefinition> perkCatalog)
+        public void RefreshActivePerks(IEnumerable<string> activePerkIds, IReadOnlyDictionary<string, PerkDefinition> perkCatalog)
         {
             EnsureReferences();
             CacheElements();
@@ -354,10 +331,7 @@ namespace Mandato.UI
                 if (string.IsNullOrEmpty(perkId)) continue;
 
                 PerkDefinition def = null;
-                if (perkCatalog != null)
-                {
-                    perkCatalog.TryGetValue(perkId, out def);
-                }
+                perkCatalog?.TryGetValue(perkId, out def);
 
                 var itemEl = new VisualElement();
                 itemEl.AddToClassList("perk-item");
@@ -368,7 +342,7 @@ namespace Mandato.UI
                 var iconEl = new VisualElement();
                 iconEl.AddToClassList("perk-icon-large");
 
-                if (def != null && def.icon != null)
+                if (def?.icon != null)
                 {
                     iconEl.style.backgroundImage = new StyleBackground(def.icon);
                 }
@@ -376,13 +350,12 @@ namespace Mandato.UI
                 cardEl.Add(iconEl);
                 itemEl.Add(cardEl);
 
-                // Callbacks de hover para modal / tooltip
                 string capturedId = perkId;
                 PerkDefinition capturedDef = def;
                 VisualElement capturedCard = cardEl;
 
-                cardEl.RegisterCallback<PointerEnterEvent>(evt => ShowPerkTooltip(capturedId, capturedDef, capturedCard));
-                cardEl.RegisterCallback<PointerLeaveEvent>(evt => HidePerkTooltip());
+                cardEl.RegisterCallback<PointerEnterEvent>(_ => ShowPerkTooltip(capturedId, capturedDef, capturedCard));
+                cardEl.RegisterCallback<PointerLeaveEvent>(_ => HidePerkTooltip());
 
                 perksContainer.Add(itemEl);
             }
@@ -393,31 +366,16 @@ namespace Mandato.UI
             if (perkModalPopup == null) return;
 
             if (lblPerkTitle != null)
-            {
-                lblPerkTitle.text = (def != null && !string.IsNullOrEmpty(def.title)) ? def.title : perkId;
-            }
+                lblPerkTitle.text = !string.IsNullOrEmpty(def?.title) ? def.title : perkId;
 
             if (lblPerkTag != null)
-            {
                 lblPerkTag.text = (def != null && def.durationMonths > 0) ? $"{def.durationMonths}M" : "PERK";
-            }
 
             if (lblPerkDesc != null)
-            {
                 lblPerkDesc.text = FormatPerkDescription(def);
-            }
 
-            // Posiciona à direita do painel de perks
             perkModalPopup.style.left = 124;
-
-            if (targetCard != null && targetCard.worldBound.yMin > 0)
-            {
-                perkModalPopup.style.top = targetCard.worldBound.yMin;
-            }
-            else
-            {
-                perkModalPopup.style.top = 28;
-            }
+            perkModalPopup.style.top = (targetCard != null && targetCard.worldBound.yMin > 0) ? targetCard.worldBound.yMin : 28;
 
             perkModalPopup.style.display = DisplayStyle.Flex;
             perkModalPopup.AddToClassList("open");
@@ -436,7 +394,7 @@ namespace Mandato.UI
         {
             if (def == null) return "Vantagem ativa no mandato.";
 
-            var sb = new System.Text.StringBuilder();
+            var sb = new StringBuilder();
             if (!string.IsNullOrEmpty(def.description))
             {
                 sb.AppendLine(def.description);
@@ -445,18 +403,13 @@ namespace Mandato.UI
             if (def.statDeltasPerMonth != null)
             {
                 var d = def.statDeltasPerMonth;
-                var deltas = new System.Collections.Generic.List<string>();
+                var deltas = new List<string>();
 
-                if (d.economy != 0)
-                    deltas.Add($"{(d.economy > 0 ? "+" : "")}{d.economy} Economia/mês");
-                if (d.popularApproval != 0)
-                    deltas.Add($"{(d.popularApproval > 0 ? "+" : "")}{d.popularApproval} Aprovação/mês");
-                if (d.internationalRelations != 0)
-                    deltas.Add($"{(d.internationalRelations > 0 ? "+" : "")}{d.internationalRelations} Relações Int./mês");
-                if (d.climaticChanges != 0)
-                    deltas.Add($"{(d.climaticChanges > 0 ? "+" : "")}{d.climaticChanges} Meio Ambiente/mês");
-                if (d.corruption != 0)
-                    deltas.Add($"{(d.corruption > 0 ? "+" : "")}{d.corruption} Corrupção/mês");
+                if (d.economy != 0) deltas.Add($"{(d.economy > 0 ? "+" : "")}{d.economy} Economia/mês");
+                if (d.popularApproval != 0) deltas.Add($"{(d.popularApproval > 0 ? "+" : "")}{d.popularApproval} Aprovação/mês");
+                if (d.internationalRelations != 0) deltas.Add($"{(d.internationalRelations > 0 ? "+" : "")}{d.internationalRelations} Relações Int./mês");
+                if (d.climaticChanges != 0) deltas.Add($"{(d.climaticChanges > 0 ? "+" : "")}{d.climaticChanges} Meio Ambiente/mês");
+                if (d.corruption != 0) deltas.Add($"{(d.corruption > 0 ? "+" : "")}{d.corruption} Corrupção/mês");
 
                 if (deltas.Count > 0)
                 {
@@ -470,11 +423,11 @@ namespace Mandato.UI
                 if (sb.Length > 0) sb.AppendLine();
                 string statName = def.rescueStat switch
                 {
-                    Mandato.Core.StatId.ClimaticChanges => "Meio Ambiente",
-                    Mandato.Core.StatId.InternationalRelations => "Relações Internacionais",
-                    Mandato.Core.StatId.PopularApproval => "Aprovação Popular",
-                    Mandato.Core.StatId.Economy => "Economia",
-                    Mandato.Core.StatId.Corruption => "Corrupção",
+                    StatId.ClimaticChanges => "Meio Ambiente",
+                    StatId.InternationalRelations => "Relações Internacionais",
+                    StatId.PopularApproval => "Aprovação Popular",
+                    StatId.Economy => "Economia",
+                    StatId.Corruption => "Corrupção",
                     _ => "Atributo"
                 };
                 sb.Append($"🛡️ <b>Prevenção de Derrota:</b> Se o indicador de <b>{statName}</b> chegar a 0, restaura para {def.rescueRestoreValue} e consome este perk.");
@@ -488,7 +441,7 @@ namespace Mandato.UI
             if (!isChoicePending) return;
             isChoicePending = false;
             ClearChoices();
-            OnChoiceSelected?.Invoke(0); // 0 = Aceitar / Aprovar
+            OnChoiceSelected?.Invoke(0);
         }
 
         private void OnRightClicked()
@@ -496,7 +449,7 @@ namespace Mandato.UI
             if (!isChoicePending) return;
             isChoicePending = false;
             ClearChoices();
-            OnChoiceSelected?.Invoke(1); // 1 = Recusar / Rejeitar
+            OnChoiceSelected?.Invoke(1);
         }
 
         private void OnContinueClicked()
@@ -504,7 +457,7 @@ namespace Mandato.UI
             if (!isChoicePending) return;
             isChoicePending = false;
             ClearChoices();
-            OnChoiceSelected?.Invoke(0); // 0 = Continuar (Tutorial)
+            OnChoiceSelected?.Invoke(0);
         }
 
         private void Update()
@@ -512,7 +465,6 @@ namespace Mandato.UI
             if (!isVisible || !enableKeyboardShortcuts) return;
             if (modalCoordinator != null && !modalCoordinator.CanProcessDecisionShortcuts()) return;
 
-            // Atalho de teclado para voltar
             if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.Backspace))
             {
                 var target = backContainer ?? decisionContainer;
@@ -535,14 +487,11 @@ namespace Mandato.UI
             }
             else
             {
-                // Opção Esquerda (0 = Aceitar)
                 if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.Alpha1))
                 {
                     OnLeftClicked();
                 }
-                // Opção Direita (1 = Recusar)
-                else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.Alpha2) ||
-                         Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.Return))
+                else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.Alpha2))
                 {
                     OnRightClicked();
                 }
@@ -551,27 +500,9 @@ namespace Mandato.UI
 
         private void OnDestroy()
         {
-            if (btnBack != null)
+            if (modalCoordinator != null)
             {
-                btnBack.clicked -= OnBackButtonClicked;
-            }
-            if (btnLeft != null)
-            {
-                btnLeft.clicked -= OnLeftClicked;
-                btnLeft.UnregisterCallback<PointerEnterEvent>(OnLeftPointerEnter);
-                btnLeft.UnregisterCallback<PointerLeaveEvent>(OnPointerLeave);
-            }
-            if (btnRight != null)
-            {
-                btnRight.clicked -= OnRightClicked;
-                btnRight.UnregisterCallback<PointerEnterEvent>(OnRightPointerEnter);
-                btnRight.UnregisterCallback<PointerLeaveEvent>(OnPointerLeave);
-            }
-            if (btnContinue != null)
-            {
-                btnContinue.clicked -= OnContinueClicked;
-                btnContinue.UnregisterCallback<PointerEnterEvent>(OnContinuePointerEnter);
-                btnContinue.UnregisterCallback<PointerLeaveEvent>(OnPointerLeave);
+                modalCoordinator.OnContextChanged -= HandleContextChanged;
             }
         }
     }

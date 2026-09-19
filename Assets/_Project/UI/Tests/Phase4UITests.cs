@@ -33,7 +33,7 @@ namespace Mandato.UI.Tests
             Assert.IsTrue(coordinator.IsAnyModalOpen);
             Assert.IsTrue(coordinator.IsModalOpen(UIModalCoordinator.MODAL_FLIP_PHONE));
             Assert.IsFalse(coordinator.CanProcessDecisionShortcuts());
-            Assert.IsFalse(coordinator.CanCallNextVisitor());
+            Assert.IsTrue(coordinator.CanCallNextVisitor());
 
             coordinator.SetModalState(UIModalCoordinator.MODAL_FLIP_PHONE, false);
 

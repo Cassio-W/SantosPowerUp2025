@@ -104,6 +104,7 @@ namespace Mandato.Infrastructure
 
         private RunStateMachine stateMachine;
         private RunCatalog catalog;
+        private UIModalCoordinator modalCoordinator;
 
         private GameObject activeNpcGameObject;
         private INpcController activeNpcController;
@@ -156,10 +157,12 @@ namespace Mandato.Infrastructure
             NpcSpeechBubblePresenter speechBubble = null,
             PaperDocumentPresenter paperPresenter = null,
             DecisionOverlayPresenter decisionOverlay = null,
-            CameraFocusManager cameraFocus = null)
+            CameraFocusManager cameraFocus = null,
+            UIModalCoordinator modalCoordinator = null)
         {
             this.stateMachine = stateMachine;
             this.catalog = catalog;
+            this.modalCoordinator = modalCoordinator;
 
             if (speechBubble != null) this.speechBubble = speechBubble;
             if (paperPresenter != null) this.paperPresenter = paperPresenter;
@@ -276,6 +279,8 @@ namespace Mandato.Infrastructure
                 isTutorialActive = true;
                 OnTutorialStarted?.Invoke();
             }
+
+            modalCoordinator?.SetContext(InteractionContext.TutorialStep);
 
             // Suprime papel 3D e botões do DecisionUI
             if (paperPresenter != null)
@@ -561,6 +566,8 @@ namespace Mandato.Infrastructure
             if (!isTutorialActive) return;
 
             isTutorialActive = false;
+
+            modalCoordinator?.SetContext(InteractionContext.DeskOverview);
 
             if (speechBubble != null)
             {

@@ -226,5 +226,69 @@ namespace Mandato.Infrastructure.Tests
             flowCoordinator.HandleObjectFocusChanged(null);
             Assert.IsFalse(flowCoordinator.IsPlayerHandRaised);
         }
+
+        [Test]
+        public void InteractionContext_PhoneDrawer_AllowsCallingVisitor_BlocksDecisions()
+        {
+            modalCoordinator.SetContext(InteractionContext.PhoneDrawer);
+
+            Assert.AreEqual(InteractionContext.PhoneDrawer, modalCoordinator.CurrentContext);
+            Assert.IsTrue(modalCoordinator.CanCallNextVisitor(), "No celular, o botão de espaço deve permanecer ativo para chamar o NPC.");
+            Assert.IsFalse(modalCoordinator.CanProcessDecisionShortcuts(), "Decisões de proposta devem ser bloqueadas com o celular aberto.");
+            Assert.IsTrue(modalCoordinator.CanOpenFlipPhone());
+        }
+
+        [Test]
+        public void InteractionContext_PaperInspect_EnablesBackButton_BlocksPhoneAndCallingVisitor()
+        {
+            var paperGo = new GameObject("Paper");
+            var paperFo = paperGo.AddComponent<PaperFocusableObject>();
+
+            flowCoordinator.HandleObjectFocusChanged(paperFo);
+
+            Assert.AreEqual(InteractionContext.PaperInspect, modalCoordinator.CurrentContext);
+            Assert.IsTrue(flowCoordinator.IsPaperFocused);
+            Assert.IsTrue(modalCoordinator.CanProcessDecisionShortcuts());
+            Assert.IsFalse(modalCoordinator.CanCallNextVisitor());
+            Assert.IsFalse(modalCoordinator.CanOpenFlipPhone());
+            Assert.IsFalse(phonePresenter.IsInteractable);
+
+            // Desfoca para retornar à mesa
+            flowCoordinator.HandleObjectFocusChanged(null);
+
+            Assert.AreEqual(InteractionContext.DeskOverview, modalCoordinator.CurrentContext);
+            Assert.IsFalse(flowCoordinator.IsPaperFocused);
+            Assert.IsTrue(modalCoordinator.CanCallNextVisitor());
+            Assert.IsTrue(modalCoordinator.CanOpenFlipPhone());
+            Assert.IsTrue(phonePresenter.IsInteractable);
+
+            Object.DestroyImmediate(paperGo);
+        }
+
+        [Test]
+        public void InteractionContext_TutorialStep_BlocksPhoneAndDecisionsAndCallingVisitor()
+        {
+            modalCoordinator.SetContext(InteractionContext.TutorialStep);
+
+            Assert.AreEqual(InteractionContext.TutorialStep, modalCoordinator.CurrentContext);
+            Assert.IsFalse(modalCoordinator.CanProcessDecisionShortcuts());
+            Assert.IsFalse(modalCoordinator.CanCallNextVisitor());
+            Assert.IsFalse(modalCoordinator.CanOpenFlipPhone());
+            Assert.IsFalse(phonePresenter.IsInteractable);
+        }
+
+        [Test]
+        public void InteractionContext_EndSummary_BlocksAllActions()
+        {
+            modalCoordinator.SetContext(InteractionContext.EndSummary);
+
+            Assert.AreEqual(InteractionContext.EndSummary, modalCoordinator.CurrentContext);
+            Assert.IsFalse(modalCoordinator.CanProcessDecisionShortcuts());
+            Assert.IsFalse(modalCoordinator.CanCallNextVisitor());
+            Assert.IsFalse(modalCoordinator.CanOpenFlipPhone());
+            Assert.IsFalse(phonePresenter.IsInteractable);
+            Assert.IsFalse(deskButton.IsInteractable);
+            Assert.IsFalse(decisionPresenter.IsVisible);
+        }
     }
 }
