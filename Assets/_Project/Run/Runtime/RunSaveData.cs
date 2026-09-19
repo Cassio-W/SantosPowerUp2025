@@ -88,6 +88,7 @@ namespace Mandato.Run
         public List<ActivePerkState> activePerks = new List<ActivePerkState>();
         public List<string> unlockedActionIds = new List<string>();
         public List<string> consumedSingleUseActions = new List<string>();
+        public string activeCharacterId = string.Empty;
 
         public List<NpcStateEntry> npcStates = new List<NpcStateEntry>();
         public List<QuestStateEntry> questStates = new List<QuestStateEntry>();
@@ -125,6 +126,7 @@ namespace Mandato.Run
                 activePerks = new List<ActivePerkState>(runState.activePerks ?? new List<ActivePerkState>()),
                 unlockedActionIds = new List<string>(runState.unlockedActionIds ?? new List<string>()),
                 consumedSingleUseActions = new List<string>(runState.consumedSingleUseActions ?? new List<string>()),
+                activeCharacterId = runState.activeCharacterId ?? string.Empty,
                 deck = new DeckSaveData(deckState)
             };
 
@@ -181,6 +183,7 @@ namespace Mandato.Run
             runState.activePerks = new List<ActivePerkState>(activePerks ?? new List<ActivePerkState>());
             runState.unlockedActionIds = new List<string>(unlockedActionIds ?? new List<string>());
             runState.consumedSingleUseActions = new List<string>(consumedSingleUseActions ?? new List<string>());
+            runState.activeCharacterId = activeCharacterId ?? string.Empty;
 
             runState.npcStates.Clear();
             if (npcStates != null)

@@ -22,6 +22,7 @@ namespace Mandato.Run
         public List<string> unlockedActionIds = new List<string>();
         public Dictionary<string, int> actionCooldowns = new Dictionary<string, int>();
         public List<string> consumedSingleUseActions = new List<string>();
+        public string activeCharacterId = string.Empty;
         public int seed;
 
         public RunState(int seed = 0)
@@ -45,6 +46,7 @@ namespace Mandato.Run
             unlockedActionIds.Clear();
             actionCooldowns.Clear();
             consumedSingleUseActions.Clear();
+            activeCharacterId = string.Empty;
         }
 
         public NpcRunState GetOrCreateNpcState(string npcId)

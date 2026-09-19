@@ -14,6 +14,7 @@ namespace Mandato.Infrastructure
         private readonly Dictionary<string, QuestDefinition> quests = new Dictionary<string, QuestDefinition>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, EndingDefinition> endings = new Dictionary<string, EndingDefinition>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, FlipPhoneActionDefinition> actions = new Dictionary<string, FlipPhoneActionDefinition>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, CharacterDefinition> characters = new Dictionary<string, CharacterDefinition>(StringComparer.OrdinalIgnoreCase);
 
         private readonly List<string> tutorialCardIds = new List<string>();
         private readonly List<string> mainDeckCardIds = new List<string>();
@@ -24,6 +25,7 @@ namespace Mandato.Infrastructure
         public IReadOnlyDictionary<string, QuestDefinition> Quests => quests;
         public IReadOnlyDictionary<string, EndingDefinition> Endings => endings;
         public IReadOnlyDictionary<string, FlipPhoneActionDefinition> Actions => actions;
+        public IReadOnlyDictionary<string, CharacterDefinition> Characters => characters;
 
         public IReadOnlyList<string> TutorialCardIds => tutorialCardIds;
         public IReadOnlyList<string> MainDeckCardIds => mainDeckCardIds;
@@ -49,7 +51,8 @@ namespace Mandato.Infrastructure
             IEnumerable<QuestDefinition> questsList,
             IEnumerable<EndingDefinition> endingsList,
             IEnumerable<FlipPhoneActionDefinition> startingActionsList,
-            bool playTutorial = true)
+            bool playTutorial = true,
+            IEnumerable<CharacterDefinition> charactersList = null)
         {
             cards.Clear();
             perks.Clear();
@@ -57,6 +60,7 @@ namespace Mandato.Infrastructure
             quests.Clear();
             endings.Clear();
             actions.Clear();
+            characters.Clear();
             tutorialCardIds.Clear();
             mainDeckCardIds.Clear();
 
@@ -139,6 +143,15 @@ namespace Mandato.Infrastructure
                     if (act != null && !string.IsNullOrEmpty(act.id)) actions[act.id] = act;
                 }
             }
+
+            // 9. Personagens
+            if (charactersList != null)
+            {
+                foreach (var ch in charactersList)
+                {
+                    if (ch != null && !string.IsNullOrEmpty(ch.id)) characters[ch.id] = ch;
+                }
+            }
         }
 
         /// <summary>
@@ -150,6 +163,16 @@ namespace Mandato.Infrastructure
             if (card == null || string.IsNullOrEmpty(card.id)) return;
             if (isTutorial) card.isTutorial = true;
             cards[card.id] = card;
+        }
+
+        /// <summary>
+        /// Registra um CharacterDefinition avulso no catálogo.
+        /// Uso por ferramentas de editor ou testes.
+        /// </summary>
+        public void RegisterCharacter(CharacterDefinition character)
+        {
+            if (character == null || string.IsNullOrEmpty(character.id)) return;
+            characters[character.id] = character;
         }
     }
 }

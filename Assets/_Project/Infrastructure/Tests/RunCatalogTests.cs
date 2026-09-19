@@ -148,5 +148,17 @@ namespace Mandato.Infrastructure.Tests
             Assert.AreEqual(initialRel + 1, runState.stats.internationalRelations);
             Assert.AreEqual(initialCorrupt + 1, runState.stats.corruption);
         }
+
+        [Test]
+        public void RegisterCharacter_AddsToCharactersDictionary()
+        {
+            var catalog = new RunCatalog();
+            var charDef = CharacterDefinition.CreateRuntimeInstance("char_test", "Presidente Teste");
+
+            catalog.RegisterCharacter(charDef);
+
+            Assert.IsTrue(catalog.Characters.ContainsKey("char_test"));
+            Assert.AreEqual("Presidente Teste", catalog.Characters["char_test"].displayName);
+        }
     }
 }

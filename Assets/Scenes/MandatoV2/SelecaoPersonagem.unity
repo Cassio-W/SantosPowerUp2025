@@ -136,7 +136,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &96259230
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -438,6 +438,10 @@ PrefabInstance:
     - target: {fileID: 1939027820935114673, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
       propertyPath: m_Name
       value: GabinetePresidencial (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4109015026439359665, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -794,13 +798,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2012787619}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.06526307, y: 0.85861653, z: -0.11303897, w: 0.49572238}
-  m_LocalPosition: {x: 0, y: 2.5, z: -1}
+  m_LocalRotation: {x: 0, y: 0.94895864, z: -0.31540054, w: 0}
+  m_LocalPosition: {x: 0, y: 2, z: -6.56}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 15, y: 120, z: 0}
+  m_LocalEulerAnglesHint: {x: 36.77, y: 180, z: 0}
 --- !u!114 &2012787623
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -852,7 +856,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2012787619}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
   m_Name: 
@@ -869,7 +873,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2012787619}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bf2362bcc238236438713dc6caaadc55, type: 3}
   m_Name: 
