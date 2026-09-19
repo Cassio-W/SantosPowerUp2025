@@ -415,6 +415,7 @@ namespace Mandato.UI
         private VisualElement CreateAppTile(FlipPhoneActionViewModel vm)
         {
             var tile = new VisualElement();
+            tile.name = $"app-tile-{(vm != null && !string.IsNullOrEmpty(vm.id) ? vm.id : "unknown")}";
             tile.AddToClassList("app-tile");
             tile.pickingMode = PickingMode.Position;
 
@@ -467,7 +468,11 @@ namespace Mandato.UI
             titleLabel.pickingMode = PickingMode.Ignore;
             tile.Add(titleLabel);
 
-            // Clique no tile abre o modal de diálogo na base
+            // Guarda uma Action diretamente no userData para o WorldSpaceUIInteraction acionar
+            // sem depender do ClickEvent (que não se propaga corretamente em UIs world-space).
+            tile.userData = (Action)(() => OpenActionModal(vm));
+
+            // Clique nativo do UI Toolkit (funciona em builds sem world-space)
             tile.RegisterCallback<ClickEvent>(evt =>
             {
                 OpenActionModal(vm);

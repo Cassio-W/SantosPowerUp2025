@@ -17,7 +17,7 @@ MonoBehaviour:
   description: "N\xE3o perde atributos este m\xEAs (+25 de corrup\xE7\xE3o)."
   icon: {fileID: 0}
   categoryTag: Gabinete
-  cooldownType: 1
+  cooldownType: 2
   cooldownTurns: 6
   unlockByDefault: 1
   conditions: []

@@ -18,7 +18,7 @@ MonoBehaviour:
     e prestar contas, concedendo +10 em todos os atributos."
   icon: {fileID: 0}
   categoryTag: Gabinete
-  cooldownType: 1
+  cooldownType: 2
   cooldownTurns: 6
   unlockByDefault: 1
   conditions: []

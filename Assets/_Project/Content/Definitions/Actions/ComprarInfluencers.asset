@@ -17,7 +17,7 @@ MonoBehaviour:
   description: "Obt\xE9m +20 de Popularidade e +15 de corrup\xE7\xE3o."
   icon: {fileID: 0}
   categoryTag: Gabinete
-  cooldownType: 1
+  cooldownType: 2
   cooldownTurns: 6
   unlockByDefault: 1
   conditions: []

@@ -54,6 +54,7 @@ namespace Mandato.Presentation
 
     private Collider _collider;
     private VisualElement _lastHoveredElement;
+    private VisualElement _pointerDownTarget;
     private bool _isPointerDown = false;
     private Vector2 _lastHitUV = Vector2.zero;
     private Vector2 _lastPanelPosition = Vector2.zero;
@@ -323,35 +324,38 @@ namespace Mandato.Presentation
         return uv;
     }
 
+    /// <summary>
+    /// Retorna as dimensões lógicas do painel UI Toolkit no espaço de Pick.
+    /// IMPORTANTE: panel.Pick() opera em coordenadas LÓGICAS do painel (espaço de layout),
+    /// NÃO em pixels físicos da RenderTexture. Usar pixels da RT causaria todos os picks
+    /// no canto superior esquerdo porque as coordenadas ficariam fora do espaço lógico.
+    /// Prioridade: layout do visualTree > layout do rootVisualElement > referenceResolution.
+    /// </summary>
     public Vector2 GetPanelResolution()
     {
-        if (uiDocument != null && uiDocument.rootVisualElement != null)
-        {
-            var panel = uiDocument.rootVisualElement.panel;
-            if (panel != null && panel.visualTree != null)
-            {
-                var layout = panel.visualTree.layout;
-                if (layout.width > 0 && layout.height > 0)
-                {
-                    return new Vector2(layout.width, layout.height);
-                }
-            }
+        if (uiDocument == null || uiDocument.rootVisualElement == null)
+            goto fallback;
 
-            var rootLayout = uiDocument.rootVisualElement.layout;
-            if (rootLayout.width > 0 && rootLayout.height > 0)
-            {
-                return new Vector2(rootLayout.width, rootLayout.height);
-            }
+        // Prioridade 1: Dimensões lógicas do visualTree (espaço real onde panel.Pick() opera).
+        var panel = uiDocument.rootVisualElement.panel;
+        if (panel?.visualTree != null)
+        {
+            var layout = panel.visualTree.layout;
+            if (layout.width > 1f && layout.height > 1f)
+                return new Vector2(layout.width, layout.height);
         }
 
-        if (uiDocument != null && uiDocument.panelSettings != null)
+        // Prioridade 2: Layout do próprio rootVisualElement.
         {
-            if (uiDocument.panelSettings.targetTexture != null)
-            {
-                var tex = uiDocument.panelSettings.targetTexture;
-                return new Vector2(tex.width, tex.height);
-            }
+            var rootLayout = uiDocument.rootVisualElement.layout;
+            if (rootLayout.width > 1f && rootLayout.height > 1f)
+                return new Vector2(rootLayout.width, rootLayout.height);
+        }
 
+        fallback:
+        // Prioridade 3: referenceResolution como fallback final.
+        if (uiDocument?.panelSettings != null)
+        {
             var res = uiDocument.panelSettings.referenceResolution;
             if (res.x > 0 && res.y > 0) return res;
         }
@@ -461,12 +465,13 @@ namespace Mandato.Presentation
     private void ProcessPointerDown(VisualElement target, Vector2 panelPosition)
     {
         _isPointerDown = true;
+        _pointerDownTarget = target;
 
         if (target == null) return;
 
         if (showDebugLogs)
         {
-            Debug.Log($"<color=#00e5ff>[WorldSpaceUI]</color> ⬇️ PointerDown em: <b>{target.name}</b> ({target.GetType().Name})");
+            Debug.Log($"<color=#00e5ff>[WorldSpaceUI]</color> ⬇️ PointerDown em: <b>{target.name}</b> ({target.GetType().Name}) painel=({panelPosition.x:F0},{panelPosition.y:F0})");
         }
 
         using var pointerDown = PointerDownEvent.GetPooled();
@@ -482,14 +487,19 @@ namespace Mandato.Presentation
     {
         _isPointerDown = false;
 
-        if (target == null) return;
+        // Usa o target capturado no MouseDown (mesmo frame do hover) para garantir
+        // consistência entre o elemento visualmente hoverado e o elemento clicado.
+        var clickTarget = _pointerDownTarget ?? target;
+        _pointerDownTarget = null;
+
+        if (clickTarget == null) return;
 
         if (showDebugLogs)
         {
-            Debug.Log($"<color=#00ffaa>[WorldSpaceUI]</color> ⬆️ PointerUp / Click em: <b>{target.name}</b> ({target.GetType().Name})");
+            Debug.Log($"<color=#00ffaa>[WorldSpaceUI]</color> ⬆️ PointerUp — downTarget: <b>{clickTarget.name}</b> | upTarget: <b>{target.name}</b> painel=({panelPosition.x:F0},{panelPosition.y:F0})");
         }
 
-        // 1. Dispara PointerUp & MouseUp
+        // 1. Dispara PointerUp & MouseUp no target atual (para ScrollView e animações)
         using var pointerUp = PointerUpEvent.GetPooled();
         pointerUp.target = target;
         target.SendEvent(pointerUp);
@@ -498,22 +508,48 @@ namespace Mandato.Presentation
         mouseUp.target = target;
         target.SendEvent(mouseUp);
 
-        // 2. Dispara ClickEvent (garante que callbacks registrados com RegisterCallback<ClickEvent> executem no elemento ou ancestrais)
-        using var clickEvent = ClickEvent.GetPooled();
-        clickEvent.target = target;
-        target.SendEvent(clickEvent);
-
-        // 3. Fallback para Botões do UI Toolkit (garante execução imediata de .clicked)
-        Button button = target as Button ?? target.GetFirstAncestorOfType<Button>();
-        if (button != null && button.enabledSelf && button.enabledInHierarchy)
+        // 2. Busca Action no userData subindo pela hierarquia a partir do downTarget.
+        // Qualquer VisualElement pode armazenar um System.Action em userData para receber
+        // cliques world-space de forma direta, sem depender da propagação do ClickEvent.
+        // IMPORTANTE: usa clickTarget (downTarget) — garante que o elemento hoverado é o que
+        // recebe o clique, mesmo que o mouse mova levemente entre MouseDown e MouseUp.
+        var current = clickTarget;
+        bool handledByAction = false;
+        while (current != null)
         {
-            using var submitEvent = NavigationSubmitEvent.GetPooled();
-            submitEvent.target = button;
-            button.SendEvent(submitEvent);
-
-            if (showDebugLogs)
+            if (current.userData is System.Action directAction)
             {
-                Debug.Log($"<color=#00ffaa>[WorldSpaceUI]</color> 🎯 Botão <b>'{button.name}'</b> acionado com sucesso.");
+                directAction.Invoke();
+                handledByAction = true;
+
+                if (showDebugLogs)
+                {
+                    Debug.Log($"<color=#00ffaa>[WorldSpaceUI]</color> 🎯 userData Action invocada em: <b>'{current.name}'</b>");
+                }
+                break;
+            }
+            current = current.parent;
+        }
+
+        // 3. Se nenhuma Action foi encontrada, usa ClickEvent padrão do UI Toolkit
+        if (!handledByAction)
+        {
+            using var clickEvent = ClickEvent.GetPooled();
+            clickEvent.target = clickTarget;
+            clickTarget.SendEvent(clickEvent);
+
+            // Fallback para Botões do UI Toolkit (garante execução imediata de .clicked)
+            Button button = clickTarget as Button ?? clickTarget.GetFirstAncestorOfType<Button>();
+            if (button != null && button.enabledSelf && button.enabledInHierarchy)
+            {
+                using var submitEvent = NavigationSubmitEvent.GetPooled();
+                submitEvent.target = button;
+                button.SendEvent(submitEvent);
+
+                if (showDebugLogs)
+                {
+                    Debug.Log($"<color=#00ffaa>[WorldSpaceUI]</color> 🎯 Botão <b>'{button.name}'</b> acionado com sucesso.");
+                }
             }
         }
     }
@@ -531,6 +567,7 @@ namespace Mandato.Presentation
     {
         ClearHover();
         _isPointerDown = false;
+        _pointerDownTarget = null;
         _isCurrentlyHit = false;
     }
 
@@ -554,11 +591,13 @@ namespace Mandato.Presentation
         if (!showOnScreenOverlay) return;
 
         GUI.color = Color.white;
-        GUILayout.BeginArea(new Rect(10, 10, 360, 220), GUI.skin.box);
+        var panelRes = GetPanelResolution();
+        GUILayout.BeginArea(new Rect(10, 10, 380, 250), GUI.skin.box);
         GUILayout.Label("<b>🖥️ WorldSpace UI Inspector</b>");
         GUILayout.Label($"Objeto: {gameObject.name}");
         GUILayout.Label($"Colisor: {(_collider != null ? _collider.GetType().Name : "NENHUM")}");
         GUILayout.Label($"Hit Ativo: {(_isCurrentlyHit ? "<color=green>SIM</color>" : "<color=red>NÃO</color>")}");
+        GUILayout.Label($"Resolução Painel: ({panelRes.x:F0} × {panelRes.y:F0})");
         GUILayout.Label($"UV Calibrado: ({_lastHitUV.x:F3}, {_lastHitUV.y:F3})");
         GUILayout.Label($"Painel Coord: ({_lastPanelPosition.x:F0}, {_lastPanelPosition.y:F0})");
         GUILayout.Label($"Elemento Hover: <b>{(_lastHoveredElement != null ? _lastHoveredElement.name : "NENHUM")}</b> ({(_lastHoveredElement != null ? _lastHoveredElement.GetType().Name : "")})");

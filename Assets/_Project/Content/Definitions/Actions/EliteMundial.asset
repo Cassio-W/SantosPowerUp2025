@@ -18,7 +18,7 @@ MonoBehaviour:
     deste m\xEAs (+10 de corrup\xE7\xE3o)."
   icon: {fileID: 0}
   categoryTag: Especiais
-  cooldownType: 1
+  cooldownType: 2
   cooldownTurns: 6
   unlockByDefault: 1
   conditions: []
