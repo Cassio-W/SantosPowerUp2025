@@ -36,6 +36,10 @@ namespace Mandato.Infrastructure
         [Header("Flip-Phone & Ações")]
         [SerializeField] private List<FlipPhoneActionDefinition> startingActions = new List<FlipPhoneActionDefinition>();
 
+        [Header("Personagens Jogáveis")]
+        [Tooltip("Lista de todos os personagens disponíveis para seleção no menu. O id salvo é resolvido aqui.")]
+        [SerializeField] private List<CharacterDefinition> availableCharacters = new List<CharacterDefinition>();
+
         [Header("Semente e Configurações de Partida")]
         [SerializeField] private int customSeed = 0;
         [SerializeField] private string mainMenuSceneName = "MenuV2";
@@ -85,7 +89,10 @@ namespace Mandato.Infrastructure
                 ? presentationBindings.TutorialManager.GetConfiguredCards()
                 : new List<CardDefinition>();
 
-            // 1. Inicializa Catálogo, Perfil e Máquina de Estados
+            // 1. Resolve o personagem selecionado no menu (pode ser null se nenhum foi escolhido)
+            var selectedCharacter = ResolveSelectedCharacter();
+
+            // 2. Inicializa Catálogo, Perfil e Máquina de Estados (com personagem, se houver)
             bootstrapResult = RunBootstrap.CreateAndInitializeRun(
                 activeTutorialCards,
                 startingCards,
@@ -96,7 +103,8 @@ namespace Mandato.Infrastructure
                 endingsCatalog,
                 startingActions,
                 shouldPlayTutorial,
-                customSeed
+                customSeed,
+                selectedCharacter
             );
 
             // 2. Inicializa o Coordenador do Flip-Phone
@@ -152,6 +160,28 @@ namespace Mandato.Infrastructure
             {
                 CloseFlipPhone();
             }
+        }
+
+        /// <summary>
+        /// Resolve a CharacterDefinition com base no id salvo via CharacterSelectionPersistence.
+        /// Retorna a primeira da lista como fallback se nada estiver salvo ou o id não for encontrado.
+        /// </summary>
+        private CharacterDefinition ResolveSelectedCharacter()
+        {
+            if (availableCharacters == null || availableCharacters.Count == 0) return null;
+
+            string savedId = CharacterSelectionPersistence.Load();
+            if (!string.IsNullOrEmpty(savedId))
+            {
+                foreach (var c in availableCharacters)
+                {
+                    if (c != null && c.id == savedId)
+                        return c;
+                }
+                Debug.LogWarning($"[MandatoBootstrap] Personagem salvo '{savedId}' não encontrado na lista. Usando o primeiro da lista.");
+            }
+
+            return availableCharacters[0];
         }
 
         private void ValidateBindingsOnAwake()

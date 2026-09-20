@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
@@ -9,6 +10,11 @@ namespace Mandato.UI
     {
         [Header("Configuração de Cena")]
         [SerializeField] private string gameplaySceneName = "JogoV2";
+
+        [Header("Seleção de Personagem")]
+        [Tooltip("Evento disparado ao clicar em Jogar. Conecte ao MenuCharacterSelectCoordinator.EnterCharacterSelect() no Inspector." +
+                 " Se não houver listener, irá diretamente para a cena de gameplay.")]
+        [SerializeField] private UnityEvent onPlayClickedUnity = new UnityEvent();
 
         [Header("UI Toolkit")]
         [SerializeField] private UIDocument uiDocument;
@@ -141,7 +147,12 @@ namespace Mandato.UI
         public void HandlePlayClicked()
         {
             OnPlayClicked?.Invoke();
-            StartGame();
+            // Se houver listeners no UnityEvent do Inspector (ex: MenuCharacterSelectCoordinator),
+            // eles têm prioridade. Caso contrário, vai direto para a cena de gameplay.
+            if (onPlayClickedUnity != null && onPlayClickedUnity.GetPersistentEventCount() > 0)
+                onPlayClickedUnity.Invoke();
+            else
+                StartGame();
         }
 
         public void StartGame()
@@ -179,6 +190,22 @@ namespace Mandato.UI
                     creditsModal.RemoveFromClassList("open");
                     creditsModal.style.display = DisplayStyle.None;
                 }
+            }
+        }
+
+        public void SetMenuVisible(bool visible)
+        {
+            if (root != null)
+            {
+                root.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+            else if (uiDocument != null && uiDocument.rootVisualElement != null)
+            {
+                uiDocument.rootVisualElement.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+            }
+            else
+            {
+                gameObject.SetActive(visible);
             }
         }
 

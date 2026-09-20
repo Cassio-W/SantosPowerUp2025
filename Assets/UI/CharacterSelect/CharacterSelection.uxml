@@ -1,0 +1,68 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI/CharacterSelect/CharacterSelection.uss?fileID=7433441132597879392&amp;guid=2d6b78924d6be7f41aab9f1f50c31e8c&amp;type=3#CharacterSelection"/>
+    <ui:VisualElement name="screen-root" picking-mode="Ignore" class="screen-root">
+        <ui:VisualElement picking-mode="Ignore" class="top-header">
+            <ui:VisualElement picking-mode="Ignore" class="header-left-box">
+                <ui:VisualElement picking-mode="Ignore" class="status-led"/>
+                <ui:Label text="JUSTIÇA ELEITORAL // SELEÇÃO DE MANDATÁRIO(A)" picking-mode="Ignore" class="header-title"/>
+            </ui:VisualElement>
+            <ui:Label name="carousel-counter" text="01 / 03" picking-mode="Ignore" class="counter-chip"/>
+        </ui:VisualElement>
+        <ui:VisualElement picking-mode="Ignore" class="main-body">
+            <ui:VisualElement picking-mode="Ignore" class="carousel-column" style="align-self: auto;">
+                <ui:Label text="CANDIDATOS REGISTRADOS" picking-mode="Ignore" class="column-title" style="font-size: 22px;"/>
+                <ui:VisualElement name="carousel-item-prev" picking-mode="Ignore" class="carousel-slot slot-side">
+                    <ui:VisualElement name="portrait-prev" picking-mode="Ignore" class="slot-portrait slot-portrait-small"/>
+                    <ui:Label name="name-prev" text="Anterior" picking-mode="Ignore" class="slot-name slot-name-small"/>
+                </ui:VisualElement>
+                <ui:VisualElement name="carousel-item-curr" picking-mode="Ignore" class="carousel-slot slot-active">
+                    <ui:VisualElement name="portrait-curr" picking-mode="Ignore" class="slot-portrait slot-portrait-large"/>
+                    <ui:VisualElement picking-mode="Ignore" class="active-slot-info">
+                        <ui:Label name="name-curr" text="Nome do Personagem" picking-mode="Ignore" class="slot-name slot-name-large" style="font-size: 41px; flex-wrap: wrap; flex-shrink: 1; flex-direction: column; align-items: stretch;"/>
+                        <ui:Label text="EM VOTAÇÃO" picking-mode="Ignore" class="active-badge" style="font-size: 16px;"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="carousel-item-next" picking-mode="Ignore" class="carousel-slot slot-side">
+                    <ui:VisualElement name="portrait-next" picking-mode="Ignore" class="slot-portrait slot-portrait-small"/>
+                    <ui:Label name="name-next" text="Próximo" picking-mode="Ignore" class="slot-name slot-name-small"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement picking-mode="Ignore" class="detail-column">
+                <ui:VisualElement picking-mode="Ignore" class="detail-header-card">
+                    <ui:Label name="detail-name" text="NOME DO PERSONAGEM" picking-mode="Ignore" class="detail-name-label" style="font-size: 73px; height: 60px;"/>
+                    <ui:Label name="detail-title" text="CARGO / PERFIL POLÍTICO" picking-mode="Ignore" class="detail-title-label" style="font-size: 33px;"/>
+                </ui:VisualElement>
+                <ui:VisualElement picking-mode="Ignore" class="detail-content-row">
+                    <ui:VisualElement picking-mode="Ignore" class="detail-portrait-box" style="width: 571px;">
+                        <ui:VisualElement name="detail-portrait-img" picking-mode="Ignore" class="detail-portrait-img"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement picking-mode="Ignore" class="detail-text-box">
+                        <ui:Label text="BIOGRAFIA &amp; DIRETRIZES DO GOVERNO" picking-mode="Ignore" class="section-subtitle" style="font-size: 33px;"/>
+                        <ui:Label name="detail-bio" text="Descrição completa do personagem e sua trajetória política..." picking-mode="Ignore" class="detail-bio-label" style="font-size: 30px;"/>
+                        <ui:VisualElement name="stats-container" picking-mode="Ignore" class="stats-container">
+                            <ui:Label text="PARÂMETROS INICIAIS DE GOVERNO" picking-mode="Ignore" class="section-subtitle" style="font-size: 29px;"/>
+                            <ui:VisualElement picking-mode="Ignore" class="stats-row" style="justify-content: flex-start;">
+                                <ui:VisualElement picking-mode="Ignore" class="stat-chip chip-climate">
+                                    <ui:Label text="CLIMA" picking-mode="Ignore" class="stat-chip-tag"/>
+                                    <ui:Label name="stat-climate-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement picking-mode="Ignore" class="stat-chip chip-economy">
+                                    <ui:Label text="ECONOMIA" picking-mode="Ignore" class="stat-chip-tag"/>
+                                    <ui:Label name="stat-economy-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement picking-mode="Ignore" class="stat-chip chip-relations">
+                                    <ui:Label text="RELAÇÕES" picking-mode="Ignore" class="stat-chip-tag"/>
+                                    <ui:Label name="stat-relations-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement picking-mode="Ignore" class="stat-chip chip-people">
+                                    <ui:Label text="POVO" picking-mode="Ignore" class="stat-chip-tag"/>
+                                    <ui:Label name="stat-people-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
