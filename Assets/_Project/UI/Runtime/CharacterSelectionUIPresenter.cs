@@ -73,6 +73,34 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
     private Label _statEconomy;
     private Label _statRelations;
     private Label _statPeople;
+    private Label _statCorruption;
+    private VisualElement _fillClimate;
+    private VisualElement _fillEconomy;
+    private VisualElement _fillRelations;
+    private VisualElement _fillPeople;
+    private VisualElement _fillCorruption;
+
+    // ---------------------------------------------------------------------
+    // Animações de Texto (Typewriter) e Interpolação de Parâmetros
+    // ---------------------------------------------------------------------
+
+    [Header("Animações de Texto e Parâmetros")]
+    [SerializeField] private float nameTypewriterSpeed = 65f;
+    [SerializeField] private float titleTypewriterSpeed = 55f;
+    [SerializeField] private float bioTypewriterSpeed = 70f;
+    [SerializeField] private float abilityTypewriterSpeed = 60f;
+    [SerializeField] private float statsInterpolationDuration = 0.45f;
+
+    private readonly Dictionary<Label, IVisualElementScheduledItem> _activeTypewriters =
+        new Dictionary<Label, IVisualElementScheduledItem>();
+
+    private float _displayedClimate = 0f;
+    private float _displayedEconomy = 0f;
+    private float _displayedRelations = 0f;
+    private float _displayedPeople = 0f;
+    private float _displayedCorruption = 0f;
+    private bool _hasInitializedStats = false;
+    private IVisualElementScheduledItem _statsInterpolationSchedule;
 
     // ---------------------------------------------------------------------
     // Estado
@@ -123,6 +151,8 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
     private void OnDisable()
     {
         StopCarouselAnimation();
+        StopAllTypewriters();
+        StopStatsInterpolation();
     }
 
     private void Update()
@@ -292,6 +322,25 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
 
         _statPeople =
             _root.Q<Label>("stat-people-val");
+
+        _statCorruption =
+            _root.Q<Label>("stat-corruption-val") ??
+            _root.Q<Label>("value-corruption");
+
+        _fillClimate =
+            _root.Q<VisualElement>("fill-climate");
+
+        _fillEconomy =
+            _root.Q<VisualElement>("fill-economy");
+
+        _fillRelations =
+            _root.Q<VisualElement>("fill-relations");
+
+        _fillPeople =
+            _root.Q<VisualElement>("fill-people");
+
+        _fillCorruption =
+            _root.Q<VisualElement>("fill-corruption");
     }
 
     // ---------------------------------------------------------------------
@@ -570,6 +619,8 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
     private void StopCarouselAnimation()
     {
         StopScheduledAnimationOnly();
+        StopAllTypewriters();
+        StopStatsInterpolation();
 
         _isAnimating = false;
 
@@ -656,22 +707,20 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
 
         if (_detailName != null)
         {
-            _detailName.text =
-                character.displayName;
+            PlayTypewriter(_detailName, character.displayName, nameTypewriterSpeed);
         }
 
         if (_detailTitle != null)
         {
-            _detailTitle.text =
-                !string.IsNullOrEmpty(character.title)
-                    ? character.title.ToUpperInvariant()
-                    : "CANDIDATO(A)";
+            string titleText = !string.IsNullOrEmpty(character.title)
+                ? character.title.ToUpperInvariant()
+                : "CANDIDATO(A)";
+            PlayTypewriter(_detailTitle, titleText, titleTypewriterSpeed);
         }
 
         if (_detailBio != null)
         {
-            _detailBio.text =
-                character.biography;
+            PlayTypewriter(_detailBio, character.biography, bioTypewriterSpeed);
         }
 
         UpdateDetailPortrait(character);
@@ -710,17 +759,19 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
         if (!string.IsNullOrEmpty(
                 character.uniqueAbilityDescription))
         {
-            _detailAbility.text =
-                $"• HABILIDADE ESPECIAL:\n" +
-                character.uniqueAbilityDescription;
-
             _detailAbility.style.display =
                 DisplayStyle.Flex;
+
+            PlayTypewriter(
+                _detailAbility,
+                $"• HABILIDADE ESPECIAL:\n{character.uniqueAbilityDescription}",
+                abilityTypewriterSpeed);
         }
         else
         {
             _detailAbility.style.display =
                 DisplayStyle.None;
+            _detailAbility.text = string.Empty;
         }
     }
 
@@ -742,29 +793,13 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
         if (!hasStats)
             return;
 
-        if (_statClimate != null)
-        {
-            _statClimate.text =
-                $"{character.initialStats.climaticChanges}%";
-        }
+        float targetClimate = Mathf.Clamp(character.initialStats.climaticChanges, 0, 100);
+        float targetEconomy = Mathf.Clamp(character.initialStats.economy, 0, 100);
+        float targetRelations = Mathf.Clamp(character.initialStats.internationalRelations, 0, 100);
+        float targetPeople = Mathf.Clamp(character.initialStats.popularApproval, 0, 100);
+        float targetCorruption = Mathf.Clamp(character.initialStats.corruption, 0, 100);
 
-        if (_statEconomy != null)
-        {
-            _statEconomy.text =
-                $"{character.initialStats.economy}%";
-        }
-
-        if (_statRelations != null)
-        {
-            _statRelations.text =
-                $"{character.initialStats.internationalRelations}%";
-        }
-
-        if (_statPeople != null)
-        {
-            _statPeople.text =
-                $"{character.initialStats.popularApproval}%";
-        }
+        AnimateStatsInterpolation(targetClimate, targetEconomy, targetRelations, targetPeople, targetCorruption, statsInterpolationDuration);
     }
 
     private void UpdateCarouselSlot(
@@ -795,6 +830,133 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
         {
             portraitElement.style.backgroundImage =
                 StyleKeyword.None;
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // Efeito Typewriter e Interpolação de Atributos
+    // ---------------------------------------------------------------------
+
+    private void PlayTypewriter(Label label, string fullText, float charsPerSecond = 60f)
+    {
+        if (label == null) return;
+
+        if (_activeTypewriters.TryGetValue(label, out var prevSchedule) && prevSchedule != null)
+        {
+            prevSchedule.Pause();
+            _activeTypewriters.Remove(label);
+        }
+
+        if (string.IsNullOrEmpty(fullText))
+        {
+            label.text = string.Empty;
+            return;
+        }
+
+        // Dá "clear" antes de iniciar o efeito de digitação
+        label.text = string.Empty;
+
+        float startTime = Time.unscaledTime;
+        int totalChars = fullText.Length;
+        float duration = totalChars / Mathf.Max(1f, charsPerSecond);
+
+        var schedule = label.schedule.Execute(() =>
+        {
+            float elapsed = Time.unscaledTime - startTime;
+            int currentLength = Mathf.Clamp(Mathf.RoundToInt((elapsed / Mathf.Max(0.01f, duration)) * totalChars), 0, totalChars);
+            label.text = fullText.Substring(0, currentLength);
+
+            if (currentLength >= totalChars)
+            {
+                if (_activeTypewriters.TryGetValue(label, out var s) && s != null)
+                {
+                    s.Pause();
+                    _activeTypewriters.Remove(label);
+                }
+            }
+        }).Every(0);
+
+        _activeTypewriters[label] = schedule;
+    }
+
+    private void StopAllTypewriters()
+    {
+        foreach (var kvp in _activeTypewriters)
+        {
+            kvp.Value?.Pause();
+        }
+        _activeTypewriters.Clear();
+    }
+
+    private void AnimateStatsInterpolation(
+        float targetClimate,
+        float targetEconomy,
+        float targetRelations,
+        float targetPeople,
+        float targetCorruption,
+        float duration = 0.45f)
+    {
+        float startClimate = _displayedClimate;
+        float startEconomy = _displayedEconomy;
+        float startRelations = _displayedRelations;
+        float startPeople = _displayedPeople;
+        float startCorruption = _displayedCorruption;
+
+        if (!_hasInitializedStats)
+        {
+            startClimate = 0f;
+            startEconomy = 0f;
+            startRelations = 0f;
+            startPeople = 0f;
+            startCorruption = 0f;
+            _hasInitializedStats = true;
+        }
+
+        StopStatsInterpolation();
+
+        float startTime = Time.unscaledTime;
+
+        _statsInterpolationSchedule = _root.schedule.Execute(() =>
+        {
+            float elapsed = Time.unscaledTime - startTime;
+            float normalized = Mathf.Clamp01(elapsed / Mathf.Max(0.01f, duration));
+
+            // Easing suave (EaseOutCubic)
+            float t = 1f - Mathf.Pow(1f - normalized, 3f);
+
+            _displayedClimate = Mathf.Lerp(startClimate, targetClimate, t);
+            _displayedEconomy = Mathf.Lerp(startEconomy, targetEconomy, t);
+            _displayedRelations = Mathf.Lerp(startRelations, targetRelations, t);
+            _displayedPeople = Mathf.Lerp(startPeople, targetPeople, t);
+            _displayedCorruption = Mathf.Lerp(startCorruption, targetCorruption, t);
+
+            // Atualiza alturas das barras de preenchimento
+            if (_fillClimate != null) _fillClimate.style.height = Length.Percent(_displayedClimate);
+            if (_fillEconomy != null) _fillEconomy.style.height = Length.Percent(_displayedEconomy);
+            if (_fillRelations != null) _fillRelations.style.height = Length.Percent(_displayedRelations);
+            if (_fillPeople != null) _fillPeople.style.height = Length.Percent(_displayedPeople);
+            if (_fillCorruption != null) _fillCorruption.style.height = Length.Percent(_displayedCorruption);
+
+            // Atualiza contagem dos valores numéricos
+            if (_statClimate != null) _statClimate.text = $"{Mathf.RoundToInt(_displayedClimate)}%";
+            if (_statEconomy != null) _statEconomy.text = $"{Mathf.RoundToInt(_displayedEconomy)}%";
+            if (_statRelations != null) _statRelations.text = $"{Mathf.RoundToInt(_displayedRelations)}%";
+            if (_statPeople != null) _statPeople.text = $"{Mathf.RoundToInt(_displayedPeople)}%";
+            if (_statCorruption != null) _statCorruption.text = $"{Mathf.RoundToInt(_displayedCorruption)}%";
+
+            if (normalized >= 1f)
+            {
+                StopStatsInterpolation();
+            }
+        }).Every(0);
+    }
+
+    private void StopStatsInterpolation()
+    {
+        if (_statsInterpolationSchedule != null)
+        {
+            _statsInterpolationSchedule.Pause();
+            _statsInterpolationSchedule = null;
         }
     }
 }

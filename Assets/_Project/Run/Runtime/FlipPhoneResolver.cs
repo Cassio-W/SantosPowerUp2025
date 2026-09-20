@@ -78,8 +78,8 @@ namespace Mandato.Run
             {
                 bool requiresProposal = action.effects.Exists(e => e != null && (
                     e.effectType == FlipPhoneEffectType.DismissCurrentProposal ||
-                    (e.effectType == FlipPhoneEffectType.RemoveNpcFromGame && string.IsNullOrEmpty(e.targetId)) ||
-                    (e.effectType == FlipPhoneEffectType.SuspendNpc && string.IsNullOrEmpty(e.targetId))
+                    (e.effectType == FlipPhoneEffectType.RemoveNpcFromGame && string.IsNullOrEmpty(e.GetTargetId())) ||
+                    (e.effectType == FlipPhoneEffectType.SuspendNpc && string.IsNullOrEmpty(e.GetTargetId()))
                 ));
                 if (requiresProposal && currentCard == null)
                 {
@@ -88,7 +88,7 @@ namespace Mandato.Run
             }
 
             // 6. Valida condições
-            string currentNpcId = currentCard != null ? currentCard.npcId : string.Empty;
+            string currentNpcId = currentCard != null ? currentCard.GetNpcId() : string.Empty;
             if (!action.AreConditionsMet(runState.stats, runState.calendar.currentMonthIndex, runState.activePerkIds, runState.decisionHistory, currentNpcId))
             {
                 return new FlipPhoneUseReport { success = false, failReason = "Condições da ação não atendidas." };
@@ -108,6 +108,8 @@ namespace Mandato.Run
                 foreach (var effect in action.effects)
                 {
                     if (effect == null) continue;
+
+                    string effTargetId = effect.GetTargetId();
 
                     switch (effect.effectType)
                     {
@@ -130,23 +132,23 @@ namespace Mandato.Run
                             break;
 
                         case FlipPhoneEffectType.InjectCard:
-                            if (!string.IsNullOrEmpty(effect.targetId) && deckState != null)
+                            if (!string.IsNullOrEmpty(effTargetId) && deckState != null)
                             {
-                                deckState.InjectCard(effect.targetId, effect.injectOnTop);
-                                report.injectedCardIds.Add(effect.targetId);
+                                deckState.InjectCard(effTargetId, effect.injectOnTop);
+                                report.injectedCardIds.Add(effTargetId);
                             }
                             break;
 
                         case FlipPhoneEffectType.RemoveCard:
-                            if (!string.IsNullOrEmpty(effect.targetId) && deckState != null)
+                            if (!string.IsNullOrEmpty(effTargetId) && deckState != null)
                             {
-                                deckState.RemoveCard(effect.targetId);
-                                report.removedCardIds.Add(effect.targetId);
+                                deckState.RemoveCard(effTargetId);
+                                report.removedCardIds.Add(effTargetId);
                             }
                             break;
 
                         case FlipPhoneEffectType.RemoveNpcFromGame:
-                            string targetRemoveNpc = !string.IsNullOrEmpty(effect.targetId) ? effect.targetId : (currentCard != null ? currentCard.npcId : string.Empty);
+                            string targetRemoveNpc = !string.IsNullOrEmpty(effTargetId) ? effTargetId : (currentCard != null ? currentCard.GetNpcId() : string.Empty);
                             if (!string.IsNullOrEmpty(targetRemoveNpc))
                             {
                                 var npcState = runState.GetOrCreateNpcState(targetRemoveNpc);
@@ -171,7 +173,7 @@ namespace Mandato.Run
                             break;
 
                         case FlipPhoneEffectType.SuspendNpc:
-                            string targetSuspendNpc = !string.IsNullOrEmpty(effect.targetId) ? effect.targetId : (currentCard != null ? currentCard.npcId : string.Empty);
+                            string targetSuspendNpc = !string.IsNullOrEmpty(effTargetId) ? effTargetId : (currentCard != null ? currentCard.GetNpcId() : string.Empty);
                             if (!string.IsNullOrEmpty(targetSuspendNpc))
                             {
                                 var npcState = runState.GetOrCreateNpcState(targetSuspendNpc);
@@ -194,23 +196,23 @@ namespace Mandato.Run
                             break;
 
                         case FlipPhoneEffectType.GrantPerk:
-                            if (!string.IsNullOrEmpty(effect.targetId))
+                            if (!string.IsNullOrEmpty(effTargetId))
                             {
                                 int duration = effect.duration;
-                                if (duration <= 0 && perkCatalog != null && perkCatalog.TryGetValue(effect.targetId, out var pDef) && pDef != null)
+                                if (duration <= 0 && perkCatalog != null && perkCatalog.TryGetValue(effTargetId, out var pDef) && pDef != null)
                                 {
                                     duration = pDef.durationMonths;
                                 }
-                                runState.GrantPerk(effect.targetId, duration);
-                                report.grantedPerkIds.Add(effect.targetId);
+                                runState.GrantPerk(effTargetId, duration);
+                                report.grantedPerkIds.Add(effTargetId);
                             }
                             break;
 
                         case FlipPhoneEffectType.TriggerEvent:
-                            if (!string.IsNullOrEmpty(effect.targetId))
+                            if (!string.IsNullOrEmpty(effTargetId))
                             {
-                                runState.TriggerEvent(effect.targetId, effect.duration > 0 ? effect.duration : 3);
-                                report.triggeredEventIds.Add(effect.targetId);
+                                runState.TriggerEvent(effTargetId, effect.duration > 0 ? effect.duration : 3);
+                                report.triggeredEventIds.Add(effTargetId);
                             }
                             break;
 

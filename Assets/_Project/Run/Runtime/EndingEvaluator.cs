@@ -39,9 +39,10 @@ namespace Mandato.Run
                 if (ending.minCorruption >= 0 && runState.stats.corruption < ending.minCorruption) continue;
 
                 // 4. Checa quests concluídas
-                if (!string.IsNullOrEmpty(ending.requiredCompletedQuestId))
+                string reqQuest = ending.GetRequiredCompletedQuestId();
+                if (!string.IsNullOrEmpty(reqQuest))
                 {
-                    if (!runState.questStates.TryGetValue(ending.requiredCompletedQuestId, out var qState) || !qState.isCompleted)
+                    if (!runState.questStates.TryGetValue(reqQuest, out var qState) || !qState.isCompleted)
                     {
                         continue;
                     }

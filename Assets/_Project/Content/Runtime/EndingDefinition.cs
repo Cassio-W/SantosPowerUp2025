@@ -18,7 +18,14 @@ namespace Mandato.Content
         public int minClimate = -1;
         public int minPopularApproval = -1;
         public int minCorruption = -1;
+
+        [Header("Quest Obrigatória (ScriptableObject)")]
+        public QuestDefinition requiredCompletedQuest;
+
+        [Header("ID Legado / Fallback")]
         public string requiredCompletedQuestId = string.Empty;
+
+        public string GetRequiredCompletedQuestId() => requiredCompletedQuest != null ? (!string.IsNullOrEmpty(requiredCompletedQuest.id) ? requiredCompletedQuest.id : requiredCompletedQuest.name) : requiredCompletedQuestId ?? string.Empty;
 
         public int priority = 0; // Finais mais específicos têm prioridade maior
 

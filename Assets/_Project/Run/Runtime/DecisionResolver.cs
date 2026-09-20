@@ -89,9 +89,9 @@ namespace Mandato.Run
                 statsBefore = runState.stats.Clone(),
                 deltaPoliticalX = choice.deltaPoliticalX,
                 deltaPoliticalY = choice.deltaPoliticalY,
-                grantedPerkId = choice.grantPerkId,
+                grantedPerkId = choice.GetGrantPerkId(),
                 presentationCue = choice.presentationCue,
-                npcId = card.npcId ?? string.Empty
+                npcId = card.GetNpcId()
             };
 
             // 1. Aplica impactos em atributos
@@ -108,46 +108,42 @@ namespace Mandato.Run
             // 3. Atualiza o baralho (injeção e remoção)
             if (deckState != null)
             {
-                if (choice.injectCardIds != null)
+                foreach (string id in choice.GetInjectCardIds())
                 {
-                    foreach (string id in choice.injectCardIds)
+                    if (!string.IsNullOrEmpty(id))
                     {
-                        if (!string.IsNullOrEmpty(id))
-                        {
-                            deckState.InjectCard(id, onTop: true);
-                            report.injectedCardIds.Add(id);
-                        }
+                        deckState.InjectCard(id, onTop: true);
+                        report.injectedCardIds.Add(id);
                     }
                 }
 
-                if (choice.removeCardIds != null)
+                foreach (string id in choice.GetRemoveCardIds())
                 {
-                    foreach (string id in choice.removeCardIds)
+                    if (!string.IsNullOrEmpty(id))
                     {
-                        if (!string.IsNullOrEmpty(id))
-                        {
-                            deckState.RemoveCard(id);
-                            report.removedCardIds.Add(id);
-                        }
+                        deckState.RemoveCard(id);
+                        report.removedCardIds.Add(id);
                     }
                 }
             }
 
             // 4. Concede perk se houver
-            if (!string.IsNullOrEmpty(choice.grantPerkId))
+            string perkToGrant = choice.GetGrantPerkId();
+            if (!string.IsNullOrEmpty(perkToGrant))
             {
                 int duration = 0;
-                if (perkCatalog != null && perkCatalog.TryGetValue(choice.grantPerkId, out var perkDef) && perkDef != null)
+                if (perkCatalog != null && perkCatalog.TryGetValue(perkToGrant, out var perkDef) && perkDef != null)
                 {
                     duration = perkDef.durationMonths;
                 }
-                runState.GrantPerk(choice.grantPerkId, duration);
+                runState.GrantPerk(perkToGrant, duration);
             }
 
             // 5. Atualização de Relação com NPC
-            if (!string.IsNullOrEmpty(card.npcId))
+            string resolvedNpcId = card.GetNpcId();
+            if (!string.IsNullOrEmpty(resolvedNpcId))
             {
-                var npcState = runState.GetOrCreateNpcState(card.npcId);
+                var npcState = runState.GetOrCreateNpcState(resolvedNpcId);
                 report.npcRelationBefore = npcState.relationScore;
                 npcState.RecordInteraction();
 
@@ -172,7 +168,7 @@ namespace Mandato.Run
                     if (qState.currentStepIndex < qDef.steps.Count)
                     {
                         var step = qDef.steps[qState.currentStepIndex];
-                        if (step != null && string.Equals(step.triggerCardId, card.id, StringComparison.OrdinalIgnoreCase))
+                        if (step != null && string.Equals(step.GetTriggerCardId(), card.id, StringComparison.OrdinalIgnoreCase))
                         {
                             if (step.requiredChoiceIndex == -1 || step.requiredChoiceIndex == choiceIndex)
                             {
@@ -183,15 +179,16 @@ namespace Mandato.Run
                                     if (qState.isCompleted)
                                     {
                                         report.completedQuestIds.Add(qId);
-                                        if (!string.IsNullOrEmpty(qDef.rewardPerkId))
+                                        string rewardPerk = qDef.GetRewardPerkId();
+                                        if (!string.IsNullOrEmpty(rewardPerk))
                                         {
                                             int rewardDuration = 0;
-                                            if (perkCatalog != null && perkCatalog.TryGetValue(qDef.rewardPerkId, out var rewardDef) && rewardDef != null)
+                                            if (perkCatalog != null && perkCatalog.TryGetValue(rewardPerk, out var rewardDef) && rewardDef != null)
                                             {
                                                 rewardDuration = rewardDef.durationMonths;
                                             }
-                                            runState.GrantPerk(qDef.rewardPerkId, rewardDuration);
-                                            report.grantedRewardPerkIds.Add(qDef.rewardPerkId);
+                                            runState.GrantPerk(rewardPerk, rewardDuration);
+                                            report.grantedRewardPerkIds.Add(rewardPerk);
                                         }
                                     }
                                 }

@@ -195,14 +195,16 @@ namespace Mandato.Editor
                     foreach (var cond in card.conditions)
                     {
                         if (cond == null) continue;
-                        if (!string.IsNullOrEmpty(cond.requiredPerkId) && !perkIds.Contains(cond.requiredPerkId))
+                        string reqPerk = cond.GetRequiredPerkId();
+                        if (!string.IsNullOrEmpty(reqPerk) && !perkIds.Contains(reqPerk))
                         {
-                            Debug.LogError($"[MandatoValidator] ❌ Carta '{card.id}' requer perk '{cond.requiredPerkId}' não encontrado no catálogo. Path: {path}");
+                            Debug.LogError($"[MandatoValidator] ❌ Carta '{card.id}' requer perk '{reqPerk}' não encontrado no catálogo. Path: {path}");
                             errorCount++;
                         }
-                        if (!string.IsNullOrEmpty(cond.requiredQuestId) && !questIds.Contains(cond.requiredQuestId))
+                        string reqQuest = cond.GetRequiredQuestId();
+                        if (!string.IsNullOrEmpty(reqQuest) && !questIds.Contains(reqQuest))
                         {
-                            Debug.LogError($"[MandatoValidator] ❌ Carta '{card.id}' requer quest '{cond.requiredQuestId}' não encontrada no catálogo. Path: {path}");
+                            Debug.LogError($"[MandatoValidator] ❌ Carta '{card.id}' requer quest '{reqQuest}' não encontrada no catálogo. Path: {path}");
                             errorCount++;
                         }
                     }
@@ -232,9 +234,10 @@ namespace Mandato.Editor
         {
             if (choice == null) return;
 
-            if (choice.injectCardIds != null)
+            var injectIds = choice.GetInjectCardIds();
+            if (injectIds != null)
             {
-                foreach (var injectId in choice.injectCardIds)
+                foreach (var injectId in injectIds)
                 {
                     if (!string.IsNullOrEmpty(injectId) && !cardIds.Contains(injectId))
                     {
@@ -244,9 +247,10 @@ namespace Mandato.Editor
                 }
             }
 
-            if (!string.IsNullOrEmpty(choice.grantPerkId) && !perkIds.Contains(choice.grantPerkId))
+            string grantPerk = choice.GetGrantPerkId();
+            if (!string.IsNullOrEmpty(grantPerk) && !perkIds.Contains(grantPerk))
             {
-                Debug.LogError($"[MandatoValidator] ❌ Carta '{cardId}' ({choiceName}) concede perk '{choice.grantPerkId}' não registrado no catálogo de Perks. Path: {path}");
+                Debug.LogError($"[MandatoValidator] ❌ Carta '{cardId}' ({choiceName}) concede perk '{grantPerk}' não registrado no catálogo de Perks. Path: {path}");
                 errorCount++;
             }
         }
@@ -318,8 +322,9 @@ namespace Mandato.Editor
 
                     void CheckSide(ChoiceDefinition choice, string side)
                     {
-                        if (choice?.injectCardIds == null) return;
-                        foreach (var injectId in choice.injectCardIds)
+                        var injectIds = choice?.GetInjectCardIds();
+                        if (injectIds == null) return;
+                        foreach (var injectId in injectIds)
                         {
                             if (!string.IsNullOrEmpty(injectId) && !allCardIds.Contains(injectId))
                             {

@@ -34,41 +34,30 @@ namespace Mandato.Run
             }
 
             // 4. Perks iniciais
-            if (character.startingPerkIds != null)
+            var blockedPerks = character.GetBlockedPerkIds();
+            foreach (var perkId in character.GetStartingPerkIds())
             {
-                foreach (var perkId in character.startingPerkIds)
-                {
-                    if (string.IsNullOrEmpty(perkId)) continue;
+                if (string.IsNullOrEmpty(perkId)) continue;
+                if (blockedPerks != null && blockedPerks.Contains(perkId)) continue;
 
-                    // Não concede se estiver explicitamente na lista de bloqueados
-                    if (character.blockedPerkIds != null && character.blockedPerkIds.Contains(perkId))
-                        continue;
-
-                    runState.GrantPerk(perkId);
-                }
+                runState.GrantPerk(perkId);
             }
 
             // 5. Ações extras do celular
-            if (character.extraUnlockedActionIds != null)
+            foreach (var actionId in character.GetExtraUnlockedActionIds())
             {
-                foreach (var actionId in character.extraUnlockedActionIds)
+                if (!string.IsNullOrEmpty(actionId))
                 {
-                    if (!string.IsNullOrEmpty(actionId))
-                    {
-                        runState.UnlockAction(actionId);
-                    }
+                    runState.UnlockAction(actionId);
                 }
             }
 
             // 6. Ações bloqueadas do celular (remove se já estiverem desbloqueadas por padrão)
-            if (character.lockedActionIds != null)
+            foreach (var lockedActionId in character.GetLockedActionIds())
             {
-                foreach (var lockedActionId in character.lockedActionIds)
+                if (!string.IsNullOrEmpty(lockedActionId))
                 {
-                    if (!string.IsNullOrEmpty(lockedActionId))
-                    {
-                        runState.LockAction(lockedActionId);
-                    }
+                    runState.LockAction(lockedActionId);
                 }
             }
 
@@ -77,9 +66,10 @@ namespace Mandato.Run
             {
                 foreach (var rel in character.initialNpcRelations)
                 {
-                    if (!string.IsNullOrEmpty(rel.npcId))
+                    string targetNpcId = rel.GetNpcId();
+                    if (!string.IsNullOrEmpty(targetNpcId))
                     {
-                        var npcState = runState.GetOrCreateNpcState(rel.npcId);
+                        var npcState = runState.GetOrCreateNpcState(targetNpcId);
                         if (npcState != null)
                         {
                             npcState.relationScore = rel.initialRelation;

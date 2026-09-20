@@ -41,22 +41,60 @@
                         <ui:Label name="detail-bio" text="Descrição completa do personagem e sua trajetória política..." picking-mode="Ignore" class="detail-bio-label" style="font-size: 30px;"/>
                         <ui:VisualElement name="stats-container" picking-mode="Ignore" class="stats-container">
                             <ui:Label text="PARÂMETROS INICIAIS DE GOVERNO" picking-mode="Ignore" class="section-subtitle" style="font-size: 29px;"/>
-                            <ui:VisualElement picking-mode="Ignore" class="stats-row" style="justify-content: flex-start;">
-                                <ui:VisualElement picking-mode="Ignore" class="stat-chip chip-climate">
-                                    <ui:Label text="CLIMA" picking-mode="Ignore" class="stat-chip-tag"/>
-                                    <ui:Label name="stat-climate-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
+                            <ui:VisualElement picking-mode="Ignore" class="stats-workspace">
+                                <ui:VisualElement picking-mode="Ignore" class="stats-grid-container">
+                                    <ui:VisualElement picking-mode="Ignore" class="stats-grid-row">
+                                        <ui:VisualElement picking-mode="Ignore" class="stat-chip chip-climate">
+                                            <ui:VisualElement name="fill-climate" picking-mode="Ignore" class="stat-chip-fill fill-climate-bg" style="height: 50%;"/>
+                                            <ui:VisualElement picking-mode="Ignore" class="stat-chip-foreground">
+                                                <ui:Label text="CLIMA" picking-mode="Ignore" class="stat-chip-tag"/>
+                                                <ui:VisualElement picking-mode="Ignore" class="stat-chip-body">
+                                                    <ui:VisualElement name="icon-climate" picking-mode="Ignore" class="stat-chip-icon" style="background-image: url(&quot;project://database/Assets/Sprites/Treenew.png?fileID=21300000&amp;guid=982e87e4a34157f4eb9258069f8f341d&amp;type=3#Treenew&quot;);"/>
+                                                    <ui:Label name="stat-climate-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
+                                                </ui:VisualElement>
+                                            </ui:VisualElement>
+                                        </ui:VisualElement>
+                                        <ui:VisualElement picking-mode="Ignore" class="stat-chip chip-economy">
+                                            <ui:VisualElement name="fill-economy" picking-mode="Ignore" class="stat-chip-fill fill-economy-bg" style="height: 50%;"/>
+                                            <ui:VisualElement picking-mode="Ignore" class="stat-chip-foreground">
+                                                <ui:Label text="ECONOMIA" picking-mode="Ignore" class="stat-chip-tag"/>
+                                                <ui:VisualElement picking-mode="Ignore" class="stat-chip-body">
+                                                    <ui:VisualElement name="icon-economy" picking-mode="Ignore" class="stat-chip-icon" style="background-image: url(&quot;project://database/Assets/Sprites/moneynew.png?fileID=21300000&amp;guid=1ff9b9ecfbad1924eb51f51a6f3863ec&amp;type=3#moneynew&quot;);"/>
+                                                    <ui:Label name="stat-economy-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
+                                                </ui:VisualElement>
+                                            </ui:VisualElement>
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement picking-mode="Ignore" class="stats-grid-row">
+                                        <ui:VisualElement picking-mode="Ignore" class="stat-chip chip-relations">
+                                            <ui:VisualElement name="fill-relations" picking-mode="Ignore" class="stat-chip-fill fill-relations-bg" style="height: 50%;"/>
+                                            <ui:VisualElement picking-mode="Ignore" class="stat-chip-foreground">
+                                                <ui:Label text="RELAÇÕES" picking-mode="Ignore" class="stat-chip-tag"/>
+                                                <ui:VisualElement picking-mode="Ignore" class="stat-chip-body">
+                                                    <ui:VisualElement name="icon-relations" picking-mode="Ignore" class="stat-chip-icon" style="background-image: url(&quot;project://database/Assets/Sprites/peaceSlider.png?fileID=21300000&amp;guid=7de11bbadd901af438bbd94d6f311438&amp;type=3#peaceSlider&quot;);"/>
+                                                    <ui:Label name="stat-relations-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
+                                                </ui:VisualElement>
+                                            </ui:VisualElement>
+                                        </ui:VisualElement>
+                                        <ui:VisualElement picking-mode="Ignore" class="stat-chip chip-people">
+                                            <ui:VisualElement name="fill-people" picking-mode="Ignore" class="stat-chip-fill fill-people-bg" style="height: 50%;"/>
+                                            <ui:VisualElement picking-mode="Ignore" class="stat-chip-foreground">
+                                                <ui:Label text="POVO" picking-mode="Ignore" class="stat-chip-tag"/>
+                                                <ui:VisualElement picking-mode="Ignore" class="stat-chip-body">
+                                                    <ui:VisualElement name="icon-people" picking-mode="Ignore" class="stat-chip-icon" style="background-image: url(&quot;project://database/Assets/Sprites/peopleSlider.png?fileID=1537655665&amp;guid=f498b99f7dc683646b439a837578e287&amp;type=3#peopleSlider&quot;);"/>
+                                                    <ui:Label name="stat-people-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
+                                                </ui:VisualElement>
+                                            </ui:VisualElement>
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
                                 </ui:VisualElement>
-                                <ui:VisualElement picking-mode="Ignore" class="stat-chip chip-economy">
-                                    <ui:Label text="ECONOMIA" picking-mode="Ignore" class="stat-chip-tag"/>
-                                    <ui:Label name="stat-economy-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
-                                </ui:VisualElement>
-                                <ui:VisualElement picking-mode="Ignore" class="stat-chip chip-relations">
-                                    <ui:Label text="RELAÇÕES" picking-mode="Ignore" class="stat-chip-tag"/>
-                                    <ui:Label name="stat-relations-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
-                                </ui:VisualElement>
-                                <ui:VisualElement picking-mode="Ignore" class="stat-chip chip-people">
-                                    <ui:Label text="POVO" picking-mode="Ignore" class="stat-chip-tag"/>
-                                    <ui:Label name="stat-people-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
+                                <ui:VisualElement name="corruption-pillar" picking-mode="Ignore" class="stat-corruption-pillar">
+                                    <ui:VisualElement name="fill-corruption" picking-mode="Ignore" class="stat-corruption-fill" style="height: 0%;"/>
+                                    <ui:VisualElement picking-mode="Ignore" class="stat-corruption-foreground">
+                                        <ui:Label text="CORRUPÇÃO" picking-mode="Ignore" class="stat-corruption-tag"/>
+                                        <ui:VisualElement name="icon-corruption" picking-mode="Ignore" class="stat-corruption-icon" style="background-image: url(&quot;project://database/Assets/Sprites/corrupcao.png?fileID=21300000&amp;guid=f217d777a72a37b48880da6bf990a435&amp;type=3#corrupcao&quot;); height: 93px; width: 94px;"/>
+                                        <ui:Label name="stat-corruption-val" text="0%" picking-mode="Ignore" class="stat-corruption-val"/>
+                                    </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>

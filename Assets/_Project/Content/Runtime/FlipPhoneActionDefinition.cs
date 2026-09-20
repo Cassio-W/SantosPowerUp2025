@@ -34,9 +34,26 @@ namespace Mandato.Content
         public StatBlock statImpacts = new StatBlock(0, 0, 0, 0, 0);
         public int deltaPoliticalX = 0;
         public int deltaPoliticalY = 0;
+        
+        [Header("Alvo por Referência Direta (ScriptableObject)")]
+        public CardDefinition targetCard;
+        public PerkDefinition targetPerk;
+        public NpcDefinition targetNpc;
+        public RunEventDefinition targetEvent;
+
+        [Header("Alvo por ID Legado / Fallback")]
         public string targetId = string.Empty; // cardId, npcId, perkId, eventId
         public int duration = 0;
         public bool injectOnTop = true;
+
+        public string GetTargetId()
+        {
+            if (targetCard != null) return !string.IsNullOrEmpty(targetCard.id) ? targetCard.id : targetCard.name;
+            if (targetPerk != null) return !string.IsNullOrEmpty(targetPerk.id) ? targetPerk.id : targetPerk.name;
+            if (targetNpc != null) return !string.IsNullOrEmpty(targetNpc.id) ? targetNpc.id : targetNpc.name;
+            if (targetEvent != null) return !string.IsNullOrEmpty(targetEvent.id) ? targetEvent.id : targetEvent.name;
+            return targetId ?? string.Empty;
+        }
 
         public FlipPhoneEffect() { }
 
@@ -63,9 +80,18 @@ namespace Mandato.Content
         public StatId requiredStat = StatId.Economy;
         public int minStatValue = 0;
         public int maxStatValue = 100;
+
+        [Header("Requisitos por Referência Direta (ScriptableObject)")]
+        public PerkDefinition requiredPerk;
+        public NpcDefinition requiredNpc;
+
+        [Header("Requisitos Legados / Fallback")]
         public string requiredPerkId = string.Empty;
         public string requiredNpcPresent = string.Empty;
         public string requiredDecisionId = string.Empty;
+
+        public string GetRequiredPerkId() => requiredPerk != null ? (!string.IsNullOrEmpty(requiredPerk.id) ? requiredPerk.id : requiredPerk.name) : requiredPerkId ?? string.Empty;
+        public string GetRequiredNpcId() => requiredNpc != null ? (!string.IsNullOrEmpty(requiredNpc.id) ? requiredNpc.id : requiredNpc.name) : requiredNpcPresent ?? string.Empty;
 
         public bool IsMet(StatBlock stats, int currentMonth, IEnumerable<string> perks, IEnumerable<string> decisionHistory, string currentNpcId)
         {
@@ -79,14 +105,15 @@ namespace Mandato.Content
                     return false;
             }
 
-            if (!string.IsNullOrEmpty(requiredPerkId))
+            string perkToMatch = GetRequiredPerkId();
+            if (!string.IsNullOrEmpty(perkToMatch))
             {
                 bool hasPerk = false;
                 if (perks != null)
                 {
                     foreach (var p in perks)
                     {
-                        if (string.Equals(p, requiredPerkId, StringComparison.OrdinalIgnoreCase))
+                        if (string.Equals(p, perkToMatch, StringComparison.OrdinalIgnoreCase))
                         {
                             hasPerk = true;
                             break;
@@ -96,9 +123,10 @@ namespace Mandato.Content
                 if (!hasPerk) return false;
             }
 
-            if (!string.IsNullOrEmpty(requiredNpcPresent))
+            string npcToMatch = GetRequiredNpcId();
+            if (!string.IsNullOrEmpty(npcToMatch))
             {
-                if (!string.Equals(currentNpcId, requiredNpcPresent, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(currentNpcId, npcToMatch, StringComparison.OrdinalIgnoreCase))
                     return false;
             }
 
