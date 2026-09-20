@@ -67,69 +67,10 @@ namespace Mandato.Infrastructure
             // Aplica overrides do personagem escolhido após a inicialização padrão
             if (selectedCharacter != null)
             {
-                ApplyCharacterToRunState(stateMachine.RunState, selectedCharacter);
+                CharacterApplicator.Apply(selectedCharacter, stateMachine.RunState);
             }
 
             return new RunBootstrapResult(catalog, profileService, stateMachine, seed);
-        }
-
-        /// <summary>
-        /// Aplica os dados da CharacterDefinition ao RunState já criado:
-        /// stats iniciais, eixo político, perks de partida, ações extras e id do personagem.
-        /// </summary>
-        private static void ApplyCharacterToRunState(RunState runState, CharacterDefinition character)
-        {
-            if (runState == null || character == null) return;
-
-            runState.activeCharacterId = character.id ?? string.Empty;
-
-            if (character.overrideInitialStats)
-            {
-                runState.stats = character.initialStats.Clone();
-            }
-
-            if (character.overridePoliticalAxis)
-            {
-                runState.politicalAxis = new PoliticalAxis(character.initialPoliticalX, character.initialPoliticalY, character.lockPoliticalAxis);
-            }
-
-            if (character.startingPerkIds != null)
-            {
-                foreach (var perkId in character.startingPerkIds)
-                {
-                    if (!string.IsNullOrEmpty(perkId) && !runState.activePerkIds.Contains(perkId))
-                        runState.activePerkIds.Add(perkId);
-                }
-            }
-
-            if (character.extraUnlockedActionIds != null)
-            {
-                foreach (var actionId in character.extraUnlockedActionIds)
-                {
-                    if (!string.IsNullOrEmpty(actionId) && !runState.unlockedActionIds.Contains(actionId))
-                        runState.unlockedActionIds.Add(actionId);
-                }
-            }
-
-            if (character.lockedActionIds != null)
-            {
-                foreach (var actionId in character.lockedActionIds)
-                {
-                    if (!string.IsNullOrEmpty(actionId))
-                        runState.unlockedActionIds.Remove(actionId);
-                }
-            }
-
-            if (character.initialNpcRelations != null)
-            {
-                foreach (var rel in character.initialNpcRelations)
-                {
-                    if (string.IsNullOrEmpty(rel.npcId)) continue;
-                    var npcState = runState.GetOrCreateNpcState(rel.npcId);
-                    if (npcState != null)
-                        npcState.relationship = rel.initialRelation;
-                }
-            }
         }
     }
 }

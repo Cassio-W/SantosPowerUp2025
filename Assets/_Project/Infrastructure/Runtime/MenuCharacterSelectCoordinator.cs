@@ -271,8 +271,13 @@ namespace Mandato.Infrastructure
             var selected = uiPresenter.CurrentCharacter;
             if (selected != null)
             {
-                CharacterSelectionPersistence.Save(selected.id);
-                Debug.Log($"[MenuCharacterSelectCoordinator] Personagem selecionado: {selected.displayName} ({selected.id})");
+                string idToSave = !string.IsNullOrEmpty(selected.id) ? selected.id : selected.name;
+                CharacterSelectionPersistence.Save(idToSave);
+                Debug.Log($"[MenuCharacterSelectCoordinator] ✅ Personagem salvo para a partida: {selected.displayName} (ID/Asset: '{idToSave}')");
+            }
+            else
+            {
+                Debug.LogWarning("[MenuCharacterSelectCoordinator] ⚠️ Nenhum personagem retornado por uiPresenter.CurrentCharacter ao confirmar.");
             }
 
             if (!string.IsNullOrEmpty(gameplaySceneName))

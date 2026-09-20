@@ -164,24 +164,106 @@ namespace Mandato.Infrastructure
 
         /// <summary>
         /// Resolve a CharacterDefinition com base no id salvo via CharacterSelectionPersistence.
-        /// Retorna a primeira da lista como fallback se nada estiver salvo ou o id não for encontrado.
+        /// Se a lista availableCharacters estiver vazia no Inspector, tenta carregar automaticamente.
+        /// Realiza busca resiliente por ID, nome de arquivo do ScriptableObject e displayName.
         /// </summary>
         private CharacterDefinition ResolveSelectedCharacter()
         {
-            if (availableCharacters == null || availableCharacters.Count == 0) return null;
-
-            string savedId = CharacterSelectionPersistence.Load();
-            if (!string.IsNullOrEmpty(savedId))
+            if (availableCharacters == null || availableCharacters.Count == 0)
             {
-                foreach (var c in availableCharacters)
+                availableCharacters = new List<CharacterDefinition>();
+
+                // 1. Tenta carregar via Resources se houver
+                var loaded = Resources.LoadAll<CharacterDefinition>("");
+                if (loaded != null && loaded.Length > 0)
                 {
-                    if (c != null && c.id == savedId)
-                        return c;
+                    availableCharacters.AddRange(loaded);
                 }
-                Debug.LogWarning($"[MandatoBootstrap] Personagem salvo '{savedId}' não encontrado na lista. Usando o primeiro da lista.");
+
+#if UNITY_EDITOR
+                // 2. No editor, busca todos os assets CharacterDefinition caso a lista não tenha sido serializada
+                if (availableCharacters.Count == 0)
+                {
+                    string[] guids = UnityEditor.AssetDatabase.FindAssets("t:CharacterDefinition");
+                    foreach (var g in guids)
+                    {
+                        string path = UnityEditor.AssetDatabase.GUIDToAssetPath(g);
+                        var charDef = UnityEditor.AssetDatabase.LoadAssetAtPath<CharacterDefinition>(path);
+                        if (charDef != null && !availableCharacters.Contains(charDef))
+                        {
+                            availableCharacters.Add(charDef);
+                        }
+                    }
+                }
+#endif
             }
 
-            return availableCharacters[0];
+            if (availableCharacters == null || availableCharacters.Count == 0)
+            {
+                Debug.LogWarning("[MandatoBootstrap] ⚠️ Nenhuma CharacterDefinition encontrada ou configurada. Partida iniciará com atributos padrão.");
+                return null;
+            }
+
+            string savedId = CharacterSelectionPersistence.Load();
+            CharacterDefinition resolved = null;
+
+            if (!string.IsNullOrEmpty(savedId))
+            {
+                // Busca por ID exato ou case-insensitive
+                foreach (var c in availableCharacters)
+                {
+                    if (c != null && !string.IsNullOrEmpty(c.id) && string.Equals(c.id, savedId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        resolved = c;
+                        break;
+                    }
+                }
+
+                // Fallback 1: Busca por nome do asset (ScriptableObject name)
+                if (resolved == null)
+                {
+                    foreach (var c in availableCharacters)
+                    {
+                        if (c != null && string.Equals(c.name, savedId, StringComparison.OrdinalIgnoreCase))
+                        {
+                            resolved = c;
+                            break;
+                        }
+                    }
+                }
+
+                // Fallback 2: Busca por displayName
+                if (resolved == null)
+                {
+                    foreach (var c in availableCharacters)
+                    {
+                        if (c != null && !string.IsNullOrEmpty(c.displayName) && string.Equals(c.displayName, savedId, StringComparison.OrdinalIgnoreCase))
+                        {
+                            resolved = c;
+                            break;
+                        }
+                    }
+                }
+
+                if (resolved == null)
+                {
+                    Debug.LogWarning($"[MandatoBootstrap] ⚠️ Personagem salvo '{savedId}' não encontrado em availableCharacters ({availableCharacters.Count} disponíveis). Usando o primeiro.");
+                    resolved = availableCharacters[0];
+                }
+            }
+            else
+            {
+                resolved = availableCharacters[0];
+            }
+
+            if (resolved != null)
+            {
+                var s = resolved.initialStats;
+                string statsInfo = s != null ? $"Clima={s.climaticChanges}%, Economia={s.economy}%, Relações={s.internationalRelations}%, Povo={s.popularApproval}%" : "default";
+                Debug.Log($"[MandatoBootstrap] ✅ Personagem inicial aplicado com sucesso: {resolved.displayName} (ID: '{resolved.id}') | Stats: {statsInfo}");
+            }
+
+            return resolved;
         }
 
         private void ValidateBindingsOnAwake()

@@ -7014,6 +7014,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00004, type: 2}
   - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00003, type: 2}
   - {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0001a, type: 2}
+  availableCharacters:
+  - {fileID: 11400000, guid: 4178fee9e90677a43a93f283b4a5cd33, type: 2}
+  - {fileID: 11400000, guid: 0f2d22bd8cda62e4bb28f5d31a273954, type: 2}
+  - {fileID: 11400000, guid: 255bf755545ccae459ca6002369fce91, type: 2}
+  - {fileID: 11400000, guid: 6ba95eca0554d864b8b12aeabea1d4bf, type: 2}
   customSeed: 0
   mainMenuSceneName: MenuV2
   delayBetweenProposals: 1.5
