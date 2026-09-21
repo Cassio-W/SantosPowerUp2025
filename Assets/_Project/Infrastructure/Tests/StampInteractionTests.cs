@@ -197,5 +197,26 @@ namespace Mandato.Infrastructure.Tests
             // Even if UIDocument isn't attached to simulated gameObject in pure test, method handles gracefully
             paperPresenter.UpdateStampPreview(false, false, Vector2.zero);
         }
+
+        [Test]
+        public void ScenePresentationBindings_PlayDecisionHandAnimation_ReturnsDefaultDurationWithoutAnimator()
+        {
+            var testBindings = new ScenePresentationBindings();
+            float approveDuration = testBindings.PlayDecisionHandAnimation(0);
+            float rejectDuration = testBindings.PlayDecisionHandAnimation(1);
+
+            Assert.AreEqual(0f, approveDuration);
+            Assert.AreEqual(0f, rejectDuration);
+        }
+
+        [Test]
+        public void FlowCoordinator_HandlePlayerChoiceSubmitted_SetsProcessingDecision()
+        {
+            flowCoordinator.PostStampWaitDuration = 0.01f;
+            flowCoordinator.HandlePlayerChoiceSubmitted(0);
+
+            Assert.IsTrue(flowCoordinator.IsProcessingDecision);
+            Assert.IsTrue(flowCoordinator.IsDismissingProposal);
+        }
     }
 }

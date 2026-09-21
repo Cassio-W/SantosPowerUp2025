@@ -24,6 +24,9 @@ namespace Mandato.Infrastructure
         [SerializeField] private string dealAnimationName = "LevantaMao";
         [SerializeField] private string dealAnimationReverseName = "";
         [SerializeField] private string defaultAnimationName = "None";
+        [SerializeField] private string approveHandAnimationName = "Joia";
+        [SerializeField] private string rejectHandAnimationName = "Dislike";
+        [SerializeField] private float defaultDecisionAnimationDuration = 1.0f;
 
         [Header("Efeitos de Ambiente & Câmera")]
         [SerializeField] private AttributeCameraEffects cameraEffects;
@@ -124,6 +127,32 @@ namespace Mandato.Infrastructure
                 playerAnimator.Play(state, 0, 0f);
             }
             catch { }
+        }
+
+        public float PlayDecisionHandAnimation(int choiceIndex)
+        {
+            if (playerAnimator == null) return 0f;
+
+            string targetState = (choiceIndex == 0) ? approveHandAnimationName : rejectHandAnimationName;
+            if (string.IsNullOrEmpty(targetState))
+            {
+                targetState = (choiceIndex == 0) ? "Joia" : "Dislike";
+            }
+
+            try
+            {
+                playerAnimator.Play(targetState, 0, 0f);
+                playerAnimator.Update(0f);
+
+                var stateInfo = playerAnimator.GetCurrentAnimatorStateInfo(0);
+                if (stateInfo.length > 0.05f)
+                {
+                    return stateInfo.length;
+                }
+            }
+            catch { }
+
+            return defaultDecisionAnimationDuration > 0f ? defaultDecisionAnimationDuration : 1.0f;
         }
     }
 }

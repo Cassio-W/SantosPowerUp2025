@@ -91,6 +91,7 @@ namespace Mandato.Presentation
         public RaycastHit ActiveRaycastHit => _activeRaycastHit;
         public bool HasActiveInteractiveHit => _hasActiveInteractiveHit;
         public bool HasActiveFocus => _currentFocusedObject != null;
+        public bool IsTransitioning => _cameraMoveCoroutine != null;
         public Camera TargetCamera => targetCamera;
 
         private void Awake()

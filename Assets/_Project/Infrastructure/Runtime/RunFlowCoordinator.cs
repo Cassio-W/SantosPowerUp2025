@@ -28,17 +28,35 @@ namespace Mandato.Infrastructure
         [Tooltip("Se verdadeiro, o hover dos botões de decisão exibe as setas de impacto no monitor.")]
         [SerializeField] private bool enableDecisionHoverPreview = false;
 
+        [Header("Tempos de Decisão e Carimbo")]
+        [Tooltip("Tempo de pausa para visualização do papel carimbado antes de sair do foco.")]
+        [SerializeField] private float postStampWaitDuration = 0.55f;
+        [Tooltip("Timeout máximo de espera para a câmera retornar à visão da mesa.")]
+        [SerializeField] private float cameraUnfocusWaitTimeout = 1.0f;
+
         private bool isAwaitingSpaceForNextNpc = false;
         private bool isPlayerHandRaised = false;
         private bool isPaperFocused = false;
         private bool isDismissingProposal = false;
         private bool isPcFocused = false;
+        private bool isProcessingDecision = false;
 
         public bool IsAwaitingSpaceForNextNpc => isAwaitingSpaceForNextNpc;
         public bool IsPlayerHandRaised => isPlayerHandRaised;
         public bool IsPaperFocused => isPaperFocused;
         public bool IsDismissingProposal => isDismissingProposal;
         public bool IsPcFocused => isPcFocused;
+        public bool IsProcessingDecision => isProcessingDecision;
+        public float PostStampWaitDuration
+        {
+            get => postStampWaitDuration;
+            set => postStampWaitDuration = Mathf.Max(0f, value);
+        }
+        public float CameraUnfocusWaitTimeout
+        {
+            get => cameraUnfocusWaitTimeout;
+            set => cameraUnfocusWaitTimeout = Mathf.Max(0.1f, value);
+        }
         public UIModalCoordinator ModalCoordinator => modalCoordinator;
         public TutorialManager TutorialManager => tutorialManager;
         public bool EnableDecisionHoverPreview
@@ -538,13 +556,63 @@ namespace Mandato.Infrastructure
 
         public void HandlePlayerChoiceSubmitted(int choiceIndex)
         {
-            if (stateMachine == null) return;
+            if (stateMachine == null || isProcessingDecision) return;
 
+            StartCoroutine(ProcessPlayerDecisionRoutine(choiceIndex));
+        }
+
+        private IEnumerator ProcessPlayerDecisionRoutine(int choiceIndex)
+        {
+            isProcessingDecision = true;
             isDismissingProposal = true;
-            isPaperFocused = false;
 
+            // Desativa imediatamente as interações do carimbo, overlay e papel
             bindings?.StampTool?.SetInspectActive(false);
             bindings?.RetroMonitorPresenter?.ClearPreviewImpacts();
+            bindings?.DecisionOverlayPresenter?.SetVisible(false);
+            bindings?.PaperPresenter?.SetPaperInteractable(false);
+
+            // 1. Pausa breve só para o jogador ver o papel carimbado
+            if (postStampWaitDuration > 0f)
+            {
+                yield return new WaitForSeconds(postStampWaitDuration);
+            }
+
+            // 2. Espera sair do modo de foco no papel (Unfocus da câmera)
+            var cam = CameraFocusManager.Instance ?? bindings?.CameraFocus;
+            if (cam != null && cam.HasActiveFocus)
+            {
+                cam.Unfocus();
+
+                float elapsed = 0f;
+                while (cam.IsTransitioning && elapsed < cameraUnfocusWaitTimeout)
+                {
+                    elapsed += Time.deltaTime;
+                    yield return null;
+                }
+            }
+
+            modalCoordinator?.SetContext(InteractionContext.DeskOverview);
+            isPaperFocused = false;
+
+            // O papel some logo antes de iniciar a animação do jogador
+            bindings?.PaperPresenter?.SetPaperActive(false);
+
+            // 3. Toca a animação da mão do jogador de acordo com a decisão:
+            // "Joia" para aprovar (choiceIndex == 0) e "Dislike" para recusar (choiceIndex == 1)
+            float animDuration = 0f;
+            if (bindings != null)
+            {
+                animDuration = bindings.PlayDecisionHandAnimation(choiceIndex);
+            }
+
+            if (animDuration > 0f)
+            {
+                yield return new WaitForSeconds(animDuration);
+            }
+
+            // 4. No fim da animação, inicia a rotina normal de decisão (atualização no PC, reação do NPC, saída pela porta, etc.)
+            isProcessingDecision = false;
 
             bool isTutorial = IsTutorialCard(stateMachine.CurrentCard);
             bool hasMoreTutorial = isTutorial && HasRemainingTutorialCards();
@@ -554,7 +622,6 @@ namespace Mandato.Infrastructure
                 bindings?.PlayDealAnimationReverse();
                 isPlayerHandRaised = false;
                 bindings?.PaperPresenter?.SetPaperInteractable(false);
-                bindings?.CameraFocus?.Unfocus();
             }
             else
             {
