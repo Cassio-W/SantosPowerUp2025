@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Refuse
+  m_Name: Reject
   m_Shader: {fileID: 4800000, guid: 8f42d6a7e1c345b89a01f1e2d3c4b5a6, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
