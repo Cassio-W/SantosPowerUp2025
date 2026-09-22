@@ -11,26 +11,45 @@
         <ui:VisualElement picking-mode="Ignore" class="main-body">
             <ui:VisualElement picking-mode="Ignore" class="carousel-column">
                 <ui:Label text="CHAPA ELEITORAL" picking-mode="Ignore" class="column-title"/>
-                <ui:VisualElement name="carousel-item-prev" picking-mode="Ignore" class="carousel-slot slot-side">
-                    <ui:VisualElement name="portrait-prev" picking-mode="Ignore" class="slot-portrait slot-portrait-small"/>
-                    <ui:Label name="name-prev" text="Anterior" picking-mode="Ignore" class="slot-name slot-name-small" style="font-size: 25px;"/>
-                </ui:VisualElement>
-                <ui:VisualElement picking-mode="Ignore" class="nav-indicator">
-                    <ui:Label text="▲" picking-mode="Ignore" class="nav-indicator-arrow"/>
-                </ui:VisualElement>
-                <ui:VisualElement name="carousel-item-curr" picking-mode="Ignore" class="carousel-slot slot-active">
-                    <ui:Label text="[ SELECIONADO ]" picking-mode="Ignore" class="active-badge" style="font-size: 26px;"/>
-                    <ui:VisualElement name="portrait-curr" picking-mode="Ignore" class="slot-portrait slot-portrait-large" style="position: absolute; top: 70px; left: 119px; aspect-ratio: 1; width: auto; height: 184px;"/>
-                    <ui:VisualElement picking-mode="Ignore" class="active-slot-info">
-                        <ui:Label name="name-curr" text="Nome do Personagem" picking-mode="Ignore" class="slot-name slot-name-large" style="font-size: 30px;"/>
+                <ui:VisualElement name="carousel-viewport" picking-mode="Ignore" class="carousel-viewport">
+                    <!-- Moldura Fixa de Seleção (Permanece no centro) -->
+                    <ui:VisualElement picking-mode="Ignore" class="active-selection-frame">
+                        <ui:Label text="[ SELECIONADO ]" picking-mode="Ignore" class="active-badge"/>
                     </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement picking-mode="Ignore" class="nav-indicator">
-                    <ui:Label text="▼" picking-mode="Ignore" class="nav-indicator-arrow"/>
-                </ui:VisualElement>
-                <ui:VisualElement name="carousel-item-next" picking-mode="Ignore" class="carousel-slot slot-side">
-                    <ui:VisualElement name="portrait-next" picking-mode="Ignore" class="slot-portrait slot-portrait-small"/>
-                    <ui:Label name="name-next" text="Proximo" picking-mode="Ignore" class="slot-name slot-name-small" style="font-size: 25px;"/>
+
+                    <!-- Setas Indicadoras Fixas -->
+                    <ui:VisualElement picking-mode="Ignore" class="nav-indicator nav-indicator-top">
+                        <ui:Label text="▲" picking-mode="Ignore" class="nav-indicator-arrow"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement picking-mode="Ignore" class="nav-indicator nav-indicator-bottom">
+                        <ui:Label text="▼" picking-mode="Ignore" class="nav-indicator-arrow"/>
+                    </ui:VisualElement>
+
+                    <!-- Track Deslizante com os 5 Candidatos -->
+                    <ui:VisualElement name="carousel-track" picking-mode="Ignore" class="carousel-track">
+                        <ui:VisualElement name="carousel-item-far-prev" picking-mode="Ignore" class="carousel-slot slot-side slot-far">
+                            <ui:VisualElement name="portrait-far-prev" picking-mode="Ignore" class="slot-portrait slot-portrait-small"/>
+                            <ui:Label name="name-far-prev" text="Candidato" picking-mode="Ignore" class="slot-name slot-name-small"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="carousel-item-prev" picking-mode="Ignore" class="carousel-slot slot-side">
+                            <ui:VisualElement name="portrait-prev" picking-mode="Ignore" class="slot-portrait slot-portrait-small"/>
+                            <ui:Label name="name-prev" text="Anterior" picking-mode="Ignore" class="slot-name slot-name-small"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="carousel-item-curr" picking-mode="Ignore" class="carousel-slot slot-center">
+                            <ui:VisualElement name="portrait-curr" picking-mode="Ignore" class="slot-portrait slot-portrait-large"/>
+                            <ui:VisualElement picking-mode="Ignore" class="active-slot-info">
+                                <ui:Label name="name-curr" text="Nome do Personagem" picking-mode="Ignore" class="slot-name slot-name-large"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="carousel-item-next" picking-mode="Ignore" class="carousel-slot slot-side">
+                            <ui:VisualElement name="portrait-next" picking-mode="Ignore" class="slot-portrait slot-portrait-small"/>
+                            <ui:Label name="name-next" text="Proximo" picking-mode="Ignore" class="slot-name slot-name-small"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="carousel-item-far-next" picking-mode="Ignore" class="carousel-slot slot-side slot-far">
+                            <ui:VisualElement name="portrait-far-next" picking-mode="Ignore" class="slot-portrait slot-portrait-small"/>
+                            <ui:Label name="name-far-next" text="Candidato" picking-mode="Ignore" class="slot-name slot-name-small"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement picking-mode="Ignore" class="detail-column">

@@ -44,17 +44,29 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
     // Carrossel
     // ---------------------------------------------------------------------
 
-    private VisualElement _itemPrev;
-    private VisualElement _itemCurr;
-    private VisualElement _itemNext;
+    private class CarouselSlotView
+    {
+        public VisualElement root;
+        public VisualElement portrait;
+        public VisualElement badge;
+        public Label name;
+    }
 
-    private VisualElement _portraitPrev;
-    private VisualElement _portraitCurr;
-    private VisualElement _portraitNext;
+    private VisualElement _viewport;
+    private VisualElement _track;
+    private readonly CarouselSlotView[] _slots = new CarouselSlotView[5];
 
-    private Label _namePrev;
-    private Label _nameCurr;
-    private Label _nameNext;
+    private VisualElement _itemPrev => _slots[1]?.root;
+    private VisualElement _itemCurr => _slots[2]?.root;
+    private VisualElement _itemNext => _slots[3]?.root;
+
+    private VisualElement _portraitPrev => _slots[1]?.portrait;
+    private VisualElement _portraitCurr => _slots[2]?.portrait;
+    private VisualElement _portraitNext => _slots[3]?.portrait;
+
+    private Label _namePrev => _slots[1]?.name;
+    private Label _nameCurr => _slots[2]?.name;
+    private Label _nameNext => _slots[3]?.name;
 
     private Label _counterLabel;
 
@@ -110,7 +122,10 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
     private int _currentIndex;
 
     private bool _isAnimating;
+    private int _pendingTargetIndex;
     private IVisualElementScheduledItem _animationSchedule;
+    private int _lastNavFrame = -1;
+    private float _lastNavTime = -1f;
 
     public CharacterDefinition CurrentCharacter =>
         (_characters != null &&
@@ -158,9 +173,6 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
     private void Update()
     {
         if (!allowKeyboardNavigation)
-            return;
-
-        if (_isAnimating)
             return;
 
         if (_characters == null || _characters.Count <= 1)
@@ -251,36 +263,53 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
 
         _root = uiDocument.rootVisualElement;
 
-        // Carrossel
-        _itemPrev =
-            _root.Q<VisualElement>("carousel-item-prev") ??
-            _root.Q<VisualElement>("item-prev");
+        _viewport = _root.Q<VisualElement>("carousel-viewport");
+        _track = _root.Q<VisualElement>("carousel-track");
 
-        _itemCurr =
-            _root.Q<VisualElement>("carousel-item-curr") ??
-            _root.Q<VisualElement>("item-curr");
+        // Slot 0 (Far Prev)
+        _slots[0] = new CarouselSlotView
+        {
+            root = _root.Q<VisualElement>("carousel-item-far-prev") ?? _root.Q<VisualElement>("slot-far-prev"),
+            portrait = _root.Q<VisualElement>("portrait-far-prev"),
+            badge = null,
+            name = _root.Q<Label>("name-far-prev")
+        };
 
-        _itemNext =
-            _root.Q<VisualElement>("carousel-item-next") ??
-            _root.Q<VisualElement>("item-next");
+        // Slot 1 (Prev)
+        _slots[1] = new CarouselSlotView
+        {
+            root = _root.Q<VisualElement>("carousel-item-prev") ?? _root.Q<VisualElement>("item-prev"),
+            portrait = _root.Q<VisualElement>("portrait-prev"),
+            badge = null,
+            name = _root.Q<Label>("name-prev")
+        };
 
-        _portraitPrev =
-            _root.Q<VisualElement>("portrait-prev");
+        // Slot 2 (Curr / Active)
+        _slots[2] = new CarouselSlotView
+        {
+            root = _root.Q<VisualElement>("carousel-item-curr") ?? _root.Q<VisualElement>("item-curr"),
+            portrait = _root.Q<VisualElement>("portrait-curr"),
+            badge = _root.Q<Label>("badge-curr") ?? _root.Q<VisualElement>("active-badge"),
+            name = _root.Q<Label>("name-curr")
+        };
 
-        _portraitCurr =
-            _root.Q<VisualElement>("portrait-curr");
+        // Slot 3 (Next)
+        _slots[3] = new CarouselSlotView
+        {
+            root = _root.Q<VisualElement>("carousel-item-next") ?? _root.Q<VisualElement>("item-next"),
+            portrait = _root.Q<VisualElement>("portrait-next"),
+            badge = null,
+            name = _root.Q<Label>("name-next")
+        };
 
-        _portraitNext =
-            _root.Q<VisualElement>("portrait-next");
-
-        _namePrev =
-            _root.Q<Label>("name-prev");
-
-        _nameCurr =
-            _root.Q<Label>("name-curr");
-
-        _nameNext =
-            _root.Q<Label>("name-next");
+        // Slot 4 (Far Next)
+        _slots[4] = new CarouselSlotView
+        {
+            root = _root.Q<VisualElement>("carousel-item-far-next") ?? _root.Q<VisualElement>("slot-far-next"),
+            portrait = _root.Q<VisualElement>("portrait-far-next"),
+            badge = null,
+            name = _root.Q<Label>("name-far-next")
+        };
 
         _counterLabel =
             _root.Q<Label>("carousel-counter") ??
@@ -368,20 +397,32 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
 
     public void NavigateUp()
     {
+        if (Time.frameCount == _lastNavFrame || (Time.unscaledTime - _lastNavTime) < 0.05f)
+            return;
+
+        _lastNavFrame = Time.frameCount;
+        _lastNavTime = Time.unscaledTime;
+
         if (!CanNavigate())
             return;
 
-        int nextIndex =
+        int prevIndex =
             (_currentIndex - 1 + _characters.Count) %
             _characters.Count;
 
         PlayCarouselAnimation(
-            nextIndex,
+            prevIndex,
             -1);
     }
 
     public void NavigateDown()
     {
+        if (Time.frameCount == _lastNavFrame || (Time.unscaledTime - _lastNavTime) < 0.05f)
+            return;
+
+        _lastNavFrame = Time.frameCount;
+        _lastNavTime = Time.unscaledTime;
+
         if (!CanNavigate())
             return;
 
@@ -396,7 +437,6 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
 
     /// <summary>
     /// Seleciona diretamente um personagem.
-    /// Não utiliza a animação da roleta.
     /// </summary>
     public void SetIndex(int index)
     {
@@ -422,48 +462,54 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
 
     private bool CanNavigate()
     {
-        return !_isAnimating &&
-               _characters != null &&
+        return _characters != null &&
                _characters.Count > 1;
     }
 
     // ---------------------------------------------------------------------
-    // Animação da roleta
+    // Animação Contínua da Roleta (Track Deslizante & Tempo Real)
     // ---------------------------------------------------------------------
 
     private void PlayCarouselAnimation(
         int nextIndex,
         int direction)
     {
-        if (_isAnimating)
-            return;
-
         if (_characters == null ||
             _characters.Count <= 1)
         {
             return;
         }
 
-        if (_itemPrev == null ||
-            _itemCurr == null ||
-            _itemNext == null)
+        // Se o usuário pressionar enquanto anima, conclui a anterior imediatamente sem glitch
+        if (_isAnimating)
         {
-            _currentIndex = nextIndex;
-            RefreshDisplay();
-            OnCharacterChanged?.Invoke(CurrentCharacter);
-            return;
+            FinishCarouselAnimation(_pendingTargetIndex);
+            if (direction > 0)
+                nextIndex = (_currentIndex + 1) % _characters.Count;
+            else
+                nextIndex = (_currentIndex - 1 + _characters.Count) % _characters.Count;
         }
 
         _isAnimating = true;
+        _pendingTargetIndex = nextIndex;
 
-        float slotHeight =
-            GetCarouselSlotHeight();
+        // 1. Atualização IMEDIATA em Tempo Real dos Detalhes e Contador
+        CharacterDefinition targetCharacter = _characters[nextIndex];
+        UpdateDetails(targetCharacter);
 
-        if (slotHeight <= 0f)
-            slotHeight = 160f;
+        if (_counterLabel != null)
+        {
+            _counterLabel.text =
+                $"{nextIndex + 1:D2} / {_characters.Count:D2}";
+        }
 
-        float distance =
-            slotHeight * carouselAnimationOvershoot;
+        OnCharacterChanged?.Invoke(targetCharacter);
+
+        // 2. Preenche os 5 slots com os personagens vizinhos corretos
+        RefreshSlotsContent(_currentIndex);
+
+        // 3. Calcula a distância precisa de rolagem do track
+        float distance = GetStepDistance(direction);
 
         float startTime = Time.unscaledTime;
 
@@ -487,12 +533,19 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
                         normalized);
 
                 float offset =
-                    Mathf.Lerp(
-                        0f,
-                        -direction * distance,
-                        progress);
+                    -direction * (progress * distance);
 
-                ApplyCarouselOffset(offset);
+                if (_track != null)
+                {
+                    _track.style.translate =
+                        new Translate(0f, offset, 0f);
+                }
+                else
+                {
+                    ApplyCarouselOffset(offset);
+                }
+
+                ApplyMorphTransition(direction, progress);
 
                 if (normalized >= 1f)
                 {
@@ -503,12 +556,6 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
             .Every(0);
     }
 
-    /// <summary>
-    /// Movimento deliberadamente mais mecânico que um carousel moderno.
-    ///
-    /// O início é rápido, há uma pequena desaceleração no final
-    /// e um pequeno overshoot já configurado no deslocamento.
-    /// </summary>
     private float EvaluateCarouselProgress(
         float normalized)
     {
@@ -532,57 +579,66 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
             finalPhase);
     }
 
-    private float GetCarouselSlotHeight()
+    private float GetStepDistance(int direction)
     {
-        if (_itemCurr != null &&
-            _itemCurr.resolvedStyle.height > 0f)
+        if (_slots[2]?.root != null)
         {
-            return _itemCurr.resolvedStyle.height;
+            if (direction > 0 && _slots[3]?.root != null)
+            {
+                float h2 = _slots[2].root.resolvedStyle.height;
+                float h3 = _slots[3].root.resolvedStyle.height;
+                float dist = (h2 + h3) * 0.5f + 12f;
+                if (dist > 50f) return dist;
+            }
+            else if (direction < 0 && _slots[1]?.root != null)
+            {
+                float h2 = _slots[2].root.resolvedStyle.height;
+                float h1 = _slots[1].root.resolvedStyle.height;
+                float dist = (h2 + h1) * 0.5f + 12f;
+                if (dist > 50f) return dist;
+            }
         }
 
-        if (_itemPrev != null &&
-            _itemPrev.resolvedStyle.height > 0f)
-        {
-            return _itemPrev.resolvedStyle.height;
-        }
-
-        if (_itemNext != null &&
-            _itemNext.resolvedStyle.height > 0f)
-        {
-            return _itemNext.resolvedStyle.height;
-        }
-
-        return 0f;
+        return 217f;
     }
 
-    private void ApplyCarouselOffset(
-        float offset)
+    private void ApplyMorphTransition(int direction, float progress)
     {
-        SetElementVerticalOffset(
-            _itemPrev,
-            offset);
-
-        SetElementVerticalOffset(
-            _itemCurr,
-            offset);
-
-        SetElementVerticalOffset(
-            _itemNext,
-            offset);
+        if (direction > 0) // Descendo (Next -> Center, Curr -> Top)
+        {
+            MorphSlot(_slots[2], fromActiveToSide: true, progress);
+            MorphSlot(_slots[3], fromActiveToSide: false, progress);
+        }
+        else // Subindo (Prev -> Center, Curr -> Bottom)
+        {
+            MorphSlot(_slots[2], fromActiveToSide: true, progress);
+            MorphSlot(_slots[1], fromActiveToSide: false, progress);
+        }
     }
 
-    private void SetElementVerticalOffset(
-        VisualElement element,
-        float offset)
+    private void MorphSlot(CarouselSlotView slot, bool fromActiveToSide, float t)
     {
-        if (element == null)
-            return;
+        if (slot == null || slot.root == null) return;
 
-        element.style.translate =
-            new Translate(
-                0f,
-                offset,
-                0f);
+        float activeFactor = fromActiveToSide ? (1f - t) : t;
+
+        slot.root.style.opacity = Mathf.Lerp(0.65f, 1f, activeFactor);
+
+        Color sideBg = new Color(226f / 255f, 232f / 255f, 240f / 255f, 1f);
+        Color centerBg = new Color(226f / 255f, 232f / 255f, 240f / 255f, 0f);
+        slot.root.style.backgroundColor = Color.Lerp(sideBg, centerBg, activeFactor);
+
+        if (slot.portrait != null)
+        {
+            float portraitSize = Mathf.Lerp(75f, 145f, activeFactor);
+            slot.portrait.style.width = portraitSize;
+            slot.portrait.style.height = portraitSize;
+        }
+
+        if (slot.name != null)
+        {
+            slot.name.style.fontSize = Mathf.Lerp(13f, 26f, activeFactor);
+        }
     }
 
     private void FinishCarouselAnimation(
@@ -592,28 +648,50 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
 
         _currentIndex = nextIndex;
 
-        ResetCarouselTransforms();
-        RefreshDisplay();
+        ResetTrackAndMorphs();
+        RefreshSlotsContent(_currentIndex);
 
         _isAnimating = false;
+    }
 
-        OnCharacterChanged?.Invoke(
-            CurrentCharacter);
+    private void ResetTrackAndMorphs()
+    {
+        if (_track != null)
+        {
+            _track.style.translate =
+                new Translate(0f, 0f, 0f);
+        }
+
+        for (int i = 0; i < _slots.Length; i++)
+        {
+            if (_slots[i]?.root == null) continue;
+
+            _slots[i].root.style.translate =
+                new Translate(0f, 0f, 0f);
+            _slots[i].root.style.opacity =
+                StyleKeyword.Null;
+            _slots[i].root.style.backgroundColor =
+                StyleKeyword.Null;
+
+            if (_slots[i].portrait != null)
+            {
+                _slots[i].portrait.style.width =
+                    StyleKeyword.Null;
+                _slots[i].portrait.style.height =
+                    StyleKeyword.Null;
+            }
+
+            if (_slots[i].name != null)
+            {
+                _slots[i].name.style.fontSize =
+                    StyleKeyword.Null;
+            }
+        }
     }
 
     private void ResetCarouselTransforms()
     {
-        SetElementVerticalOffset(
-            _itemPrev,
-            0f);
-
-        SetElementVerticalOffset(
-            _itemCurr,
-            0f);
-
-        SetElementVerticalOffset(
-            _itemNext,
-            0f);
+        ResetTrackAndMorphs();
     }
 
     private void StopCarouselAnimation()
@@ -624,7 +702,7 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
 
         _isAnimating = false;
 
-        ResetCarouselTransforms();
+        ResetTrackAndMorphs();
     }
 
     private void StopScheduledAnimationOnly()
@@ -636,8 +714,21 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
         }
     }
 
+    private void ApplyCarouselOffset(
+        float offset)
+    {
+        for (int i = 0; i < _slots.Length; i++)
+        {
+            if (_slots[i]?.root != null)
+            {
+                _slots[i].root.style.translate =
+                    new Translate(0f, offset, 0f);
+            }
+        }
+    }
+
     // ---------------------------------------------------------------------
-    // Refresh
+    // Refresh & Atualização de Slots
     // ---------------------------------------------------------------------
 
     private void RefreshDisplay()
@@ -652,42 +743,10 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
         CacheElements();
 
         int count = _characters.Count;
+        _currentIndex = Mathf.Clamp(_currentIndex, 0, count - 1);
 
-        int prevIndex =
-            (_currentIndex - 1 + count) %
-            count;
-
-        int nextIndex =
-            (_currentIndex + 1) %
-            count;
-
-        CharacterDefinition prevCharacter =
-            _characters[prevIndex];
-
-        CharacterDefinition currentCharacter =
-            _characters[_currentIndex];
-
-        CharacterDefinition nextCharacter =
-            _characters[nextIndex];
-
-        // Carrossel
-        UpdateCarouselSlot(
-            _itemPrev,
-            _portraitPrev,
-            _namePrev,
-            prevCharacter);
-
-        UpdateCarouselSlot(
-            _itemCurr,
-            _portraitCurr,
-            _nameCurr,
-            currentCharacter);
-
-        UpdateCarouselSlot(
-            _itemNext,
-            _portraitNext,
-            _nameNext,
-            nextCharacter);
+        ResetTrackAndMorphs();
+        RefreshSlotsContent(_currentIndex);
 
         if (_counterLabel != null)
         {
@@ -696,7 +755,49 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
         }
 
         // Detalhes
-        UpdateDetails(currentCharacter);
+        UpdateDetails(CurrentCharacter);
+    }
+
+    private void RefreshSlotsContent(int centerIndex)
+    {
+        if (_characters == null || _characters.Count == 0) return;
+        int count = _characters.Count;
+
+        int idx0 = ((centerIndex - 2) % count + count) % count;
+        int idx1 = ((centerIndex - 1) % count + count) % count;
+        int idx2 = centerIndex;
+        int idx3 = (centerIndex + 1) % count;
+        int idx4 = (centerIndex + 2) % count;
+
+        UpdateSlotData(_slots[0], _characters[idx0]);
+        UpdateSlotData(_slots[1], _characters[idx1]);
+        UpdateSlotData(_slots[2], _characters[idx2]);
+        UpdateSlotData(_slots[3], _characters[idx3]);
+        UpdateSlotData(_slots[4], _characters[idx4]);
+    }
+
+    private void UpdateSlotData(CarouselSlotView slot, CharacterDefinition character)
+    {
+        if (slot == null || character == null) return;
+
+        if (slot.name != null)
+        {
+            slot.name.text = SanitizeRetroText(character.displayName);
+        }
+
+        if (slot.portrait != null)
+        {
+            if (character.portrait != null)
+            {
+                slot.portrait.style.backgroundImage =
+                    new StyleBackground(character.portrait);
+                slot.portrait.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                slot.portrait.style.backgroundImage = StyleKeyword.None;
+            }
+        }
     }
 
     private void UpdateDetails(
