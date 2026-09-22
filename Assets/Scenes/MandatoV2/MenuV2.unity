@@ -292,6 +292,11 @@ MonoBehaviour:
   allowKeyboardNavigation: 1
   carouselAnimationDuration: 0.18
   carouselAnimationOvershoot: 1.05
+  nameTypewriterSpeed: 65
+  titleTypewriterSpeed: 55
+  bioTypewriterSpeed: 70
+  abilityTypewriterSpeed: 60
+  statsInterpolationDuration: 0.45
 --- !u!114 &56261872
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -637,10 +642,14 @@ MonoBehaviour:
   menuUIObjects: []
   mainMenuPresenter: {fileID: 96259231}
   availableCharacters:
-  - {fileID: 11400000, guid: 4178fee9e90677a43a93f283b4a5cd33, type: 2}
-  - {fileID: 11400000, guid: 0f2d22bd8cda62e4bb28f5d31a273954, type: 2}
-  - {fileID: 11400000, guid: 255bf755545ccae459ca6002369fce91, type: 2}
   - {fileID: 11400000, guid: 6ba95eca0554d864b8b12aeabea1d4bf, type: 2}
+  - {fileID: 11400000, guid: e50983bd9212ef944a34a2e7075d7f82, type: 2}
+  - {fileID: 11400000, guid: 255bf755545ccae459ca6002369fce91, type: 2}
+  - {fileID: 11400000, guid: 7c07571bd21d50b4a9f558fbf2adf551, type: 2}
+  - {fileID: 11400000, guid: 0f2d22bd8cda62e4bb28f5d31a273954, type: 2}
+  - {fileID: 11400000, guid: c64011995f867e749a2b44e8765ba2c7, type: 2}
+  - {fileID: 11400000, guid: 4178fee9e90677a43a93f283b4a5cd33, type: 2}
+  - {fileID: 11400000, guid: aea6fea463039d14fbd2c532d23af8f6, type: 2}
   uiPresenter: {fileID: 56261871}
   buttonUp: {fileID: 953751182}
   buttonDown: {fileID: 56261875}

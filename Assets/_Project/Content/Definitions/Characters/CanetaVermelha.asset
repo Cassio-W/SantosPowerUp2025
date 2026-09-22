@@ -10,28 +10,32 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 51163078bcbffbf47b7e791e69be29af, type: 3}
-  m_Name: Senhor Centrao 1
+  m_Name: CanetaVermelha
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CharacterDefinition
-  id: 2
-  displayName: GRG GR G
+  id: 6
+  displayName: Caneta Vermelha
   title: 
-  biography: gehinoriuherthgrew
-  portrait: {fileID: 21300000, guid: f217d777a72a37b48880da6bf990a435, type: 3}
-  modelPrefab: {fileID: 5340672492827399196, guid: e0963aa14dba98a43938b379bb1c9335, type: 3}
+  biography: "Essa \xE9 a caneta vermelha"
+  portrait: {fileID: 21300000, guid: fb8e3e5eeb8e980439e4b5304ebbf9ed, type: 3}
+  modelPrefab: {fileID: 5429354218765748742, guid: d6f8590726c0fdf4d8820af07e591e5b, type: 3}
   overrideInitialStats: 1
   initialStats:
-    climaticChanges: 34
-    internationalRelations: 65
-    popularApproval: 33
-    economy: 68
-    corruption: 35
+    climaticChanges: 50
+    internationalRelations: 50
+    popularApproval: 50
+    economy: 50
+    corruption: 0
   overridePoliticalAxis: 0
   initialPoliticalX: 0
   initialPoliticalY: 0
   lockPoliticalAxis: 0
+  startingPerks: []
   startingPerkIds: []
+  blockedPerks: []
   blockedPerkIds: []
+  extraUnlockedActions: []
   extraUnlockedActionIds: []
+  lockedActions: []
   lockedActionIds: []
   initialNpcRelations: []
   uniqueAbilityIds: []

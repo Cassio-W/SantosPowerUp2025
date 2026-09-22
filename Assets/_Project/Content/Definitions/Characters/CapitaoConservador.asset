@@ -10,28 +10,33 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 51163078bcbffbf47b7e791e69be29af, type: 3}
-  m_Name: Senhor Centrao
+  m_Name: CapitaoConservador
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CharacterDefinition
-  id: 1
-  displayName: Senhor Centrao 1
+  id: 3
+  displayName: "Capit\xE3o Conservador"
   title: 
-  biography: "Esse \xE9 o senhor centrao 1"
-  portrait: {fileID: 21300000, guid: 998aa6362a3c21e4391f3a699a33d8c9, type: 3}
-  modelPrefab: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
+  biography: "Esse \xE9 o capit\xE3o conservador"
+  portrait: {fileID: 21300000, guid: 0d16c950cb99c724891a288e8ec2d3bf, type: 3}
+  modelPrefab: {fileID: 6040501860826345181, guid: bce69ffb460102040acb20bbea5190c3, type: 3}
   overrideInitialStats: 1
   initialStats:
-    climaticChanges: 26
-    internationalRelations: 78
-    popularApproval: 18
-    economy: 69
-    corruption: 42
+    climaticChanges: 35
+    internationalRelations: 60
+    popularApproval: 50
+    economy: 60
+    corruption: 49
   overridePoliticalAxis: 0
-  initialPoliticalX: 0
-  initialPoliticalY: 0
+  initialPoliticalX: 2
+  initialPoliticalY: 2
   lockPoliticalAxis: 0
+  startingPerks:
+  - {fileID: 11400000, guid: f2c6f1ae53de5ea44bb96c2e9dc50438, type: 2}
   startingPerkIds: []
+  blockedPerks: []
   blockedPerkIds: []
+  extraUnlockedActions: []
   extraUnlockedActionIds: []
+  lockedActions: []
   lockedActionIds: []
   initialNpcRelations: []
   uniqueAbilityIds: []

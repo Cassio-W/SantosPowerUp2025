@@ -93,7 +93,7 @@ Material:
     - _ClearCoatMask: 0
     - _ClearCoatSmoothness: 0
     - _Contrast: 1
-    - _CornerSmoothness: 0.001
+    - _CornerSmoothness: 0.0141
     - _Cull: 2
     - _Curvature: 0
     - _Cutoff: 0.5

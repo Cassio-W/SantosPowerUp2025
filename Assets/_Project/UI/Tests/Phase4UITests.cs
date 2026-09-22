@@ -346,5 +346,37 @@ namespace Mandato.UI.Tests
 
             Object.DestroyImmediate(go);
         }
+
+        // ── CharacterSelectionUIPresenter Text Sanitization Tests ───
+
+        [Test]
+        public void CharacterSelectionUIPresenter_SanitizeRetroText_RemovesDiacriticsAndTilde()
+        {
+            // "Senhor Centrão" -> "Senhor Centrao" (evita offset vertical da fonte de fallback)
+            string result = CharacterSelectionUIPresenter.SanitizeRetroText("Senhor Centrão");
+            Assert.AreEqual("Senhor Centrao", result);
+
+            string resultCapitao = CharacterSelectionUIPresenter.SanitizeRetroText("Capitão Conservador");
+            Assert.AreEqual("Capitao Conservador", resultCapitao);
+
+            string resultBio = CharacterSelectionUIPresenter.SanitizeRetroText("Esse é o senhor centrao");
+            Assert.AreEqual("Esse e o senhor centrao", resultBio);
+
+            string resultCorrupcao = CharacterSelectionUIPresenter.SanitizeRetroText("CORRUPÇÃO");
+            Assert.AreEqual("CORRUPCAO", resultCorrupcao);
+
+            string resultRelacoes = CharacterSelectionUIPresenter.SanitizeRetroText("RELAÇÕES");
+            Assert.AreEqual("RELACOES", resultRelacoes);
+        }
+
+        [Test]
+        public void CharacterSelectionUIPresenter_SanitizeRetroText_HandlesSpecialCharactersAndBullets()
+        {
+            string resultBullet = CharacterSelectionUIPresenter.SanitizeRetroText("• HABILIDADE ESPECIAL:\nAumenta a aprovação.");
+            Assert.AreEqual("- HABILIDADE ESPECIAL:\nAumenta a aprovacao.", resultBullet);
+
+            Assert.AreEqual(string.Empty, CharacterSelectionUIPresenter.SanitizeRetroText(null));
+            Assert.AreEqual(string.Empty, CharacterSelectionUIPresenter.SanitizeRetroText(string.Empty));
+        }
     }
 }

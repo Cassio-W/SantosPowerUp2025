@@ -4,7 +4,7 @@
         <ui:VisualElement picking-mode="Ignore" class="top-header">
             <ui:VisualElement picking-mode="Ignore" class="header-left-box">
                 <ui:VisualElement picking-mode="Ignore" class="status-led"/>
-                <ui:Label text="JUSTIÇA ELEITORAL // SELEÇÃO DE MANDATÁRIO(A)" picking-mode="Ignore" class="header-title"/>
+                <ui:Label text="JUSTICA ELEITORAL // SELECAO DE MANDATARIO(A)" picking-mode="Ignore" class="header-title"/>
             </ui:VisualElement>
             <ui:Label name="carousel-counter" text="01 / 03" picking-mode="Ignore" class="counter-chip"/>
         </ui:VisualElement>
@@ -15,32 +15,31 @@
                     <ui:VisualElement name="portrait-prev" picking-mode="Ignore" class="slot-portrait slot-portrait-small"/>
                     <ui:Label name="name-prev" text="Anterior" picking-mode="Ignore" class="slot-name slot-name-small"/>
                 </ui:VisualElement>
-                <ui:VisualElement name="carousel-item-curr" picking-mode="Ignore" class="carousel-slot slot-active">
+                <ui:VisualElement name="carousel-item-curr" picking-mode="Ignore" class="carousel-slot slot-active" style="height: 290px;">
                     <ui:VisualElement name="portrait-curr" picking-mode="Ignore" class="slot-portrait slot-portrait-large"/>
                     <ui:VisualElement picking-mode="Ignore" class="active-slot-info">
                         <ui:Label name="name-curr" text="Nome do Personagem" picking-mode="Ignore" class="slot-name slot-name-large" style="font-size: 41px; flex-wrap: wrap; flex-shrink: 1; flex-direction: column; align-items: stretch;"/>
-                        <ui:Label text="EM VOTAÇÃO" picking-mode="Ignore" class="active-badge" style="font-size: 16px;"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="carousel-item-next" picking-mode="Ignore" class="carousel-slot slot-side">
                     <ui:VisualElement name="portrait-next" picking-mode="Ignore" class="slot-portrait slot-portrait-small"/>
-                    <ui:Label name="name-next" text="Próximo" picking-mode="Ignore" class="slot-name slot-name-small"/>
+                    <ui:Label name="name-next" text="Proximo" picking-mode="Ignore" class="slot-name slot-name-small"/>
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement picking-mode="Ignore" class="detail-column">
                 <ui:VisualElement picking-mode="Ignore" class="detail-header-card">
-                    <ui:Label name="detail-name" text="NOME DO PERSONAGEM" picking-mode="Ignore" class="detail-name-label" style="font-size: 73px; height: 60px;"/>
-                    <ui:Label name="detail-title" text="CARGO / PERFIL POLÍTICO" picking-mode="Ignore" class="detail-title-label" style="font-size: 33px;"/>
+                    <ui:Label name="detail-name" text="NOME DO PERSONAGEM" picking-mode="Ignore" class="detail-name-label" style="font-size: 73px; min-height: 75px;"/>
+                    <ui:Label name="detail-title" text="CARGO / PERFIL POLITICO" picking-mode="Ignore" class="detail-title-label" style="font-size: 33px;"/>
                 </ui:VisualElement>
                 <ui:VisualElement picking-mode="Ignore" class="detail-content-row">
                     <ui:VisualElement picking-mode="Ignore" class="detail-portrait-box" style="width: 571px;">
                         <ui:VisualElement name="detail-portrait-img" picking-mode="Ignore" class="detail-portrait-img"/>
                     </ui:VisualElement>
                     <ui:VisualElement picking-mode="Ignore" class="detail-text-box">
-                        <ui:Label text="BIOGRAFIA &amp; DIRETRIZES DO GOVERNO" picking-mode="Ignore" class="section-subtitle" style="font-size: 33px;"/>
-                        <ui:Label name="detail-bio" text="Descrição completa do personagem e sua trajetória política..." picking-mode="Ignore" class="detail-bio-label" style="font-size: 30px;"/>
+                        <ui:Label text="BIOGRAFIA &amp; DIRETRIZES DO GOVERNO" picking-mode="Ignore" class="section-subtitle" style="font-size: 40px;"/>
+                        <ui:Label name="detail-bio" text="Descricao completa do personagem e sua trajetoria politica..." picking-mode="Ignore" class="detail-bio-label" style="font-size: 35px;"/>
                         <ui:VisualElement name="stats-container" picking-mode="Ignore" class="stats-container">
-                            <ui:Label text="PARÂMETROS INICIAIS DE GOVERNO" picking-mode="Ignore" class="section-subtitle" style="font-size: 29px;"/>
+                            <ui:Label text="PARAMETROS INICIAIS DE GOVERNO" picking-mode="Ignore" class="section-subtitle" style="font-size: 40px;"/>
                             <ui:VisualElement picking-mode="Ignore" class="stats-workspace">
                                 <ui:VisualElement picking-mode="Ignore" class="stats-grid-container">
                                     <ui:VisualElement picking-mode="Ignore" class="stats-grid-row">
@@ -69,7 +68,7 @@
                                         <ui:VisualElement picking-mode="Ignore" class="stat-chip chip-relations">
                                             <ui:VisualElement name="fill-relations" picking-mode="Ignore" class="stat-chip-fill fill-relations-bg" style="height: 50%;"/>
                                             <ui:VisualElement picking-mode="Ignore" class="stat-chip-foreground">
-                                                <ui:Label text="RELAÇÕES" picking-mode="Ignore" class="stat-chip-tag"/>
+                                                <ui:Label text="RELACOES" picking-mode="Ignore" class="stat-chip-tag"/>
                                                 <ui:VisualElement picking-mode="Ignore" class="stat-chip-body">
                                                     <ui:VisualElement name="icon-relations" picking-mode="Ignore" class="stat-chip-icon" style="background-image: url(&quot;project://database/Assets/Sprites/peaceSlider.png?fileID=21300000&amp;guid=7de11bbadd901af438bbd94d6f311438&amp;type=3#peaceSlider&quot;);"/>
                                                     <ui:Label name="stat-relations-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
@@ -81,7 +80,7 @@
                                             <ui:VisualElement picking-mode="Ignore" class="stat-chip-foreground">
                                                 <ui:Label text="POVO" picking-mode="Ignore" class="stat-chip-tag"/>
                                                 <ui:VisualElement picking-mode="Ignore" class="stat-chip-body">
-                                                    <ui:VisualElement name="icon-people" picking-mode="Ignore" class="stat-chip-icon" style="background-image: url(&quot;project://database/Assets/Sprites/peopleSlider.png?fileID=1537655665&amp;guid=f498b99f7dc683646b439a837578e287&amp;type=3#peopleSlider&quot;);"/>
+                                                    <ui:VisualElement name="icon-people" picking-mode="Ignore" class="stat-chip-icon" style="background-image: url(&quot;project://database/Assets/Sprites/peopleSlider.png?fileID=21300000&amp;guid=f498b99f7dc683646b439a837578e287&amp;type=3#peopleSlider&quot;);"/>
                                                     <ui:Label name="stat-people-val" text="50%" picking-mode="Ignore" class="stat-chip-val"/>
                                                 </ui:VisualElement>
                                             </ui:VisualElement>
@@ -90,8 +89,8 @@
                                 </ui:VisualElement>
                                 <ui:VisualElement name="corruption-pillar" picking-mode="Ignore" class="stat-corruption-pillar">
                                     <ui:VisualElement name="fill-corruption" picking-mode="Ignore" class="stat-corruption-fill" style="height: 0%;"/>
-                                    <ui:VisualElement picking-mode="Ignore" class="stat-corruption-foreground">
-                                        <ui:Label text="CORRUPÇÃO" picking-mode="Ignore" class="stat-corruption-tag"/>
+                                    <ui:VisualElement picking-mode="Ignore" class="stat-corruption-foreground" style="height: 339px;">
+                                        <ui:Label text="CORRUPCAO" picking-mode="Ignore" class="stat-corruption-tag"/>
                                         <ui:VisualElement name="icon-corruption" picking-mode="Ignore" class="stat-corruption-icon" style="background-image: url(&quot;project://database/Assets/Sprites/corrupcao.png?fileID=21300000&amp;guid=f217d777a72a37b48880da6bf990a435&amp;type=3#corrupcao&quot;); height: 93px; width: 94px;"/>
                                         <ui:Label name="stat-corruption-val" text="0%" picking-mode="Ignore" class="stat-corruption-val"/>
                                     </ui:VisualElement>

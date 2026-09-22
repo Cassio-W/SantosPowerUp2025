@@ -7129,10 +7129,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00003, type: 2}
   - {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0001a, type: 2}
   availableCharacters:
-  - {fileID: 11400000, guid: 4178fee9e90677a43a93f283b4a5cd33, type: 2}
-  - {fileID: 11400000, guid: 0f2d22bd8cda62e4bb28f5d31a273954, type: 2}
-  - {fileID: 11400000, guid: 255bf755545ccae459ca6002369fce91, type: 2}
   - {fileID: 11400000, guid: 6ba95eca0554d864b8b12aeabea1d4bf, type: 2}
+  - {fileID: 11400000, guid: e50983bd9212ef944a34a2e7075d7f82, type: 2}
+  - {fileID: 11400000, guid: 255bf755545ccae459ca6002369fce91, type: 2}
+  - {fileID: 11400000, guid: 7c07571bd21d50b4a9f558fbf2adf551, type: 2}
+  - {fileID: 11400000, guid: 0f2d22bd8cda62e4bb28f5d31a273954, type: 2}
+  - {fileID: 11400000, guid: c64011995f867e749a2b44e8765ba2c7, type: 2}
+  - {fileID: 11400000, guid: 4178fee9e90677a43a93f283b4a5cd33, type: 2}
+  - {fileID: 11400000, guid: aea6fea463039d14fbd2c532d23af8f6, type: 2}
   customSeed: 0
   mainMenuSceneName: MenuV2
   delayBetweenProposals: 1.5
@@ -7883,7 +7887,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c50161e3910afac4e874d6fedfd65776, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Mandato.Infrastructure::Mandato.Infrastructure.TutorialManager
-  playTutorial: 0
+  playTutorial: 1
   tutorialNpcName: Lula
   tutorialNpcPrefab: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
   spawnPoint: {fileID: 0}
@@ -9162,6 +9166,10 @@ PrefabInstance:
     - target: {fileID: 7665528489574417328, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
       propertyPath: dryColor.r
       value: 0.21568629
+      objectReference: {fileID: 0}
+    - target: {fileID: 7665528489574417328, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+      propertyPath: hoverHeight
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 7665528489574417328, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
       propertyPath: targetCamera

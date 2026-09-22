@@ -707,20 +707,22 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
 
         if (_detailName != null)
         {
-            PlayTypewriter(_detailName, character.displayName, nameTypewriterSpeed);
+            string nameText = SanitizeRetroText(character.displayName);
+            PlayTypewriter(_detailName, nameText, nameTypewriterSpeed);
         }
 
         if (_detailTitle != null)
         {
             string titleText = !string.IsNullOrEmpty(character.title)
-                ? character.title.ToUpperInvariant()
+                ? SanitizeRetroText(character.title).ToUpperInvariant()
                 : "CANDIDATO(A)";
             PlayTypewriter(_detailTitle, titleText, titleTypewriterSpeed);
         }
 
         if (_detailBio != null)
         {
-            PlayTypewriter(_detailBio, character.biography, bioTypewriterSpeed);
+            string bioText = SanitizeRetroText(character.biography);
+            PlayTypewriter(_detailBio, bioText, bioTypewriterSpeed);
         }
 
         UpdateDetailPortrait(character);
@@ -762,9 +764,10 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
             _detailAbility.style.display =
                 DisplayStyle.Flex;
 
+            string abilityText = $"- HABILIDADE ESPECIAL:\n{SanitizeRetroText(character.uniqueAbilityDescription)}";
             PlayTypewriter(
                 _detailAbility,
-                $"• HABILIDADE ESPECIAL:\n{character.uniqueAbilityDescription}",
+                abilityText,
                 abilityTypewriterSpeed);
         }
         else
@@ -814,7 +817,7 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
         if (nameLabel != null)
         {
             nameLabel.text =
-                character.displayName;
+                SanitizeRetroText(character.displayName);
         }
 
         if (portraitElement == null)
@@ -831,6 +834,36 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
             portraitElement.style.backgroundImage =
                 StyleKeyword.None;
         }
+    }
+
+    /// <summary>
+    /// Normaliza e remove diacríticos/acentos e caracteres especiais não suportados nativamente
+    /// pela fonte RETROTECH (8-bit ASCII), evitando acionamento de fonte de fallback do TextCore
+    /// que causa deslocamento vertical / offsets de altura indesejados nas linhas de texto.
+    /// </summary>
+    public static string SanitizeRetroText(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+            return string.Empty;
+
+        // Substitui caracteres especiais comuns não presentes no conjunto RETROTECH
+        text = text.Replace('•', '-');
+
+        // Decompõe caracteres acentuados (ex: 'ã' -> 'a' + '~') e filtra marcas sem espaçamento
+        string normalized = text.Normalize(System.Text.NormalizationForm.FormD);
+        var sb = new System.Text.StringBuilder(normalized.Length);
+
+        for (int i = 0; i < normalized.Length; i++)
+        {
+            char c = normalized[i];
+            var category = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+            if (category != System.Globalization.UnicodeCategory.NonSpacingMark)
+            {
+                sb.Append(c);
+            }
+        }
+
+        return sb.ToString().Normalize(System.Text.NormalizationForm.FormC);
     }
 
     // ---------------------------------------------------------------------

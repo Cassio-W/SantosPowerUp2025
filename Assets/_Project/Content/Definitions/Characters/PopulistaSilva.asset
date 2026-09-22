@@ -10,28 +10,35 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 51163078bcbffbf47b7e791e69be29af, type: 3}
-  m_Name: Senhor Centrao 2
+  m_Name: PopulistaSilva
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CharacterDefinition
-  id: 3
-  displayName: GGGGGGGGGGGGG
+  id: 2
+  displayName: Populista da Silva
   title: 
-  biography: ljlQJOASFFE
-  portrait: {fileID: 21300000, guid: 0d16c950cb99c724891a288e8ec2d3bf, type: 3}
-  modelPrefab: {fileID: 6040501860826345181, guid: bce69ffb460102040acb20bbea5190c3, type: 3}
+  biography: "Esse \xE9 o populista da silva"
+  portrait: {fileID: 21300000, guid: 046c59d7628ad3841bfd9cd2ce59bb5b, type: 3}
+  modelPrefab: {fileID: 5340672492827399196, guid: e0963aa14dba98a43938b379bb1c9335, type: 3}
   overrideInitialStats: 1
   initialStats:
-    climaticChanges: 46
-    internationalRelations: 54
-    popularApproval: 46
-    economy: 51
-    corruption: 49
+    climaticChanges: 65
+    internationalRelations: 50
+    popularApproval: 75
+    economy: 50
+    corruption: 40
   overridePoliticalAxis: 0
-  initialPoliticalX: 0
+  initialPoliticalX: -2
   initialPoliticalY: 0
   lockPoliticalAxis: 0
+  startingPerks: []
   startingPerkIds: []
+  blockedPerks: []
   blockedPerkIds: []
+  extraUnlockedActions:
+  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00004, type: 2}
+  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00005, type: 2}
+  - {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0002b, type: 2}
   extraUnlockedActionIds: []
+  lockedActions: []
   lockedActionIds: []
   initialNpcRelations: []
   uniqueAbilityIds: []

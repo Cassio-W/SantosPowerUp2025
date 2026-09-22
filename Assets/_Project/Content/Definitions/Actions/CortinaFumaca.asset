@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 883384b68471ade47bf5fc0f3daa8960, type: 3}
-  m_Name: EngavetarProposta
+  m_Name: CortinaFumaca
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.FlipPhoneActionDefinition
   id: action_engavetar_proposta
   displayName: "Cortina de Fuma\xE7a"
