@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CharacterDefinition
   id: 7
   displayName: Vilma
-  title: 
-  biography: "Essa \xE9 a vilma"
+  title: "A Gerentona do PAC"
+  biography: "Adora gráficos complicados, estocar vento e saudar a mandioca. Técnica e teimosa, mas se perder a base aliada, toma impeachment num estalar de dedos."
   portrait: {fileID: 21300000, guid: 8403b0f3a5da6074396e7c22d5db4b6e, type: 3}
   modelPrefab: {fileID: 7470939222124999217, guid: c774684354c0c8340acd528845103aad, type: 3}
   overrideInitialStats: 1

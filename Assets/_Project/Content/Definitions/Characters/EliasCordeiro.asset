@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CharacterDefinition
   id: 8
   displayName: Dr. Elias Cordeiro
-  title: 
-  biography: "Esse \xE9 o dr elias"
+  title: "Diplomata de Carreira & Burocrata Fino"
+  biography: "Fala 5 línguas, almoça em Genebra e não sabe o preço do quilo do feijão. Queridinho do mercado externo, mas o povão nunca ouviu falar dele."
   portrait: {fileID: 21300000, guid: cea2c9bf87b0c4dfdafb697a3ff00959, type: 3}
   modelPrefab: {fileID: 4047350394622487709, guid: 16e4de0f62729694eb1a5ff97f31af79, type: 3}
   overrideInitialStats: 1

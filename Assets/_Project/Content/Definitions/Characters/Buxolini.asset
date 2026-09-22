@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CharacterDefinition
   id: 4
   displayName: Buxollini
-  title: 
-  biography: "Esse \xE9 o buxollini"
+  title: "General da Ordem & Regime Forte"
+  biography: "Acha que democracia é bagunça. Governa na base da canetada e do toque de recolher. Se a estabilidade cair, o tanque vai pra rua."
   portrait: {fileID: 21300000, guid: f8b071edf6fc0a342a4880adeaa7cd79, type: 3}
   modelPrefab: {fileID: 7243269876658770806, guid: aea00cd83b7045845975864cbf0caa3e, type: 3}
   overrideInitialStats: 1

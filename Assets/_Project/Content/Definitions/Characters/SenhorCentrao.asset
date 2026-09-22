@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CharacterDefinition
   id: 1
   displayName: "Senhor Centr\xE3o"
-  title: 
-  biography: "Esse \xE9 o senhor centrao"
+  title: "Presidente do Congresso & Rei da Emenda"
+  biography: "Não tem ideologia, tem orçamento secreto. Negocia até a mãe se render ministério. Começa com estabilidade total, mas se faltar cargo, o governo cai."
   portrait: {fileID: 21300000, guid: 40ea74febf0b57946a2a4319bc0ffd19, type: 3}
   modelPrefab: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
   overrideInitialStats: 1

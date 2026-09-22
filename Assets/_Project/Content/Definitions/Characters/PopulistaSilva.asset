@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CharacterDefinition
   id: 2
   displayName: Populista da Silva
-  title: 
-  biography: "Esse \xE9 o populista da silva"
+  title: "Pai dos Pobres & Amigo da Picanha"
+  biography: "Promete picanha, cerveja e subsídio pra todo mundo. O povão ama de paixão, mas o cofre sangra e os gringos desconfiam das pedaladas."
   portrait: {fileID: 21300000, guid: 046c59d7628ad3841bfd9cd2ce59bb5b, type: 3}
   modelPrefab: {fileID: 5340672492827399196, guid: e0963aa14dba98a43938b379bb1c9335, type: 3}
   overrideInitialStats: 1

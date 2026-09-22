@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CharacterDefinition
   id: 3
   displayName: "Capit\xE3o Conservador"
-  title: 
-  biography: "Esse \xE9 o capit\xE3o conservador"
+  title: "Defensor da Moral & das Armas"
+  biography: "Discurso duro, patriota de rede social e fã de cloroquina. Odeia ONG ambiental, adora o agro e passa pano pros filhos em Brasília."
   portrait: {fileID: 21300000, guid: 0d16c950cb99c724891a288e8ec2d3bf, type: 3}
   modelPrefab: {fileID: 6040501860826345181, guid: bce69ffb460102040acb20bbea5190c3, type: 3}
   overrideInitialStats: 1

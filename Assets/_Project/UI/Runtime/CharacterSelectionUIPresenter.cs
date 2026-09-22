@@ -764,7 +764,7 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
             _detailAbility.style.display =
                 DisplayStyle.Flex;
 
-            string abilityText = $"- HABILIDADE ESPECIAL:\n{SanitizeRetroText(character.uniqueAbilityDescription)}";
+            string abilityText = $"TRUQUE DE CAMPANHA:\n{SanitizeRetroText(character.uniqueAbilityDescription)}";
             PlayTypewriter(
                 _detailAbility,
                 abilityText,
