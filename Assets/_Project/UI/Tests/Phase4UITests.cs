@@ -257,7 +257,23 @@ namespace Mandato.UI.Tests
             };
             var nextStats = new StatBlock(climate: 85, relations: 50, approval: 55, eco: 55, corrupt: 20);
             var nextSnapshot = new RunSnapshot(nextStats, new PoliticalAxis(), 2, "02/2026", true, false, false, string.Empty);
-            Assert.DoesNotThrow(() => presenter.UpdateSnapshot(nextSnapshot, report));
+            // Test Typewriter, Log & Text Methods (incluindo chamadas repetidas sem alteração de valor)
+            Assert.DoesNotThrow(() => presenter.UpdateDateDisplay("02/2026"));
+            Assert.DoesNotThrow(() => presenter.UpdateDateDisplay("02/2026")); // Chamada repetida não deve re-digitar
+            Assert.DoesNotThrow(() => presenter.UpdateSituation("CRISE POLÍTICA"));
+            Assert.DoesNotThrow(() => presenter.UpdateSituation("CRISE POLÍTICA")); // Chamada repetida não deve re-digitar
+            Assert.DoesNotThrow(() => presenter.NotifyTermination(RunTermination.CreateDefeat("Renúncia")));
+            Assert.DoesNotThrow(() => presenter.LogMessage("Teste de log do terminal CRT", "log-alert"));
+            Assert.DoesNotThrow(() => presenter.LogMessage("Teste de log do terminal CRT", "log-alert")); // Chamada repetida
+            Assert.DoesNotThrow(() => presenter.StopAllTypewriters());
+            Assert.DoesNotThrow(() => presenter.SkipAllTypewriters());
+            Assert.DoesNotThrow(() => presenter.AnimateStatsInterpolation(50, 50, 50, 50, 0, 0.45f));
+            Assert.DoesNotThrow(() => presenter.AnimateStatsInterpolation(50, 50, 50, 50, 0, 0.45f)); // Chamada repetida
+            Assert.DoesNotThrow(() => presenter.StopStatsInterpolation());
+
+            string sanitized = RetroMonitorPresenter.SanitizeRetroText("Situação Econômica Crítica • Atenção!");
+            Assert.IsFalse(sanitized.Contains("ã") || sanitized.Contains("ó") || sanitized.Contains("í"));
+            Assert.IsTrue(sanitized.Contains("-"));
 
             Object.DestroyImmediate(go);
         }

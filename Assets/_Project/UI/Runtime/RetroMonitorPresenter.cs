@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Mandato.Content;
 using Mandato.Core;
 using Mandato.Run;
@@ -11,15 +12,22 @@ namespace Mandato.UI
     /// <summary>
     /// Presenter do Monitor Retrô CRT 3D em UI Toolkit puro (renderizado diegeticamente no RenderTexture).
     /// Controla as barras dos 4 indicadores (Clima, Economia, Relações, População), módulo de Corrupção,
-    /// animações de ghost fills, setas de variação, tremores e efeito de glitch no CRT.
+    /// animações de ghost fills, setas de variação, tremores, efeito typewriter e glitch no CRT.
     /// </summary>
     public class RetroMonitorPresenter : MonoBehaviour
     {
         [Header("Configurações do Monitor")]
         [SerializeField] private Material crtMaterial;
         [SerializeField] private float animationSpeed = 4f;
+        [SerializeField] private float statsInterpolationDuration = 0.5f;
         [SerializeField] private float arrowDuration = 4.5f;
         [SerializeField] private bool triggerGlitchOnChanges = true;
+
+        [Header("Animações de Texto (Typewriter)")]
+        [SerializeField] private bool enableTypewriter = true;
+        [SerializeField] private float logTypewriterSpeed = 45f;
+        [SerializeField] private float situationTypewriterSpeed = 35f;
+        [SerializeField] private float dateTypewriterSpeed = 30f;
 
         [Header("UI Document e Assets")]
         [SerializeField] private UIDocument uiDocument;
@@ -47,6 +55,18 @@ namespace Mandato.UI
         private Label situationLabel;
         private Label dynamicLogEntry;
 
+        // Agendamentos UI Toolkit
+        private readonly Dictionary<Label, IVisualElementScheduledItem> _activeTypewriters =
+            new Dictionary<Label, IVisualElementScheduledItem>();
+        private readonly Dictionary<Label, string> _displayedTexts =
+            new Dictionary<Label, string>();
+        private IVisualElementScheduledItem _statsInterpolationSchedule;
+
+        // Cache de últimos textos definidos para evitar disparos redundantes
+        private string _lastDateText;
+        private string _lastSituationText;
+        private string _lastLogText;
+
         // Valores interpolados
         private float curNature = 50f, targetNature = 50f;
         private float curEconomy = 50f, targetEconomy = 50f;
@@ -63,10 +83,32 @@ namespace Mandato.UI
             HideAllArrows();
         }
 
+        private void Start()
+        {
+            if (dynamicLogEntry != null && enableTypewriter && gameObject.activeInHierarchy)
+            {
+                string initialMsg = "> [SISTEMA] Telemetria operacional. Aguardando despachos...";
+                _lastLogText = SanitizeRetroText(initialMsg);
+                PlayTypewriter(dynamicLogEntry, initialMsg, logTypewriterSpeed, showCursor: false);
+            }
+        }
+
         private void OnEnable()
         {
             EnsureReferences();
             CacheElements();
+        }
+
+        private void OnDisable()
+        {
+            StopAllTypewriters();
+            StopStatsInterpolation();
+        }
+
+        private void OnDestroy()
+        {
+            StopAllTypewriters();
+            StopStatsInterpolation();
         }
 
         public void EnsureReferences()
@@ -231,6 +273,9 @@ namespace Mandato.UI
                              Mathf.Abs(dRelations) > 0.1f || Mathf.Abs(dPeople) > 0.1f ||
                              Mathf.Abs(dCorruption) > 0.1f;
 
+            // Dispara animação de interpolação sincronizada de preenchimento e números
+            AnimateStatsInterpolation(targetNature, targetEconomy, targetRelations, targetPeople, targetCorruption, statsInterpolationDuration);
+
             if (hasChange && triggerGlitchOnChanges)
             {
                 TriggerGlitch();
@@ -299,19 +344,51 @@ namespace Mandato.UI
 
         public void UpdateDateDisplay(string displayDate)
         {
-            if (dateLabel != null && !string.IsNullOrEmpty(displayDate))
+            if (dateLabel == null || string.IsNullOrEmpty(displayDate)) return;
+
+            string fullText = $"DATA: {displayDate}";
+            string sanitized = SanitizeRetroText(fullText);
+
+            if (string.Equals(_lastDateText, sanitized, StringComparison.Ordinal) && dateLabel.text == sanitized)
             {
-                dateLabel.text = $"MANDATO: {displayDate}";
+                return;
+            }
+
+            _lastDateText = sanitized;
+
+            if (enableTypewriter && gameObject.activeInHierarchy && isActiveAndEnabled && dateLabel.panel != null)
+            {
+                PlayTypewriter(dateLabel, sanitized, dateTypewriterSpeed, showCursor: false);
+            }
+            else
+            {
+                dateLabel.text = sanitized;
             }
         }
 
         public void UpdateSituation(string situationText)
         {
-            if (situationLabel != null && !string.IsNullOrEmpty(situationText))
+            if (situationLabel == null || string.IsNullOrEmpty(situationText)) return;
+
+            string formatted = situationText.StartsWith("SITUAÇÃO:", StringComparison.OrdinalIgnoreCase)
+                ? situationText
+                : $"SITUAÇÃO: {situationText}";
+            string sanitized = SanitizeRetroText(formatted);
+
+            if (string.Equals(_lastSituationText, sanitized, StringComparison.Ordinal) && situationLabel.text == sanitized)
             {
-                situationLabel.text = situationText.StartsWith("SITUAÇÃO:", StringComparison.OrdinalIgnoreCase)
-                    ? situationText
-                    : $"SITUAÇÃO: {situationText}";
+                return;
+            }
+
+            _lastSituationText = sanitized;
+
+            if (enableTypewriter && gameObject.activeInHierarchy && isActiveAndEnabled && situationLabel.panel != null)
+            {
+                PlayTypewriter(situationLabel, sanitized, situationTypewriterSpeed, showCursor: false);
+            }
+            else
+            {
+                situationLabel.text = sanitized;
             }
         }
 
@@ -320,9 +397,25 @@ namespace Mandato.UI
             if (card == null) return;
 
             string title = !string.IsNullOrEmpty(card.categoryTag) ? card.categoryTag : card.title;
+            string message = $"> [DESPACHO] Nova proposta: \"{title}\"";
+            string sanitized = SanitizeRetroText(message);
+
             if (dynamicLogEntry != null)
             {
-                dynamicLogEntry.text = $"> [DESPACHO] Nova proposta: \"{title}\"";
+                SetLogVariantClass("log-dispatch");
+
+                if (!string.Equals(_lastLogText, sanitized, StringComparison.Ordinal) || dynamicLogEntry.text != sanitized)
+                {
+                    _lastLogText = sanitized;
+                    if (enableTypewriter && gameObject.activeInHierarchy && isActiveAndEnabled && dynamicLogEntry.panel != null)
+                    {
+                        PlayTypewriter(dynamicLogEntry, sanitized, logTypewriterSpeed, showCursor: true);
+                    }
+                    else
+                    {
+                        dynamicLogEntry.text = sanitized;
+                    }
+                }
             }
 
             if (triggerGlitchOnChanges)
@@ -336,24 +429,37 @@ namespace Mandato.UI
             if (termination.IsOngoing) return;
 
             string reason = !string.IsNullOrEmpty(termination.reason) ? termination.reason : (termination.IsVictory ? "Mandato cumprido com êxito!" : "Mandato encerrado prematuramente.");
+            string message = $"> [FIM DE JOGO] {reason}";
+            string sanitized = SanitizeRetroText(message);
+
             if (dynamicLogEntry != null)
             {
-                dynamicLogEntry.text = $"> [FIM DE JOGO] {reason}";
+                SetLogVariantClass(termination.IsVictory ? "log-system" : "log-alert");
+
+                if (!string.Equals(_lastLogText, sanitized, StringComparison.Ordinal) || dynamicLogEntry.text != sanitized)
+                {
+                    _lastLogText = sanitized;
+                    if (enableTypewriter && gameObject.activeInHierarchy && isActiveAndEnabled && dynamicLogEntry.panel != null)
+                    {
+                        PlayTypewriter(dynamicLogEntry, sanitized, logTypewriterSpeed, showCursor: true);
+                    }
+                    else
+                    {
+                        dynamicLogEntry.text = sanitized;
+                    }
+                }
             }
+
             TriggerGlitch(0.8f);
         }
 
         private void Update()
         {
-            float dt = Time.deltaTime * animationSpeed;
-
-            curNature = Mathf.MoveTowards(curNature, targetNature, dt * 25f);
-            curEconomy = Mathf.MoveTowards(curEconomy, targetEconomy, dt * 25f);
-            curRelations = Mathf.MoveTowards(curRelations, targetRelations, dt * 25f);
-            curPeople = Mathf.MoveTowards(curPeople, targetPeople, dt * 25f);
-            curCorruption = Mathf.MoveTowards(curCorruption, targetCorruption, dt * 25f);
-
-            ApplyVisualValues();
+            // Fallback para edição/visualização no editor quando não estiver executando
+            if (_statsInterpolationSchedule == null && !Application.isPlaying)
+            {
+                ApplyVisualValues();
+            }
         }
 
         private void ApplyVisualValues()
@@ -477,6 +583,266 @@ namespace Mandato.UI
             crtMaterial.SetFloat("_GlitchStrength", strength);
             yield return new WaitForSeconds(0.15f);
             crtMaterial.SetFloat("_GlitchStrength", 0.0f);
+        }
+
+        // =========================================================================
+        // TYPEWRITER & FORMATAÇÃO RETRÔ
+        // =========================================================================
+
+        /// <summary>
+        /// Executa o efeito de digitação retrô (Typewriter) em um elemento de texto (Label).
+        /// </summary>
+        public void PlayTypewriter(Label label, string fullText, float charsPerSecond = 45f, bool showCursor = true, Action onComplete = null)
+        {
+            if (label == null) return;
+
+            fullText = SanitizeRetroText(fullText);
+
+            // Se o texto já está completamente exibido e idêntico, e não há animação rodando, não reinicia
+            if (_displayedTexts.TryGetValue(label, out var lastText) && string.Equals(lastText, fullText, StringComparison.Ordinal))
+            {
+                if (!_activeTypewriters.ContainsKey(label))
+                {
+                    label.text = fullText;
+                    onComplete?.Invoke();
+                    return;
+                }
+            }
+
+            if (_activeTypewriters.TryGetValue(label, out var prevSchedule) && prevSchedule != null)
+            {
+                prevSchedule.Pause();
+                _activeTypewriters.Remove(label);
+            }
+
+            _displayedTexts[label] = fullText;
+
+            if (string.IsNullOrEmpty(fullText))
+            {
+                label.text = string.Empty;
+                onComplete?.Invoke();
+                return;
+            }
+
+            if (!enableTypewriter || charsPerSecond <= 0f || label.panel == null)
+            {
+                label.text = fullText;
+                onComplete?.Invoke();
+                return;
+            }
+
+            label.text = showCursor ? "█" : string.Empty;
+
+            float startTime = Time.unscaledTime;
+            int totalChars = fullText.Length;
+            float duration = totalChars / Mathf.Max(1f, charsPerSecond);
+
+            var schedule = label.schedule.Execute(() =>
+            {
+                float elapsed = Time.unscaledTime - startTime;
+                int currentLength = Mathf.Clamp(Mathf.RoundToInt((elapsed / Mathf.Max(0.01f, duration)) * totalChars), 0, totalChars);
+
+                if (currentLength < totalChars && showCursor)
+                {
+                    label.text = fullText.Substring(0, currentLength) + "█";
+                }
+                else
+                {
+                    label.text = fullText.Substring(0, currentLength);
+                }
+
+                if (currentLength >= totalChars)
+                {
+                    if (_activeTypewriters.TryGetValue(label, out var s) && s != null)
+                    {
+                        s.Pause();
+                        _activeTypewriters.Remove(label);
+                    }
+                    onComplete?.Invoke();
+                }
+            }).Every(0);
+
+            _activeTypewriters[label] = schedule;
+        }
+
+        /// <summary>
+        /// Interrompe todas as animações de digitação ativas.
+        /// </summary>
+        public void StopAllTypewriters()
+        {
+            foreach (var kvp in _activeTypewriters)
+            {
+                kvp.Value?.Pause();
+            }
+            _activeTypewriters.Clear();
+        }
+
+        /// <summary>
+        /// Pula todas as animações de digitação ativas, interrompendo os agendamentos.
+        /// </summary>
+        public void SkipAllTypewriters()
+        {
+            StopAllTypewriters();
+        }
+
+        /// <summary>
+        /// Altera dinamicamente a variante de estilo do log do terminal (ex: log-dispatch, log-alert, log-warning, log-system).
+        /// </summary>
+        public void SetLogVariantClass(string className)
+        {
+            if (dynamicLogEntry == null) return;
+
+            dynamicLogEntry.RemoveFromClassList("log-system");
+            dynamicLogEntry.RemoveFromClassList("log-dispatch");
+            dynamicLogEntry.RemoveFromClassList("log-warning");
+            dynamicLogEntry.RemoveFromClassList("log-alert");
+
+            if (!string.IsNullOrEmpty(className))
+            {
+                dynamicLogEntry.AddToClassList(className);
+            }
+        }
+
+        /// <summary>
+        /// Registra uma mensagem personalizada no terminal inferior com efeito typewriter e estilo.
+        /// </summary>
+        public void LogMessage(string message, string logStyleClass = "log-system", float speed = -1f)
+        {
+            if (dynamicLogEntry == null || string.IsNullOrEmpty(message)) return;
+
+            SetLogVariantClass(logStyleClass);
+            string sanitized = SanitizeRetroText(message);
+
+            if (string.Equals(_lastLogText, sanitized, StringComparison.Ordinal) && dynamicLogEntry.text == sanitized)
+            {
+                return;
+            }
+
+            _lastLogText = sanitized;
+            float actualSpeed = speed > 0f ? speed : logTypewriterSpeed;
+
+            if (enableTypewriter && gameObject.activeInHierarchy && isActiveAndEnabled && dynamicLogEntry.panel != null)
+            {
+                PlayTypewriter(dynamicLogEntry, sanitized, actualSpeed, showCursor: true);
+            }
+            else
+            {
+                dynamicLogEntry.text = sanitized;
+            }
+        }
+
+        /// <summary>
+        /// Animação de interpolação sincronizada entre o preenchimento de background e os valores numéricos (com curva EaseOutCubic idêntica à urna).
+        /// </summary>
+        public void AnimateStatsInterpolation(
+            float targetClimate,
+            float targetEconomy,
+            float targetRelations,
+            float targetPeople,
+            float targetCorruption,
+            float duration = -1f)
+        {
+            float actualDuration = duration > 0f ? duration : statsInterpolationDuration;
+            float startClimate = curNature;
+            float startEconomy = curEconomy;
+            float startRelations = curRelations;
+            float startPeople = curPeople;
+            float startCorruption = curCorruption;
+
+            // Se não houve alteração relevante entre os valores atuais e alvos, não precisa animar
+            bool needsAnimation = Mathf.Abs(targetClimate - startClimate) >= 0.1f ||
+                                  Mathf.Abs(targetEconomy - startEconomy) >= 0.1f ||
+                                  Mathf.Abs(targetRelations - startRelations) >= 0.1f ||
+                                  Mathf.Abs(targetPeople - startPeople) >= 0.1f ||
+                                  Mathf.Abs(targetCorruption - startCorruption) >= 0.1f;
+
+            if (!needsAnimation)
+            {
+                curNature = targetClimate;
+                curEconomy = targetEconomy;
+                curRelations = targetRelations;
+                curPeople = targetPeople;
+                curCorruption = targetCorruption;
+                ApplyVisualValues();
+                return;
+            }
+
+            StopStatsInterpolation();
+
+            if (root == null || root.panel == null || !gameObject.activeInHierarchy || actualDuration <= 0.001f)
+            {
+                curNature = targetClimate;
+                curEconomy = targetEconomy;
+                curRelations = targetRelations;
+                curPeople = targetPeople;
+                curCorruption = targetCorruption;
+                ApplyVisualValues();
+                return;
+            }
+
+            float startTime = Time.unscaledTime;
+
+            _statsInterpolationSchedule = root.schedule.Execute(() =>
+            {
+                float elapsed = Time.unscaledTime - startTime;
+                float normalized = Mathf.Clamp01(elapsed / Mathf.Max(0.01f, actualDuration));
+
+                // Easing suave (EaseOutCubic) idêntico à UI da urna
+                float t = 1f - Mathf.Pow(1f - normalized, 3f);
+
+                curNature = Mathf.Lerp(startClimate, targetClimate, t);
+                curEconomy = Mathf.Lerp(startEconomy, targetEconomy, t);
+                curRelations = Mathf.Lerp(startRelations, targetRelations, t);
+                curPeople = Mathf.Lerp(startPeople, targetPeople, t);
+                curCorruption = Mathf.Lerp(startCorruption, targetCorruption, t);
+
+                ApplyVisualValues();
+
+                if (normalized >= 1f)
+                {
+                    StopStatsInterpolation();
+                }
+            }).Every(0);
+        }
+
+        /// <summary>
+        /// Interrompe qualquer interpolação de atributos/stats em andamento.
+        /// </summary>
+        public void StopStatsInterpolation()
+        {
+            if (_statsInterpolationSchedule != null)
+            {
+                _statsInterpolationSchedule.Pause();
+                _statsInterpolationSchedule = null;
+            }
+        }
+
+        /// <summary>
+        /// Normaliza e remove diacríticos/acentos e caracteres especiais não suportados nativamente
+        /// pela fonte RETROTECH (8-bit ASCII), evitando acionamento de fonte de fallback do TextCore
+        /// que causa deslocamento vertical / offsets de altura indesejados nas linhas de texto.
+        /// </summary>
+        public static string SanitizeRetroText(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return string.Empty;
+
+            text = text.Replace('•', '-');
+
+            string normalized = text.Normalize(System.Text.NormalizationForm.FormD);
+            var sb = new System.Text.StringBuilder(normalized.Length);
+
+            for (int i = 0; i < normalized.Length; i++)
+            {
+                char c = normalized[i];
+                var category = System.Globalization.CharUnicodeInfo.GetUnicodeCategory(c);
+                if (category != System.Globalization.UnicodeCategory.NonSpacingMark)
+                {
+                    sb.Append(c);
+                }
+            }
+
+            return sb.ToString().Normalize(System.Text.NormalizationForm.FormC);
         }
     }
 }

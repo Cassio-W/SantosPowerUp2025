@@ -7887,7 +7887,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c50161e3910afac4e874d6fedfd65776, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Mandato.Infrastructure::Mandato.Infrastructure.TutorialManager
-  playTutorial: 1
+  playTutorial: 0
   tutorialNpcName: Lula
   tutorialNpcPrefab: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
   spawnPoint: {fileID: 0}

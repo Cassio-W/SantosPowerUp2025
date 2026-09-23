@@ -528,6 +528,22 @@ Label {
     text-overflow: ellipsis;
 }
 
+.dynamic-log-label.log-system {
+    color: #4ade80;
+}
+
+.dynamic-log-label.log-dispatch {
+    color: #38bdf8;
+}
+
+.dynamic-log-label.log-warning {
+    color: #facc15;
+}
+
+.dynamic-log-label.log-alert {
+    color: #ef4444;
+}
+
 .system-version-label {
     font-size: 11px;
     color: #64748b;
