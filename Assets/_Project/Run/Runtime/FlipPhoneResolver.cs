@@ -54,32 +54,40 @@ namespace Mandato.Run
                 return new FlipPhoneUseReport { success = false, failReason = "A partida já está encerrada." };
             }
 
-            // 2. Verifica se está desbloqueada
+            // 2. Verifica se o NPC vinculado à ação está disponível (não foi preso, afastado ou morto)
+            string linkedNpc = action.GetLinkedNpcId();
+            if (!string.IsNullOrEmpty(linkedNpc) && !runState.IsNpcAvailable(linkedNpc))
+            {
+                return new FlipPhoneUseReport { success = false, failReason = "O contato vinculado está indisponível (preso, afastado ou falecido)." };
+            }
+
+            // 3. Verifica se está desbloqueada
             if (!runState.IsActionUnlocked(action.id) && !action.unlockByDefault)
             {
                 return new FlipPhoneUseReport { success = false, failReason = "Ação não desbloqueada." };
             }
 
-            // 3. Verifica se já foi consumida (SingleUse)
+            // 4. Verifica se já foi consumida (SingleUse)
             if (action.cooldownType == FlipPhoneCooldownType.SingleUse && runState.IsActionConsumed(action.id))
             {
                 return new FlipPhoneUseReport { success = false, failReason = "Ação de uso único já consumida." };
             }
 
-            // 4. Verifica cooldown ativo
+            // 5. Verifica cooldown ativo
             if (runState.IsActionOnCooldown(action.id))
             {
                 int remaining = runState.GetActionCooldown(action.id);
                 return new FlipPhoneUseReport { success = false, failReason = $"Ação em recarga ({remaining} turno(s) restante(s))." };
             }
 
-            // 5. Valida efeitos que requerem proposta ou visitante ativo
+            // 6. Valida efeitos que requerem proposta ou visitante ativo
             if (action.effects != null)
             {
                 bool requiresProposal = action.effects.Exists(e => e != null && (
                     e.effectType == FlipPhoneEffectType.DismissCurrentProposal ||
                     (e.effectType == FlipPhoneEffectType.RemoveNpcFromGame && string.IsNullOrEmpty(e.GetTargetId())) ||
-                    (e.effectType == FlipPhoneEffectType.SuspendNpc && string.IsNullOrEmpty(e.GetTargetId()))
+                    (e.effectType == FlipPhoneEffectType.SuspendNpc && string.IsNullOrEmpty(e.GetTargetId())) ||
+                    (e.effectType == FlipPhoneEffectType.ModifyNpcRelation && string.IsNullOrEmpty(e.GetTargetId()))
                 ));
                 if (requiresProposal && currentCard == null)
                 {
@@ -87,9 +95,9 @@ namespace Mandato.Run
                 }
             }
 
-            // 6. Valida condições
+            // 7. Valida condições
             string currentNpcId = currentCard != null ? currentCard.GetNpcId() : string.Empty;
-            if (!action.AreConditionsMet(runState.stats, runState.calendar.currentMonthIndex, runState.activePerkIds, runState.decisionHistory, currentNpcId))
+            if (!action.AreConditionsMet(runState.stats, runState.calendar.currentMonthIndex, runState.activePerkIds, runState.decisionHistory, currentNpcId, runState.GetNpcRelation))
             {
                 return new FlipPhoneUseReport { success = false, failReason = "Condições da ação não atendidas." };
             }
@@ -102,7 +110,7 @@ namespace Mandato.Run
                 statsBefore = runState.stats.Clone()
             };
 
-            // 7. Aplica cada efeito
+            // 8. Aplica cada efeito
             if (action.effects != null)
             {
                 foreach (var effect in action.effects)
@@ -148,7 +156,9 @@ namespace Mandato.Run
                             break;
 
                         case FlipPhoneEffectType.RemoveNpcFromGame:
-                            string targetRemoveNpc = !string.IsNullOrEmpty(effTargetId) ? effTargetId : (currentCard != null ? currentCard.GetNpcId() : string.Empty);
+                            string targetRemoveNpc = !string.IsNullOrEmpty(effTargetId)
+                                ? effTargetId
+                                : (currentCard != null ? currentCard.GetNpcId() : string.Empty);
                             if (!string.IsNullOrEmpty(targetRemoveNpc))
                             {
                                 var npcState = runState.GetOrCreateNpcState(targetRemoveNpc);
@@ -173,7 +183,9 @@ namespace Mandato.Run
                             break;
 
                         case FlipPhoneEffectType.SuspendNpc:
-                            string targetSuspendNpc = !string.IsNullOrEmpty(effTargetId) ? effTargetId : (currentCard != null ? currentCard.GetNpcId() : string.Empty);
+                            string targetSuspendNpc = !string.IsNullOrEmpty(effTargetId)
+                                ? effTargetId
+                                : (currentCard != null ? currentCard.GetNpcId() : string.Empty);
                             if (!string.IsNullOrEmpty(targetSuspendNpc))
                             {
                                 var npcState = runState.GetOrCreateNpcState(targetSuspendNpc);
@@ -182,6 +194,20 @@ namespace Mandato.Run
                                     npcState.suspendedMonths = effect.duration > 0 ? effect.duration : 24;
                                 }
                                 report.suspendedNpcIds.Add(targetSuspendNpc);
+                            }
+                            break;
+
+                        case FlipPhoneEffectType.ModifyNpcRelation:
+                            string targetRelationNpc = !string.IsNullOrEmpty(effTargetId)
+                                ? effTargetId
+                                : (currentCard != null ? currentCard.GetNpcId() : string.Empty);
+                            if (!string.IsNullOrEmpty(targetRelationNpc))
+                            {
+                                var npcState = runState.GetOrCreateNpcState(targetRelationNpc);
+                                if (npcState != null)
+                                {
+                                    npcState.ModifyRelation(effect.deltaNpcRelation);
+                                }
                             }
                             break;
 

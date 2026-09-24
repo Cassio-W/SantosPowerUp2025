@@ -134,8 +134,22 @@ namespace Mandato.Editor
             var npcObj = GetFieldValue<GameObject>(legacyDeal, dealType, "NPC", null);
             if (npcObj != null)
             {
-                card.npcId = npcObj.name;
-                card.npcPrefab = npcObj;
+                // Busca se existe NpcDefinition correspondente
+                string[] npcGuids = AssetDatabase.FindAssets("t:NpcDefinition", new[] { "Assets/_Project/Content/Definitions/NPCs" });
+                NpcDefinition foundNpc = null;
+                foreach (var nGuid in npcGuids)
+                {
+                    var nDef = AssetDatabase.LoadAssetAtPath<NpcDefinition>(AssetDatabase.GUIDToAssetPath(nGuid));
+                    if (nDef != null && (nDef.prefab == npcObj || string.Equals(nDef.id, npcObj.name, StringComparison.OrdinalIgnoreCase) || string.Equals(nDef.displayName, npcObj.name, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        foundNpc = nDef;
+                        break;
+                    }
+                }
+
+                card.npc = foundNpc;
+                card.npcId = foundNpc == null ? npcObj.name : string.Empty;
+                card.npcPrefab = foundNpc == null ? npcObj : null;
             }
             card.sourceLegacyAsset = legacyDeal;
 

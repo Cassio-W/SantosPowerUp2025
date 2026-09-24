@@ -11,7 +11,8 @@ namespace Mandato.UI
         public string id = string.Empty;
         public string displayName = string.Empty;
         public string description = string.Empty;
-        public string categoryTag = "Ações";
+        public string categoryTag = "Contatos";
+        public string linkedNpcId = string.Empty;
         public Sprite icon;
         public bool isAvailable = true;
         public bool isOnCooldown = false;
@@ -164,7 +165,7 @@ namespace Mandato.UI
 
             root = uiDocument.rootVisualElement;
             screenRoot = root.Q<VisualElement>("phone-screen-root");
-            appsContainer = root.Q<VisualElement>("apps-grid-container");
+            appsContainer = root.Q<VisualElement>("apps-grid-container") ?? root.Q<VisualElement>("contacts-list-container");
             emptyLabel = root.Q<Label>("empty-actions-label");
             closeBtn = root.Q<Button>("phone-close-btn");
 
@@ -198,7 +199,6 @@ namespace Mandato.UI
 
         public void SetCategoryFilter(string filterName)
         {
-            // Abas foram removidas para simplificação e foco em grade de aplicativos.
             // Mantido para compatibilidade com assinaturas antigas.
         }
 
@@ -225,7 +225,7 @@ namespace Mandato.UI
                 screenRoot.style.opacity = 1f;
             }
 
-            Debug.Log("<color=#6a9fb5>[FlipPhonePresenter]</color> UI Toolkit: Tela do celular exibida.");
+            Debug.Log("<color=#6a9fb5>[FlipPhonePresenter]</color> UI Toolkit: Agenda de contatos exibida.");
             OnPhoneOpened?.Invoke();
         }
 
@@ -275,7 +275,7 @@ namespace Mandato.UI
             CacheVisualElements();
             RebuildAppTiles();
 
-            Debug.Log($"<color=#6a9fb5>[FlipPhonePresenter]</color> Interface atualizada com {cachedViewModels.Count} aplicativos.");
+            Debug.Log($"<color=#6a9fb5>[FlipPhonePresenter]</color> Agenda atualizada com {cachedViewModels.Count} contatos.");
         }
 
         public void OpenActionModal(FlipPhoneActionViewModel vm)
@@ -298,7 +298,7 @@ namespace Mandato.UI
 
             if (modalCategoryBadge != null)
             {
-                modalCategoryBadge.text = !string.IsNullOrEmpty(vm.categoryTag) ? vm.categoryTag.ToUpper() : "GABINETE";
+                modalCategoryBadge.text = !string.IsNullOrEmpty(vm.categoryTag) ? vm.categoryTag.ToUpper() : "CONTATO";
             }
 
             if (modalAppIcon != null)
@@ -339,8 +339,7 @@ namespace Mandato.UI
                 }
                 else
                 {
-                    bool isContact = vm.categoryTag != null && vm.categoryTag.IndexOf("Contato", StringComparison.OrdinalIgnoreCase) >= 0;
-                    modalExecBtn.text = isContact ? "LIGAR" : "EXECUTAR";
+                    modalExecBtn.text = "LIGAR";
                     modalExecBtn.SetEnabled(true);
                 }
             }
@@ -352,7 +351,7 @@ namespace Mandato.UI
             }
 
             isModalOpen = true;
-            Debug.Log($"<color=#6a9fb5>[FlipPhonePresenter]</color> Modal de detalhes aberto para o app: <b>{vm.displayName}</b>");
+            Debug.Log($"<color=#6a9fb5>[FlipPhonePresenter]</color> Modal de detalhes aberto para o contato: <b>{vm.displayName}</b>");
         }
 
         public void CloseActionModal()
@@ -374,7 +373,7 @@ namespace Mandato.UI
             if (selectedAction.isAvailable && !selectedAction.isOnCooldown && !selectedAction.isConsumed)
             {
                 string actionId = selectedAction.id;
-                Debug.Log($"<color=#6a9fb5>[FlipPhonePresenter]</color> Executando ação confirmada no modal: '<b>{actionId}</b>'");
+                Debug.Log($"<color=#6a9fb5>[FlipPhonePresenter]</color> Executando ligação confirmada: '<b>{actionId}</b>'");
                 CloseActionModal();
                 OnActionRequested?.Invoke(actionId);
             }
@@ -412,73 +411,110 @@ namespace Mandato.UI
             }
         }
 
-        private VisualElement CreateAppTile(FlipPhoneActionViewModel vm)
+        public VisualElement CreateAppTile(FlipPhoneActionViewModel vm)
         {
-            var tile = new VisualElement();
-            tile.name = $"app-tile-{(vm != null && !string.IsNullOrEmpty(vm.id) ? vm.id : "unknown")}";
-            tile.AddToClassList("app-tile");
-            tile.pickingMode = PickingMode.Position;
+            var row = new VisualElement();
+            row.name = $"contact-row-{(vm != null && !string.IsNullOrEmpty(vm.id) ? vm.id : "unknown")}";
+            row.AddToClassList("contact-row");
+            row.AddToClassList("app-tile"); // Mantém compatibilidade com seletores e world-space interaction
+            row.pickingMode = PickingMode.Position;
 
             if (vm.isConsumed)
             {
-                tile.AddToClassList("consumed");
+                row.AddToClassList("consumed");
             }
             else if (vm.isOnCooldown)
             {
-                tile.AddToClassList("on-cooldown");
-
-                var badge = new Label($"{vm.cooldownTurnsRemaining}T");
-                badge.AddToClassList("app-badge");
-                badge.AddToClassList("badge-cooldown");
-                badge.pickingMode = PickingMode.Ignore;
-                tile.Add(badge);
+                row.AddToClassList("on-cooldown");
             }
             else if (!vm.isAvailable)
             {
-                tile.AddToClassList("unavailable");
+                row.AddToClassList("unavailable");
             }
 
-            // Ícone do Aplicativo ou Fallback estilizado
+            // 1. Ícone do Contato à esquerda
+            var iconBox = new VisualElement();
+            iconBox.AddToClassList("contact-icon-box");
+            iconBox.pickingMode = PickingMode.Ignore;
+
             if (vm.icon != null)
             {
                 var iconEl = new VisualElement();
+                iconEl.AddToClassList("contact-icon");
                 iconEl.AddToClassList("app-icon");
                 iconEl.style.backgroundImage = new StyleBackground(vm.icon);
                 iconEl.pickingMode = PickingMode.Ignore;
-                tile.Add(iconEl);
+                iconBox.Add(iconEl);
             }
             else
             {
                 var fallbackBox = new VisualElement();
+                fallbackBox.AddToClassList("contact-fallback-box");
                 fallbackBox.AddToClassList("app-fallback-box");
                 fallbackBox.pickingMode = PickingMode.Ignore;
 
-                string initial = !string.IsNullOrEmpty(vm.displayName) ? vm.displayName.Substring(0, 1).ToUpper() : "?";
-                var letter = new Label(initial);
-                letter.AddToClassList("app-fallback-letter");
-                letter.pickingMode = PickingMode.Ignore;
-
-                fallbackBox.Add(letter);
-                tile.Add(fallbackBox);
+                var fallbackSymbol = new Label("📞");
+                fallbackSymbol.AddToClassList("contact-fallback-symbol");
+                fallbackSymbol.pickingMode = PickingMode.Ignore;
+                fallbackBox.Add(fallbackSymbol);
+                iconBox.Add(fallbackBox);
             }
+            row.Add(iconBox);
 
-            // Título do Aplicativo
+            // 2. Informações do Contato (Centro)
+            var infoBox = new VisualElement();
+            infoBox.AddToClassList("contact-info");
+            infoBox.pickingMode = PickingMode.Ignore;
+
             var titleLabel = new Label(vm.displayName);
+            titleLabel.AddToClassList("contact-name");
             titleLabel.AddToClassList("app-title");
             titleLabel.pickingMode = PickingMode.Ignore;
-            tile.Add(titleLabel);
+            infoBox.Add(titleLabel);
 
-            // Guarda uma Action diretamente no userData para o WorldSpaceUIInteraction acionar
-            // sem depender do ClickEvent (que não se propaga corretamente em UIs world-space).
-            tile.userData = (Action)(() => OpenActionModal(vm));
+            string tagText = !string.IsNullOrEmpty(vm.categoryTag) ? vm.categoryTag.ToUpper() : "CONTATO";
+            var tagLabel = new Label(tagText);
+            tagLabel.AddToClassList("contact-tag");
+            tagLabel.pickingMode = PickingMode.Ignore;
+            infoBox.Add(tagLabel);
 
-            // Clique nativo do UI Toolkit (funciona em builds sem world-space)
-            tile.RegisterCallback<ClickEvent>(evt =>
+            row.Add(infoBox);
+
+            // 3. Indicador de Status / Ação à direita
+            var callBadge = new Label();
+            callBadge.AddToClassList("contact-call-badge");
+            callBadge.pickingMode = PickingMode.Ignore;
+
+            if (vm.isConsumed)
+            {
+                callBadge.text = "USADO";
+                callBadge.AddToClassList("badge-consumed");
+            }
+            else if (vm.isOnCooldown)
+            {
+                callBadge.text = $"{vm.cooldownTurnsRemaining}T RECARGA";
+                callBadge.AddToClassList("badge-cooldown");
+            }
+            else if (!vm.isAvailable)
+            {
+                callBadge.text = !string.IsNullOrEmpty(vm.statusText) ? vm.statusText.ToUpper() : "BLOQUEADO";
+                callBadge.AddToClassList("badge-unavailable");
+            }
+            else
+            {
+                callBadge.text = "LIGAR 📞";
+                callBadge.AddToClassList("badge-call");
+            }
+            row.Add(callBadge);
+
+            // Clique na linha inteira abre o modal de confirmação de ligação
+            row.userData = (Action)(() => OpenActionModal(vm));
+            row.RegisterCallback<ClickEvent>(evt =>
             {
                 OpenActionModal(vm);
             });
 
-            return tile;
+            return row;
         }
 
         public void ShowMessage(string message, bool isError = false)

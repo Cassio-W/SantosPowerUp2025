@@ -40,7 +40,8 @@ namespace Mandato.Infrastructure
             IEnumerable<FlipPhoneActionDefinition> startingActions,
             bool playTutorial = true,
             int customSeed = 0,
-            CharacterDefinition selectedCharacter = null)
+            CharacterDefinition selectedCharacter = null,
+            IEnumerable<NpcDefinition> npcs = null)
         {
             var catalog = new RunCatalog();
             catalog.Build(
@@ -52,7 +53,9 @@ namespace Mandato.Infrastructure
                 quests,
                 endings,
                 startingActions,
-                playTutorial
+                playTutorial,
+                selectedCharacter != null ? new[] { selectedCharacter } : null,
+                npcs
             );
 
             var profileService = new RunProfileService();

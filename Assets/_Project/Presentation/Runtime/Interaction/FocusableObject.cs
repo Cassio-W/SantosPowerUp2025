@@ -10,6 +10,7 @@ namespace Mandato.Presentation
     /// </summary>
     [DisallowMultipleComponent]
     [SelectionBase]
+    [ExecuteAlways]
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class FocusableObject : MonoBehaviour
 {
@@ -118,7 +119,9 @@ namespace Mandato.Presentation
     protected Vector3 _currentHoverPosOffset;
     protected Vector3 _currentHoverScaleMultiplier = Vector3.one;
     protected float _currentHighlightWeight = 0f;
-    protected Coroutine _hopRoutine;
+    protected bool _isHopping = false;
+    protected float _hopStartTime;
+    protected float _hopDuration;
     protected Vector3 _currentHopPosOffset = Vector3.zero;
     protected Vector3 _currentHopScaleMultiplier = Vector3.one;
 
@@ -144,9 +147,51 @@ namespace Mandato.Presentation
     public Vector3 HoverHopOffset { get => hoverHopOffset; set => hoverHopOffset = value; }
     public float HoverHopDuration { get => hoverHopDuration; set => hoverHopDuration = Mathf.Max(0.01f, value); }
     public Vector3 HoverHopPunchScale { get => hoverHopPunchScale; set => hoverHopPunchScale = value; }
-    public Vector3 CurrentHopPosOffset => _currentHopPosOffset;
-    public Vector3 CurrentHopScaleMultiplier => _currentHopScaleMultiplier;
-    public bool IsHopping => _hopRoutine != null;
+    
+    public bool IsHopping
+    {
+        get
+        {
+            if (!_isHopping || !gameObject.activeInHierarchy || !enabled)
+            {
+                _isHopping = false;
+                _currentHopPosOffset = Vector3.zero;
+                _currentHopScaleMultiplier = Vector3.one;
+                return false;
+            }
+
+            if (Time.realtimeSinceStartup - _hopStartTime >= _hopDuration)
+            {
+                _isHopping = false;
+                _currentHopPosOffset = Vector3.zero;
+                _currentHopScaleMultiplier = Vector3.one;
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    public Vector3 CurrentHopPosOffset
+    {
+        get
+        {
+            if (!IsHopping) return Vector3.zero;
+            CalculateHopTransform(out Vector3 posOffset, out _);
+            return posOffset;
+        }
+    }
+
+    public Vector3 CurrentHopScaleMultiplier
+    {
+        get
+        {
+            if (!IsHopping) return Vector3.one;
+            CalculateHopTransform(out _, out Vector3 scaleMult);
+            return scaleMult;
+        }
+    }
+
     public List<Renderer> TargetRenderers => targetRenderers;
 
     protected virtual void Awake()
@@ -260,7 +305,7 @@ namespace Mandato.Presentation
 
     protected virtual void Start()
     {
-        if (CameraFocusManager.Instance == null)
+        if (Application.isPlaying && CameraFocusManager.Instance == null)
         {
             CameraFocusManager.EnsureExists();
         }
@@ -316,6 +361,8 @@ namespace Mandato.Presentation
         {
             ActiveHighlightedObjects.Remove(this);
         }
+
+        CalculateHopTransform(out _currentHopPosOffset, out _currentHopScaleMultiplier);
 
         if (!_isFocused && (enableHoverScale || hoverLiftOffset.sqrMagnitude > 0.0001f || enableHoverHop || _currentHopPosOffset.sqrMagnitude > 0.00001f || _currentHopScaleMultiplier != Vector3.one))
         {
@@ -376,53 +423,63 @@ namespace Mandato.Presentation
     /// </summary>
     public void PlayHoverHop()
     {
-        if (!enableHoverHop || hoverHopIntensity <= 0.001f || !gameObject.activeInHierarchy || _isFocused)
+        if (!enableHoverHop || hoverHopIntensity <= 0.001f || !gameObject.activeInHierarchy || !enabled || _isFocused)
             return;
 
-        if (_hopRoutine != null)
-        {
-            StopCoroutine(_hopRoutine);
-        }
-
-        _hopRoutine = StartCoroutine(ProceduralHopRoutine());
+        _isHopping = true;
+        _hopStartTime = Time.realtimeSinceStartup;
+        _hopDuration = HoverHopDuration;
     }
 
     /// <summary>
-    /// Corrotina que executa o pulinho com subida/punch e retorno suave com amortecimento.
+    /// Interrompe a animação procedural de pulinho e reseta os offsets de transformação.
     /// </summary>
-    protected virtual System.Collections.IEnumerator ProceduralHopRoutine()
+    public void StopHoverHop()
     {
-        Vector3 peakHopOffset = hoverHopOffset * hoverHopIntensity;
-        Vector3 peakHopScale = Vector3.Lerp(Vector3.one, hoverHopPunchScale, hoverHopIntensity);
-
-        float halfDuration = Mathf.Max(0.01f, hoverHopDuration * 0.5f);
-        float elapsed = 0f;
-
-        // 1. Pulinho (sobe e aplica punch scale)
-        while (elapsed < halfDuration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / halfDuration);
-            _currentHopPosOffset = Vector3.Lerp(Vector3.zero, peakHopOffset, t);
-            _currentHopScaleMultiplier = Vector3.Lerp(Vector3.one, peakHopScale, t);
-            yield return null;
-        }
-
-        // 2. Retorna com suavidade (curva de mola suave)
-        elapsed = 0f;
-        while (elapsed < halfDuration)
-        {
-            elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.Clamp01(elapsed / halfDuration);
-            float smoothT = Mathf.SmoothStep(0f, 1f, t);
-            _currentHopPosOffset = Vector3.Lerp(peakHopOffset, Vector3.zero, smoothT);
-            _currentHopScaleMultiplier = Vector3.Lerp(peakHopScale, Vector3.one, smoothT);
-            yield return null;
-        }
-
+        _isHopping = false;
         _currentHopPosOffset = Vector3.zero;
         _currentHopScaleMultiplier = Vector3.one;
-        _hopRoutine = null;
+    }
+
+    /// <summary>
+    /// Calcula os offsets de translação e escala instantâneos para a animação de pulinho no hover.
+    /// </summary>
+    private void CalculateHopTransform(out Vector3 posOffset, out Vector3 scaleMult)
+    {
+        if (!_isHopping || !gameObject.activeInHierarchy || !enabled)
+        {
+            _isHopping = false;
+            posOffset = Vector3.zero;
+            scaleMult = Vector3.one;
+            return;
+        }
+
+        float elapsed = Time.realtimeSinceStartup - _hopStartTime;
+        if (elapsed >= _hopDuration || _hopDuration <= 0.0001f)
+        {
+            _isHopping = false;
+            posOffset = Vector3.zero;
+            scaleMult = Vector3.one;
+            return;
+        }
+
+        Vector3 peakHopOffset = hoverHopOffset * hoverHopIntensity;
+        Vector3 peakHopScale = Vector3.Lerp(Vector3.one, hoverHopPunchScale, hoverHopIntensity);
+        float halfDuration = Mathf.Max(0.005f, _hopDuration * 0.5f);
+
+        if (elapsed < halfDuration)
+        {
+            float t = Mathf.Clamp01(elapsed / halfDuration);
+            posOffset = Vector3.Lerp(Vector3.zero, peakHopOffset, t);
+            scaleMult = Vector3.Lerp(Vector3.one, peakHopScale, t);
+        }
+        else
+        {
+            float t = Mathf.Clamp01((elapsed - halfDuration) / halfDuration);
+            float smoothT = Mathf.SmoothStep(0f, 1f, t);
+            posOffset = Vector3.Lerp(peakHopOffset, Vector3.zero, smoothT);
+            scaleMult = Vector3.Lerp(peakHopScale, Vector3.one, smoothT);
+        }
     }
 
     /// <summary>
@@ -481,13 +538,7 @@ namespace Mandato.Presentation
 
         if (focused)
         {
-            if (_hopRoutine != null)
-            {
-                StopCoroutine(_hopRoutine);
-                _hopRoutine = null;
-            }
-            _currentHopPosOffset = Vector3.zero;
-            _currentHopScaleMultiplier = Vector3.one;
+            StopHoverHop();
 
             PlaySound(focusSound, focusSoundVolume);
             _currentHighlightWeight = 0f;
@@ -589,13 +640,7 @@ namespace Mandato.Presentation
 
     protected virtual void OnDisable()
     {
-        if (_hopRoutine != null)
-        {
-            StopCoroutine(_hopRoutine);
-            _hopRoutine = null;
-        }
-        _currentHopPosOffset = Vector3.zero;
-        _currentHopScaleMultiplier = Vector3.one;
+        StopHoverHop();
 
         if (_isHovered)
         {
@@ -616,13 +661,7 @@ namespace Mandato.Presentation
 
     protected virtual void OnDestroy()
     {
-        if (_hopRoutine != null)
-        {
-            StopCoroutine(_hopRoutine);
-            _hopRoutine = null;
-        }
-        _currentHopPosOffset = Vector3.zero;
-        _currentHopScaleMultiplier = Vector3.one;
+        StopHoverHop();
 
         _currentHighlightWeight = 0f;
         ActiveHighlightedObjects.Remove(this);

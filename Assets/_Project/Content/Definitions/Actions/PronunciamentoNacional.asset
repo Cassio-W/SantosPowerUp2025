@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: Pronunciamento Nacional
   description: "Convoca rede nacional de r\xE1dio e TV para alinhar a base governista
     e prestar contas, concedendo +10 em todos os atributos."
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: f498b99f7dc683646b439a837578e287, type: 3}
   categoryTag: Gabinete
   cooldownType: 2
   cooldownTurns: 6

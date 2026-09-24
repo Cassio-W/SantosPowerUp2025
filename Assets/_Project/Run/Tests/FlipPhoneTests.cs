@@ -540,5 +540,126 @@ namespace Mandato.Run.Tests
             Assert.IsTrue(runState.IsActionOnCooldown(action.id));
             Assert.AreEqual(6, runState.GetActionCooldown(action.id));
         }
+
+        [Test]
+        public void NpcRelationCondition_BlocksAction_WhenRelationOutOfRange()
+        {
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_alianca_politica",
+                "Aliança Política",
+                "Exige relacionamento >= 30 com o Ministro da Economia."
+            );
+            action.conditions.Add(new FlipPhoneCondition
+            {
+                checkNpcRelation = true,
+                targetNpcIdForRelation = "MinistroEco",
+                minNpcRelation = 30,
+                maxNpcRelation = 100
+            });
+            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 15, 0, 0)));
+
+            var npcState = runState.GetOrCreateNpcState("MinistroEco");
+            npcState.relationScore = 10; // Menor que 30
+
+            // 1. Falha por não atender o relacionamento mínimo
+            var reportFail = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsFalse(reportFail.success);
+            StringAssert.Contains("condições", reportFail.failReason.ToLower());
+
+            // 2. Ajusta relacionamento para 45 (dentro do intervalo [30, 100])
+            npcState.relationScore = 45;
+            var reportSuccess = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsTrue(reportSuccess.success);
+            Assert.AreEqual(65, runState.stats.popularApproval);
+        }
+
+        [Test]
+        public void LinkedNpc_ActionsBecomeUnavailable_WhenNpcIsSuspendedOrDead()
+        {
+            // Ação vinculada ao Ministro da Economia
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_pacote_economico_vinculado",
+                "Linha Direta Fazenda",
+                "Ação fornecida pelo Ministro da Economia.",
+                linkedNpcId: "MinistroEco"
+            );
+            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 0, 15, 0)));
+
+            // 1. Ministro disponível: ação pode ser usada
+            Assert.IsTrue(runState.IsNpcAvailable("MinistroEco"));
+            var report1 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsTrue(report1.success);
+            Assert.AreEqual(65, runState.stats.economy);
+
+            // 2. Prende / suspende o Ministro da Economia por 24 meses (ex: via Polícia Federal)
+            var actionPF = FlipPhoneActionDefinition.CreateRuntimeInstance("action_pf_temp", "PF", "Prende visitante atual");
+            actionPF.effects.Add(FlipPhoneEffect.CreateSuspendNpc(24, "")); // Prende visitante da proposta atual
+            actionPF.effects.Add(FlipPhoneEffect.CreateDismissProposal());
+
+            var currentCard = catalog["card_a"]; // card_a pertence a MinistroEco
+            var reportPF = FlipPhoneResolver.ResolveUse(runState, deckState, actionPF, catalog, currentCard: currentCard);
+            Assert.IsTrue(reportPF.success);
+            Assert.IsFalse(runState.IsNpcAvailable("MinistroEco"));
+
+            // 3. Tenta usar a ação vinculada ao Ministro suspenso: deve FALHAR
+            var report2 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsFalse(report2.success);
+            StringAssert.Contains("indisponível", report2.failReason.ToLower());
+
+            // 4. Passam 24 meses: a suspensão expira
+            for (int i = 0; i < 24; i++)
+            {
+                runState.AdvanceMonth();
+            }
+            Assert.IsTrue(runState.IsNpcAvailable("MinistroEco"));
+
+            // 5. Ação volta a funcionar após o retorno do Ministro
+            var report3 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsTrue(report3.success);
+
+            // 6. Assassina o Ministro permanentemente
+            var actionKill = FlipPhoneActionDefinition.CreateRuntimeInstance("action_kill_temp", "Kill", "Mata visitante");
+            actionKill.effects.Add(FlipPhoneEffect.CreateRemoveNpcFromGame(""));
+            FlipPhoneResolver.ResolveUse(runState, deckState, actionKill, catalog, currentCard: currentCard);
+
+            Assert.IsFalse(runState.IsNpcAvailable("MinistroEco"));
+            var report4 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsFalse(report4.success);
+            StringAssert.Contains("indisponível", report4.failReason.ToLower());
+        }
+
+        [Test]
+        public void ModifyNpcRelation_AppliesDeltaToTargetNpcOrCurrentProposal()
+        {
+            var actionExplicit = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_afinar_relacao",
+                "Jantar de Confraternização",
+                "Melhora a relação com MinistroEco em +25."
+            );
+            actionExplicit.effects.Add(FlipPhoneEffect.CreateModifyNpcRelation(25, "MinistroEco"));
+
+            var npcState = runState.GetOrCreateNpcState("MinistroEco");
+            npcState.relationScore = 10;
+
+            var report1 = FlipPhoneResolver.ResolveUse(runState, deckState, actionExplicit, catalog);
+            Assert.IsTrue(report1.success);
+            Assert.AreEqual(35, npcState.relationScore);
+
+            // Agora testa ação que altera relação do visitante atual (sem targetId explícito)
+            var actionCurrent = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_elogio_publico",
+                "Elogio Público",
+                "Melhora a relação com a pessoa presente em +15."
+            );
+            actionCurrent.effects.Add(FlipPhoneEffect.CreateModifyNpcRelation(15, ""));
+
+            var currentCard = catalog["card_c"]; // npcId = "Deputado"
+            var depState = runState.GetOrCreateNpcState("Deputado");
+            depState.relationScore = 0;
+
+            var report2 = FlipPhoneResolver.ResolveUse(runState, deckState, actionCurrent, catalog, currentCard: currentCard);
+            Assert.IsTrue(report2.success);
+            Assert.AreEqual(15, depState.relationScore);
+        }
     }
 }

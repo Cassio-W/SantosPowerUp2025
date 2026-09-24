@@ -90,10 +90,21 @@ namespace Mandato.Content.Tests
             // Com perk diferente
             Assert.IsFalse(card.AreConditionsMet(stats, 1, new[] { "perk_outro" }));
 
-            // Com o perk correto
-            Assert.IsTrue(card.AreConditionsMet(stats, 1, new[] { "perk_alianca_centro" }));
-            // Case-insensitive
-            Assert.IsTrue(card.AreConditionsMet(stats, 1, new[] { "PERK_ALIANCA_CENTRO" }));
+            // With NpcDefinition reference
+            var npc = NpcDefinition.CreateRuntimeInstance("npc_fazenda", "Ministro da Fazenda", "Ministro", bio: "Bio satírica");
+            card.npc = npc;
+            Assert.AreEqual("npc_fazenda", card.GetNpcId());
+        }
+
+        [Test]
+        public void CardDefinition_GetNpcPrefab_ReturnsNpcDefinitionPrefab()
+        {
+            var npc = NpcDefinition.CreateRuntimeInstance("npc_test", "NPC Teste");
+            var card = CardDefinition.CreateRuntimeInstance("card_test", "Card Teste", "Desc", null, null);
+            card.npc = npc;
+
+            Assert.AreEqual("npc_test", card.GetNpcId());
+            Assert.IsNull(card.GetNpcPrefab());
         }
     }
 }

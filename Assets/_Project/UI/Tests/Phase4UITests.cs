@@ -216,6 +216,35 @@ namespace Mandato.UI.Tests
             Object.DestroyImmediate(go);
         }
 
+        [Test]
+        public void FlipPhonePresenter_ContactRow_EntireRowHasActionCallback_And_OpensModal()
+        {
+            var go = new GameObject("FlipPhoneTest");
+            var presenter = go.AddComponent<FlipPhonePresenter>();
+
+            var vm = new FlipPhoneActionViewModel
+            {
+                id = "action_policia_federal",
+                displayName = "Polícia Federal",
+                categoryTag = "Especiais",
+                isAvailable = true
+            };
+
+            var row = presenter.CreateAppTile(vm);
+            Assert.IsNotNull(row);
+            Assert.IsTrue(row.ClassListContains("contact-row"));
+            Assert.IsTrue(row.ClassListContains("app-tile"));
+            Assert.IsNotNull(row.userData);
+            Assert.IsInstanceOf<System.Action>(row.userData);
+
+            // Invocando o callback atribuído na linha inteira
+            Assert.IsFalse(presenter.IsModalOpen);
+            ((System.Action)row.userData).Invoke();
+            Assert.IsTrue(presenter.IsModalOpen);
+
+            Object.DestroyImmediate(go);
+        }
+
         // ── RetroMonitorPresenter Snapshot Logic Tests ────────────
 
         [Test]

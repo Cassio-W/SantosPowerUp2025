@@ -32,6 +32,7 @@ namespace Mandato.Infrastructure
         [SerializeField] private List<PerkDefinition> perksCatalog = new List<PerkDefinition>();
         [SerializeField] private List<RunEventDefinition> eventsCatalog = new List<RunEventDefinition>();
         [SerializeField] private List<QuestDefinition> questsCatalog = new List<QuestDefinition>();
+        [SerializeField] private List<NpcDefinition> npcsCatalog = new List<NpcDefinition>();
 
         [Header("Flip-Phone & Ações")]
         [SerializeField] private List<FlipPhoneActionDefinition> startingActions = new List<FlipPhoneActionDefinition>();
@@ -63,6 +64,7 @@ namespace Mandato.Infrastructure
         public IReadOnlyDictionary<string, PerkDefinition> PerkCatalog => bootstrapResult?.Catalog.Perks;
         public IReadOnlyDictionary<string, RunEventDefinition> EventCatalog => bootstrapResult?.Catalog.Events;
         public IReadOnlyDictionary<string, QuestDefinition> QuestCatalog => bootstrapResult?.Catalog.Quests;
+        public IReadOnlyDictionary<string, NpcDefinition> NpcCatalog => bootstrapResult?.Catalog.Npcs;
         public ProfileState CurrentProfile => bootstrapResult?.ProfileService.CurrentProfile;
         public RunProfileService ProfileService => bootstrapResult?.ProfileService;
         public RunFlowCoordinator FlowCoordinator => flowCoordinator;
@@ -104,7 +106,8 @@ namespace Mandato.Infrastructure
                 startingActions,
                 shouldPlayTutorial,
                 customSeed,
-                selectedCharacter
+                selectedCharacter,
+                npcsCatalog
             );
 
             // 2. Inicializa o Coordenador do Flip-Phone

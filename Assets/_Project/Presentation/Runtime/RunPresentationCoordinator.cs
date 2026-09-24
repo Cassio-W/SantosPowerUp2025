@@ -52,9 +52,13 @@ namespace Mandato.Presentation
                 if (npcPrefabs == null) npcPrefabs = new List<GameObject>();
                 foreach (var kvp in catalog)
                 {
-                    if (kvp.Value != null && kvp.Value.npcPrefab != null && !npcPrefabs.Contains(kvp.Value.npcPrefab))
+                    if (kvp.Value != null)
                     {
-                        npcPrefabs.Add(kvp.Value.npcPrefab);
+                        var p = kvp.Value.GetNpcPrefab();
+                        if (p != null && !npcPrefabs.Contains(p))
+                        {
+                            npcPrefabs.Add(p);
+                        }
                     }
                 }
             }
@@ -97,7 +101,7 @@ namespace Mandato.Presentation
                 yield break;
             }
 
-            GameObject prefabToSpawn = card.npcPrefab;
+            GameObject prefabToSpawn = card.GetNpcPrefab();
             if (prefabToSpawn == null && npcPrefabs != null && npcPrefabs.Count > 0)
             {
                 prefabToSpawn = npcPrefabs[UnityEngine.Random.Range(0, npcPrefabs.Count)];

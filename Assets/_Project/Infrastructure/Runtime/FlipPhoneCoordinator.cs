@@ -62,17 +62,44 @@ namespace Mandato.Infrastructure
             if (phonePresenter == null || stateMachine == null || catalog == null) return;
 
             var viewModels = new List<FlipPhoneActionViewModel>();
-            string currentNpcId = stateMachine.CurrentCard != null ? stateMachine.CurrentCard.npcId : string.Empty;
+            string currentNpcId = stateMachine.CurrentCard != null ? stateMachine.CurrentCard.GetNpcId() : string.Empty;
 
             foreach (var action in catalog.Actions.Values)
             {
                 if (action == null) continue;
 
+                string linkedNpc = action.GetLinkedNpcId();
+                bool isNpcAvailable = string.IsNullOrEmpty(linkedNpc) || stateMachine.RunState.IsNpcAvailable(linkedNpc);
                 bool isConsumed = action.cooldownType == FlipPhoneCooldownType.SingleUse && stateMachine.RunState.IsActionConsumed(action.id);
                 bool onCooldown = stateMachine.RunState.IsActionOnCooldown(action.id);
                 int cooldownTurns = stateMachine.RunState.GetActionCooldown(action.id);
-                bool conditionsMet = action.AreConditionsMet(stateMachine.RunState.stats, stateMachine.RunState.calendar.currentMonthIndex, stateMachine.RunState.activePerkIds, stateMachine.RunState.decisionHistory, currentNpcId);
+                bool conditionsMet = action.AreConditionsMet(
+                    stateMachine.RunState.stats,
+                    stateMachine.RunState.calendar.currentMonthIndex,
+                    stateMachine.RunState.activePerkIds,
+                    stateMachine.RunState.decisionHistory,
+                    currentNpcId,
+                    stateMachine.RunState.GetNpcRelation
+                );
                 bool isUnlocked = stateMachine.RunState.IsActionUnlocked(action.id) || action.unlockByDefault;
+
+                string statusText = string.Empty;
+                if (!isNpcAvailable)
+                {
+                    statusText = "INDISPONÍVEL";
+                }
+                else if (isConsumed)
+                {
+                    statusText = "USADO";
+                }
+                else if (onCooldown)
+                {
+                    statusText = $"{cooldownTurns}T RECARGA";
+                }
+                else if (!conditionsMet || !isUnlocked)
+                {
+                    statusText = "BLOQUEADO";
+                }
 
                 var vm = new FlipPhoneActionViewModel
                 {
@@ -81,10 +108,12 @@ namespace Mandato.Infrastructure
                     description = action.description,
                     categoryTag = action.categoryTag,
                     icon = action.icon,
-                    isAvailable = isUnlocked && !isConsumed && !onCooldown && conditionsMet,
+                    linkedNpcId = linkedNpc,
+                    isAvailable = isUnlocked && !isConsumed && !onCooldown && conditionsMet && isNpcAvailable,
                     isOnCooldown = onCooldown,
                     cooldownTurnsRemaining = cooldownTurns,
-                    isConsumed = isConsumed
+                    isConsumed = isConsumed,
+                    statusText = statusText
                 };
 
                 viewModels.Add(vm);

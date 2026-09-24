@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fe2724653a99254d92eeefcbe807e47, type: 3}
+  m_Name: CandidatoMilitar
+  m_EditorClassIdentifier: Mandato.Content::Mandato.Content.NpcDefinition
+  id: Candidato Militar
+  displayName: Candidato Militar
+  role: "Capit\xE3o Reformado & Salvador da P\xE1tria"
+  prefab: {fileID: 3995003932205011531, guid: 9179786054c1ca64996197a586509ff2, type: 3}
+  portrait: {fileID: 0}
+  visualModelId: 
+  politicalBiasX: 9
+  politicalBiasY: 7
+  bio: "Promete colocar disciplina nas escolas, armas na cintura de todo cidad\xE3o
+    e acabar com a corrup\xE7\xE3o... nomeando seus sobrinhos e coron\xE9is para
+    cargos comissionados."

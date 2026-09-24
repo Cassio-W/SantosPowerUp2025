@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9fe2724653a99254d92eeefcbe807e47, type: 3}
+  m_Name: PoliticoInfluencer
+  m_EditorClassIdentifier: Mandato.Content::Mandato.Content.NpcDefinition
+  id: "Pol\xEDtico Influencer"
+  displayName: "Pol\xEDtico Influencer"
+  role: Deputado Tiktoker & Gerador de Cortes
+  prefab: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
+  portrait: {fileID: 0}
+  visualModelId: 
+  politicalBiasX: -4
+  politicalBiasY: -5
+  bio: "N\xE3o l\xEA projetos de lei, s\xF3 l\xEA os coment\xE1rios da live. Cria
+    esc\xE2ndalo em comiss\xE3o pra viralizar e governa pelo algoritmo do Twitter
+    e TikTok."

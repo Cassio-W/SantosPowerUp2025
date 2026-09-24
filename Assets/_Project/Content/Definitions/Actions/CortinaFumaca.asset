@@ -16,7 +16,7 @@ MonoBehaviour:
   displayName: "Cortina de Fuma\xE7a"
   description: "Utiliza manobras de bastidores e influ\xEAncia pol\xEDtica para arquivar
     a proposta em discuss\xE3o sem precisar votar. Exige no m\xEDnimo 50% de Corrup\xE7\xE3o."
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: f217d777a72a37b48880da6bf990a435, type: 3}
   categoryTag: "A\xE7\xF5es"
   cooldownType: 2
   cooldownTurns: 0

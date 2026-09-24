@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,8 +16,9 @@ MonoBehaviour:
   title: Ventilador Barulho
   description: "O que acha de fazer uma usina e\xF3lica perto de algumas cidades?
     Para produzir energia limpa!"
-  npcId: Ministro da Economia
-  npcPrefab: {fileID: 9148107631748954292, guid: a71d66c2d3ba94e46b0fda843b37281e, type: 3}
+  npc: {fileID: 11400000, guid: c1a000018471ade47bf5fc0f3da00001, type: 2}
+  npcId: 
+  npcPrefab: {fileID: 0}
   sourceLegacyAsset: {fileID: 11400000, guid: d134cdb7aaba1b6498405c8b98e22c3e, type: 2}
   categoryTag: Eolica
   isTutorial: 0
@@ -53,3 +54,4 @@ MonoBehaviour:
     grantPerkId: 
     presentationCue: 
   conditions: []
+

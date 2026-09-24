@@ -15,7 +15,7 @@ MonoBehaviour:
   id: action_indices_pesquisa
   displayName: "\xCDndices de Pesquisa"
   description: "N\xE3o perde atributos este m\xEAs (+25 de corrup\xE7\xE3o)."
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: f498b99f7dc683646b439a837578e287, type: 3}
   categoryTag: Gabinete
   cooldownType: 2
   cooldownTurns: 6

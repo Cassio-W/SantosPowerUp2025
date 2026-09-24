@@ -141,7 +141,7 @@ namespace Mandato.UI
             ClearStamps();
 
             string desc = card != null ? card.FormattedDescription : string.Empty;
-            string author = card != null ? (!string.IsNullOrEmpty(card.npcId) ? card.npcId : card.title) : string.Empty;
+            string author = card != null ? (card.npc != null && !string.IsNullOrEmpty(card.npc.displayName) ? card.npc.displayName : (!string.IsNullOrEmpty(card.GetNpcId()) ? card.GetNpcId() : card.title)) : string.Empty;
             currentFormattedDate = !string.IsNullOrEmpty(displayDate) ? displayDate : "01/2026";
             string dateLoc = $"{defaultLocation}, {currentFormattedDate}";
 

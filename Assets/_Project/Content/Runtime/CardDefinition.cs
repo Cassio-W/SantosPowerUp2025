@@ -247,6 +247,13 @@ namespace Mandato.Content
             return npcId ?? string.Empty;
         }
 
+        public GameObject GetNpcPrefab()
+        {
+            if (npc != null && npc.prefab != null)
+                return npc.prefab;
+            return npcPrefab;
+        }
+
         public bool AreConditionsMet(
             StatBlock stats,
             int currentMonth,

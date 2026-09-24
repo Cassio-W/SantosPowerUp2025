@@ -7,28 +7,40 @@
             <ui:VisualElement class="phone-top-bar">
                 <ui:VisualElement class="system-tag-box">
                     <ui:VisualElement class="system-status-led" />
-                    <ui:Label text="LINHA DIRETA" class="system-compact-title" />
+                    <ui:Label text="CONTATOS / LINHA DIRETA" class="system-compact-title" />
                 </ui:VisualElement>
-                <ui:Button name="phone-close-btn" text="✕ FECHAR" class="phone-close-btn" />
+                <ui:Button name="phone-close-btn" text="✕ SAIR" class="phone-close-btn" />
             </ui:VisualElement>
 
-            <!-- MAIN APPS WORKSPACE -->
+            <!-- MAIN CONTACTS LIST WORKSPACE -->
             <ui:ScrollView name="apps-scroll-view" class="apps-scroll-view">
-                <ui:VisualElement name="apps-grid-container" class="apps-grid-container">
-                    <!-- Apps de preview no Inspector (substituídos em runtime pelo FlipPhonePresenter) -->
-                    <ui:VisualElement class="app-tile" picking-mode="Position">
-                        <ui:VisualElement class="app-icon" picking-mode="Ignore" style="background-image: url(&apos;project://database/Assets/Sprites/moneynew.png?fileID=21300000&amp;guid=1ff9b9ecfbad1924eb51f51a6f3863ec&amp;type=3#moneynew&apos;);" />
-                        <ui:Label text="PRONUNCIAMENTO" picking-mode="Ignore" class="app-title" />
+                <ui:VisualElement name="apps-grid-container" class="contacts-list-container">
+                    <!-- Contatos de preview no UI Builder (substituídos em runtime pelo FlipPhonePresenter) -->
+                    <ui:VisualElement class="contact-row app-tile" picking-mode="Position">
+                        <ui:VisualElement class="contact-icon-box" picking-mode="Ignore">
+                            <ui:VisualElement class="contact-icon app-icon" picking-mode="Ignore" style="background-image: url(&apos;project://database/Assets/Sprites/moneynew.png?fileID=21300000&amp;guid=1ff9b9ecfbad1924eb51f51a6f3863ec&amp;type=3#moneynew&apos;);" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="contact-info" picking-mode="Ignore">
+                            <ui:Label text="PRONUNCIAMENTO NACIONAL" picking-mode="Ignore" class="contact-name app-title" />
+                            <ui:Label text="GABINETE" picking-mode="Ignore" class="contact-tag" />
+                        </ui:VisualElement>
+                        <ui:Label text="LIGAR 📞" picking-mode="Ignore" class="contact-call-badge" />
                     </ui:VisualElement>
-                    <ui:VisualElement class="app-tile" picking-mode="Position">
-                        <ui:VisualElement class="app-icon" picking-mode="Ignore" style="background-image: url(&apos;project://database/Assets/Sprites/corrupcao.png?fileID=21300000&amp;guid=f217d777a72a37b48880da6bf990a435&amp;type=3#corrupcao&apos;);" />
-                        <ui:Label text="ENGAVETAR" picking-mode="Ignore" class="app-title" />
+                    <ui:VisualElement class="contact-row app-tile" picking-mode="Position">
+                        <ui:VisualElement class="contact-icon-box" picking-mode="Ignore">
+                            <ui:VisualElement class="contact-icon app-icon" picking-mode="Ignore" style="background-image: url(&apos;project://database/Assets/Sprites/PerkJudiciario.png?fileID=21300000&amp;guid=d4186ea4b67fa94498308bf3b8577717&amp;type=3#PerkJudiciario&apos;);" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="contact-info" picking-mode="Ignore">
+                            <ui:Label text="POLÍCIA FEDERAL" picking-mode="Ignore" class="contact-name app-title" />
+                            <ui:Label text="ESPECIAIS" picking-mode="Ignore" class="contact-tag" />
+                        </ui:VisualElement>
+                        <ui:Label text="LIGAR 📞" picking-mode="Ignore" class="contact-call-badge" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Label name="empty-actions-label" text="NENHUM APLICATIVO DISPONÍVEL" class="empty-actions-label hidden" />
+                <ui:Label name="empty-actions-label" text="NENHUM CONTATO DISPONÍVEL" class="empty-actions-label hidden" />
             </ui:ScrollView>
 
-            <!-- ACTION DETAIL MODAL (BOTTOM DIALOG BOX) -->
+            <!-- CALL CONFIRMATION DETAIL MODAL (BOTTOM DIALOG BOX) -->
             <ui:VisualElement name="action-modal-backdrop" class="action-modal-backdrop hidden">
                 <ui:VisualElement name="action-modal-dialog" class="action-modal-dialog">
                     
@@ -37,21 +49,21 @@
                         <ui:VisualElement class="modal-header-left">
                             <ui:VisualElement name="modal-app-icon" class="modal-app-icon" />
                             <ui:VisualElement class="modal-title-box">
-                                <ui:Label name="modal-action-title" text="TÍTULO DA AÇÃO" class="modal-action-title" />
-                                <ui:Label name="modal-category-badge" text="GABINETE" class="modal-category-badge" />
+                                <ui:Label name="modal-action-title" text="NOME DO CONTATO" class="modal-action-title" />
+                                <ui:Label name="modal-category-badge" text="CONTATO" class="modal-category-badge" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- MODAL BODY -->
                     <ui:VisualElement class="modal-body">
-                        <ui:Label name="modal-action-desc" text="Descrição detalhada da ação governamental..." class="modal-action-desc" />
+                        <ui:Label name="modal-action-desc" text="Descrição concisa da ação governamental..." class="modal-action-desc" />
                     </ui:VisualElement>
 
                     <!-- MODAL FOOTER BUTTONS -->
                     <ui:VisualElement class="modal-footer">
                         <ui:Button name="modal-back-btn" text="VOLTAR" class="modal-btn modal-back-btn" />
-                        <ui:Button name="modal-exec-btn" text="EXECUTAR" class="modal-btn modal-exec-btn" />
+                        <ui:Button name="modal-exec-btn" text="LIGAR" class="modal-btn modal-exec-btn" />
                     </ui:VisualElement>
 
                 </ui:VisualElement>

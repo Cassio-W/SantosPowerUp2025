@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,8 +16,9 @@ MonoBehaviour:
   title: copaDoMundo
   description: "Senhor presidente, a FIFA quer sediar a Copa aqui. Turismo, visibilidade
     e... est\xE1dio novo!"
-  npcId: Primeira Dama
-  npcPrefab: {fileID: 5429354218765748742, guid: d6f8590726c0fdf4d8820af07e591e5b, type: 3}
+  npc: {fileID: 11400000, guid: c1a000078471ade47bf5fc0f3da00007, type: 2}
+  npcId: 
+  npcPrefab: {fileID: 0}
   sourceLegacyAsset: {fileID: 11400000, guid: cfdbeaddf871bcd4f85bd4d06cc96ca1, type: 2}
   categoryTag: 
   isTutorial: 0
@@ -53,3 +54,4 @@ MonoBehaviour:
     grantPerkId: 
     presentationCue: 
   conditions: []
+

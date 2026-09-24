@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,8 +16,9 @@ MonoBehaviour:
   title: Tutorial06
   description: "E se tiver que tirar algo da popula\xE7\xE3o, n\xE3o precisa pensar
     duas vezes se \xE9 que me entende. S\xF3 toma cuidado com a Pol\xEDcia Federal."
-  npcId: Vice-Presidente
-  npcPrefab: {fileID: 7410145720240828870, guid: b126acb8a7a673f439f5ec19e17dfd59, type: 3}
+  npc: {fileID: 11400000, guid: c1a000028471ade47bf5fc0f3da00002, type: 2}
+  npcId: 
+  npcPrefab: {fileID: 0}
   sourceLegacyAsset: {fileID: 11400000, guid: 05b6ac40d9b40ce4f9dfc132e8d2fc40, type: 2}
   categoryTag: 
   isTutorial: 1
@@ -53,3 +54,4 @@ MonoBehaviour:
     grantPerkId: 
     presentationCue: 
   conditions: []
+

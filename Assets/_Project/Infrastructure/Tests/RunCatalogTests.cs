@@ -160,5 +160,17 @@ namespace Mandato.Infrastructure.Tests
             Assert.IsTrue(catalog.Characters.ContainsKey("char_test"));
             Assert.AreEqual("Presidente Teste", catalog.Characters["char_test"].displayName);
         }
+
+        [Test]
+        public void RegisterNpc_AddsToNpcsDictionary()
+        {
+            var catalog = new RunCatalog();
+            var npcDef = NpcDefinition.CreateRuntimeInstance("npc_fazenda", "Ministro da Economia", "Ministro");
+
+            catalog.RegisterNpc(npcDef);
+
+            Assert.IsTrue(catalog.Npcs.ContainsKey("npc_fazenda"));
+            Assert.AreEqual("Ministro da Economia", catalog.Npcs["npc_fazenda"].displayName);
+        }
     }
 }

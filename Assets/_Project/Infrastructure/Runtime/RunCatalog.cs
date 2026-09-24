@@ -15,6 +15,7 @@ namespace Mandato.Infrastructure
         private readonly Dictionary<string, EndingDefinition> endings = new Dictionary<string, EndingDefinition>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, FlipPhoneActionDefinition> actions = new Dictionary<string, FlipPhoneActionDefinition>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, CharacterDefinition> characters = new Dictionary<string, CharacterDefinition>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, NpcDefinition> npcs = new Dictionary<string, NpcDefinition>(StringComparer.OrdinalIgnoreCase);
 
         private readonly List<string> tutorialCardIds = new List<string>();
         private readonly List<string> mainDeckCardIds = new List<string>();
@@ -26,6 +27,7 @@ namespace Mandato.Infrastructure
         public IReadOnlyDictionary<string, EndingDefinition> Endings => endings;
         public IReadOnlyDictionary<string, FlipPhoneActionDefinition> Actions => actions;
         public IReadOnlyDictionary<string, CharacterDefinition> Characters => characters;
+        public IReadOnlyDictionary<string, NpcDefinition> Npcs => npcs;
 
         public IReadOnlyList<string> TutorialCardIds => tutorialCardIds;
         public IReadOnlyList<string> MainDeckCardIds => mainDeckCardIds;
@@ -52,7 +54,8 @@ namespace Mandato.Infrastructure
             IEnumerable<EndingDefinition> endingsList,
             IEnumerable<FlipPhoneActionDefinition> startingActionsList,
             bool playTutorial = true,
-            IEnumerable<CharacterDefinition> charactersList = null)
+            IEnumerable<CharacterDefinition> charactersList = null,
+            IEnumerable<NpcDefinition> npcsList = null)
         {
             cards.Clear();
             perks.Clear();
@@ -61,6 +64,7 @@ namespace Mandato.Infrastructure
             endings.Clear();
             actions.Clear();
             characters.Clear();
+            npcs.Clear();
             tutorialCardIds.Clear();
             mainDeckCardIds.Clear();
 
@@ -152,6 +156,15 @@ namespace Mandato.Infrastructure
                     if (ch != null && !string.IsNullOrEmpty(ch.id)) characters[ch.id] = ch;
                 }
             }
+
+            // 10. NPCs
+            if (npcsList != null)
+            {
+                foreach (var npc in npcsList)
+                {
+                    if (npc != null && !string.IsNullOrEmpty(npc.id)) npcs[npc.id] = npc;
+                }
+            }
         }
 
         /// <summary>
@@ -173,6 +186,16 @@ namespace Mandato.Infrastructure
         {
             if (character == null || string.IsNullOrEmpty(character.id)) return;
             characters[character.id] = character;
+        }
+
+        /// <summary>
+        /// Registra um NpcDefinition avulso no catálogo.
+        /// Uso por ferramentas de editor ou testes.
+        /// </summary>
+        public void RegisterNpc(NpcDefinition npc)
+        {
+            if (npc == null || string.IsNullOrEmpty(npc.id)) return;
+            npcs[npc.id] = npc;
         }
     }
 }

@@ -81,7 +81,8 @@ namespace Mandato.Run
                 string priorityId = priorityDrawPile[i];
                 if (catalog.TryGetValue(priorityId, out CardDefinition priorityCard) && priorityCard != null)
                 {
-                    bool npcOk = isNpcAvailable == null || string.IsNullOrEmpty(priorityCard.npcId) || isNpcAvailable(priorityCard.npcId);
+                    string cardNpc = priorityCard.GetNpcId();
+                    bool npcOk = isNpcAvailable == null || string.IsNullOrEmpty(cardNpc) || isNpcAvailable(cardNpc);
                     if (npcOk && priorityCard.AreConditionsMet(stats, currentMonth, activePerkIds, politicalAxis, getNpcRelation, getQuestState))
                     {
                         priorityDrawPile.RemoveAt(i);
@@ -138,7 +139,8 @@ namespace Mandato.Run
                 string cardId = drawPile[i];
                 if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
                 {
-                    bool npcOk = isNpcAvailable == null || string.IsNullOrEmpty(card.npcId) || isNpcAvailable(card.npcId);
+                    string cardNpc = card.GetNpcId();
+                    bool npcOk = isNpcAvailable == null || string.IsNullOrEmpty(cardNpc) || isNpcAvailable(cardNpc);
                     if (npcOk && card.AreConditionsMet(stats, currentMonth, activePerkIds, politicalAxis, getNpcRelation, getQuestState))
                     {
                         eligibleIndices.Add(i);
@@ -223,7 +225,7 @@ namespace Mandato.Run
             {
                 if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
                 {
-                    if (string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase) && !toRemove.Contains(cardId))
+                    if (string.Equals(card.GetNpcId(), npcId, StringComparison.OrdinalIgnoreCase) && !toRemove.Contains(cardId))
                     {
                         toRemove.Add(cardId);
                     }
@@ -234,7 +236,7 @@ namespace Mandato.Run
             {
                 if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
                 {
-                    if (string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase) && !toRemove.Contains(cardId))
+                    if (string.Equals(card.GetNpcId(), npcId, StringComparison.OrdinalIgnoreCase) && !toRemove.Contains(cardId))
                     {
                         toRemove.Add(cardId);
                     }
@@ -245,7 +247,7 @@ namespace Mandato.Run
             {
                 if (catalog.TryGetValue(cardId, out CardDefinition card) && card != null)
                 {
-                    if (string.Equals(card.npcId, npcId, StringComparison.OrdinalIgnoreCase) && !toRemove.Contains(cardId))
+                    if (string.Equals(card.GetNpcId(), npcId, StringComparison.OrdinalIgnoreCase) && !toRemove.Contains(cardId))
                     {
                         toRemove.Add(cardId);
                     }

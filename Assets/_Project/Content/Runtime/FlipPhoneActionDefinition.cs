@@ -24,7 +24,8 @@ namespace Mandato.Content
         DismissCurrentProposal,
         SuspendNpc,
         PeekStatImpacts,
-        PreventStatLoss
+        PreventStatLoss,
+        ModifyNpcRelation
     }
 
     [Serializable]
@@ -34,6 +35,7 @@ namespace Mandato.Content
         public StatBlock statImpacts = new StatBlock(0, 0, 0, 0, 0);
         public int deltaPoliticalX = 0;
         public int deltaPoliticalY = 0;
+        public int deltaNpcRelation = 0;
         
         [Header("Alvo por Referência Direta (ScriptableObject)")]
         public CardDefinition targetCard;
@@ -69,6 +71,7 @@ namespace Mandato.Content
         public static FlipPhoneEffect CreateSuspendNpc(int duration = 24, string npcId = "") => new FlipPhoneEffect { effectType = FlipPhoneEffectType.SuspendNpc, duration = duration, targetId = npcId };
         public static FlipPhoneEffect CreatePeekImpacts() => new FlipPhoneEffect { effectType = FlipPhoneEffectType.PeekStatImpacts };
         public static FlipPhoneEffect CreatePreventStatLoss() => new FlipPhoneEffect { effectType = FlipPhoneEffectType.PreventStatLoss };
+        public static FlipPhoneEffect CreateModifyNpcRelation(int delta, string npcId = "") => new FlipPhoneEffect { effectType = FlipPhoneEffectType.ModifyNpcRelation, deltaNpcRelation = delta, targetId = npcId };
     }
 
     [Serializable]
@@ -85,6 +88,13 @@ namespace Mandato.Content
         public PerkDefinition requiredPerk;
         public NpcDefinition requiredNpc;
 
+        [Header("Condições de Relacionamento com NPC")]
+        public bool checkNpcRelation = false;
+        public NpcDefinition targetNpcForRelation;
+        public string targetNpcIdForRelation = string.Empty;
+        public int minNpcRelation = -100;
+        public int maxNpcRelation = 100;
+
         [Header("Requisitos Legados / Fallback")]
         public string requiredPerkId = string.Empty;
         public string requiredNpcPresent = string.Empty;
@@ -92,8 +102,15 @@ namespace Mandato.Content
 
         public string GetRequiredPerkId() => requiredPerk != null ? (!string.IsNullOrEmpty(requiredPerk.id) ? requiredPerk.id : requiredPerk.name) : requiredPerkId ?? string.Empty;
         public string GetRequiredNpcId() => requiredNpc != null ? (!string.IsNullOrEmpty(requiredNpc.id) ? requiredNpc.id : requiredNpc.name) : requiredNpcPresent ?? string.Empty;
+        public string GetTargetNpcRelationId() => targetNpcForRelation != null ? (!string.IsNullOrEmpty(targetNpcForRelation.id) ? targetNpcForRelation.id : targetNpcForRelation.name) : (!string.IsNullOrEmpty(targetNpcIdForRelation) ? targetNpcIdForRelation : GetRequiredNpcId());
 
-        public bool IsMet(StatBlock stats, int currentMonth, IEnumerable<string> perks, IEnumerable<string> decisionHistory, string currentNpcId)
+        public bool IsMet(
+            StatBlock stats,
+            int currentMonth,
+            IEnumerable<string> perks,
+            IEnumerable<string> decisionHistory,
+            string currentNpcId,
+            Func<string, int> getNpcRelation = null)
         {
             if (currentMonth < minMonth || currentMonth > maxMonth)
                 return false;
@@ -130,6 +147,17 @@ namespace Mandato.Content
                     return false;
             }
 
+            if (checkNpcRelation)
+            {
+                string npcRelationId = GetTargetNpcRelationId();
+                if (!string.IsNullOrEmpty(npcRelationId) && getNpcRelation != null)
+                {
+                    int rel = getNpcRelation(npcRelationId);
+                    if (rel < minNpcRelation || rel > maxNpcRelation)
+                        return false;
+                }
+            }
+
             if (!string.IsNullOrEmpty(requiredDecisionId))
             {
                 bool hasDecision = false;
@@ -158,7 +186,13 @@ namespace Mandato.Content
         public string displayName = string.Empty;
         [TextArea(2, 5)] public string description = string.Empty;
         public Sprite icon;
-        public string categoryTag = "Ações"; // ex: "Contatos", "Gabinete", "Especiais"
+        public string categoryTag = "Contatos"; // ex: "Contatos", "Gabinete", "Especiais"
+
+        [Header("NPC Vinculado (Opcional)")]
+        [Tooltip("NPC que fornece/possui esta linha de contato. Se o NPC for preso, suspenso ou falecer, esta ação ficará indisponível.")]
+        public NpcDefinition linkedNpc;
+        [Tooltip("ID do NPC vinculado (fallback).")]
+        public string linkedNpcId = string.Empty;
 
         [Header("Cooldown & Usabilidade")]
         public FlipPhoneCooldownType cooldownType = FlipPhoneCooldownType.None;
@@ -171,13 +205,21 @@ namespace Mandato.Content
         [Header("Efeitos")]
         public List<FlipPhoneEffect> effects = new List<FlipPhoneEffect>();
 
-        public bool AreConditionsMet(StatBlock stats, int currentMonth, IEnumerable<string> perks, IEnumerable<string> decisionHistory, string currentNpcId)
+        public string GetLinkedNpcId() => linkedNpc != null ? (!string.IsNullOrEmpty(linkedNpc.id) ? linkedNpc.id : linkedNpc.name) : linkedNpcId ?? string.Empty;
+
+        public bool AreConditionsMet(
+            StatBlock stats,
+            int currentMonth,
+            IEnumerable<string> perks,
+            IEnumerable<string> decisionHistory,
+            string currentNpcId,
+            Func<string, int> getNpcRelation = null)
         {
             if (conditions == null || conditions.Count == 0) return true;
 
             for (int i = 0; i < conditions.Count; i++)
             {
-                if (conditions[i] != null && !conditions[i].IsMet(stats, currentMonth, perks, decisionHistory, currentNpcId))
+                if (conditions[i] != null && !conditions[i].IsMet(stats, currentMonth, perks, decisionHistory, currentNpcId, getNpcRelation))
                     return false;
             }
             return true;
@@ -189,7 +231,8 @@ namespace Mandato.Content
             string description,
             FlipPhoneCooldownType cooldownType = FlipPhoneCooldownType.None,
             int cooldownTurns = 0,
-            bool unlockByDefault = true)
+            bool unlockByDefault = true,
+            string linkedNpcId = "")
         {
             var action = CreateInstance<FlipPhoneActionDefinition>();
             action.id = id;
@@ -198,6 +241,7 @@ namespace Mandato.Content
             action.cooldownType = cooldownType;
             action.cooldownTurns = cooldownTurns;
             action.unlockByDefault = unlockByDefault;
+            action.linkedNpcId = linkedNpcId ?? string.Empty;
             return action;
         }
     }
