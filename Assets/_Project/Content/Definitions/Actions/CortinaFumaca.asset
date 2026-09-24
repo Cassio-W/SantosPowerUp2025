@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.FlipPhoneActionDefinition
   id: action_engavetar_proposta
   displayName: "Cortina de Fuma\xE7a"
-  description: "Utiliza manobras de bastidores e influ\xEAncia pol\xEDtica para arquivar
-    a proposta em discuss\xE3o sem precisar votar. Exige no m\xEDnimo 50% de Corrup\xE7\xE3o."
+  description: Gera um escândalo midiático para engavetar a proposta atual sem votar.
   icon: {fileID: 21300000, guid: f217d777a72a37b48880da6bf990a435, type: 3}
   categoryTag: "A\xE7\xF5es"
   cooldownType: 2

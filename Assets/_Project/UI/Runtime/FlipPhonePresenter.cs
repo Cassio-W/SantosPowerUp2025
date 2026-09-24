@@ -171,11 +171,12 @@ namespace Mandato.UI
 
             if (closeBtn != null)
             {
+                closeBtn.userData = (Action)(() => Close());
                 closeBtn.clicked -= Close;
                 closeBtn.clicked += Close;
             }
 
-            // Modal de Diálogo Inferior
+            // Modal de Diálogo
             modalBackdrop = root.Q<VisualElement>("action-modal-backdrop");
             modalAppIcon = root.Q<VisualElement>("modal-app-icon");
             modalTitle = root.Q<Label>("modal-action-title");
@@ -186,12 +187,14 @@ namespace Mandato.UI
 
             if (modalBackBtn != null)
             {
+                modalBackBtn.userData = (Action)(() => CloseActionModal());
                 modalBackBtn.clicked -= CloseActionModal;
                 modalBackBtn.clicked += CloseActionModal;
             }
 
             if (modalExecBtn != null)
             {
+                modalExecBtn.userData = (Action)(() => HandleModalExecClicked());
                 modalExecBtn.clicked -= HandleModalExecClicked;
                 modalExecBtn.clicked += HandleModalExecClicked;
             }

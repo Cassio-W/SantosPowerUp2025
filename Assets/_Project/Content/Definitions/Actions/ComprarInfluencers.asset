@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.FlipPhoneActionDefinition
   id: action_comprar_influencers
   displayName: Comprar Influencers
-  description: "Obt\xE9m +20 de Popularidade e +15 de corrup\xE7\xE3o."
+  description: Financia campanhas digitais e páginas de fofoca para inflar a imagem do governo.
   icon: {fileID: 21300000, guid: 1ff9b9ecfbad1924eb51f51a6f3863ec, type: 3}
   categoryTag: Gabinete
   cooldownType: 2

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.FlipPhoneActionDefinition
   id: action_assassino_aluguel
   displayName: Assassino de Aluguel
-  description: "Retira o personagem da run permanentemente (+30 de corrup\xE7\xE3o)."
+  description: Contrata um serviço discreto para silenciar o visitante em definitivo.
   icon: {fileID: 21300000, guid: 8403b0f3a5da6074396e7c22d5db4b6e, type: 3}
   categoryTag: Especiais
   cooldownType: 2

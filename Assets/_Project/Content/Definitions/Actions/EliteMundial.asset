@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.FlipPhoneActionDefinition
   id: action_elite_mundial
   displayName: Elite Mundial
-  description: "Permite saber como os atributos ser\xE3o afetados em cada resposta
-    deste m\xEAs (+10 de corrup\xE7\xE3o)."
+  description: Consulta informantes globais para prever os impactos de cada decisão.
   icon: {fileID: 21300000, guid: c38e7de7dcb7ea044a4ff5597d7dd31d, type: 3}
   categoryTag: Especiais
   cooldownType: 2

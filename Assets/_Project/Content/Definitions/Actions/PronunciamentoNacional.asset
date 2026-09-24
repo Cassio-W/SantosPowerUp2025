@@ -14,8 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.FlipPhoneActionDefinition
   id: action_pronunciamento_nacional
   displayName: Pronunciamento Nacional
-  description: "Convoca rede nacional de r\xE1dio e TV para alinhar a base governista
-    e prestar contas, concedendo +10 em todos os atributos."
+  description: Convoca rede nacional de rádio e TV para mobilizar a base governista.
   icon: {fileID: 21300000, guid: f498b99f7dc683646b439a837578e287, type: 3}
   categoryTag: Gabinete
   cooldownType: 2

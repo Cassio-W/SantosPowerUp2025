@@ -61,6 +61,9 @@ namespace Mandato.Presentation
     private bool _isCurrentlyHit = false;
     private Vector3 _lastHitWorldPoint = Vector3.zero;
 
+    private bool _isDispatchingWorldSpaceEvent = false;
+    private VisualElement _attachedRoot = null;
+
     public bool IsCurrentlyHit => _isCurrentlyHit;
     public Vector2 LastHitUV => _lastHitUV;
     public Vector2 LastPanelPosition => _lastPanelPosition;
@@ -77,12 +80,14 @@ namespace Mandato.Presentation
     {
         EnsureCollider();
         EnsureReferences();
+        EnsureEventBlocker();
     }
 
     private void Start()
     {
         EnsureCollider();
         EnsureReferences();
+        EnsureEventBlocker();
     }
 
     private void EnsureReferences()
@@ -100,6 +105,8 @@ namespace Mandato.Presentation
         {
             interactionCamera = Camera.main;
         }
+
+        EnsureEventBlocker();
     }
 
     /// <summary>
@@ -363,6 +370,72 @@ namespace Mandato.Presentation
         return new Vector2(1920, 1080);
     }
 
+    private void EnsureEventBlocker()
+    {
+        if (uiDocument == null || uiDocument.rootVisualElement == null) return;
+        if (_attachedRoot == uiDocument.rootVisualElement) return;
+
+        DetachEventBlocker();
+        _attachedRoot = uiDocument.rootVisualElement;
+
+        _attachedRoot.RegisterCallback<PointerDownEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.RegisterCallback<PointerUpEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.RegisterCallback<PointerMoveEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.RegisterCallback<PointerEnterEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.RegisterCallback<PointerLeaveEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.RegisterCallback<PointerOverEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.RegisterCallback<PointerOutEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.RegisterCallback<MouseDownEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.RegisterCallback<MouseUpEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.RegisterCallback<MouseMoveEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.RegisterCallback<ClickEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.RegisterCallback<ContextClickEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+    }
+
+    private void DetachEventBlocker()
+    {
+        if (_attachedRoot == null) return;
+
+        _attachedRoot.UnregisterCallback<PointerDownEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.UnregisterCallback<PointerUpEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.UnregisterCallback<PointerMoveEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.UnregisterCallback<PointerEnterEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.UnregisterCallback<PointerLeaveEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.UnregisterCallback<PointerOverEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.UnregisterCallback<PointerOutEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.UnregisterCallback<MouseDownEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.UnregisterCallback<MouseUpEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.UnregisterCallback<MouseMoveEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.UnregisterCallback<ClickEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+        _attachedRoot.UnregisterCallback<ContextClickEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
+
+        _attachedRoot = null;
+    }
+
+    private void BlockScreenEvent(EventBase evt)
+    {
+        // Se o evento NÃO partiu do nosso raycast 3D no objeto em cena, bloqueia imediatamente
+        // para impedir cliques fantasmas vindos de coordenadas de tela padrão do Unity UI Toolkit.
+        if (!_isDispatchingWorldSpaceEvent)
+        {
+            evt.StopImmediatePropagation();
+        }
+    }
+
+    private void SendWorldSpaceEvent(VisualElement target, EventBase evt)
+    {
+        if (target == null || evt == null) return;
+        _isDispatchingWorldSpaceEvent = true;
+        try
+        {
+            target.SendEvent(evt);
+        }
+        finally
+        {
+            _isDispatchingWorldSpaceEvent = false;
+        }
+    }
+
     private void ProcessHover(VisualElement target, Vector2 panelPosition)
     {
         if (target != _lastHoveredElement)
@@ -373,11 +446,11 @@ namespace Mandato.Presentation
 
                 using var outEvent = MouseOutEvent.GetPooled();
                 outEvent.target = _lastHoveredElement;
-                _lastHoveredElement.SendEvent(outEvent);
+                SendWorldSpaceEvent(_lastHoveredElement, outEvent);
 
                 using var leaveEvent = PointerLeaveEvent.GetPooled();
                 leaveEvent.target = _lastHoveredElement;
-                _lastHoveredElement.SendEvent(leaveEvent);
+                SendWorldSpaceEvent(_lastHoveredElement, leaveEvent);
             }
 
             _lastHoveredElement = target;
@@ -388,11 +461,11 @@ namespace Mandato.Presentation
 
                 using var overEvent = MouseOverEvent.GetPooled();
                 overEvent.target = target;
-                target.SendEvent(overEvent);
+                SendWorldSpaceEvent(target, overEvent);
 
                 using var enterEvent = PointerEnterEvent.GetPooled();
                 enterEvent.target = target;
-                target.SendEvent(enterEvent);
+                SendWorldSpaceEvent(target, enterEvent);
 
                 if (showDebugLogs)
                 {
@@ -405,11 +478,11 @@ namespace Mandato.Presentation
         {
             using var moveEvent = PointerMoveEvent.GetPooled();
             moveEvent.target = target;
-            target.SendEvent(moveEvent);
+            SendWorldSpaceEvent(target, moveEvent);
 
             using var mouseMove = MouseMoveEvent.GetPooled();
             mouseMove.target = target;
-            target.SendEvent(mouseMove);
+            SendWorldSpaceEvent(target, mouseMove);
         }
     }
 
@@ -452,11 +525,11 @@ namespace Mandato.Presentation
 
             using var outEvent = MouseOutEvent.GetPooled();
             outEvent.target = _lastHoveredElement;
-            _lastHoveredElement.SendEvent(outEvent);
+            SendWorldSpaceEvent(_lastHoveredElement, outEvent);
 
             using var leaveEvent = PointerLeaveEvent.GetPooled();
             leaveEvent.target = _lastHoveredElement;
-            _lastHoveredElement.SendEvent(leaveEvent);
+            SendWorldSpaceEvent(_lastHoveredElement, leaveEvent);
 
             _lastHoveredElement = null;
         }
@@ -476,11 +549,11 @@ namespace Mandato.Presentation
 
         using var pointerDown = PointerDownEvent.GetPooled();
         pointerDown.target = target;
-        target.SendEvent(pointerDown);
+        SendWorldSpaceEvent(target, pointerDown);
 
         using var mouseDown = MouseDownEvent.GetPooled();
         mouseDown.target = target;
-        target.SendEvent(mouseDown);
+        SendWorldSpaceEvent(target, mouseDown);
     }
 
     private void ProcessPointerUpAndClick(VisualElement target, Vector2 panelPosition)
@@ -502,11 +575,11 @@ namespace Mandato.Presentation
         // 1. Dispara PointerUp & MouseUp no target atual (para ScrollView e animações)
         using var pointerUp = PointerUpEvent.GetPooled();
         pointerUp.target = target;
-        target.SendEvent(pointerUp);
+        SendWorldSpaceEvent(target, pointerUp);
 
         using var mouseUp = MouseUpEvent.GetPooled();
         mouseUp.target = target;
-        target.SendEvent(mouseUp);
+        SendWorldSpaceEvent(target, mouseUp);
 
         // 2. Busca Action no userData subindo pela hierarquia a partir do downTarget.
         // Qualquer VisualElement pode armazenar um System.Action em userData para receber
@@ -536,7 +609,7 @@ namespace Mandato.Presentation
         {
             using var clickEvent = ClickEvent.GetPooled();
             clickEvent.target = clickTarget;
-            clickTarget.SendEvent(clickEvent);
+            SendWorldSpaceEvent(clickTarget, clickEvent);
 
             // Fallback para Botões do UI Toolkit (garante execução imediata de .clicked)
             Button button = clickTarget as Button ?? clickTarget.GetFirstAncestorOfType<Button>();
@@ -544,7 +617,7 @@ namespace Mandato.Presentation
             {
                 using var submitEvent = NavigationSubmitEvent.GetPooled();
                 submitEvent.target = button;
-                button.SendEvent(submitEvent);
+                SendWorldSpaceEvent(button, submitEvent);
 
                 if (showDebugLogs)
                 {
@@ -560,11 +633,12 @@ namespace Mandato.Presentation
 
         using var wheelEvent = WheelEvent.GetPooled();
         wheelEvent.target = target;
-        target.SendEvent(wheelEvent);
+        SendWorldSpaceEvent(target, wheelEvent);
     }
 
     private void OnDisable()
     {
+        DetachEventBlocker();
         ClearHover();
         _isPointerDown = false;
         _pointerDownTarget = null;

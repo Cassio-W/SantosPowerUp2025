@@ -5,6 +5,7 @@ using Mandato.Infrastructure;
 using Mandato.Presentation;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Mandato.Infrastructure.Tests
 {
@@ -344,6 +345,19 @@ namespace Mandato.Infrastructure.Tests
             UnityEngine.Object.DestroyImmediate(foregroundPhone);
             UnityEngine.Object.DestroyImmediate(backgroundPC);
             UnityEngine.Object.DestroyImmediate(camGo);
+        }
+
+        [Test]
+        public void WorldSpaceUIInteraction_EnsuresScreenEventBlockerAttached()
+        {
+            var go = new GameObject("WorldSpaceTest");
+            var uiDoc = go.AddComponent<UIDocument>();
+            var wsInteraction = go.AddComponent<WorldSpaceUIInteraction>();
+
+            Assert.IsNotNull(wsInteraction);
+            Assert.IsFalse(wsInteraction.IsCurrentlyHit);
+
+            UnityEngine.Object.DestroyImmediate(go);
         }
     }
 }

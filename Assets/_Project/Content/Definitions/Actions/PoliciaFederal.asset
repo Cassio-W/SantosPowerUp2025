@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.FlipPhoneActionDefinition
   id: action_policia_federal
   displayName: "Pol\xEDcia Federal"
-  description: "Retira o NPC da run por 2 anos (+20 de corrup\xE7\xE3o)."
+  description: Deflagra uma operação emergencial para afastar o visitante temporariamente.
   icon: {fileID: 21300000, guid: 046c59d7628ad3841bfd9cd2ce59bb5b, type: 3}
   categoryTag: Especiais
   cooldownType: 2

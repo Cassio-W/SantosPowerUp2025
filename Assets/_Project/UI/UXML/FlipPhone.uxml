@@ -40,30 +40,38 @@
                 <ui:Label name="empty-actions-label" text="NENHUM CONTATO DISPONÍVEL" class="empty-actions-label hidden" />
             </ui:ScrollView>
 
-            <!-- CALL CONFIRMATION DETAIL MODAL (BOTTOM DIALOG BOX) -->
+            <!-- CALL CONFIRMATION DETAIL SCREEN (FULL SCREEN VIEW) -->
             <ui:VisualElement name="action-modal-backdrop" class="action-modal-backdrop hidden">
                 <ui:VisualElement name="action-modal-dialog" class="action-modal-dialog">
                     
-                    <!-- MODAL HEADER -->
-                    <ui:VisualElement class="modal-header">
-                        <ui:VisualElement class="modal-header-left">
+                    <!-- TOP STATUS BAR -->
+                    <ui:VisualElement class="modal-top-status-bar">
+                        <ui:VisualElement class="system-tag-box">
+                            <ui:VisualElement class="system-status-led" />
+                            <ui:Label text="DETALHES DO CONTATO" class="modal-system-title" />
+                        </ui:VisualElement>
+                        <ui:Label name="modal-category-badge" text="GABINETE" class="modal-category-badge" />
+                    </ui:VisualElement>
+
+                    <!-- CONTACT HERO (LARGE ICON + NAME) -->
+                    <ui:VisualElement class="modal-contact-hero">
+                        <ui:VisualElement class="modal-app-icon-box">
                             <ui:VisualElement name="modal-app-icon" class="modal-app-icon" />
-                            <ui:VisualElement class="modal-title-box">
-                                <ui:Label name="modal-action-title" text="NOME DO CONTATO" class="modal-action-title" />
-                                <ui:Label name="modal-category-badge" text="CONTATO" class="modal-category-badge" />
-                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="modal-title-box">
+                            <ui:Label name="modal-action-title" text="NOME DO CONTATO" class="modal-action-title" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <!-- MODAL BODY -->
+                    <!-- BODY / LARGE DESCRIPTION (NO SCROLLBAR) -->
                     <ui:VisualElement class="modal-body">
                         <ui:Label name="modal-action-desc" text="Descrição concisa da ação governamental..." class="modal-action-desc" />
                     </ui:VisualElement>
 
-                    <!-- MODAL FOOTER BUTTONS -->
+                    <!-- FOOTER ACTION BUTTONS -->
                     <ui:VisualElement class="modal-footer">
-                        <ui:Button name="modal-back-btn" text="VOLTAR" class="modal-btn modal-back-btn" />
-                        <ui:Button name="modal-exec-btn" text="LIGAR" class="modal-btn modal-exec-btn" />
+                        <ui:Button name="modal-back-btn" text="◄ VOLTAR" class="modal-btn modal-back-btn" />
+                        <ui:Button name="modal-exec-btn" text="LIGAR 📞" class="modal-btn modal-exec-btn" />
                     </ui:VisualElement>
 
                 </ui:VisualElement>

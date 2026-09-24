@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.FlipPhoneActionDefinition
   id: action_indices_pesquisa
   displayName: "\xCDndices de Pesquisa"
-  description: "N\xE3o perde atributos este m\xEAs (+25 de corrup\xE7\xE3o)."
+  description: Manipula relatórios estatísticos para blindar os índices do governo.
   icon: {fileID: 21300000, guid: f498b99f7dc683646b439a837578e287, type: 3}
   categoryTag: Gabinete
   cooldownType: 2
