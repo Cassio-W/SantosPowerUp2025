@@ -139,7 +139,13 @@ namespace Mandato.Run
                 runState.GrantPerk(perkToGrant, duration);
             }
 
-            // 5. Atualização de Relação com NPC
+            // 5. Agenda evento interativo se a escolha definir um
+            if (!string.IsNullOrEmpty(choice.scheduleEventId))
+            {
+                runState.ScheduleEvent(choice.scheduleEventId);
+            }
+
+            // 6. Atualização de Relação com NPC
             string resolvedNpcId = card.GetNpcId();
             if (!string.IsNullOrEmpty(resolvedNpcId))
             {

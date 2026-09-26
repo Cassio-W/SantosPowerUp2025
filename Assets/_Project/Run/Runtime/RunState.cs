@@ -27,6 +27,12 @@ namespace Mandato.Run
         public bool isPreviewAttributesActive = false;
         public int seed;
 
+        /// <summary>
+        /// ID do evento interativo agendado para o próximo turno disponível.
+        /// Quando preenchido, o próximo DrawAndPresentProposal será substituído pelo evento.
+        /// </summary>
+        public string scheduledEventId = string.Empty;
+
         public RunState(int seed = 0)
         {
             this.seed = seed;
@@ -51,6 +57,7 @@ namespace Mandato.Run
             activeCharacterId = string.Empty;
             preventStatLossThisMonth = false;
             isPreviewAttributesActive = false;
+            scheduledEventId = string.Empty;
         }
 
         public NpcRunState GetOrCreateNpcState(string npcId)
@@ -122,6 +129,28 @@ namespace Mandato.Run
             {
                 activeEvents.Add(new ActiveEventState(eventId, duration));
             }
+        }
+
+        /// <summary>
+        /// Agenda um evento interativo para o próximo turno sem proposta.
+        /// Pode ser chamado por qualquer sistema: proposta aceita/recusada, ação no celular,
+        /// relação com NPC, calendário, outro evento, etc.
+        /// </summary>
+        public void ScheduleEvent(string eventId)
+        {
+            if (!string.IsNullOrEmpty(eventId))
+                scheduledEventId = eventId;
+        }
+
+        /// <summary>
+        /// Consome e retorna o ID do evento agendado, limpando o campo.
+        /// Chamado pelo sistema de fluxo antes de sortear a próxima proposta.
+        /// </summary>
+        public string ConsumeScheduledEvent()
+        {
+            var id = scheduledEventId;
+            scheduledEventId = string.Empty;
+            return id;
         }
 
         public void GrantPerk(string perkId, int duration = 0)

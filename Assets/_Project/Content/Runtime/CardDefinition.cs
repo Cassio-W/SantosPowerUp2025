@@ -31,6 +31,10 @@ namespace Mandato.Content
         public string grantPerkId = string.Empty;
         public string presentationCue = string.Empty;
 
+        [Tooltip("ID do evento interativo a agendar quando esta opção for escolhida. " +
+                 "O evento substituirá a proposta do próximo mês disponível.")]
+        public string scheduleEventId = string.Empty;
+
         public ChoiceDefinition() { }
 
         public ChoiceDefinition(string label)

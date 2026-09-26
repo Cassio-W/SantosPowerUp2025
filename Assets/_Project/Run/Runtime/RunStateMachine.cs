@@ -12,6 +12,7 @@ namespace Mandato.Run
         AwaitingChoice,
         ResolvingChoice,
         PresentingConsequences,
+        RunningEvent,       // Evento interativo em execução — jogo aguarda callback do evento
         AdvancingTime,
         Terminated
     }
@@ -137,7 +138,9 @@ namespace Mandato.Run
             IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null,
             IReadOnlyDictionary<string, RunEventDefinition> eventCatalog = null)
         {
-            if (CurrentPhase != RunPhase.PresentingConsequences)
+            // Aceita PresentingConsequences (fluxo normal de proposta) e
+            // RunningEvent (fluxo de evento interativo — o evento substituiu a proposta)
+            if (CurrentPhase != RunPhase.PresentingConsequences && CurrentPhase != RunPhase.RunningEvent)
                 return null;
 
             if (RunState.termination.IsDefeat || RunState.termination.IsVictory)
@@ -199,6 +202,18 @@ namespace Mandato.Run
 
             SetPhase(RunPhase.PreparingRun);
         }
+
+        /// <summary>
+        /// Transiciona para RunningEvent, indicando que um evento interativo assumiu o controle.
+        /// Chamado pelo RunFlowCoordinator antes de entregar o controle ao evento.
+        /// </summary>
+        public void BeginEventPhase() => SetPhase(RunPhase.RunningEvent);
+
+        /// <summary>
+        /// Retorna à fase PreparingRun após a conclusão de um evento interativo.
+        /// Chamado pelo RunFlowCoordinator depois de aplicar o InteractiveEventResult.
+        /// </summary>
+        public void EndEventPhase() => SetPhase(RunPhase.PreparingRun);
 
         private void SetPhase(RunPhase phase)
         {

@@ -96,6 +96,9 @@ namespace Mandato.Run
 
         public DeckSaveData deck = new DeckSaveData();
 
+        /// <summary>Evento interativo agendado para o próximo turno. Vazio = nenhum.</summary>
+        public string scheduledEventId = string.Empty;
+
         public RunSaveData() { }
 
         public static RunSaveData FromRuntime(RunState runState, DeckState deckState)
@@ -127,6 +130,7 @@ namespace Mandato.Run
                 unlockedActionIds = new List<string>(runState.unlockedActionIds ?? new List<string>()),
                 consumedSingleUseActions = new List<string>(runState.consumedSingleUseActions ?? new List<string>()),
                 activeCharacterId = runState.activeCharacterId ?? string.Empty,
+                scheduledEventId = runState.scheduledEventId ?? string.Empty,
                 deck = new DeckSaveData(deckState)
             };
 
@@ -184,6 +188,7 @@ namespace Mandato.Run
             runState.unlockedActionIds = new List<string>(unlockedActionIds ?? new List<string>());
             runState.consumedSingleUseActions = new List<string>(consumedSingleUseActions ?? new List<string>());
             runState.activeCharacterId = activeCharacterId ?? string.Empty;
+            runState.scheduledEventId = scheduledEventId ?? string.Empty;
 
             runState.npcStates.Clear();
             if (npcStates != null)

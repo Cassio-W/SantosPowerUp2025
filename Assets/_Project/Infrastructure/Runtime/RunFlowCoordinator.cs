@@ -19,6 +19,7 @@ namespace Mandato.Infrastructure
         private FlipPhoneCoordinator flipPhoneCoordinator;
         private UIModalCoordinator modalCoordinator;
         private TutorialManager tutorialManager;
+        private InteractiveEventRegistry eventRegistry;
 
         [Header("Configuração de Fluxo")]
         [SerializeField] private bool requireSpaceToCallNextNpc = true;
@@ -75,7 +76,8 @@ namespace Mandato.Infrastructure
             KeyCode callKey = KeyCode.Space,
             float delayBetween = 1.5f,
             string menuScene = "MenuV2",
-            UIModalCoordinator modalCoordinator = null)
+            UIModalCoordinator modalCoordinator = null,
+            InteractiveEventRegistry eventRegistry = null)
         {
             this.stateMachine = stateMachine;
             this.catalog = catalog;
@@ -83,6 +85,7 @@ namespace Mandato.Infrastructure
             this.bindings = bindings;
             this.flipPhoneCoordinator = flipPhoneCoordinator;
             this.modalCoordinator = modalCoordinator ?? new UIModalCoordinator();
+            this.eventRegistry = eventRegistry;
             this.requireSpaceToCallNextNpc = requireSpace;
             this.callNextNpcKey = callKey;
             this.delayBetweenProposals = delayBetween;
@@ -299,6 +302,17 @@ namespace Mandato.Infrastructure
                         bindings.FlipPhonePresenter?.SetInteractable(false);
                         bindings.DeskCallButton?.SetInteractable(false);
                         bindings.DecisionOverlayPresenter?.SetBackVisible(false);
+                    }
+                    break;
+
+                case InteractionContext.EventMinigame:
+                    bindings?.StampTool?.SetInspectActive(false);
+                    flipPhoneCoordinator?.ClosePhone();
+                    if (bindings != null)
+                    {
+                        bindings.FlipPhonePresenter?.SetInteractable(false);
+                        bindings.DeskCallButton?.SetInteractable(false);
+                        bindings.DecisionOverlayPresenter?.SetVisible(false);
                     }
                     break;
 
@@ -689,10 +703,88 @@ namespace Mandato.Infrastructure
         private IEnumerator DrawNextProposalRoutine(float delay = 0.2f)
         {
             yield return new WaitForSeconds(delay);
-            if (stateMachine != null && catalog?.Cards.Count > 0)
+
+            if (stateMachine == null || catalog?.Cards.Count <= 0) yield break;
+
+            // Antes de sortear a próxima proposta, verifica se há evento interativo agendado
+            string pendingEventId = stateMachine.RunState?.ConsumeScheduledEvent();
+            if (!string.IsNullOrEmpty(pendingEventId))
             {
-                stateMachine.DrawAndPresentProposal(catalog.Cards);
+                if (eventRegistry != null && eventRegistry.TryGet(pendingEventId, out var ev))
+                {
+                    stateMachine.BeginEventPhase();
+                    modalCoordinator?.SetContext(InteractionContext.EventMinigame);
+                    ev.Begin(stateMachine.RunState, OnInteractiveEventCompleted);
+                    yield break; // evento assumiu o controle
+                }
+                else
+                {
+                    Debug.LogWarning($"[RunFlowCoordinator] Evento '{pendingEventId}' agendado mas não encontrado no registry. Sorteando proposta normal.");
+                }
             }
+
+            stateMachine.DrawAndPresentProposal(catalog.Cards);
+        }
+
+        /// <summary>
+        /// Chamado pelo evento interativo quando ele conclui (callback de caixa preta).
+        /// Aplica o resultado no estado do jogo e retoma o fluxo normal de proposta.
+        /// </summary>
+        private void OnInteractiveEventCompleted(InteractiveEventResult result)
+        {
+            if (result == null || stateMachine == null) return;
+
+            // Aplica os efeitos declarados pelo evento
+            if (result.wasCompleted)
+            {
+                var runState = stateMachine.RunState;
+
+                if (result.statImpacts != null)
+                    runState.ApplyStatImpacts(result.statImpacts);
+
+                foreach (var perkId in result.grantPerkIds ?? new System.Collections.Generic.List<string>())
+                    runState.GrantPerk(perkId);
+
+                if (result.npcRelationDeltas != null)
+                {
+                    foreach (var kvp in result.npcRelationDeltas)
+                    {
+                        var npcState = runState.GetOrCreateNpcState(kvp.Key);
+                        npcState?.ModifyRelation(kvp.Value);
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(result.scheduleNextEventId))
+                    runState.ScheduleEvent(result.scheduleNextEventId);
+
+                // injectCardIds e removeCardIds são processados pelo DeckState
+                if (stateMachine.DeckState != null)
+                {
+                    foreach (var cardId in result.injectCardIds ?? new System.Collections.Generic.List<string>())
+                        stateMachine.DeckState.InjectCard(cardId, onTop: true);
+
+                    foreach (var cardId in result.removeCardIds ?? new System.Collections.Generic.List<string>())
+                        stateMachine.DeckState.RemoveCard(cardId);
+                }
+            }
+
+            // Retorna ao contexto da mesa e verifica término
+            modalCoordinator?.SetContext(InteractionContext.DeskOverview);
+
+            if (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory)
+                return;
+
+            // O evento substituiu a proposta: CompleteTurnAndAdvance aceita RunningEvent
+            var monthlyReport = stateMachine.CompleteTurnAndAdvance(catalog.Perks, catalog.Events);
+            SyncPresenters(applyCameraEffects: (monthlyReport != null), instantCamera: false);
+
+            if (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory)
+                return;
+
+            if (requireSpaceToCallNextNpc)
+                isAwaitingSpaceForNextNpc = true;
+            else
+                StartCoroutine(DrawNextProposalRoutine(delayBetweenProposals));
         }
 
         private void HandleRunTerminated(RunTermination termination)
