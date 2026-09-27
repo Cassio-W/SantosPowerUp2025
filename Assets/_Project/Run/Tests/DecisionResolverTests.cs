@@ -240,5 +240,141 @@ namespace Mandato.Run.Tests
             Assert.IsFalse(run.activePerkIds.Contains("AliancaEUA"));
             Assert.IsTrue(run.termination.IsOngoing);
         }
+
+        [Test]
+        public void Resolve_AcceptProposal_IncreasesNpcRelationByFixedDefault()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+
+            ResolutionReport report = DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 0);
+
+            Assert.IsNotNull(report);
+            Assert.AreEqual("Ministro", report.npcId);
+            Assert.AreEqual(0, report.npcRelationBefore);
+            Assert.AreEqual(DecisionResolver.DefaultAcceptNpcRelationDelta, report.npcRelationDelta);
+            Assert.AreEqual(5, report.npcRelationAfter);
+            Assert.AreEqual(5, run.GetNpcRelation("Ministro"));
+
+            var npcState = run.GetOrCreateNpcState("Ministro");
+            Assert.IsTrue(npcState.isMet);
+            Assert.AreEqual(1, npcState.interactionCount);
+        }
+
+        [Test]
+        public void Resolve_RejectProposal_DecreasesNpcRelationByFixedDefault()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+
+            ResolutionReport report = DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 1);
+
+            Assert.IsNotNull(report);
+            Assert.AreEqual("Ministro", report.npcId);
+            Assert.AreEqual(0, report.npcRelationBefore);
+            Assert.AreEqual(DecisionResolver.DefaultRejectNpcRelationDelta, report.npcRelationDelta);
+            Assert.AreEqual(-5, report.npcRelationAfter);
+            Assert.AreEqual(-5, run.GetNpcRelation("Ministro"));
+
+            var npcState = run.GetOrCreateNpcState("Ministro");
+            Assert.IsTrue(npcState.isMet);
+            Assert.AreEqual(1, npcState.interactionCount);
+        }
+
+        [Test]
+        public void Resolve_SuccessiveDecisions_AccumulatesNpcRelationCorrectly()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+
+            // Aceita 1ª proposta (+5)
+            var rep1 = DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 0);
+            Assert.AreEqual(0, rep1.npcRelationBefore);
+            Assert.AreEqual(5, rep1.npcRelationAfter);
+
+            // Aceita 2ª proposta (+5 -> 10)
+            var rep2 = DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 0);
+            Assert.AreEqual(5, rep2.npcRelationBefore);
+            Assert.AreEqual(10, rep2.npcRelationAfter);
+
+            // Recusa 3ª proposta (-5 -> 5)
+            var rep3 = DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 1);
+            Assert.AreEqual(10, rep3.npcRelationBefore);
+            Assert.AreEqual(5, rep3.npcRelationAfter);
+
+            // Recusa 4ª proposta (-5 -> 0)
+            var rep4 = DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 1);
+            Assert.AreEqual(5, rep4.npcRelationBefore);
+            Assert.AreEqual(0, rep4.npcRelationAfter);
+
+            // Recusa 5ª proposta (-5 -> -5)
+            var rep5 = DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 1);
+            Assert.AreEqual(0, rep5.npcRelationBefore);
+            Assert.AreEqual(-5, rep5.npcRelationAfter);
+            Assert.AreEqual(5, run.GetOrCreateNpcState("Ministro").interactionCount);
+        }
+
+        [Test]
+        public void Resolve_CustomChoiceDeltaNpcRelation_OverridesDefaultDelta()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+
+            var customCard = CardDefinition.CreateRuntimeInstance(
+                id: "card_custom_relation",
+                title: "Tratado Especial",
+                description: "Proposta com relação customizada.",
+                left: new ChoiceDefinition("Grande Acordo", new StatBlock(), deltaNpcRelation: 15),
+                right: new ChoiceDefinition("Grande Ofensa", new StatBlock(), deltaNpcRelation: -20),
+                npcId: "npc_diplomata"
+            );
+
+            // Aceita com delta customizado +15
+            var rep1 = DecisionResolver.Resolve(run, deck, customCard, choiceIndex: 0);
+            Assert.AreEqual(15, rep1.npcRelationDelta);
+            Assert.AreEqual(15, rep1.npcRelationAfter);
+            Assert.AreEqual(15, run.GetNpcRelation("npc_diplomata"));
+
+            // Recusa com delta customizado -20 (15 - 20 = -5)
+            var rep2 = DecisionResolver.Resolve(run, deck, customCard, choiceIndex: 1);
+            Assert.AreEqual(-20, rep2.npcRelationDelta);
+            Assert.AreEqual(-5, rep2.npcRelationAfter);
+            Assert.AreEqual(-5, run.GetNpcRelation("npc_diplomata"));
+        }
+
+        [Test]
+        public void Resolve_NpcRelation_ClampsAtMaxAndMinLimits()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+            run.GetOrCreateNpcState("Ministro").relationScore = 98;
+
+            // +5 em 98 deve travar em 100
+            var repMax = DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 0);
+            Assert.AreEqual(100, repMax.npcRelationAfter);
+            Assert.AreEqual(100, run.GetNpcRelation("Ministro"));
+
+            run.GetOrCreateNpcState("Ministro").relationScore = -98;
+            // -5 em -98 deve travar em -100
+            var repMin = DecisionResolver.Resolve(run, deck, testCard, choiceIndex: 1);
+            Assert.AreEqual(-100, repMin.npcRelationAfter);
+            Assert.AreEqual(-100, run.GetNpcRelation("Ministro"));
+        }
+
+        [Test]
+        public void Resolve_CardWithoutNpc_DoesNotFailAndLeavesNpcFieldsEmpty()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+
+            var noNpcCard = CardDefinition.CreateNeutralRoutineCard();
+            var rep = DecisionResolver.Resolve(run, deck, noNpcCard, choiceIndex: 0);
+
+            Assert.IsNotNull(rep);
+            Assert.IsEmpty(rep.npcId);
+            Assert.AreEqual(0, rep.npcRelationDelta);
+            Assert.AreEqual(0, rep.npcRelationBefore);
+            Assert.AreEqual(0, rep.npcRelationAfter);
+        }
     }
 }

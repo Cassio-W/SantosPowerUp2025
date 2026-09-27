@@ -17,22 +17,24 @@ namespace Mandato.Core
     {
         public const int MinValue = 0;
         public const int MaxValue = 100;
+        public const int MinDelta = -100;
+        public const int MaxDelta = 100;
         public const int DefaultInitialValue = 50;
         public const int DefaultInitialCorruption = 0;
 
-        [Range(MinValue, MaxValue)]
+        [Range(MinDelta, MaxDelta)]
         public int climaticChanges = DefaultInitialValue;
 
-        [Range(MinValue, MaxValue)]
+        [Range(MinDelta, MaxDelta)]
         public int internationalRelations = DefaultInitialValue;
 
-        [Range(MinValue, MaxValue)]
+        [Range(MinDelta, MaxDelta)]
         public int popularApproval = DefaultInitialValue;
 
-        [Range(MinValue, MaxValue)]
+        [Range(MinDelta, MaxDelta)]
         public int economy = DefaultInitialValue;
 
-        [Range(MinValue, MaxValue)]
+        [Range(MinDelta, MaxDelta)]
         public int corruption = DefaultInitialCorruption;
 
         public StatBlock()

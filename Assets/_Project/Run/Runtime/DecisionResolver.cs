@@ -153,7 +153,10 @@ namespace Mandato.Run
                 report.npcRelationBefore = npcState.relationScore;
                 npcState.RecordInteraction();
 
-                int relationDelta = choiceIndex == 0 ? DefaultAcceptNpcRelationDelta : DefaultRejectNpcRelationDelta;
+                int relationDelta = choice.deltaNpcRelation != 0
+                    ? choice.deltaNpcRelation
+                    : (choiceIndex == 0 ? DefaultAcceptNpcRelationDelta : DefaultRejectNpcRelationDelta);
+
                 npcState.ModifyRelation(relationDelta);
                 report.npcRelationAfter = npcState.relationScore;
                 report.npcRelationDelta = relationDelta;

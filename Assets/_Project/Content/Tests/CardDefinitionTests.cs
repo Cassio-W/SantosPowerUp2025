@@ -106,5 +106,16 @@ namespace Mandato.Content.Tests
             Assert.AreEqual("npc_test", card.GetNpcId());
             Assert.IsNull(card.GetNpcPrefab());
         }
+
+        [Test]
+        public void ChoiceDefinition_InitializesDeltaNpcRelation_Correctly()
+        {
+            var defaultChoice = new ChoiceDefinition("Aceitar");
+            Assert.AreEqual(0, defaultChoice.deltaNpcRelation);
+
+            var customChoice = new ChoiceDefinition("Custom", new StatBlock(5, 5, 0, 0, 0), deltaNpcRelation: 12);
+            Assert.AreEqual(12, customChoice.deltaNpcRelation);
+            Assert.AreEqual(5, customChoice.statImpacts.climaticChanges);
+        }
     }
 }

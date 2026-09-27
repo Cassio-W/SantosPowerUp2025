@@ -15,6 +15,9 @@ namespace Mandato.Content
         public int deltaPoliticalY = 0;
         public bool hasCorruptionMods = false;
 
+        [Tooltip("Variação da relação com o NPC autor da proposta ao escolher esta opção. Se 0, utiliza o padrão fixo (+5 para aceitar / -5 para recusar).")]
+        public int deltaNpcRelation = 0;
+
         [Tooltip("Arraste as cartas que esta decisão injeta no baralho.")]
         public List<CardDefinition> injectCards = new List<CardDefinition>();
         [Tooltip("IDs das cartas a injetar (fallback).")]
@@ -47,6 +50,14 @@ namespace Mandato.Content
         {
             this.label = label ?? string.Empty;
             this.statImpacts = impacts ?? new StatBlock(0, 0, 0, 0, 0);
+            this.hasCorruptionMods = corruptionMods;
+        }
+
+        public ChoiceDefinition(string label, StatBlock impacts, int deltaNpcRelation, bool corruptionMods = false)
+        {
+            this.label = label ?? string.Empty;
+            this.statImpacts = impacts ?? new StatBlock(0, 0, 0, 0, 0);
+            this.deltaNpcRelation = deltaNpcRelation;
             this.hasCorruptionMods = corruptionMods;
         }
 

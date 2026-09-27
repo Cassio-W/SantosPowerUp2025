@@ -41,6 +41,13 @@ namespace Mandato.Core.Tests
         }
 
         [Test]
+        public void DeltaConstants_AreConfiguredProperly()
+        {
+            Assert.AreEqual(-100, StatBlock.MinDelta);
+            Assert.AreEqual(100, StatBlock.MaxDelta);
+        }
+
+        [Test]
         public void Clone_CreatesIndependentCopy()
         {
             var original = new StatBlock(40, 60, 70, 80, 10);
