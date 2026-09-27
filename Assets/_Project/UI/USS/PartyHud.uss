@@ -1,0 +1,222 @@
+.party-hud-root {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* ─── Top Bar (Energia / Sair) ─── */
+.party-top-bar {
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: rgba(18, 20, 26, 0.85);
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.energy-container {
+    flex-direction: row;
+    align-items: center;
+}
+
+.energy-label {
+    color: #ffffff;
+    font-size: 16px;
+    -unity-font-style: bold;
+    margin-right: 12px;
+}
+
+.energy-bar {
+    flex-direction: row;
+    align-items: center;
+}
+
+.energy-segment {
+    width: 24px;
+    height: 14px;
+    border-radius: 4px;
+    margin-right: 6px;
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.3);
+}
+
+.energy-segment--active {
+    background-color: #f39c12;
+    border-color: #e67e22;
+}
+
+.energy-segment--spent {
+    background-color: #2c3e50;
+    opacity: 0.4;
+}
+
+.btn-end-party {
+    background-color: #c0392b;
+    color: #ffffff;
+    font-size: 14px;
+    -unity-font-style: bold;
+    padding: 8px 18px;
+    border-radius: 8px;
+    border-width: 0;
+    transition-duration: 0.15s;
+}
+
+.btn-end-party:hover {
+    background-color: #e74c3c;
+    scale: 1.05;
+}
+
+/* ─── Botão Voltar da Conversa (ESC) ─── */
+.btn-back-conversation {
+    position: absolute;
+    top: 85px;
+    left: 24px;
+    background-color: rgba(30, 36, 48, 0.9);
+    color: #ecf0f1;
+    font-size: 14px;
+    -unity-font-style: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.2);
+    transition-duration: 0.15s;
+}
+
+.btn-back-conversation:hover {
+    background-color: #34495e;
+    border-color: #3498db;
+    scale: 1.05;
+}
+
+/* ─── Feedback Momentâneo de Relação ─── */
+.approach-feedback-label {
+    position: absolute;
+    top: 35%;
+    align-self: center;
+    font-size: 32px;
+    -unity-font-style: bold;
+    color: #2ecc71;
+    background-color: rgba(0, 0, 0, 0.75);
+    padding: 10px 24px;
+    border-radius: 12px;
+    border-width: 1px;
+    border-color: rgba(46, 204, 113, 0.5);
+    -unity-text-align: middle-center;
+}
+
+/* ─── Bottom Area (Balão + Roda) ─── */
+.party-bottom-area {
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-end;
+    margin-bottom: 10px;
+}
+
+.npc-speech-bubble {
+    width: 460px;
+    min-height: 140px;
+    background-color: rgba(20, 24, 33, 0.92);
+    border-radius: 16px;
+    border-width: 2px;
+    border-color: #34495e;
+    padding: 16px 20px;
+    margin-right: 24px;
+    justify-content: flex-start;
+}
+
+.npc-name-label {
+    color: #e67e22;
+    font-size: 18px;
+    -unity-font-style: bold;
+    margin-bottom: 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+    padding-bottom: 4px;
+}
+
+.npc-speech-text {
+    color: #ecf0f1;
+    font-size: 15px;
+    white-space: normal;
+}
+
+/* ─── Roda de Abordagem (Diamond Layout) ─── */
+.approach-wheel {
+    width: 220px;
+    height: 220px;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+}
+
+.approach-wheel-bg {
+    position: absolute;
+    width: 110px;
+    height: 110px;
+    border-radius: 55px;
+    background-color: rgba(0, 0, 0, 0.4);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-approach {
+    position: absolute;
+    width: 95px;
+    height: 38px;
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #ffffff;
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.2);
+    -unity-text-align: middle-center;
+    transition-duration: 0.15s;
+}
+
+.btn-approach:hover {
+    scale: 1.08;
+}
+
+.btn-approach-up {
+    top: 0;
+    align-self: center;
+    background-color: #8e44ad;
+}
+
+.btn-approach-right {
+    right: 0;
+    top: 90px;
+    background-color: #f39c12;
+}
+
+.btn-approach-down {
+    bottom: 0;
+    align-self: center;
+    background-color: #2980b9;
+}
+
+.btn-approach-left {
+    left: 0;
+    top: 90px;
+    background-color: #e84393;
+}
+
+.approach-used {
+    opacity: 0.25;
+    background-color: #4b6584 !important;
+}

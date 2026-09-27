@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49754ce4bb3718445be784c6e98a7242, type: 3}
+  m_Name: FestaEvent
+  m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CorporatePartyEventDefinition
+  eventId: 
+  guestPool:
+  - {fileID: 11400000, guid: c1a000128471ade47bf5fc0f3da00012, type: 2}
+  - {fileID: 11400000, guid: c1a000118471ade47bf5fc0f3da00011, type: 2}
+  - {fileID: 11400000, guid: c1a000098471ade47bf5fc0f3da00009, type: 2}
+  - {fileID: 11400000, guid: c1a000058471ade47bf5fc0f3da00005, type: 2}
+  - {fileID: 11400000, guid: c1a000088471ade47bf5fc0f3da00008, type: 2}
+  - {fileID: 11400000, guid: c1a000018471ade47bf5fc0f3da00001, type: 2}
+  - {fileID: 11400000, guid: c1a000038471ade47bf5fc0f3da00003, type: 2}
+  - {fileID: 11400000, guid: c1a000048471ade47bf5fc0f3da00004, type: 2}
+  - {fileID: 11400000, guid: c1a000068471ade47bf5fc0f3da00006, type: 2}
+  - {fileID: 11400000, guid: c1a000108471ade47bf5fc0f3da00010, type: 2}
+  - {fileID: 11400000, guid: c1a000078471ade47bf5fc0f3da00007, type: 2}
+  - {fileID: 11400000, guid: c1a000028471ade47bf5fc0f3da00002, type: 2}
+  minGuests: 3
+  maxGuests: 6
+  baseInteractionLimit: 4
+  bonusInteractionPerkId: 
+  bonusInteractionAmount: 1
+  sceneName: Event_CorporateParty

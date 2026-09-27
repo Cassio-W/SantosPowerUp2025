@@ -1,0 +1,41 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/_Project/UI/USS/PartyHud.uss" />
+    <ui:VisualElement name="party-hud-root" class="party-hud-root" picking-mode="Ignore">
+        
+        <!-- Top Bar: Ânimo/Interações + Botão Sair -->
+        <ui:VisualElement name="party-top-bar" class="party-top-bar" picking-mode="Ignore">
+            <ui:VisualElement name="energy-container" class="energy-container" picking-mode="Ignore">
+                <ui:Label text="Ânimo:" class="energy-label" />
+                <ui:VisualElement name="energy-bar" class="energy-bar" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:Button name="btn-end-party" text="Sair da Festa" class="btn-end-party" />
+        </ui:VisualElement>
+
+        <!-- Botão Voltar da Conversa (aparece durante o diálogo) -->
+        <ui:Button name="btn-back-conversation" text="⮌ Voltar (ESC)" class="btn-back-conversation hidden" />
+
+        <!-- Feedback momentâneo central (+2 Relação, etc) -->
+        <ui:Label name="approach-feedback-label" text="+2 Relação" class="approach-feedback-label hidden" />
+
+        <!-- Bottom Area: Balão de Fala + Roda de Abordagem -->
+        <ui:VisualElement name="party-bottom-area" class="party-bottom-area" picking-mode="Ignore">
+            
+            <!-- Balão de diálogo do NPC -->
+            <ui:VisualElement name="npc-speech-bubble" class="npc-speech-bubble hidden">
+                <ui:Label name="npc-name-label" text="Nome do NPC" class="npc-name-label" />
+                <ui:Label name="npc-speech-text" text="Texto de abertura do NPC..." class="npc-speech-text" />
+            </ui:VisualElement>
+
+            <!-- Roda de 4 Abordagens -->
+            <ui:VisualElement name="approach-wheel" class="approach-wheel hidden">
+                <ui:VisualElement class="approach-wheel-bg" picking-mode="Ignore" />
+                <ui:Button name="btn-approach-up" text="Arrogante" class="btn-approach btn-approach-up" />
+                <ui:Button name="btn-approach-right" text="Brincalhão" class="btn-approach btn-approach-right" />
+                <ui:Button name="btn-approach-down" text="Persuasivo" class="btn-approach btn-approach-down" />
+                <ui:Button name="btn-approach-left" text="Romântico" class="btn-approach btn-approach-left" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+</ui:UXML>
