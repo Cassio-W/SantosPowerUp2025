@@ -29,6 +29,13 @@ namespace Mandato.UI
         [SerializeField] private float situationTypewriterSpeed = 35f;
         [SerializeField] private float dateTypewriterSpeed = 30f;
 
+        [Header("Áudio / Som (Typewriter)")]
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip typewriterSound;
+        [Range(0f, 1f)] [SerializeField] private float typewriterSoundVolume = 0.4f;
+        [SerializeField] private Vector2 typewriterPitchVariation = new Vector2(0.96f, 1.04f);
+        [SerializeField] private float minTypewriterSoundInterval = 0.03f;
+
         [Header("UI Document e Assets")]
         [SerializeField] private UIDocument uiDocument;
         [SerializeField] private VisualTreeAsset uxmlAsset;
@@ -146,6 +153,29 @@ namespace Mandato.UI
 #endif
                     }
                 }
+            }
+
+            EnsureAudioSource();
+
+#if UNITY_EDITOR
+            if (typewriterSound == null)
+            {
+                typewriterSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/menu-select-sound-100466 (mp3cut.net).mp3");
+            }
+#endif
+        }
+
+        private void EnsureAudioSource()
+        {
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>() ?? GetComponentInChildren<AudioSource>();
+            }
+
+            if (audioSource == null && gameObject != null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake = false;
             }
         }
 
@@ -587,11 +617,23 @@ namespace Mandato.UI
 
         // =========================================================================
         // TYPEWRITER & FORMATAÇÃO RETRÔ
-        // =========================================================================
+        private float _lastTypewriterSoundTime = -1f;
 
-        /// <summary>
-        /// Executa o efeito de digitação retrô (Typewriter) em um elemento de texto (Label).
-        /// </summary>
+        public void PlayTypewriterSound()
+        {
+            if (typewriterSound == null) return;
+            if (Time.unscaledTime - _lastTypewriterSoundTime < minTypewriterSoundInterval) return;
+            _lastTypewriterSoundTime = Time.unscaledTime;
+
+            EnsureAudioSource();
+            if (audioSource == null) return;
+
+            float originalPitch = audioSource.pitch;
+            audioSource.pitch = UnityEngine.Random.Range(typewriterPitchVariation.x, typewriterPitchVariation.y);
+            audioSource.PlayOneShot(typewriterSound, typewriterSoundVolume);
+            audioSource.pitch = originalPitch;
+        }
+
         public void PlayTypewriter(Label label, string fullText, float charsPerSecond = 45f, bool showCursor = true, Action onComplete = null)
         {
             if (label == null) return;
@@ -636,11 +678,25 @@ namespace Mandato.UI
             float startTime = Time.unscaledTime;
             int totalChars = fullText.Length;
             float duration = totalChars / Mathf.Max(1f, charsPerSecond);
+            int lastLength = 0;
 
             var schedule = label.schedule.Execute(() =>
             {
                 float elapsed = Time.unscaledTime - startTime;
                 int currentLength = Mathf.Clamp(Mathf.RoundToInt((elapsed / Mathf.Max(0.01f, duration)) * totalChars), 0, totalChars);
+
+                if (currentLength > lastLength)
+                {
+                    for (int i = lastLength; i < currentLength; i++)
+                    {
+                        if (!char.IsWhiteSpace(fullText[i]))
+                        {
+                            PlayTypewriterSound();
+                            break;
+                        }
+                    }
+                    lastLength = currentLength;
+                }
 
                 if (currentLength < totalChars && showCursor)
                 {

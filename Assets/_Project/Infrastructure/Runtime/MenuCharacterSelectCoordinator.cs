@@ -53,6 +53,13 @@ namespace Mandato.Infrastructure
         [SerializeField] private MenuPhysicalButton3D buttonBack;
         [SerializeField] private List<MenuPhysicalButton3D> physicalButtons = new List<MenuPhysicalButton3D>();
 
+        [Header("Áudio e Transição de Confirmação")]
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip confirmSound;
+        [Range(0f, 1f)] [SerializeField] private float confirmSoundVolume = 0.9f;
+        [Tooltip("Delay em segundos antes de carregar a cena de gameplay para permitir a reprodução do áudio e feedback do clique.")]
+        [SerializeField] private float confirmDelay = 0.55f;
+
         [Header("Cena de Gameplay")]
         [SerializeField] private string gameplaySceneName = "JogoV2";
 
@@ -61,9 +68,14 @@ namespace Mandato.Infrastructure
         private Quaternion _menuCameraRotation;
         private float _menuCameraFov;
         private Coroutine _cameraMoveCoroutine;
+        private Coroutine _confirmCoroutine;
+        private bool _isConfirming = false;
+        private float _lastConfirmSoundTime = -1f;
 
         public MenuInteractionContext CurrentContext { get; private set; } = MenuInteractionContext.MainMenuOverview;
         public bool IsInCharacterSelect => CurrentContext == MenuInteractionContext.CharacterSelect;
+        public AudioClip ConfirmSound { get => confirmSound; set => confirmSound = value; }
+        public float ConfirmDelay { get => confirmDelay; set => confirmDelay = value; }
 
         public event Action<MenuInteractionContext, MenuInteractionContext> OnContextChanged;
 
@@ -74,6 +86,15 @@ namespace Mandato.Infrastructure
             {
                 mainMenuPresenter = FindFirstObjectByType<MainMenuPresenter>();
             }
+
+            EnsureAudioSource();
+
+#if UNITY_EDITOR
+            if (confirmSound == null)
+            {
+                confirmSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/urna-move.mp3");
+            }
+#endif
 
             FindAndBindPhysicalButtons();
         }
@@ -261,12 +282,16 @@ namespace Mandato.Infrastructure
 
         /// <summary>
         /// Chamado ao clicar no botão físico 3D "Confirmar" ou pressionar Enter.
-        /// Salva o personagem escolhido e carrega a cena de gameplay.
+        /// Salva o personagem escolhido, toca o som de confirmação e carrega a cena de gameplay após um breve delay.
         /// </summary>
         public void ConfirmSelection()
         {
-            if (CurrentContext != MenuInteractionContext.CharacterSelect) return;
+            if (CurrentContext != MenuInteractionContext.CharacterSelect || _isConfirming) return;
             if (uiPresenter == null) return;
+
+            _isConfirming = true;
+            SetContext(MenuInteractionContext.Transitioning);
+            SetPhysicalButtonsInteractable(false);
 
             var selected = uiPresenter.CurrentCharacter;
             if (selected != null)
@@ -280,9 +305,49 @@ namespace Mandato.Infrastructure
                 Debug.LogWarning("[MenuCharacterSelectCoordinator] ⚠️ Nenhum personagem retornado por uiPresenter.CurrentCharacter ao confirmar.");
             }
 
+            PlayConfirmSound();
+
             if (!string.IsNullOrEmpty(gameplaySceneName))
             {
-                SceneManager.LoadScene(gameplaySceneName);
+                if (_confirmCoroutine != null) StopCoroutine(_confirmCoroutine);
+                _confirmCoroutine = StartCoroutine(ConfirmAndLoadSceneRoutine());
+            }
+        }
+
+        private IEnumerator ConfirmAndLoadSceneRoutine()
+        {
+            if (confirmDelay > 0f)
+            {
+                yield return new WaitForSecondsRealtime(confirmDelay);
+            }
+
+            SceneManager.LoadScene(gameplaySceneName);
+        }
+
+        public void PlayConfirmSound()
+        {
+            if (confirmSound == null) return;
+            if (Time.unscaledTime - _lastConfirmSoundTime < 0.1f) return;
+            _lastConfirmSoundTime = Time.unscaledTime;
+
+            EnsureAudioSource();
+            if (audioSource != null)
+            {
+                audioSource.PlayOneShot(confirmSound, confirmSoundVolume);
+            }
+        }
+
+        public void EnsureAudioSource()
+        {
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>() ?? GetComponentInChildren<AudioSource>();
+            }
+
+            if (audioSource == null && gameObject != null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake = false;
             }
         }
 

@@ -73,6 +73,25 @@ namespace Mandato.Infrastructure.Tests
         }
 
         [Test]
+        public void StartPress_And_ReleasePress_TogglesHeldState_And_AudioLoop()
+        {
+            var audio = buttonObject.AddComponent<AudioSource>();
+            deskButton.PressSound = AudioClip.Create("TestBuzz", 44100, 1, 44100, false);
+
+            Assert.IsFalse(deskButton.IsHeldDown);
+
+            deskButton.StartPress();
+            Assert.IsTrue(deskButton.IsHeldDown, "IsHeldDown deve ser verdadeiro após StartPress.");
+            Assert.IsTrue(audio.loop, "AudioSource deve estar com loop = true enquanto pressionado.");
+            Assert.IsTrue(audio.isPlaying, "AudioSource deve estar tocando enquanto pressionado.");
+
+            deskButton.ReleasePress();
+            Assert.IsFalse(deskButton.IsHeldDown, "IsHeldDown deve ser falso após ReleasePress.");
+            Assert.IsFalse(audio.loop, "AudioSource deve ter loop desativado após ReleasePress.");
+            Assert.IsFalse(audio.isPlaying, "AudioSource deve parar de tocar após ReleasePress.");
+        }
+
+        [Test]
         public void ScenePresentationBindings_ExposesDeskCallButton()
         {
             var bindings = new ScenePresentationBindings();

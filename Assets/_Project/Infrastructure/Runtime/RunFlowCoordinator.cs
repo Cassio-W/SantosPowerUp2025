@@ -455,22 +455,31 @@ namespace Mandato.Infrastructure
 
         private void Update()
         {
-            bool spaceOrEnter = Input.GetKeyDown(callNextNpcKey) ||
-                                Input.GetKeyDown(KeyCode.Space) ||
-                                Input.GetKeyDown(KeyCode.Return) ||
-                                Input.GetKeyDown(KeyCode.KeypadEnter);
+            bool spaceOrEnterDown = Input.GetKeyDown(callNextNpcKey) ||
+                                    Input.GetKeyDown(KeyCode.Space) ||
+                                    Input.GetKeyDown(KeyCode.Return) ||
+                                    Input.GetKeyDown(KeyCode.KeypadEnter);
 
-            if (spaceOrEnter)
+            bool spaceOrEnterUp = Input.GetKeyUp(callNextNpcKey) ||
+                                  Input.GetKeyUp(KeyCode.Space) ||
+                                  Input.GetKeyUp(KeyCode.Return) ||
+                                  Input.GetKeyUp(KeyCode.KeypadEnter);
+
+            if (spaceOrEnterDown)
             {
                 if (modalCoordinator != null && !modalCoordinator.CanCallNextVisitor()) return;
                 if (bindings?.EndScreenPresenter != null && bindings.EndScreenPresenter.IsVisible) return;
 
-                bindings?.DeskCallButton?.PlayPressEffects();
+                bindings?.DeskCallButton?.StartPress();
 
                 if (isAwaitingSpaceForNextNpc)
                 {
                     AuthorizeNextVisitor();
                 }
+            }
+            else if (spaceOrEnterUp)
+            {
+                bindings?.DeskCallButton?.ReleasePress();
             }
         }
 
@@ -495,7 +504,7 @@ namespace Mandato.Infrastructure
             if (bindings?.EndScreenPresenter != null && bindings.EndScreenPresenter.IsVisible) return;
 
             isAwaitingSpaceForNextNpc = false;
-            bindings?.DeskCallButton?.PlayPressEffects();
+            bindings?.DeskCallButton?.StartPress();
             StartCoroutine(DrawNextProposalRoutine(0.05f));
         }
 

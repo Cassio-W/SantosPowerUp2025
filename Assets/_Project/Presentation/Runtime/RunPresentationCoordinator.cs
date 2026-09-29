@@ -327,7 +327,14 @@ namespace Mandato.Presentation
                 UnityEditor.Selection.activeGameObject = null;
             }
 #endif
-            Destroy(obj);
+            if (Application.isPlaying)
+            {
+                Destroy(obj);
+            }
+            else
+            {
+                DestroyImmediate(obj);
+            }
         }
 
         private void StopActiveRoutine()

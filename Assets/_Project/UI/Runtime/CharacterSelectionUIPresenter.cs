@@ -103,6 +103,15 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
     [SerializeField] private float abilityTypewriterSpeed = 60f;
     [SerializeField] private float statsInterpolationDuration = 0.45f;
 
+    [Header("Áudio / Sons da Urna")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip characterChangeSound;
+    [Range(0f, 1f)] [SerializeField] private float characterChangeSoundVolume = 0.8f;
+    [SerializeField] private AudioClip typewriterSound;
+    [Range(0f, 1f)] [SerializeField] private float typewriterSoundVolume = 0.4f;
+    [SerializeField] private Vector2 typewriterPitchVariation = new Vector2(0.96f, 1.04f);
+    [SerializeField] private float minTypewriterSoundInterval = 0.03f;
+
     private readonly Dictionary<Label, IVisualElementScheduledItem> _activeTypewriters =
         new Dictionary<Label, IVisualElementScheduledItem>();
 
@@ -223,6 +232,38 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
             uxmlAsset != null)
         {
             uiDocument.visualTreeAsset = uxmlAsset;
+        }
+
+        EnsureAudioSource();
+
+#if UNITY_EDITOR
+        if (typewriterSound == null)
+        {
+            typewriterSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/menu-select-sound-100466 (mp3cut.net).mp3");
+        }
+#endif
+    }
+
+    public void PlayCharacterChangeSound()
+    {
+        if (characterChangeSound == null) return;
+        EnsureAudioSource();
+        if (audioSource == null) return;
+
+        audioSource.PlayOneShot(characterChangeSound, characterChangeSoundVolume);
+    }
+
+    private void EnsureAudioSource()
+    {
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>() ?? GetComponentInChildren<AudioSource>();
+        }
+
+        if (audioSource == null && gameObject != null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
         }
     }
 
@@ -971,6 +1012,23 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
     // Efeito Typewriter e Interpolação de Atributos
     // ---------------------------------------------------------------------
 
+    private float _lastTypewriterSoundTime = -1f;
+
+    public void PlayTypewriterSound()
+    {
+        if (typewriterSound == null) return;
+        if (Time.unscaledTime - _lastTypewriterSoundTime < minTypewriterSoundInterval) return;
+        _lastTypewriterSoundTime = Time.unscaledTime;
+
+        EnsureAudioSource();
+        if (audioSource == null) return;
+
+        float originalPitch = audioSource.pitch;
+        audioSource.pitch = UnityEngine.Random.Range(typewriterPitchVariation.x, typewriterPitchVariation.y);
+        audioSource.PlayOneShot(typewriterSound, typewriterSoundVolume);
+        audioSource.pitch = originalPitch;
+    }
+
     private void PlayTypewriter(Label label, string fullText, float charsPerSecond = 60f)
     {
         if (label == null) return;
@@ -993,11 +1051,26 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
         float startTime = Time.unscaledTime;
         int totalChars = fullText.Length;
         float duration = totalChars / Mathf.Max(1f, charsPerSecond);
+        int lastLength = 0;
 
         var schedule = label.schedule.Execute(() =>
         {
             float elapsed = Time.unscaledTime - startTime;
             int currentLength = Mathf.Clamp(Mathf.RoundToInt((elapsed / Mathf.Max(0.01f, duration)) * totalChars), 0, totalChars);
+
+            if (currentLength > lastLength)
+            {
+                for (int i = lastLength; i < currentLength; i++)
+                {
+                    if (!char.IsWhiteSpace(fullText[i]))
+                    {
+                        PlayTypewriterSound();
+                        break;
+                    }
+                }
+                lastLength = currentLength;
+            }
+
             label.text = fullText.Substring(0, currentLength);
 
             if (currentLength >= totalChars)

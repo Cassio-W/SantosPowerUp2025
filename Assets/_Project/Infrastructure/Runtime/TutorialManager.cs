@@ -542,7 +542,7 @@ namespace Mandato.Infrastructure
 
                 if (activeNpcGameObject != null)
                 {
-                    Destroy(activeNpcGameObject);
+                    SafeDestroy(activeNpcGameObject);
                     activeNpcGameObject = null;
                 }
             }
@@ -598,11 +598,25 @@ namespace Mandato.Infrastructure
 
             if (activeNpcGameObject != null)
             {
-                Destroy(activeNpcGameObject);
+                SafeDestroy(activeNpcGameObject);
                 activeNpcGameObject = null;
             }
 
             CompleteTutorial();
+        }
+
+        private void SafeDestroy(GameObject obj)
+        {
+            if (obj == null) return;
+            obj.SetActive(false);
+            if (Application.isPlaying)
+            {
+                Destroy(obj);
+            }
+            else
+            {
+                DestroyImmediate(obj);
+            }
         }
 
         private void OnDestroy()
@@ -614,7 +628,7 @@ namespace Mandato.Infrastructure
 
             if (activeNpcGameObject != null)
             {
-                Destroy(activeNpcGameObject);
+                SafeDestroy(activeNpcGameObject);
                 activeNpcGameObject = null;
             }
         }

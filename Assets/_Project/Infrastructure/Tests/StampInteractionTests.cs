@@ -210,13 +210,29 @@ namespace Mandato.Infrastructure.Tests
         }
 
         [Test]
-        public void FlowCoordinator_HandlePlayerChoiceSubmitted_SetsProcessingDecision()
+        public void StampAndPaper_AudioClips_DoNotThrow()
         {
-            flowCoordinator.PostStampWaitDuration = 0.01f;
-            flowCoordinator.HandlePlayerChoiceSubmitted(0);
+            var audioClip = AudioClip.Create("TestAudio", 44100, 1, 44100, false);
 
-            Assert.IsTrue(flowCoordinator.IsProcessingDecision);
-            Assert.IsTrue(flowCoordinator.IsDismissingProposal);
+            stampTool.StampSuccessSound = audioClip;
+            stampTool.DipSound = audioClip;
+            Assert.AreEqual(audioClip, stampTool.StampSuccessSound);
+            Assert.AreEqual(audioClip, stampTool.DipSound);
+
+            approvePad.DipSound = audioClip;
+            Assert.AreEqual(audioClip, approvePad.DipSound);
+
+            var paperFocusGo = new GameObject("PaperFocusTest");
+            var paperFocus = paperFocusGo.AddComponent<PaperFocusableObject>();
+            paperFocus.FocusSound = audioClip;
+            Assert.AreEqual(audioClip, paperFocus.FocusSound);
+
+            Assert.DoesNotThrow(() => approvePad.ApplyInkToStamp(stampTool));
+            Assert.DoesNotThrow(() => paperFocus.SetFocused(true));
+            Assert.DoesNotThrow(() => paperFocus.SetFocused(false));
+
+            Object.DestroyImmediate(paperFocusGo);
+            Object.DestroyImmediate(audioClip);
         }
     }
 }

@@ -299,7 +299,14 @@ namespace Mandato.Presentation
                     }
 #endif
                     gameObject.SetActive(false);
-                    Destroy(gameObject);
+                    if (Application.isPlaying)
+                    {
+                        Destroy(gameObject);
+                    }
+                    else
+                    {
+                        DestroyImmediate(gameObject);
+                    }
                 }
                 else if (agent == null || !agent.isOnNavMesh || !agent.isActiveAndEnabled)
                 {

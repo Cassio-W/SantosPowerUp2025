@@ -149,7 +149,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d56f47a9cbf576c47bd3ac76dacbc6b9, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -7.83
+      value: -7.833
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d56f47a9cbf576c47bd3ac76dacbc6b9, type: 3}
       propertyPath: m_LocalRotation.w
@@ -297,6 +297,13 @@ MonoBehaviour:
   bioTypewriterSpeed: 70
   abilityTypewriterSpeed: 60
   statsInterpolationDuration: 0.45
+  audioSource: {fileID: 0}
+  characterChangeSound: {fileID: 0}
+  characterChangeSoundVolume: 0.8
+  typewriterSound: {fileID: 8300000, guid: 424b132081f0d8342a363a636a5df73d, type: 3}
+  typewriterSoundVolume: 0.4
+  typewriterPitchVariation: {x: 0.96, y: 1.04}
+  minTypewriterSoundInterval: 0.03
 --- !u!114 &56261872
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -346,9 +353,9 @@ MonoBehaviour:
   hoverOffset: {x: 0, y: 0.005, z: 0}
   hoverScaleMultiplier: 1.05
   audioSource: {fileID: 0}
-  pressSound: {fileID: 0}
+  pressSound: {fileID: 8300000, guid: 7818b3c2552de2847a328738b0add0c8, type: 3}
   soundVolume: 1
-  hoverSound: {fileID: 0}
+  hoverSound: {fileID: 8300000, guid: 28e84177f7e33094086bbcf2ea379654, type: 3}
   hoverSoundVolume: 0.5
   pitchVariation: {x: 0.96, y: 1.04}
   onButtonPressed:
@@ -420,9 +427,9 @@ MonoBehaviour:
   hoverOffset: {x: 0, y: 0.005, z: 0}
   hoverScaleMultiplier: 1.05
   audioSource: {fileID: 0}
-  pressSound: {fileID: 0}
+  pressSound: {fileID: 8300000, guid: 23e52617584621c4e835cbf52586e1f6, type: 3}
   soundVolume: 1
-  hoverSound: {fileID: 0}
+  hoverSound: {fileID: 8300000, guid: 28e84177f7e33094086bbcf2ea379654, type: 3}
   hoverSoundVolume: 0.5
   pitchVariation: {x: 0.96, y: 1.04}
   onButtonPressed:
@@ -479,6 +486,7 @@ GameObject:
   - component: {fileID: 96259232}
   - component: {fileID: 96259231}
   - component: {fileID: 96259230}
+  - component: {fileID: 96259233}
   m_Layer: 0
   m_Name: HUD_Menu
   m_TagString: Untagged
@@ -541,6 +549,11 @@ MonoBehaviour:
   uiDocument: {fileID: 96259230}
   uxmlAsset: {fileID: 9197481963319205126, guid: 6912123e66cc6ac499004ac9e6abb17a, type: 3}
   panelSettings: {fileID: 11400000, guid: 7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d, type: 2}
+  audioSource: {fileID: 96259233}
+  hoverSound: {fileID: 8300000, guid: 424b132081f0d8342a363a636a5df73d, type: 3}
+  clickSound: {fileID: 8300000, guid: fed9d03172300284f92f5985124a4695, type: 3}
+  hoverSoundVolume: 0.5
+  clickSoundVolume: 1
 --- !u!4 &96259232
 Transform:
   m_ObjectHideFlags: 0
@@ -556,6 +569,129 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!82 &96259233
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 96259229}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!1 &134366962 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9197321770870340984, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+  m_PrefabInstance: {fileID: 1691757079}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &134366964
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 134366962}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 2.0441682, y: 2.2287364, z: 2.7622833}
+  m_Center: {x: -0.0044623613, y: -0.00000011920929, z: -0.00000023841858}
 --- !u!1 &331290413
 GameObject:
   m_ObjectHideFlags: 0
@@ -660,6 +796,10 @@ MonoBehaviour:
   - {fileID: 56261875}
   - {fileID: 56261873}
   - {fileID: 2062668402}
+  audioSource: {fileID: 0}
+  confirmSound: {fileID: 8300000, guid: 7818b3c2552de2847a328738b0add0c8, type: 3}
+  confirmSoundVolume: 0.9
+  confirmDelay: 0.55
   gameplaySceneName: JogoV2
 --- !u!1 &650473158
 GameObject:
@@ -692,6 +832,32 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 12.16, y: 180, z: 0}
+--- !u!1 &768106083 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 9132492519469894770, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+  m_PrefabInstance: {fileID: 1691757079}
+  m_PrefabAsset: {fileID: 0}
+--- !u!65 &768106085
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 768106083}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.51586026, y: 0.27570957, z: 0.51586026}
+  m_Center: {x: 0.000000059604645, y: -0.00000010430813, z: 0.000000059604645}
 --- !u!114 &953751182
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -718,9 +884,9 @@ MonoBehaviour:
   hoverOffset: {x: 0, y: 0.005, z: 0}
   hoverScaleMultiplier: 1.05
   audioSource: {fileID: 0}
-  pressSound: {fileID: 0}
+  pressSound: {fileID: 8300000, guid: 23e52617584621c4e835cbf52586e1f6, type: 3}
   soundVolume: 1
-  hoverSound: {fileID: 0}
+  hoverSound: {fileID: 8300000, guid: 28e84177f7e33094086bbcf2ea379654, type: 3}
   hoverSoundVolume: 0.5
   pitchVariation: {x: 0.96, y: 1.04}
   onButtonPressed:
@@ -766,6 +932,33 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.18512201, y: 0.15883435, z: 0.1530457}
   m_Center: {x: 0.00000002235174, y: 0.00000004097819, z: -0.00000001862645}
+--- !u!1 &954896351 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4812012039997631203, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+  m_PrefabInstance: {fileID: 1691757079}
+  m_PrefabAsset: {fileID: 0}
+--- !u!64 &954896353
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 954896351}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 2876311854728113814, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
 --- !u!1 &1372991564
 GameObject:
   m_ObjectHideFlags: 0
@@ -941,9 +1134,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1862807501180101224, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1939027820935114673, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
       propertyPath: m_Name
       value: GabinetePresidencial (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4489078972786119212, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+      propertyPath: m_Enabled
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6277817231750428444, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
       propertyPath: m_LocalPosition.x
@@ -953,10 +1154,27 @@ PrefabInstance:
       propertyPath: m_LocalPosition.z
       value: -0.297
       objectReference: {fileID: 0}
+    - target: {fileID: 7767940769662842046, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8745139274341343811, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+      propertyPath: pressSound
+      value: 
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4812012039997631203, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 954896353}
+    - targetCorrespondingSourceObject: {fileID: 9197321770870340984, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 134366964}
+    - targetCorrespondingSourceObject: {fileID: 9132492519469894770, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 768106085}
   m_SourcePrefab: {fileID: 100100000, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
 --- !u!1001 &1747459627
 PrefabInstance:
@@ -1416,9 +1634,9 @@ MonoBehaviour:
   hoverOffset: {x: 0, y: 0.005, z: 0}
   hoverScaleMultiplier: 1.05
   audioSource: {fileID: 0}
-  pressSound: {fileID: 0}
+  pressSound: {fileID: 8300000, guid: 23e52617584621c4e835cbf52586e1f6, type: 3}
   soundVolume: 1
-  hoverSound: {fileID: 0}
+  hoverSound: {fileID: 8300000, guid: 28e84177f7e33094086bbcf2ea379654, type: 3}
   hoverSoundVolume: 0.5
   pitchVariation: {x: 0.96, y: 1.04}
   onButtonPressed:

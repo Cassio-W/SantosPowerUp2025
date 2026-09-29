@@ -80,19 +80,19 @@ namespace Mandato.Presentation
 
     [Header("--- Efeitos Sonoros ---")]
     [Tooltip("AudioSource para tocar os sons. Se vazio, cria/usa um AudioSource local automaticamente.")]
-    [SerializeField] private AudioSource audioSource;
+    [SerializeField] protected AudioSource audioSource;
 
     [Tooltip("Som ao passar o mouse por cima do objeto.")]
-    [SerializeField] private AudioClip hoverSound;
-    [Range(0f, 1f)] [SerializeField] private float hoverSoundVolume = 0.8f;
+    [SerializeField] protected AudioClip hoverSound;
+    [Range(0f, 1f)] [SerializeField] protected float hoverSoundVolume = 0.8f;
 
     [Tooltip("Som ao clicar e focar o objeto.")]
-    [SerializeField] private AudioClip focusSound;
-    [Range(0f, 1f)] [SerializeField] private float focusSoundVolume = 1f;
+    [SerializeField] protected AudioClip focusSound;
+    [Range(0f, 1f)] [SerializeField] protected float focusSoundVolume = 1f;
 
     [Tooltip("Som ao desfocar o objeto.")]
-    [SerializeField] private AudioClip unfocusSound;
-    [Range(0f, 1f)] [SerializeField] private float unfocusSoundVolume = 0.8f;
+    [SerializeField] protected AudioClip unfocusSound;
+    [Range(0f, 1f)] [SerializeField] protected float unfocusSoundVolume = 0.8f;
 
     [Header("--- Comportamento de Clique ---")]
     [Tooltip("Permite clicar neste objeto para focar.")]
@@ -147,6 +147,9 @@ namespace Mandato.Presentation
     public Vector3 HoverHopOffset { get => hoverHopOffset; set => hoverHopOffset = value; }
     public float HoverHopDuration { get => hoverHopDuration; set => hoverHopDuration = Mathf.Max(0.01f, value); }
     public Vector3 HoverHopPunchScale { get => hoverHopPunchScale; set => hoverHopPunchScale = value; }
+    public AudioClip FocusSound { get => focusSound; set => focusSound = value; }
+    public AudioClip HoverSound { get => hoverSound; set => hoverSound = value; }
+    public AudioClip UnfocusSound { get => unfocusSound; set => unfocusSound = value; }
     
     public bool IsHopping
     {
@@ -204,15 +207,9 @@ namespace Mandato.Presentation
             GetComponentsInChildren(true, targetRenderers);
         }
 
-        if (audioSource == null)
+        if (hoverSound != null || focusSound != null || unfocusSound != null)
         {
-            audioSource = GetComponent<AudioSource>();
-            if (audioSource == null && (hoverSound != null || focusSound != null || unfocusSound != null))
-            {
-                audioSource = gameObject.AddComponent<AudioSource>();
-                audioSource.playOnAwake = false;
-                audioSource.spatialBlend = 0f;
-            }
+            EnsureAudioSource();
         }
 
         // Garante que o objeto tenha um Collider válido para raycasting
@@ -624,15 +621,34 @@ namespace Mandato.Presentation
         return Quaternion.identity;
     }
 
+    /// <summary>
+    /// Garante que o objeto tenha um AudioSource válido para reprodução de efeitos sonoros.
+    /// </summary>
+    public void EnsureAudioSource()
+    {
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>() ?? GetComponentInChildren<AudioSource>();
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake = false;
+                audioSource.spatialBlend = 0f;
+            }
+        }
+    }
+
     protected void PlaySound(AudioClip clip, float volume)
     {
         if (clip == null) return;
+
+        EnsureAudioSource();
 
         if (audioSource != null)
         {
             audioSource.PlayOneShot(clip, volume);
         }
-        else
+        else if (Application.isPlaying)
         {
             AudioSource.PlayClipAtPoint(clip, Camera.main != null ? Camera.main.transform.position : transform.position, volume);
         }

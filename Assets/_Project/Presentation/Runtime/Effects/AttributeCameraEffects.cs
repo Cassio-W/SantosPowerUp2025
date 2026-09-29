@@ -80,7 +80,10 @@ namespace Mandato.Presentation
         {
             if (Instance != null && Instance != this)
             {
-                Destroy(this);
+                if (Application.isPlaying)
+                    Destroy(this);
+                else
+                    DestroyImmediate(this);
                 return;
             }
             Instance = this;
@@ -97,6 +100,14 @@ namespace Mandato.Presentation
         private void OnApplicationQuit()
         {
             RestoreOriginalSkyColor();
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance == this)
+            {
+                Instance = null;
+            }
         }
 
         /// <summary>

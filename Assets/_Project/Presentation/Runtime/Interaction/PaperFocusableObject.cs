@@ -160,6 +160,13 @@ namespace Mandato.Presentation
             UnfocusOnSecondClick = false;
 
             CaptureRestTransform();
+
+#if UNITY_EDITOR
+            if (focusSound == null)
+            {
+                focusSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/paper-sound.mp3");
+            }
+#endif
         }
 
         /// <summary>

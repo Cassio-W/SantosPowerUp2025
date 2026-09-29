@@ -134,6 +134,26 @@ namespace Mandato.UI.Tests
             Object.DestroyImmediate(go);
         }
 
+        [Test]
+        public void MainMenuPresenter_PlayHoverAndClickSound_DoesNotThrow()
+        {
+            var go = new GameObject("MainMenuTest");
+            var presenter = go.AddComponent<MainMenuPresenter>();
+
+            Assert.DoesNotThrow(() => presenter.PlayHoverSound());
+            Assert.DoesNotThrow(() => presenter.PlayClickSound());
+
+            var audioClip = AudioClip.Create("TestClip", 44100, 1, 44100, false);
+            presenter.HoverSound = audioClip;
+            presenter.ClickSound = audioClip;
+
+            Assert.DoesNotThrow(() => presenter.PlayHoverSound());
+            Assert.DoesNotThrow(() => presenter.PlayClickSound());
+
+            Object.DestroyImmediate(audioClip);
+            Object.DestroyImmediate(go);
+        }
+
         // ── FlipPhone ViewModel & Category Tests ──────────────────
 
         [Test]
@@ -422,6 +442,27 @@ namespace Mandato.UI.Tests
 
             Assert.AreEqual(string.Empty, CharacterSelectionUIPresenter.SanitizeRetroText(null));
             Assert.AreEqual(string.Empty, CharacterSelectionUIPresenter.SanitizeRetroText(string.Empty));
+        }
+
+        [Test]
+        public void Typewriter_AudioMethods_DoNotThrow()
+        {
+            var goMonitor = new GameObject("RetroMonitorTest");
+            var monitorPresenter = goMonitor.AddComponent<RetroMonitorPresenter>();
+            Assert.DoesNotThrow(() => monitorPresenter.PlayTypewriterSound());
+
+            var goUrna = new GameObject("UrnaTest");
+            var urnaPresenter = goUrna.AddComponent<CharacterSelectionUIPresenter>();
+            Assert.DoesNotThrow(() => urnaPresenter.PlayTypewriterSound());
+            Assert.DoesNotThrow(() => urnaPresenter.PlayCharacterChangeSound());
+
+            var goCoord = new GameObject("CoordTest");
+            var coord = goCoord.AddComponent<Mandato.Infrastructure.MenuCharacterSelectCoordinator>();
+            Assert.DoesNotThrow(() => coord.PlayConfirmSound());
+
+            Object.DestroyImmediate(goMonitor);
+            Object.DestroyImmediate(goUrna);
+            Object.DestroyImmediate(goCoord);
         }
     }
 }

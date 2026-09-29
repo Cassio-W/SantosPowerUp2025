@@ -72,6 +72,8 @@ namespace Mandato.Presentation
 
         public bool IsInteractable => interactable;
         public Transform TargetMovingPart => movingPart != null ? movingPart : transform;
+        public AudioClip PressSound { get => pressSound; set => pressSound = value; }
+        public AudioClip HoverSound { get => hoverSound; set => hoverSound = value; }
 
         private void Awake()
         {
@@ -86,9 +88,31 @@ namespace Mandato.Presentation
             _originalLocalPos = movingPart.localPosition;
             _originalLocalScale = movingPart.localScale;
 
+            EnsureAudioSource();
+
+#if UNITY_EDITOR
+            if (pressSound == null)
+            {
+                pressSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/urna-click.mp3");
+            }
+            if (hoverSound == null)
+            {
+                hoverSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/click-baixo.mp3");
+            }
+#endif
+        }
+
+        private void EnsureAudioSource()
+        {
             if (audioSource == null)
             {
-                audioSource = GetComponent<AudioSource>();
+                audioSource = GetComponent<AudioSource>() ?? GetComponentInParent<AudioSource>();
+            }
+
+            if (audioSource == null && gameObject != null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake = false;
             }
         }
 
@@ -220,6 +244,7 @@ namespace Mandato.Presentation
         private void PlayPressAudio()
         {
             if (pressSound == null) return;
+            EnsureAudioSource();
 
             if (audioSource != null)
             {
@@ -228,23 +253,16 @@ namespace Mandato.Presentation
                 audioSource.PlayOneShot(pressSound, soundVolume);
                 audioSource.pitch = originalPitch;
             }
-            else
-            {
-                AudioSource.PlayClipAtPoint(pressSound, transform.position, soundVolume);
-            }
         }
 
         private void PlayHoverSound()
         {
             if (hoverSound == null) return;
+            EnsureAudioSource();
 
             if (audioSource != null)
             {
                 audioSource.PlayOneShot(hoverSound, hoverSoundVolume);
-            }
-            else
-            {
-                AudioSource.PlayClipAtPoint(hoverSound, transform.position, hoverSoundVolume);
             }
         }
 

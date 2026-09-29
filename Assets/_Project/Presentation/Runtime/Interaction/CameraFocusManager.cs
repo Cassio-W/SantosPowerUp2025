@@ -98,7 +98,10 @@ namespace Mandato.Presentation
         {
             if (Instance != null && Instance != this)
             {
-                Destroy(this);
+                if (Application.isPlaying)
+                    Destroy(this);
+                else
+                    DestroyImmediate(this);
                 return;
             }
             Instance = this;

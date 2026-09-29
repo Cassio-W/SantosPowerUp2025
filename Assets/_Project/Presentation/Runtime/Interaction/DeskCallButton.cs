@@ -7,9 +7,9 @@ using UnityEngine.EventSystems;
 namespace Mandato.Presentation
 {
     /// <summary>
-    /// Componente que representa o botão físico / campainha na mesa do gabinete.
-    /// Ao ser clicado ou ao acionar a tecla de chamada (Espaço), reproduz som e animações
-    /// e solicita a chamada do próximo visitante ao fluxo da partida.
+    /// Componente que representa o botão físico / campainha na mesa do gabinete presidencial.
+    /// Segue o clique contínuo do jogador: mantém o botão pressionado fisicamente e reproduz o som (buzz.mp3)
+    /// em loop contínuo enquanto o jogador mantiver o clique ou tecla pressionada, retornando ao soltar.
     /// </summary>
     [DisallowMultipleComponent]
     [SelectionBase]
@@ -18,6 +18,15 @@ namespace Mandato.Presentation
         [Header("--- Interação ---")]
         [Tooltip("Define se o botão responde a cliques do jogador.")]
         [SerializeField] private bool interactable = true;
+
+        [Tooltip("Se ativo, realiza raycast de mouse no Update para garantir 100% de consistência em qualquer câmera.")]
+        [SerializeField] private bool useDirectRaycast = true;
+
+        [Tooltip("LayerMask dos objetos clicáveis.")]
+        [SerializeField] private LayerMask raycastLayerMask = ~0;
+
+        [Tooltip("Se verdadeiro, ignora cliques se o cursor estiver sobre uma UI de tela UGUI/EventSystem ativa.")]
+        [SerializeField] private bool checkEventSystemBlocking = false;
 
         [Tooltip("Se verdadeiro, busca automaticamente o componente FocusableObject no mesmo GameObject ou pais para integração de clique.")]
         [SerializeField] private bool hookFocusableObject = true;
@@ -28,15 +37,15 @@ namespace Mandato.Presentation
         [Tooltip("Tecla local para acionamento do botão.")]
         [SerializeField] private KeyCode localCallKey = KeyCode.Space;
 
-        [Header("--- Áudio / Som ---")]
+        [Header("--- Áudio / Som (Contínuo / Loop no Hold) ---")]
         [Tooltip("AudioSource para tocar os sons do botão. Se nulo, busca automaticamente ou cria em runtime.")]
         [SerializeField] private AudioSource audioSource;
 
-        [Tooltip("Som reproduzido ao pressionar o botão.")]
+        [Tooltip("Som reproduzido continuamente enquanto o botão estiver pressionado (buzz.mp3).")]
         [SerializeField] private AudioClip pressSound;
 
         [Range(0f, 1f)]
-        [Tooltip("Volume do som de clique.")]
+        [Tooltip("Volume do som de clique/buzz.")]
         [SerializeField] private float soundVolume = 1f;
 
         [Tooltip("Som opcional ao passar o mouse por cima do botão.")]
@@ -69,14 +78,18 @@ namespace Mandato.Presentation
         [Tooltip("Deslocamento local para baixo durante o pressionamento (ex: Y = -0.015).")]
         [SerializeField] private Vector3 pressOffset = new Vector3(0f, -0.015f, 0f);
 
-        [Tooltip("Duração total da animação de descida e subida em segundos.")]
-        [SerializeField] private float pressDuration = 0.12f;
+        [Tooltip("Duração da descida do botão em segundos.")]
+        [SerializeField] private float pressDownDuration = 0.04f;
+
+        [Tooltip("Duração do retorno do botão ao soltar em segundos.")]
+        [SerializeField] private float releaseDuration = 0.1f;
 
         [Tooltip("Multiplicador de escala momentâneo para efeito de punch.")]
         [SerializeField] private Vector3 punchScale = new Vector3(1.02f, 0.95f, 1.02f);
 
         [Header("--- Eventos Unity ---")]
         public UnityEvent onButtonPressed = new UnityEvent();
+        public UnityEvent onButtonReleased = new UnityEvent();
         public UnityEvent onButtonHoverEnter = new UnityEvent();
         public UnityEvent onButtonHoverExit = new UnityEvent();
 
@@ -86,19 +99,31 @@ namespace Mandato.Presentation
         public event Action OnCallRequested;
 
         // Estados internos
+        private Collider _collider;
+        private Camera _mainCamera;
         private Vector3 _originalLocalPos;
         private Vector3 _originalLocalScale;
-        private Coroutine _proceduralPressRoutine;
+        private Coroutine _proceduralRoutine;
+        private Coroutine _autoReleaseRoutine;
+        private bool _isHeldDown;
+        private bool _isMouseHeld;
+        private bool _isKeyHeld;
         private bool _isHovered;
         private FocusableObject _cachedFocusable;
 
         public bool IsInteractable => interactable;
+        public bool IsHeldDown => _isHeldDown;
         public AudioSource AudioSource => audioSource;
         public Animator Animator => animator;
         public Transform TargetMovingPart => movingPart != null ? movingPart : transform;
+        public AudioClip PressSound { get => pressSound; set => pressSound = value; }
+        public AudioClip HoverSound { get => hoverSound; set => hoverSound = value; }
 
         private void Awake()
         {
+            _collider = GetComponent<Collider>();
+            _mainCamera = Camera.main;
+
             if (movingPart == null)
             {
                 movingPart = transform;
@@ -107,10 +132,7 @@ namespace Mandato.Presentation
             _originalLocalPos = movingPart.localPosition;
             _originalLocalScale = movingPart.localScale;
 
-            if (audioSource == null)
-            {
-                audioSource = GetComponent<AudioSource>();
-            }
+            EnsureAudioSource();
 
             if (animator == null)
             {
@@ -125,6 +147,27 @@ namespace Mandato.Presentation
                     _cachedFocusable.onClicked.AddListener(Press);
                 }
             }
+
+#if UNITY_EDITOR
+            if (pressSound == null)
+            {
+                pressSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/buzz2.mp3");
+            }
+#endif
+        }
+
+        public void EnsureAudioSource()
+        {
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>() ?? GetComponentInChildren<AudioSource>();
+            }
+
+            if (audioSource == null && gameObject != null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake = false;
+            }
         }
 
         private void OnDestroy()
@@ -137,111 +180,265 @@ namespace Mandato.Presentation
 
         private void Update()
         {
+            if (_mainCamera == null)
+            {
+                _mainCamera = Camera.main;
+            }
+
+            // 1. Raycast de mouse direto
+            if (useDirectRaycast && interactable)
+            {
+                if (_mainCamera != null)
+                {
+                    Ray ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
+                    bool isHit = Physics.Raycast(ray, out RaycastHit hit, 100f, raycastLayerMask);
+                    bool isHittingThis = isHit && (_collider != null ? (hit.collider == _collider || hit.transform == transform || hit.transform.IsChildOf(transform)) : (hit.transform == transform || hit.transform.IsChildOf(transform)));
+
+                    if (isHittingThis)
+                    {
+                        if (!_isHovered)
+                        {
+                            HandleHoverEnter();
+                        }
+
+                        if (Input.GetMouseButtonDown(0))
+                        {
+                            if (!(checkEventSystemBlocking && EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()))
+                            {
+                                _isMouseHeld = true;
+                                StartPress();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (_isHovered && !_isHeldDown)
+                        {
+                            HandleHoverExit();
+                        }
+                    }
+                }
+            }
+
+            // 2. Liberação de clique do mouse
+            if (_isMouseHeld)
+            {
+                if (!Input.GetMouseButton(0))
+                {
+                    _isMouseHeld = false;
+                    ReleasePress();
+                    if (!_isHovered)
+                    {
+                        HandleHoverExit();
+                    }
+                }
+            }
+
+            // 3. Monitoramento de tecla de espaço local
             if (handleSpaceKeyLocally && interactable)
             {
-                bool keyPressed = Input.GetKeyDown(localCallKey) ||
-                                  Input.GetKeyDown(KeyCode.Space) ||
-                                  Input.GetKeyDown(KeyCode.Return) ||
-                                  Input.GetKeyDown(KeyCode.KeypadEnter);
+                bool keyStateDown = Input.GetKeyDown(localCallKey) ||
+                                    Input.GetKeyDown(KeyCode.Space) ||
+                                    Input.GetKeyDown(KeyCode.Return) ||
+                                    Input.GetKeyDown(KeyCode.KeypadEnter);
 
-                if (keyPressed)
+                bool keyStateUp = Input.GetKeyUp(localCallKey) ||
+                                  Input.GetKeyUp(KeyCode.Space) ||
+                                  Input.GetKeyUp(KeyCode.Return) ||
+                                  Input.GetKeyUp(KeyCode.KeypadEnter);
+
+                if (keyStateDown)
                 {
-                    Press();
+                    _isKeyHeld = true;
+                    StartPress();
+                }
+                else if (_isKeyHeld && keyStateUp)
+                {
+                    _isKeyHeld = false;
+                    ReleasePress();
                 }
             }
         }
 
-        /// <summary>
-        /// Detecta clique direto do mouse via Collider na cena 3D.
-        /// </summary>
+        // Fallbacks para eventos Unity tradicionais
         private void OnMouseDown()
         {
-            if (!interactable) return;
+            if (useDirectRaycast || !interactable) return;
+            if (checkEventSystemBlocking && EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
 
-            // Se o ponteiro estiver sobre UI tradicional, ignora o clique 3D
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            _isMouseHeld = true;
+            StartPress();
+        }
+
+        private void OnMouseUp()
+        {
+            if (_isMouseHeld)
             {
-                return;
+                _isMouseHeld = false;
+                ReleasePress();
             }
-
-            Press();
         }
 
         private void OnMouseEnter()
         {
-            if (!interactable) return;
+            if (useDirectRaycast || !interactable) return;
+            HandleHoverEnter();
+        }
 
+        private void OnMouseExit()
+        {
+            if (useDirectRaycast || !interactable) return;
+            if (!_isHeldDown)
+            {
+                HandleHoverExit();
+            }
+        }
+
+        private void HandleHoverEnter()
+        {
             _isHovered = true;
             PlayHoverSound();
             onButtonHoverEnter?.Invoke();
         }
 
-        private void OnMouseExit()
+        private void HandleHoverExit()
         {
             _isHovered = false;
             onButtonHoverExit?.Invoke();
         }
 
         /// <summary>
-        /// Aciona o botão: dispara efeitos audiovisuais e emite a solicitação de chamada de visitante.
+        /// Inicia o pressionamento contínuo do botão: move a cúpula para baixo, toca o som em loop
+        /// e dispara a solicitação de chamada de visitante.
         /// </summary>
-        public void Press()
+        public void StartPress()
         {
             if (!interactable) return;
 
-            PlayPressEffects();
+            if (_autoReleaseRoutine != null)
+            {
+                StopCoroutine(_autoReleaseRoutine);
+                _autoReleaseRoutine = null;
+            }
+
+            if (_isHeldDown) return;
+            _isHeldDown = true;
+
+            StartLoopingPressAudio();
+            PlayAnimatorPress();
+            PlayProceduralPressDown();
+
             onButtonPressed?.Invoke();
             OnCallRequested?.Invoke();
         }
 
         /// <summary>
+        /// Libera o botão: encerra o som em loop e retorna a cúpula à posição original.
+        /// </summary>
+        public void ReleasePress()
+        {
+            if (!_isHeldDown) return;
+            _isHeldDown = false;
+
+            if (_autoReleaseRoutine != null)
+            {
+                StopCoroutine(_autoReleaseRoutine);
+                _autoReleaseRoutine = null;
+            }
+
+            StopLoopingPressAudio();
+            PlayProceduralRelease();
+
+            onButtonReleased?.Invoke();
+        }
+
+        /// <summary>
+        /// Aciona um clique único com auto-release para chamadas programáticas e testes.
+        /// </summary>
+        public void Press()
+        {
+            if (!interactable) return;
+
+            StartPress();
+
+            if (!_isMouseHeld && !_isKeyHeld)
+            {
+                if (_autoReleaseRoutine != null) StopCoroutine(_autoReleaseRoutine);
+                _autoReleaseRoutine = StartCoroutine(AutoReleaseRoutine(0.12f));
+            }
+        }
+
+        /// <summary>
         /// Executa apenas a parte audiovisual (som e animação) do botão.
-        /// Chamado automaticamente quando a tecla Espaço é pressionada no coordenador de fluxo.
+        /// Mantido para compatibilidade com o fluxo da partida.
         /// </summary>
         public void PlayPressEffects()
         {
             if (!interactable) return;
 
-            PlayPressSound();
-            PlayAnimatorPress();
-            PlayProceduralPress();
+            StartPress();
+
+            if (!_isMouseHeld && !_isKeyHeld)
+            {
+                if (_autoReleaseRoutine != null) StopCoroutine(_autoReleaseRoutine);
+                _autoReleaseRoutine = StartCoroutine(AutoReleaseRoutine(0.12f));
+            }
+        }
+
+        private IEnumerator AutoReleaseRoutine(float delay)
+        {
+            yield return new WaitForSecondsRealtime(delay);
+            if (!_isMouseHeld && !_isKeyHeld && _isHeldDown)
+            {
+                ReleasePress();
+            }
+            _autoReleaseRoutine = null;
         }
 
         public void SetInteractable(bool value)
         {
             interactable = value;
+            if (!value && _isHeldDown)
+            {
+                _isMouseHeld = false;
+                _isKeyHeld = false;
+                ReleasePress();
+            }
         }
 
-        private void PlayPressSound()
+        private void StartLoopingPressAudio()
         {
             if (pressSound == null) return;
+            EnsureAudioSource();
 
-            float originalPitch = 1f;
             if (audioSource != null)
             {
-                originalPitch = audioSource.pitch;
+                audioSource.clip = pressSound;
+                audioSource.loop = true;
+                audioSource.volume = soundVolume;
                 float randomPitch = UnityEngine.Random.Range(pitchVariation.x, pitchVariation.y);
                 audioSource.pitch = randomPitch;
-                audioSource.PlayOneShot(pressSound, soundVolume);
-                audioSource.pitch = originalPitch;
+                audioSource.Play();
             }
-            else
+        }
+
+        private void StopLoopingPressAudio()
+        {
+            if (audioSource != null && audioSource.isPlaying)
             {
-                AudioSource.PlayClipAtPoint(pressSound, transform.position, soundVolume);
+                audioSource.Stop();
+                audioSource.loop = false;
             }
         }
 
         private void PlayHoverSound()
         {
             if (hoverSound == null) return;
+            EnsureAudioSource();
 
             if (audioSource != null)
             {
                 audioSource.PlayOneShot(hoverSound, hoverSoundVolume);
-            }
-            else
-            {
-                AudioSource.PlayClipAtPoint(hoverSound, transform.position, hoverSoundVolume);
             }
         }
 
@@ -266,57 +463,81 @@ namespace Mandato.Presentation
             }
         }
 
-        private void PlayProceduralPress()
+        private void PlayProceduralPressDown()
         {
-            if (!enableProceduralPress || TargetMovingPart == null) return;
+            if (!enableProceduralPress || TargetMovingPart == null || !gameObject.activeInHierarchy) return;
 
-            if (!gameObject.activeInHierarchy) return;
-
-            if (_proceduralPressRoutine != null)
+            if (_proceduralRoutine != null)
             {
-                StopCoroutine(_proceduralPressRoutine);
+                StopCoroutine(_proceduralRoutine);
             }
 
-            _proceduralPressRoutine = StartCoroutine(ProceduralPressRoutine());
+            _proceduralRoutine = StartCoroutine(ProceduralPressDownRoutine());
         }
 
-        private IEnumerator ProceduralPressRoutine()
+        private void PlayProceduralRelease()
+        {
+            if (!enableProceduralPress || TargetMovingPart == null || !gameObject.activeInHierarchy) return;
+
+            if (_proceduralRoutine != null)
+            {
+                StopCoroutine(_proceduralRoutine);
+            }
+
+            _proceduralRoutine = StartCoroutine(ProceduralReleaseRoutine());
+        }
+
+        private IEnumerator ProceduralPressDownRoutine()
         {
             Transform target = TargetMovingPart;
             if (target == null) yield break;
 
+            Vector3 startPos = target.localPosition;
+            Vector3 startScale = target.localScale;
             Vector3 downPos = _originalLocalPos + pressOffset;
             Vector3 downScale = Vector3.Scale(_originalLocalScale, punchScale);
 
-            float halfDuration = Mathf.Max(0.01f, pressDuration * 0.5f);
+            float duration = Mathf.Max(0.01f, pressDownDuration);
             float elapsed = 0f;
 
-            // 1. Desce
-            while (elapsed < halfDuration)
+            while (elapsed < duration)
             {
                 elapsed += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(elapsed / halfDuration);
-                target.localPosition = Vector3.Lerp(_originalLocalPos, downPos, t);
-                target.localScale = Vector3.Lerp(_originalLocalScale, downScale, t);
+                float t = Mathf.Clamp01(elapsed / duration);
+                target.localPosition = Vector3.Lerp(startPos, downPos, t);
+                target.localScale = Vector3.Lerp(startScale, downScale, t);
                 yield return null;
             }
 
-            // 2. Retorna com suavidade
-            elapsed = 0f;
-            while (elapsed < halfDuration)
+            target.localPosition = downPos;
+            target.localScale = downScale;
+            _proceduralRoutine = null;
+        }
+
+        private IEnumerator ProceduralReleaseRoutine()
+        {
+            Transform target = TargetMovingPart;
+            if (target == null) yield break;
+
+            Vector3 currentPos = target.localPosition;
+            Vector3 currentScale = target.localScale;
+
+            float duration = Mathf.Max(0.01f, releaseDuration);
+            float elapsed = 0f;
+
+            while (elapsed < duration)
             {
                 elapsed += Time.unscaledDeltaTime;
-                float t = Mathf.Clamp01(elapsed / halfDuration);
-                // Curva de mola suave
+                float t = Mathf.Clamp01(elapsed / duration);
                 float smoothT = Mathf.SmoothStep(0f, 1f, t);
-                target.localPosition = Vector3.Lerp(downPos, _originalLocalPos, smoothT);
-                target.localScale = Vector3.Lerp(downScale, _originalLocalScale, smoothT);
+                target.localPosition = Vector3.Lerp(currentPos, _originalLocalPos, smoothT);
+                target.localScale = Vector3.Lerp(currentScale, _originalLocalScale, smoothT);
                 yield return null;
             }
 
             target.localPosition = _originalLocalPos;
             target.localScale = _originalLocalScale;
-            _proceduralPressRoutine = null;
+            _proceduralRoutine = null;
         }
 
         private void OnDisable()
@@ -326,7 +547,16 @@ namespace Mandato.Presentation
                 TargetMovingPart.localPosition = _originalLocalPos;
                 TargetMovingPart.localScale = _originalLocalScale;
             }
-            _proceduralPressRoutine = null;
+
+            _isHeldDown = false;
+            _isMouseHeld = false;
+            _isKeyHeld = false;
+            _isHovered = false;
+
+            StopLoopingPressAudio();
+
+            _proceduralRoutine = null;
+            _autoReleaseRoutine = null;
         }
     }
 }

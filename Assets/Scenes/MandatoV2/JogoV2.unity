@@ -5640,7 +5640,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   hoverSound: {fileID: 0}
   hoverSoundVolume: 0.8
-  focusSound: {fileID: 0}
+  focusSound: {fileID: 8300000, guid: 4a8e52a9a7e6f3b4991209b0c79135a1, type: 3}
   focusSoundVolume: 1
   unfocusSound: {fileID: 0}
   unfocusSoundVolume: 0.8
@@ -7152,6 +7152,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e7c78e7a20fb5d343b7a60e1688b05d2, type: 2}
   eventsCatalog: []
   questsCatalog: []
+  npcsCatalog: []
   startingActions:
   - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00002, type: 2}
   - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00005, type: 2}
@@ -7580,9 +7581,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AttributeCameraEffects
   pollutionVolume: {fileID: 1860537182}
-  pollutionStartThreshold: 50
+  pollutionStartThreshold: 25
   corruptionVolume: {fileID: 1402890043}
-  corruptionStartThreshold: 0
+  corruptionStartThreshold: 50
   corruptionMaxThreshold: 100
   skyMaterial: {fileID: 2100000, guid: 6e3ecc34cbd56824297623dc77531785, type: 2}
   pollutionHue: 58
@@ -9243,6 +9244,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1862807501180101224, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+      propertyPath: typewriterSound
+      value: 
+      objectReference: {fileID: 8300000, guid: 424b132081f0d8342a363a636a5df73d, type: 3}
     - target: {fileID: 1939027820935114673, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
       propertyPath: m_Name
       value: GabinetePresidencial
@@ -9315,6 +9320,10 @@ PrefabInstance:
       propertyPath: hoverHopIntensity
       value: 0.1
       objectReference: {fileID: 0}
+    - target: {fileID: 8745139274341343811, guid: b791dad89fbc7e34281a00789c789cfd, type: 3}
+      propertyPath: pressSound
+      value: 
+      objectReference: {fileID: 8300000, guid: b3de79f5ec01abd489fa7ec71b9526d6, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:

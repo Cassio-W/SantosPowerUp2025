@@ -297,6 +297,13 @@ MonoBehaviour:
   bioTypewriterSpeed: 70
   abilityTypewriterSpeed: 60
   statsInterpolationDuration: 0.45
+  audioSource: {fileID: 0}
+  characterChangeSound: {fileID: 8300000, guid: 7818b3c2552de2847a328738b0add0c8, type: 3}
+  characterChangeSoundVolume: 0.8
+  typewriterSound: {fileID: 8300000, guid: e19a4e377f0a8274d92a1059fba75e21, type: 3}
+  typewriterSoundVolume: 0.4
+  typewriterPitchVariation: {x: 0.96, y: 1.04}
+  minTypewriterSoundInterval: 0.03
 --- !u!114 &56261872
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -346,9 +353,9 @@ MonoBehaviour:
   hoverOffset: {x: 0, y: 0.005, z: 0}
   hoverScaleMultiplier: 1.05
   audioSource: {fileID: 0}
-  pressSound: {fileID: 0}
+  pressSound: {fileID: 8300000, guid: 23e52617584621c4e835cbf52586e1f6, type: 3}
   soundVolume: 1
-  hoverSound: {fileID: 0}
+  hoverSound: {fileID: 8300000, guid: 28e84177f7e33094086bbcf2ea379654, type: 3}
   hoverSoundVolume: 0.5
   pitchVariation: {x: 0.96, y: 1.04}
   onButtonPressed:
@@ -420,9 +427,9 @@ MonoBehaviour:
   hoverOffset: {x: 0, y: 0.005, z: 0}
   hoverScaleMultiplier: 1.05
   audioSource: {fileID: 0}
-  pressSound: {fileID: 0}
+  pressSound: {fileID: 8300000, guid: 23e52617584621c4e835cbf52586e1f6, type: 3}
   soundVolume: 1
-  hoverSound: {fileID: 0}
+  hoverSound: {fileID: 8300000, guid: 28e84177f7e33094086bbcf2ea379654, type: 3}
   hoverSoundVolume: 0.5
   pitchVariation: {x: 0.96, y: 1.04}
   onButtonPressed:
@@ -707,7 +714,7 @@ MonoBehaviour:
   - {fileID: 71672462}
   - {fileID: 1388096842}
   - {fileID: 2038105721}
-  autoInitializeInEditor: 0
+  autoInitializeInEditor: 1
   debugEventDefinition: {fileID: 11400000, guid: 046c2c112fda5904bbfbe3981f542cf7, type: 2}
 --- !u!4 &696539937
 Transform:
@@ -785,9 +792,9 @@ MonoBehaviour:
   hoverOffset: {x: 0, y: 0.005, z: 0}
   hoverScaleMultiplier: 1.05
   audioSource: {fileID: 0}
-  pressSound: {fileID: 0}
+  pressSound: {fileID: 8300000, guid: 23e52617584621c4e835cbf52586e1f6, type: 3}
   soundVolume: 1
-  hoverSound: {fileID: 0}
+  hoverSound: {fileID: 8300000, guid: 28e84177f7e33094086bbcf2ea379654, type: 3}
   hoverSoundVolume: 0.5
   pitchVariation: {x: 0.96, y: 1.04}
   onButtonPressed:
@@ -1871,9 +1878,9 @@ MonoBehaviour:
   hoverOffset: {x: 0, y: 0.005, z: 0}
   hoverScaleMultiplier: 1.05
   audioSource: {fileID: 0}
-  pressSound: {fileID: 0}
+  pressSound: {fileID: 8300000, guid: 23e52617584621c4e835cbf52586e1f6, type: 3}
   soundVolume: 1
-  hoverSound: {fileID: 0}
+  hoverSound: {fileID: 8300000, guid: 28e84177f7e33094086bbcf2ea379654, type: 3}
   hoverSoundVolume: 0.5
   pitchVariation: {x: 0.96, y: 1.04}
   onButtonPressed:

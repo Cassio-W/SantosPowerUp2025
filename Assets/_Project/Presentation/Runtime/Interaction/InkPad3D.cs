@@ -42,6 +42,7 @@ namespace Mandato.Presentation
 
         public int ChoiceIndex => (int)inkType;
         public bool IsApprove => inkType == InkType.Approve;
+        public AudioClip DipSound { get => dipSound; set => dipSound = value; }
 
         public event Action<InkPad3D> OnInkPadDipped;
 
@@ -63,6 +64,13 @@ namespace Mandato.Presentation
             {
                 originalSpongePos = spongeTransform.localPosition;
             }
+
+#if UNITY_EDITOR
+            if (dipSound == null)
+            {
+                dipSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/ink.mp3");
+            }
+#endif
         }
 
         private void UpdateOutlineColor()

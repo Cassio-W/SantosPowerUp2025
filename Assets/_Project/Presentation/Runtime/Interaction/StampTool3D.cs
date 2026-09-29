@@ -70,6 +70,9 @@ namespace Mandato.Presentation
         public bool IsInspectActive => isInspectActive;
         public bool HasSubmittedDecision => hasSubmittedDecision;
         public float HoverHeight { get => hoverHeight; set => hoverHeight = value; }
+        public AudioClip StampSuccessSound { get => stampSuccessSound; set => stampSuccessSound = value; }
+        public AudioClip StampDrySound { get => stampDrySound; set => stampDrySound = value; }
+        public AudioClip DipSound { get => dipSound; set => dipSound = value; }
 
         public event Action<StampInkState> OnInkChanged;
         public event Action<int, Vector2> OnStampApplied;
@@ -87,6 +90,23 @@ namespace Mandato.Presentation
             {
                 audioSource = GetComponent<AudioSource>() ?? GetComponentInChildren<AudioSource>();
             }
+
+            if (audioSource == null && gameObject != null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake = false;
+            }
+
+#if UNITY_EDITOR
+            if (stampSuccessSound == null)
+            {
+                stampSuccessSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/stamp.mp3");
+            }
+            if (dipSound == null)
+            {
+                dipSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/ink.mp3");
+            }
+#endif
 
             EnsureCollidersIgnored();
             CaptureRestTransform();
