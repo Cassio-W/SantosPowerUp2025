@@ -460,9 +460,51 @@ namespace Mandato.UI.Tests
             var coord = goCoord.AddComponent<Mandato.Infrastructure.MenuCharacterSelectCoordinator>();
             Assert.DoesNotThrow(() => coord.PlayConfirmSound());
 
+            var goPhone = new GameObject("PhoneTest");
+            var phonePresenter = goPhone.AddComponent<FlipPhonePresenter>();
+            Assert.DoesNotThrow(() => phonePresenter.PlayContactHoverSound());
+            Assert.DoesNotThrow(() => phonePresenter.PlayButtonClickSound());
+
             Object.DestroyImmediate(goMonitor);
             Object.DestroyImmediate(goUrna);
             Object.DestroyImmediate(goCoord);
+            Object.DestroyImmediate(goPhone);
+        }
+
+        [Test]
+        public void FlipPhonePresenter_AudioPropertiesAndTileCreation_WorkAsExpected()
+        {
+            var go = new GameObject("FlipPhoneAudioTest");
+            var presenter = go.AddComponent<FlipPhonePresenter>();
+
+            presenter.ContactHoverSoundVolume = 0.5f;
+            presenter.ButtonClickSoundVolume = 0.9f;
+            Assert.AreEqual(0.5f, presenter.ContactHoverSoundVolume);
+            Assert.AreEqual(0.9f, presenter.ButtonClickSoundVolume);
+
+            var vm = new FlipPhoneActionViewModel
+            {
+                id = "action_test",
+                displayName = "Ministério Teste",
+                description = "Descrição para teste de som.",
+                categoryTag = "Teste",
+                isAvailable = true
+            };
+
+            var tile = presenter.CreateAppTile(vm);
+            Assert.IsNotNull(tile);
+            Assert.IsTrue(tile.ClassListContains("contact-row"));
+            Assert.IsTrue(tile.ClassListContains("app-tile"));
+
+            // Executar a ação associada ao tile (userData Action com clique de botão)
+            Assert.IsNotNull(tile.userData);
+            var clickAction = tile.userData as System.Action;
+            Assert.IsNotNull(clickAction);
+            Assert.DoesNotThrow(() => clickAction());
+
+            Assert.IsTrue(presenter.IsModalOpen);
+
+            Object.DestroyImmediate(go);
         }
     }
 }

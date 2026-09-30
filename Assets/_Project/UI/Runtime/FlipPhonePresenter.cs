@@ -32,12 +32,25 @@ namespace Mandato.UI
         [SerializeField] private bool isInteractable = true;
         [SerializeField] private GameObject phoneGameObject;
 
+        [Header("Áudio / Sons do Celular")]
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip contactHoverSound;
+        [SerializeField] private AudioClip buttonClickSound;
+        [Range(0f, 1f)] [SerializeField] private float contactHoverSoundVolume = 0.7f;
+        [Range(0f, 1f)] [SerializeField] private float buttonClickSoundVolume = 0.8f;
+
         public KeyCode ToggleKey { get => toggleKey; set => toggleKey = value; }
         public bool AllowKeyboardToggle { get => allowKeyboardToggle; set => allowKeyboardToggle = value; }
         public bool IsInteractable { get => isInteractable; set => SetInteractable(value); }
         public GameObject PhoneGameObject { get => phoneGameObject != null ? phoneGameObject : gameObject; set => phoneGameObject = value; }
         public GameObject GetPhoneGameObject() => PhoneGameObject;
         public void SetPhoneGameObject(GameObject go) => phoneGameObject = go;
+
+        public AudioSource AudioSource { get => audioSource; set => audioSource = value; }
+        public AudioClip ContactHoverSound { get => contactHoverSound; set => contactHoverSound = value; }
+        public AudioClip ButtonClickSound { get => buttonClickSound; set => buttonClickSound = value; }
+        public float ContactHoverSoundVolume { get => contactHoverSoundVolume; set => contactHoverSoundVolume = value; }
+        public float ButtonClickSoundVolume { get => buttonClickSoundVolume; set => buttonClickSoundVolume = value; }
 
         public void SetInteractable(bool value)
         {
@@ -89,16 +102,31 @@ namespace Mandato.UI
         private FlipPhoneActionViewModel selectedAction;
         private List<FlipPhoneActionViewModel> cachedViewModels = new List<FlipPhoneActionViewModel>();
 
+        private VisualElement currentHoveredContactRow;
+        private float lastContactHoverSoundTime = -1f;
+        private float lastButtonClickSoundTime = -1f;
+        private const float minContactHoverInterval = 0.05f;
+        private const float minButtonClickInterval = 0.05f;
+
         private void Awake()
         {
             EnsureDocument();
+            EnsureAudioAssets();
+            EnsureAudioSource();
             CacheVisualElements();
         }
 
         private void OnEnable()
         {
             EnsureDocument();
+            EnsureAudioAssets();
+            EnsureAudioSource();
             CacheVisualElements();
+        }
+
+        private void OnValidate()
+        {
+            EnsureAudioAssets();
         }
 
         private void Start()
@@ -124,6 +152,88 @@ namespace Mandato.UI
                     Close();
                 }
             }
+        }
+
+        public void EnsureAudioAssets()
+        {
+#if UNITY_EDITOR
+            if (contactHoverSound == null)
+            {
+                contactHoverSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/phone-type3.mp3");
+            }
+            if (buttonClickSound == null)
+            {
+                buttonClickSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/phone-type1.mp3");
+            }
+#endif
+        }
+
+        public void EnsureAudioSource()
+        {
+            if (audioSource == null)
+            {
+                audioSource = GetComponent<AudioSource>() ?? GetComponentInChildren<AudioSource>() ?? GetComponentInParent<AudioSource>();
+            }
+
+            if (audioSource == null && gameObject != null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake = false;
+                audioSource.spatialBlend = 0f;
+            }
+        }
+
+        public void PlayContactHoverSound()
+        {
+            if (contactHoverSound == null) return;
+            if (Time.unscaledTime - lastContactHoverSoundTime < minContactHoverInterval) return;
+            lastContactHoverSoundTime = Time.unscaledTime;
+
+            EnsureAudioSource();
+            if (audioSource != null)
+            {
+                audioSource.PlayOneShot(contactHoverSound, contactHoverSoundVolume);
+            }
+        }
+
+        public void PlayButtonClickSound()
+        {
+            if (buttonClickSound == null) return;
+            if (Time.unscaledTime - lastButtonClickSoundTime < minButtonClickInterval) return;
+            lastButtonClickSoundTime = Time.unscaledTime;
+
+            EnsureAudioSource();
+            if (audioSource != null)
+            {
+                audioSource.PlayOneShot(buttonClickSound, buttonClickSoundVolume);
+            }
+        }
+
+        private void HandleContactHover(VisualElement row)
+        {
+            if (currentHoveredContactRow == row) return;
+            currentHoveredContactRow = row;
+            PlayContactHoverSound();
+        }
+
+        private void HandleContactLeave(VisualElement row)
+        {
+            if (currentHoveredContactRow == row)
+            {
+                currentHoveredContactRow = null;
+            }
+        }
+
+        private void HandleCloseClicked()
+        {
+            PlayButtonClickSound();
+            Close();
+        }
+
+        private void HandleModalBackClicked()
+        {
+            PlayButtonClickSound();
+            CloseActionModal();
         }
 
         public void EnsureDocument()
@@ -171,9 +281,9 @@ namespace Mandato.UI
 
             if (closeBtn != null)
             {
-                closeBtn.userData = (Action)(() => Close());
-                closeBtn.clicked -= Close;
-                closeBtn.clicked += Close;
+                closeBtn.userData = (Action)HandleCloseClicked;
+                closeBtn.clicked -= HandleCloseClicked;
+                closeBtn.clicked += HandleCloseClicked;
             }
 
             // Modal de Diálogo
@@ -187,14 +297,14 @@ namespace Mandato.UI
 
             if (modalBackBtn != null)
             {
-                modalBackBtn.userData = (Action)(() => CloseActionModal());
-                modalBackBtn.clicked -= CloseActionModal;
-                modalBackBtn.clicked += CloseActionModal;
+                modalBackBtn.userData = (Action)HandleModalBackClicked;
+                modalBackBtn.clicked -= HandleModalBackClicked;
+                modalBackBtn.clicked += HandleModalBackClicked;
             }
 
             if (modalExecBtn != null)
             {
-                modalExecBtn.userData = (Action)(() => HandleModalExecClicked());
+                modalExecBtn.userData = (Action)HandleModalExecClicked;
                 modalExecBtn.clicked -= HandleModalExecClicked;
                 modalExecBtn.clicked += HandleModalExecClicked;
             }
@@ -236,6 +346,7 @@ namespace Mandato.UI
         {
             IsOpen = false;
             CloseActionModal();
+            currentHoveredContactRow = null;
 
             if (screenRoot != null)
             {
@@ -373,6 +484,8 @@ namespace Mandato.UI
         {
             if (selectedAction == null) return;
 
+            PlayButtonClickSound();
+
             if (selectedAction.isAvailable && !selectedAction.isOnCooldown && !selectedAction.isConsumed)
             {
                 string actionId = selectedAction.id;
@@ -386,6 +499,7 @@ namespace Mandato.UI
         {
             if (appsContainer == null) return;
 
+            currentHoveredContactRow = null;
             appsContainer.Clear();
 
             int visibleCount = 0;
@@ -510,12 +624,18 @@ namespace Mandato.UI
             }
             row.Add(callBadge);
 
-            // Clique na linha inteira abre o modal de confirmação de ligação
-            row.userData = (Action)(() => OpenActionModal(vm));
-            row.RegisterCallback<ClickEvent>(evt =>
+            // Hover no contato -> som phone-type3.mp3
+            row.RegisterCallback<PointerEnterEvent>(evt => HandleContactHover(row));
+            row.RegisterCallback<PointerLeaveEvent>(evt => HandleContactLeave(row));
+
+            // Clique na linha inteira toca som de botão (phone-type1.mp3) e abre o modal de confirmação de ligação
+            Action onContactClicked = () =>
             {
+                PlayButtonClickSound();
                 OpenActionModal(vm);
-            });
+            };
+            row.userData = onContactClicked;
+            row.RegisterCallback<ClickEvent>(evt => onContactClicked());
 
             return row;
         }

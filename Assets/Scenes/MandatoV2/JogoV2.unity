@@ -486,6 +486,11 @@ MonoBehaviour:
   allowKeyboardToggle: 1
   isInteractable: 1
   phoneGameObject: {fileID: 116235397}
+  audioSource: {fileID: 0}
+  contactHoverSound: {fileID: 8300000, guid: 99dcf3a392a257b409e42d263a120adf, type: 3}
+  buttonClickSound: {fileID: 8300000, guid: 716872325c9061140a84697633ca38a0, type: 3}
+  contactHoverSoundVolume: 0.7
+  buttonClickSoundVolume: 0.8
 --- !u!1 &167788165
 GameObject:
   m_ObjectHideFlags: 0
