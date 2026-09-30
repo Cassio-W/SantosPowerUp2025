@@ -69,6 +69,46 @@ namespace ComicVFX
                 public float highlightWeight;
             }
 
+            private static int GetSubmeshCount(Renderer r)
+            {
+                if (r is MeshRenderer mr)
+                {
+                    var mf = mr.GetComponent<MeshFilter>();
+                    if (mf != null && mf.sharedMesh != null)
+                    {
+                        return mf.sharedMesh.subMeshCount;
+                    }
+                }
+                else if (r is SkinnedMeshRenderer smr)
+                {
+                    if (smr.sharedMesh != null)
+                    {
+                        return smr.sharedMesh.subMeshCount;
+                    }
+                }
+
+                var mats = r.sharedMaterials;
+                return mats != null && mats.Length > 0 ? mats.Length : 1;
+            }
+
+            private static void DrawRendererAllSubmeshes(RasterCommandBuffer cmd, Renderer r, Material maskMaterial)
+            {
+                int submeshCount = GetSubmeshCount(r);
+                for (int s = 0; s < submeshCount; s++)
+                {
+                    cmd.DrawRenderer(r, maskMaterial, s, 0);
+                }
+            }
+
+            private static void DrawRendererAllSubmeshes(CommandBuffer cmd, Renderer r, Material maskMaterial)
+            {
+                int submeshCount = GetSubmeshCount(r);
+                for (int s = 0; s < submeshCount; s++)
+                {
+                    cmd.DrawRenderer(r, maskMaterial, s, 0);
+                }
+            }
+
             public ToonOutlinePass(Settings settings)
             {
                 this.settings = settings;
@@ -191,7 +231,7 @@ namespace ComicVFX
                                         Renderer r = data.renderers[i];
                                         if (r != null && r.enabled && r.gameObject.activeInHierarchy)
                                         {
-                                            context.cmd.DrawRenderer(r, data.maskMaterial, 0, 0);
+                                            DrawRendererAllSubmeshes(context.cmd, r, data.maskMaterial);
                                         }
                                     }
                                 }
@@ -292,7 +332,7 @@ namespace ComicVFX
                             Renderer r = highlightRenderers[i];
                             if (r != null && r.enabled && r.gameObject.activeInHierarchy)
                             {
-                                cmd.DrawRenderer(r, maskMat, 0, 0);
+                                DrawRendererAllSubmeshes(cmd, r, maskMat);
                             }
                         }
 

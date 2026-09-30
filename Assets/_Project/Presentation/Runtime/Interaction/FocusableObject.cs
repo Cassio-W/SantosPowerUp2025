@@ -202,7 +202,14 @@ namespace Mandato.Presentation
         _originalLocalPos = transform.localPosition;
         _originalLocalScale = transform.localScale;
 
-        if (targetRenderers == null || targetRenderers.Count == 0)
+        if (targetRenderers == null)
+        {
+            targetRenderers = new List<Renderer>();
+        }
+
+        targetRenderers.RemoveAll(r => r == null);
+
+        if (targetRenderers.Count == 0)
         {
             GetComponentsInChildren(true, targetRenderers);
         }

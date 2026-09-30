@@ -11,9 +11,9 @@ Shader "Hidden/ComicVFX/UnlitMask"
         Pass
         {
             Name "UnlitMaskPass"
-            ZWrite On
-            ZTest LEqual
-            Cull Back
+            ZWrite Off
+            ZTest Always
+            Cull Off
 
             HLSLPROGRAM
             #pragma vertex vert

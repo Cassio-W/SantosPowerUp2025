@@ -10486,10 +10486,10 @@ MonoBehaviour:
   audioSource: {fileID: 474556749}
   hoverSound: {fileID: 0}
   hoverSoundVolume: 0.8
-  focusSound: {fileID: 8300000, guid: 4a8e52a9a7e6f3b4991209b0c79135a1, type: 3}
-  focusSoundVolume: 1
-  unfocusSound: {fileID: 0}
-  unfocusSoundVolume: 0.8
+  focusSound: {fileID: 8300000, guid: 711c519a91c9b6c4192d1a7931afc393, type: 3}
+  focusSoundVolume: 0.5
+  unfocusSound: {fileID: 8300000, guid: 711c519a91c9b6c4192d1a7931afc393, type: 3}
+  unfocusSoundVolume: 0.5
   allowClickToFocus: 1
   unfocusOnSecondClick: 0
   allowUnfocusOnClickOutside: 0

@@ -130,14 +130,18 @@ Shader "ComicVFX/ToonOutlineScreen"
                 // Se houver highlight ativo, interpola suavemente a cor do contorno para o objeto em hover
                 if (_HasHighlight > 0.001)
                 {
-                    float2 maskTexel = texel * 1.5;
+                    float2 maskTexel = texel * 2.0;
                     float mC = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv).r;
                     float mL = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv - float2(maskTexel.x, 0)).r;
                     float mR = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv + float2(maskTexel.x, 0)).r;
                     float mD = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv - float2(0, maskTexel.y)).r;
                     float mU = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv + float2(0, maskTexel.y)).r;
+                    float mUL = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv + float2(-maskTexel.x, maskTexel.y) * 0.707).r;
+                    float mUR = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv + float2(maskTexel.x, maskTexel.y) * 0.707).r;
+                    float mDL = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv + float2(-maskTexel.x, -maskTexel.y) * 0.707).r;
+                    float mDR = SAMPLE_TEXTURE2D(_HoverMask, sampler_HoverMask, input.uv + float2(maskTexel.x, -maskTexel.y) * 0.707).r;
 
-                    float isNearHovered = max(mC, max(max(mL, mR), max(mD, mU)));
+                    float isNearHovered = max(mC, max(max(mL, mR), max(max(mD, mU), max(max(mUL, mUR), max(mDL, mDR)))));
                     half4 activeHighColor = lerp(_OutlineColor, _HighlightOutlineColor, _HasHighlight);
                     targetOutlineColor = lerp(_OutlineColor, activeHighColor, isNearHovered);
                 }
