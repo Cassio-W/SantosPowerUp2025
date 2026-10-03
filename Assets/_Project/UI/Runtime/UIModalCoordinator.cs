@@ -14,6 +14,7 @@ namespace Mandato.UI
         PcTerminal,     // Foco no monitor CRT retrô: sistema do PC interativo, decisões e telefone bloqueados.
         PhoneDrawer,    // Flip-Phone aberto em primeiro plano: menu de ações ministeriais ativo, botão de chamar habilitado.
         TutorialStep,   // Diálogo guiado do tutorial em andamento: apenas avanço com Espaço/Enter.
+        CalendarInspect,// Foco na folha do calendário na parede: histórico, previsão e navegação de meses ativos; demais interações bloqueadas.
         EventMinigame,  // Evento interativo em execução (caixa preta): todas as ações do jogo principal bloqueadas.
         EndSummary      // Painel de fim de jogo (Vitória ou Derrota): todas as ações bloqueadas.
     }
@@ -153,6 +154,7 @@ namespace Mandato.UI
             if (CurrentContext == InteractionContext.PcTerminal) return false;
             if (CurrentContext == InteractionContext.PhoneDrawer) return false;
             if (CurrentContext == InteractionContext.TutorialStep) return false;
+            if (CurrentContext == InteractionContext.CalendarInspect) return false;
             if (CurrentContext == InteractionContext.EventMinigame) return false;
             if (CurrentContext == InteractionContext.EndSummary) return false;
             if (IsModalOpen(MODAL_CREDITS)) return false;
@@ -169,6 +171,7 @@ namespace Mandato.UI
             if (CurrentContext == InteractionContext.PcTerminal) return false;
             if (CurrentContext == InteractionContext.PaperInspect) return false;
             if (CurrentContext == InteractionContext.TutorialStep) return false;
+            if (CurrentContext == InteractionContext.CalendarInspect) return false;
             if (CurrentContext == InteractionContext.EventMinigame) return false;
             if (CurrentContext == InteractionContext.EndSummary) return false;
             if (IsModalOpen(MODAL_CREDITS)) return false;
@@ -184,6 +187,7 @@ namespace Mandato.UI
             if (CurrentContext == InteractionContext.PcTerminal) return false;
             if (CurrentContext == InteractionContext.PaperInspect) return false;
             if (CurrentContext == InteractionContext.TutorialStep) return false;
+            if (CurrentContext == InteractionContext.CalendarInspect) return false;
             if (CurrentContext == InteractionContext.EventMinigame) return false;
             if (CurrentContext == InteractionContext.EndSummary) return false;
             if (IsModalOpen(MODAL_CREDITS)) return false;

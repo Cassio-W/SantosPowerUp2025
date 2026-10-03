@@ -1,0 +1,340 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False" picking-mode="Ignore">
+    <Style src="Calendar.uss" />
+
+    <!-- CONTAINER RAIZ DO CANVAS -->
+    <ui:VisualElement name="calendar-root" class="calendar-root" picking-mode="Ignore">
+        
+        <!-- FOLHA DO CALENDÁRIO VERTICAL -->
+        <ui:VisualElement name="calendar-page" class="calendar-page" picking-mode="Ignore">
+                
+                <!-- ESPIRAL / ANÉIS METÁLICOS DE ENCADERNAÇÃO NO TOPO -->
+                <ui:VisualElement class="calendar-binder-bar" picking-mode="Ignore">
+                    <ui:VisualElement class="binder-hole" picking-mode="Ignore"><ui:VisualElement class="binder-ring" picking-mode="Ignore" /></ui:VisualElement>
+                    <ui:VisualElement class="binder-hole" picking-mode="Ignore"><ui:VisualElement class="binder-ring" picking-mode="Ignore" /></ui:VisualElement>
+                    <ui:VisualElement class="binder-hole" picking-mode="Ignore"><ui:VisualElement class="binder-ring" picking-mode="Ignore" /></ui:VisualElement>
+                    <ui:VisualElement class="binder-hole" picking-mode="Ignore"><ui:VisualElement class="binder-ring" picking-mode="Ignore" /></ui:VisualElement>
+                    <ui:VisualElement class="binder-hole" picking-mode="Ignore"><ui:VisualElement class="binder-ring" picking-mode="Ignore" /></ui:VisualElement>
+                    <ui:VisualElement class="binder-hole" picking-mode="Ignore"><ui:VisualElement class="binder-ring" picking-mode="Ignore" /></ui:VisualElement>
+                    <ui:VisualElement class="binder-hole" picking-mode="Ignore"><ui:VisualElement class="binder-ring" picking-mode="Ignore" /></ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- CABEÇALHO SUPERIOR: ANO GRANDE NO CANTO, MÊS NO TOPO E CHANCELARIA -->
+                <ui:VisualElement class="calendar-header" picking-mode="Ignore">
+                    
+                    <!-- CANTO ESQUERDO: ANO GRANDE EM DESTAQUE -->
+                    <ui:VisualElement class="year-corner-box" picking-mode="Ignore">
+                        <ui:Label text="EXERCÍCIO" class="year-caption-label" picking-mode="Ignore" />
+                        <ui:Label name="year-number" text="2026" class="calendar-giant-year" picking-mode="Ignore" />
+                        <ui:Label text="OFICIAL" class="year-stamp-tag" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <!-- CENTRO: NOME DO MÊS E SUBTÍTULO DO MANDATO -->
+                    <ui:VisualElement class="month-center-box" picking-mode="Ignore">
+                        <ui:VisualElement class="month-title-row" picking-mode="Ignore">
+                            <ui:Button name="btn-prev-month" text="◀" class="month-nav-btn" picking-mode="Position" />
+                            <ui:Label name="month-name" text="JANEIRO" class="calendar-month-name" picking-mode="Ignore" />
+                            <ui:Button name="btn-next-month" text="▶" class="month-nav-btn" picking-mode="Position" />
+                        </ui:VisualElement>
+                        <ui:Label name="month-subtitle" text="MÊS 01 DE 48 • 1º ANO DO MANDATO • 31 DIAS" class="calendar-month-subtitle" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <!-- CANTO DIREITO: BRASÃO / CHANCELARIA -->
+                    <ui:VisualElement class="cabinet-seal-box" picking-mode="Ignore">
+                        <ui:Label text="REPÚBLICA FEDERATIVA" class="cabinet-seal-title" picking-mode="Ignore" />
+                        <ui:Label text="GABINETE PRESIDENCIAL" class="cabinet-seal-sub" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- LINHA DIVISÓRIA DE TINTA TIPOGRÁFICA -->
+                <ui:VisualElement class="calendar-divider-line" picking-mode="Ignore" />
+
+                <!-- SEÇÃO 1 (VERTICAL): CABEÇALHO DA SEMANA E GRADE COMPLETA DOS DIAS -->
+                <ui:VisualElement class="calendar-grid-section" picking-mode="Ignore">
+                    
+                    <!-- LINHA DOS DIAS DA SEMANA (DOM A SÁB) -->
+                    <ui:VisualElement class="weekdays-row" picking-mode="Ignore">
+                        <ui:Label text="DOM" class="weekday-label weekday-weekend" picking-mode="Ignore" />
+                        <ui:Label text="SEG" class="weekday-label" picking-mode="Ignore" />
+                        <ui:Label text="TER" class="weekday-label" picking-mode="Ignore" />
+                        <ui:Label text="QUA" class="weekday-label" picking-mode="Ignore" />
+                        <ui:Label text="QUI" class="weekday-label" picking-mode="Ignore" />
+                        <ui:Label text="SEX" class="weekday-label" picking-mode="Ignore" />
+                        <ui:Label text="SÁB" class="weekday-label weekday-weekend" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <!-- GRADE DE DIAS DO MÊS (35 CÉLULAS QUADRADAS) -->
+                    <ui:VisualElement name="days-grid" class="days-grid" picking-mode="Ignore">
+                        
+                        <!-- LINHA 1 (SEMANA 1) -->
+                        <ui:VisualElement class="day-cell day-cell--empty" picking-mode="Ignore"><ui:Label text="28" class="day-number day-number--faded" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement class="day-cell day-cell--empty" picking-mode="Ignore"><ui:Label text="29" class="day-number day-number--faded" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement class="day-cell day-cell--empty" picking-mode="Ignore"><ui:Label text="30" class="day-number day-number--faded" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement class="day-cell day-cell--empty" picking-mode="Ignore"><ui:Label text="31" class="day-number day-number--faded" picking-mode="Ignore" /></ui:VisualElement>
+
+                        <!-- DIA 01: PASSADO (X PRETO) -->
+                        <ui:VisualElement name="day-cell-1" class="day-cell day-cell--past" picking-mode="Position">
+                            <ui:Label text="01" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="day-cross-x" picking-mode="Ignore"><ui:Label text="✕" class="day-cross-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                            <ui:VisualElement class="day-decision-seal seal-approved" picking-mode="Ignore" />
+                        </ui:VisualElement>
+
+                        <!-- DIA 02: PASSADO (X PRETO) -->
+                        <ui:VisualElement name="day-cell-2" class="day-cell day-cell--past" picking-mode="Position">
+                            <ui:Label text="02" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="day-cross-x" picking-mode="Ignore"><ui:Label text="✕" class="day-cross-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                            <ui:VisualElement class="day-decision-seal seal-rejected" picking-mode="Ignore" />
+                        </ui:VisualElement>
+
+                        <!-- DIA 03: PASSADO (X PRETO) -->
+                        <ui:VisualElement name="day-cell-3" class="day-cell day-cell--past" picking-mode="Position">
+                            <ui:Label text="03" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="day-cross-x" picking-mode="Ignore"><ui:Label text="✕" class="day-cross-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                            <ui:VisualElement class="day-decision-seal seal-approved" picking-mode="Ignore" />
+                        </ui:VisualElement>
+
+                        <!-- LINHA 2 (SEMANA 2) -->
+                        <ui:VisualElement name="day-cell-4" class="day-cell day-cell--past" picking-mode="Position">
+                            <ui:Label text="04" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="day-cross-x" picking-mode="Ignore"><ui:Label text="✕" class="day-cross-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="day-cell-5" class="day-cell day-cell--past" picking-mode="Position">
+                            <ui:Label text="05" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="day-cross-x" picking-mode="Ignore"><ui:Label text="✕" class="day-cross-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="day-cell-6" class="day-cell day-cell--past" picking-mode="Position">
+                            <ui:Label text="06" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="day-cross-x" picking-mode="Ignore"><ui:Label text="✕" class="day-cross-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="day-cell-7" class="day-cell day-cell--past" picking-mode="Position">
+                            <ui:Label text="07" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="day-cross-x" picking-mode="Ignore"><ui:Label text="✕" class="day-cross-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="day-cell-8" class="day-cell day-cell--past" picking-mode="Position">
+                            <ui:Label text="08" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="day-cross-x" picking-mode="Ignore"><ui:Label text="✕" class="day-cross-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="day-cell-9" class="day-cell day-cell--past" picking-mode="Position">
+                            <ui:Label text="09" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="day-cross-x" picking-mode="Ignore"><ui:Label text="✕" class="day-cross-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="day-cell-10" class="day-cell day-cell--past" picking-mode="Position">
+                            <ui:Label text="10" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="day-cross-x" picking-mode="Ignore"><ui:Label text="✕" class="day-cross-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- LINHA 3 (SEMANA 3) -->
+                        <ui:VisualElement name="day-cell-11" class="day-cell day-cell--past" picking-mode="Position">
+                            <ui:Label text="11" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="day-cross-x" picking-mode="Ignore"><ui:Label text="✕" class="day-cross-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="day-cell-12" class="day-cell day-cell--past" picking-mode="Position">
+                            <ui:Label text="12" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="day-cross-x" picking-mode="Ignore"><ui:Label text="✕" class="day-cross-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="day-cell-13" class="day-cell day-cell--past" picking-mode="Position">
+                            <ui:Label text="13" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="day-cross-x" picking-mode="Ignore"><ui:Label text="✕" class="day-cross-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- DIA 14: HOJE (CIRCULADO EM VERMELHO) -->
+                        <ui:VisualElement name="day-cell-14" class="day-cell day-cell--today" picking-mode="Position">
+                            <ui:Label text="14" class="day-number day-number--today" picking-mode="Ignore" />
+                            <ui:VisualElement class="today-ink-circle" picking-mode="Ignore" />
+                            <ui:Label text="HOJE" class="today-tag-label" picking-mode="Ignore" />
+                        </ui:VisualElement>
+
+                        <!-- DIAS FUTUROS NORMAIS -->
+                        <ui:VisualElement name="day-cell-15" class="day-cell day-cell--future" picking-mode="Position"><ui:Label text="15" class="day-number" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement name="day-cell-16" class="day-cell day-cell--future" picking-mode="Position"><ui:Label text="16" class="day-number" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement name="day-cell-17" class="day-cell day-cell--future" picking-mode="Position"><ui:Label text="17" class="day-number" picking-mode="Ignore" /></ui:VisualElement>
+
+                        <!-- LINHA 4 (SEMANA 4) -->
+                        <!-- DIA 18: FUTURO COM EVENTO MARCADO (CRISE) -->
+                        <ui:VisualElement name="day-cell-18" class="day-cell day-cell--future day-cell--event" picking-mode="Position">
+                            <ui:Label text="18" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="event-marker-badge marker-crisis" picking-mode="Ignore"><ui:Label text="!" class="event-marker-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="day-cell-19" class="day-cell day-cell--future" picking-mode="Position"><ui:Label text="19" class="day-number" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement name="day-cell-20" class="day-cell day-cell--future" picking-mode="Position"><ui:Label text="20" class="day-number" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement name="day-cell-21" class="day-cell day-cell--future" picking-mode="Position"><ui:Label text="21" class="day-number" picking-mode="Ignore" /></ui:VisualElement>
+
+                        <!-- DIA 22: FUTURO COM EVENTO DIPLOMÁTICO -->
+                        <ui:VisualElement name="day-cell-22" class="day-cell day-cell--future day-cell--event" picking-mode="Position">
+                            <ui:Label text="22" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="event-marker-badge marker-diplomacy" picking-mode="Ignore"><ui:Label text="★" class="event-marker-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="day-cell-23" class="day-cell day-cell--future" picking-mode="Position"><ui:Label text="23" class="day-number" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement name="day-cell-24" class="day-cell day-cell--future" picking-mode="Position"><ui:Label text="24" class="day-number" picking-mode="Ignore" /></ui:VisualElement>
+
+                        <!-- LINHA 5 (SEMANA 5) -->
+                        <!-- DIA 25: FIM DE ACONTECIMENTO / PRAZO -->
+                        <ui:VisualElement name="day-cell-25" class="day-cell day-cell--future day-cell--event" picking-mode="Position">
+                            <ui:Label text="25" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="event-marker-badge marker-deadline" picking-mode="Ignore"><ui:Label text="⌛" class="event-marker-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement name="day-cell-26" class="day-cell day-cell--future" picking-mode="Position"><ui:Label text="26" class="day-number" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement name="day-cell-27" class="day-cell day-cell--future" picking-mode="Position"><ui:Label text="27" class="day-number" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement name="day-cell-28" class="day-cell day-cell--future" picking-mode="Position"><ui:Label text="28" class="day-number" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement name="day-cell-29" class="day-cell day-cell--future" picking-mode="Position"><ui:Label text="29" class="day-number" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement name="day-cell-30" class="day-cell day-cell--future" picking-mode="Position"><ui:Label text="30" class="day-number" picking-mode="Ignore" /></ui:VisualElement>
+
+                        <!-- DIA 31: SESSÃO LEGISLATIVA / CONGRESSO -->
+                        <ui:VisualElement name="day-cell-31" class="day-cell day-cell--future day-cell--event" picking-mode="Position">
+                            <ui:Label text="31" class="day-number" picking-mode="Ignore" />
+                            <ui:VisualElement class="event-marker-badge marker-congress" picking-mode="Ignore"><ui:Label text="🏛" class="event-marker-symbol" picking-mode="Ignore" /></ui:VisualElement>
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- LINHA DIVISÓRIA INFERIOR -->
+                <ui:VisualElement class="calendar-divider-line" picking-mode="Ignore" />
+
+                <!-- SEÇÃO 2 (VERTICAL INFERIOR): AGENDAMENTOS FUTUROS E POST-IT DO GABINETE -->
+                <ui:VisualElement class="calendar-bottom-section" picking-mode="Ignore">
+                    
+                    <!-- BLOCO DE AGENDAMENTOS FUTUROS (PREVISÕES E EVENTOS) -->
+                    <ui:VisualElement class="scheduled-panel" picking-mode="Ignore">
+                        <ui:VisualElement class="scheduled-header-row" picking-mode="Ignore">
+                            <ui:Label text="CRONOGRAMA &amp; PREVISÕES DO MÊS" class="scheduled-title" picking-mode="Ignore" />
+                            <ui:Label text="AGENDAMENTOS" class="scheduled-tag" picking-mode="Ignore" />
+                        </ui:VisualElement>
+                        
+                        <ui:ScrollView name="scheduled-events-list" class="scheduled-scroll" picking-mode="Ignore">
+                            
+                            <!-- ITEM 1: CRISE -->
+                            <ui:VisualElement class="schedule-item item--crisis" picking-mode="Ignore">
+                                <ui:VisualElement class="schedule-date-col" picking-mode="Ignore">
+                                    <ui:Label text="18" class="schedule-day-txt" picking-mode="Ignore" />
+                                    <ui:Label text="JAN" class="schedule-mon-txt" picking-mode="Ignore" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="schedule-info-col" picking-mode="Ignore">
+                                    <ui:VisualElement class="schedule-badge-row" picking-mode="Ignore">
+                                        <ui:Label text="CRISE FEDERATIVA" class="badge-pill badge-crisis" picking-mode="Ignore" />
+                                        <ui:Label text="EM 4 DIAS" class="badge-time" picking-mode="Ignore" />
+                                    </ui:VisualElement>
+                                    <ui:Label text="Reunião com Governadores" class="schedule-name" picking-mode="Ignore" />
+                                    <ui:Label text="Exigência de socorro orçamentário estadual." class="schedule-details" picking-mode="Ignore" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+
+                            <!-- ITEM 2: DIPLOMACIA -->
+                            <ui:VisualElement class="schedule-item item--diplomacy" picking-mode="Ignore">
+                                <ui:VisualElement class="schedule-date-col" picking-mode="Ignore">
+                                    <ui:Label text="22" class="schedule-day-txt" picking-mode="Ignore" />
+                                    <ui:Label text="JAN" class="schedule-mon-txt" picking-mode="Ignore" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="schedule-info-col" picking-mode="Ignore">
+                                    <ui:VisualElement class="schedule-badge-row" picking-mode="Ignore">
+                                        <ui:Label text="DIPLOMACIA" class="badge-pill badge-diplomacy" picking-mode="Ignore" />
+                                        <ui:Label text="EM 8 DIAS" class="badge-time" picking-mode="Ignore" />
+                                    </ui:VisualElement>
+                                    <ui:Label text="Cúpula Bilateral EUA - Brasil" class="schedule-name" picking-mode="Ignore" />
+                                    <ui:Label text="Negociação de tarifas aduaneiras de aço." class="schedule-details" picking-mode="Ignore" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+
+                            <!-- ITEM 3: FIM DE ACONTECIMENTO -->
+                            <ui:VisualElement class="schedule-item item--deadline" picking-mode="Ignore">
+                                <ui:VisualElement class="schedule-date-col" picking-mode="Ignore">
+                                    <ui:Label text="25" class="schedule-day-txt" picking-mode="Ignore" />
+                                    <ui:Label text="JAN" class="schedule-mon-txt" picking-mode="Ignore" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="schedule-info-col" picking-mode="Ignore">
+                                    <ui:VisualElement class="schedule-badge-row" picking-mode="Ignore">
+                                        <ui:Label text="FIM DE PRAZO" class="badge-pill badge-deadline" picking-mode="Ignore" />
+                                        <ui:Label text="EXPIRAÇÃO" class="badge-time" picking-mode="Ignore" />
+                                    </ui:VisualElement>
+                                    <ui:Label text="Término da Moratória de Juros" class="schedule-name" picking-mode="Ignore" />
+                                    <ui:Label text="Encerra o benefício fiscal concedido ao agronegócio." class="schedule-details" picking-mode="Ignore" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+
+                            <!-- ITEM 4: CONGRESSO -->
+                            <ui:VisualElement class="schedule-item item--congress" picking-mode="Ignore">
+                                <ui:VisualElement class="schedule-date-col" picking-mode="Ignore">
+                                    <ui:Label text="31" class="schedule-day-txt" picking-mode="Ignore" />
+                                    <ui:Label text="JAN" class="schedule-mon-txt" picking-mode="Ignore" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="schedule-info-col" picking-mode="Ignore">
+                                    <ui:VisualElement class="schedule-badge-row" picking-mode="Ignore">
+                                        <ui:Label text="CONGRESSO" class="badge-pill badge-congress" picking-mode="Ignore" />
+                                        <ui:Label text="FIM DO MÊS" class="badge-time" picking-mode="Ignore" />
+                                    </ui:VisualElement>
+                                    <ui:Label text="Votação da Meta Fiscal" class="schedule-name" picking-mode="Ignore" />
+                                    <ui:Label text="Aprovação parlamentar do orçamento anual da União." class="schedule-details" picking-mode="Ignore" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+
+                    <!-- POST-IT AMARELO DE LEMBRETE DO GABINETE -->
+                    <ui:VisualElement class="postit-box" picking-mode="Ignore">
+                        <ui:VisualElement class="postit-pushpin" picking-mode="Ignore" />
+                        <ui:Label text="Nota da Secretaria-Geral:" class="postit-title-label" picking-mode="Ignore" />
+                        <ui:Label text="Passe o cursor sobre os dias passados com 'X' preto para revisar as propostas assinadas, ministros e o impacto nos índices nacionais." class="postit-content-label" picking-mode="Ignore" />
+                        <ui:Label text="— Gabinete da Presidência" class="postit-signature-label" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- CAMADA DE OVERLAY DO TOOLTIP (ÚLTIMO ELEMENTO DE CALENDAR-PAGE = 100% SEMPRE NO TOPO DE TUDO) -->
+                <ui:VisualElement name="calendar-tooltip-overlay" class="calendar-tooltip-overlay hidden" picking-mode="Ignore">
+                    <ui:VisualElement name="calendar-tooltip-card" class="calendar-tooltip-card" picking-mode="Ignore">
+                        
+                        <!-- CABEÇALHO DO TOOLTIP: DATA E STATUS BADGE -->
+                        <ui:VisualElement class="tooltip-header" picking-mode="Ignore">
+                            <ui:Label name="tooltip-date-label" text="01 DE JANEIRO" class="tooltip-date-label" picking-mode="Ignore" />
+                            <ui:Label name="tooltip-status-tag" text="DESPACHADO: APROVADO" class="tooltip-status-tag tag-approved" picking-mode="Ignore" />
+                        </ui:VisualElement>
+
+                        <!-- BLOCO DE NPC COM FOTO 3X4 E CLIPE DE PAPEL -->
+                        <ui:VisualElement name="tooltip-npc-section" class="tooltip-npc-block" picking-mode="Ignore">
+                            <ui:VisualElement class="tooltip-portrait-frame" picking-mode="Ignore">
+                                <ui:VisualElement class="paper-clip-deco" picking-mode="Ignore" />
+                                <ui:VisualElement name="tooltip-portrait" class="tooltip-npc-portrait" picking-mode="Ignore" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="tooltip-npc-info" picking-mode="Ignore">
+                                <ui:Label name="tooltip-npc-name" text="Ministro da Economia" class="tooltip-npc-name" picking-mode="Ignore" />
+                                <ui:Label name="tooltip-proposal-title" text="Diretrizes do Novo Mandato" class="tooltip-proposal-title" picking-mode="Ignore" />
+                                <ui:Label name="tooltip-proposal-desc" text="Aprovação do pacote inicial de governabilidade." class="tooltip-proposal-desc" picking-mode="Ignore" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- BLOCO DE ATRIBUTOS (+/- ÍNDICES NACIONAIS) -->
+                        <ui:VisualElement name="tooltip-stats-section" class="tooltip-stats-row" picking-mode="Ignore">
+                            <ui:Label name="tooltip-stat-1" text="+10 Popularidade" class="stat-pill stat-pill--pos" picking-mode="Ignore" />
+                            <ui:Label name="tooltip-stat-2" text="+5 Estabilidade" class="stat-pill stat-pill--pos" picking-mode="Ignore" />
+                        </ui:VisualElement>
+
+                        <!-- BLOCO DE PERKS DESBLOQUEADOS -->
+                        <ui:VisualElement name="tooltip-perk-section" class="tooltip-perk-row" picking-mode="Ignore">
+                            <ui:Label name="tooltip-perk-text" text="★ Perk: Lua de Mel Política" class="tooltip-perk-text" picking-mode="Ignore" />
+                        </ui:VisualElement>
+
+                        <!-- BLOCO DE EVENTO FUTURO (CRISES, DIPLOMACIA, ETC.) -->
+                        <ui:VisualElement name="tooltip-event-section" class="tooltip-event-block hidden" picking-mode="Ignore">
+                            <ui:Label name="tooltip-event-title" text="Título do Evento" class="tooltip-event-title" picking-mode="Ignore" />
+                            <ui:Label name="tooltip-event-desc" text="Descrição detalhada do acontecimento futuro..." class="tooltip-event-desc" picking-mode="Ignore" />
+                            <ui:Label name="tooltip-event-impact" text="Impacto previsto nos indicadores nacionais." class="tooltip-event-impact" picking-mode="Ignore" />
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

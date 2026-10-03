@@ -1,0 +1,847 @@
+/* ==========================================================================
+   CALENDÁRIO DE PAPEL VERTICAL PRESIDENCIAL — PROJETO MANDATO
+   Layout vertical (retrato), grade mensal com X preto nos dias passados,
+   detalhes históricos no hover, agendamentos futuros e compensação de rotação UV.
+   ========================================================================== */
+
+:root {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -unity-font: url('project://database/Assets/BreeSerif-Regular.ttf?fileID=12800000&guid=59b91adeaaa5b7741a8f1ac398008a07&type=3#BreeSerif-Regular');
+    -unity-font-definition: url('project://database/Assets/BreeSerif-Regular.ttf?fileID=12800000&guid=59b91adeaaa5b7741a8f1ac398008a07&type=3#BreeSerif-Regular');
+}
+
+/* CONTAINER RAIZ DO CANVAS (100% LARGURA E ALTURA) */
+.calendar-root {
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+/* FOLHA DO CALENDÁRIO VERTICAL (OCUPA 100% DO PAINEL) */
+.calendar-page {
+    width: 100%;
+    height: 100%;
+    background-color: #FAF5EA; /* Bege pergaminho oficial */
+    border-width: 4px;
+    border-color: #3E3022;
+    border-radius: 12px;
+    padding: 24px 28px 22px 28px;
+    box-sizing: border-box;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   ESPIRAL / ANÉIS METÁLICOS DE ENCADERNAÇÃO NO TOPO
+   -------------------------------------------------------------------------- */
+.calendar-binder-bar {
+    width: 92%;
+    height: 28px;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: -12px;
+    align-self: center;
+    z-index: 10;
+}
+
+.binder-hole {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background-color: #2B2117;
+    border-width: 2px;
+    border-color: #17110B;
+    justify-content: center;
+    align-items: center;
+}
+
+.binder-ring {
+    width: 10px;
+    height: 28px;
+    border-radius: 5px;
+    background-color: #695642;
+    border-width: 2px;
+    border-color: #3D3022;
+    margin-top: -5px;
+}
+
+/* --------------------------------------------------------------------------
+   CABEÇALHO SUPERIOR: ANO NO CANTO, NOME DO MÊS E CHANCELARIA
+   -------------------------------------------------------------------------- */
+.calendar-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+}
+
+/* CANTO ESQUERDO: ANO GRANDE */
+.year-corner-box {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    border-right-width: 2.5px;
+    border-right-color: #5C4A38;
+    padding-right: 18px;
+}
+
+.year-caption-label {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #6E5B49;
+    letter-spacing: 2px;
+}
+
+.calendar-giant-year {
+    font-size: 56px;
+    -unity-font-style: bold;
+    color: #17110A; /* Tinta tipográfica preta oficial */
+    line-height: 52px;
+    letter-spacing: 2px;
+    margin-top: -2px;
+    margin-bottom: -4px;
+}
+
+.year-stamp-tag {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: #8C2424; /* Vermelho carimbo oficial */
+    letter-spacing: 3px;
+}
+
+/* CENTRO: NOME DO MÊS E SUBTÍTULO */
+.month-center-box {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.month-title-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.month-nav-btn {
+    width: 30px;
+    height: 30px;
+    border-width: 2px;
+    border-color: #5C4A38;
+    border-radius: 6px;
+    background-color: #EDE2CD;
+    color: #3B2E21;
+    font-size: 15px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-left: 8px;
+    margin-right: 8px;
+    transition-duration: 0.12s;
+}
+
+.month-nav-btn:hover,
+.month-nav-btn.hovered {
+    background-color: #DCCBB1;
+    border-color: #2D2217;
+    scale: 1.05;
+}
+
+.calendar-month-name {
+    font-size: 38px;
+    -unity-font-style: bold;
+    color: #1F1710;
+    letter-spacing: 3px;
+}
+
+.calendar-month-subtitle {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #7A6652;
+    letter-spacing: 1.5px;
+    margin-top: 3px;
+}
+
+/* CANTO DIREITO: BRASÃO / CHANCELARIA */
+.cabinet-seal-box {
+    border-width: 2px;
+    border-color: #8C7B68;
+    border-radius: 4px;
+    padding: 6px 14px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(140, 123, 104, 0.08);
+}
+
+.cabinet-seal-title {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #5C4C3C;
+    letter-spacing: 2px;
+}
+
+.cabinet-seal-sub {
+    font-size: 10px;
+    color: #7A6856;
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
+
+/* LINHA SEPARADORA RÚSTICA */
+.calendar-divider-line {
+    width: 100%;
+    height: 3px;
+    background-color: #4A3A2A;
+    margin-top: 6px;
+    margin-bottom: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   SEÇÃO CENTRAL: GRADE MENSAL DE DIAS (LARGURA TOTAL 100%)
+   -------------------------------------------------------------------------- */
+.calendar-grid-section {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+/* CABEÇALHO DOS DIAS DA SEMANA */
+.weekdays-row {
+    flex-direction: row;
+    justify-content: space-between;
+    border-bottom-width: 2px;
+    border-bottom-color: #6E5A46;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+}
+
+.weekday-label {
+    flex-grow: 1;
+    width: 14.28%;
+    font-size: 15px;
+    -unity-font-style: bold;
+    color: #382A1C;
+    letter-spacing: 1.5px;
+    -unity-text-align: middle-center;
+}
+
+.weekday-weekend {
+    color: #9C2E2E; /* Tinta vermelha de finais de semana */
+}
+
+/* GRADE DOS DIAS (7 COLUNAS x 5 LINHAS) */
+.days-grid {
+    flex-grow: 1;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-content: space-between;
+}
+
+/* CÉLULA INDIVIDUAL DO DIA */
+.day-cell {
+    width: 13.5%;
+    height: 94px;
+    background-color: #FDFBF6;
+    border-width: 2px;
+    border-color: #C8BAA3;
+    border-radius: 6px;
+    padding: 6px 8px;
+    box-sizing: border-box;
+    position: relative;
+    justify-content: flex-start;
+    align-items: flex-start;
+    transition-duration: 0.12s;
+}
+
+.day-cell:hover,
+.day-cell.hovered {
+    border-color: #94301B;
+    background-color: #FFFDF9;
+    scale: 1.05;
+    z-index: 80;
+}
+
+/* DIAS DE MESES ADJACENTES (FADED) */
+.day-cell--empty {
+    background-color: rgba(220, 210, 195, 0.35);
+    border-color: #DDD2BF;
+    opacity: 0.5;
+}
+
+.day-number--faded {
+    color: #A69784;
+}
+
+/* NÚMERO DO DIA */
+.day-number {
+    font-size: 20px;
+    -unity-font-style: bold;
+    color: #2B2117;
+}
+
+.day-number--today {
+    color: #9E1F1F;
+}
+
+/* --------------------------------------------------------------------------
+   ESTADO 1: DIAS PASSADOS (MARCADOS COM UM 'X' PRETO)
+   -------------------------------------------------------------------------- */
+.day-cell--past {
+    background-color: #F7F1E4;
+}
+
+.day-cross-x {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    justify-content: center;
+    align-items: center;
+    rotate: -4deg;
+}
+
+.day-cross-symbol {
+    font-size: 48px;
+    -unity-font-style: bold;
+    color: #120E0A; /* Tinta carvão preta pura de canetão/marcador */
+    -unity-text-align: middle-center;
+    opacity: 0.95;
+    letter-spacing: -2px;
+}
+
+/* SELO DE RESOLUÇÃO DO DIA */
+.day-decision-seal {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
+}
+
+.seal-approved {
+    background-color: #2E7D32;
+    border-width: 1px;
+    border-color: #1B5E20;
+}
+
+.seal-rejected {
+    background-color: #C62828;
+    border-width: 1px;
+    border-color: #8E0000;
+}
+
+/* --------------------------------------------------------------------------
+   ESTADO 2: DIA ATUAL (HOJE - CIRCULADO EM VERMELHO)
+   -------------------------------------------------------------------------- */
+.day-cell--today {
+    background-color: #FFF8EE;
+    border-color: #C62828;
+    border-width: 2.5px;
+}
+
+.today-ink-circle {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    border-width: 2.5px;
+    border-color: #B71C1C;
+    rotate: 6deg;
+}
+
+.today-tag-label {
+    position: absolute;
+    right: 6px;
+    bottom: 4px;
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: #B71C1C;
+    letter-spacing: 1px;
+}
+
+/* --------------------------------------------------------------------------
+   ESTADO 3: DIAS FUTUROS COM EVENTOS AGENDADOS
+   -------------------------------------------------------------------------- */
+.day-cell--future {
+    background-color: #FCF9F2;
+}
+
+.day-cell--event {
+    border-color: #7A583A;
+}
+
+.event-marker-badge {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    justify-content: center;
+    align-items: center;
+}
+
+.event-marker-symbol {
+    font-size: 12px;
+    -unity-font-style: bold;
+}
+
+.marker-crisis {
+    background-color: rgba(183, 28, 28, 0.18);
+    border-width: 1px;
+    border-color: #B71C1C;
+}
+.marker-crisis .event-marker-symbol { color: #B71C1C; }
+
+.marker-diplomacy {
+    background-color: rgba(21, 101, 192, 0.18);
+    border-width: 1px;
+    border-color: #1565C0;
+}
+.marker-diplomacy .event-marker-symbol { color: #1565C0; }
+
+.marker-deadline {
+    background-color: rgba(198, 88, 7, 0.18);
+    border-width: 1px;
+    border-color: #C65807;
+}
+.marker-deadline .event-marker-symbol { color: #C65807; }
+
+.marker-congress {
+    background-color: rgba(46, 125, 50, 0.18);
+    border-width: 1px;
+    border-color: #2E7D32;
+}
+.marker-congress .event-marker-symbol { color: #2E7D32; }
+
+/* --------------------------------------------------------------------------
+   HOVER POPUP: CAMADA DE OVERLAY TOPMOST E CARD DE DOSSIÊ DO DIA
+   Garante que o popup seja sempre o elemento do topo absoluto da folha
+   -------------------------------------------------------------------------- */
+.calendar-tooltip-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.calendar-tooltip-card {
+    position: absolute;
+    width: 330px;
+    background-color: #FAF5EA;
+    border-width: 3px;
+    border-color: #4A3A2C;
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-sizing: border-box;
+    flex-direction: column;
+}
+
+.hidden {
+    display: none;
+}
+
+/* Fallback legado caso alguma célula antiga tente instanciar tooltip interno */
+.day-hover-tooltip {
+    display: none;
+}
+
+.tooltip-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom-width: 2px;
+    border-bottom-color: #8C7A65;
+    padding-bottom: 6px;
+    margin-bottom: 10px;
+}
+
+.tooltip-date-label {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: #2A1E14;
+    letter-spacing: 1px;
+}
+
+.tooltip-status-tag {
+    font-size: 11px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.tag-approved {
+    background-color: rgba(46, 125, 50, 0.16);
+    border-width: 1px;
+    border-color: #2E7D32;
+    color: #2E7D32;
+}
+
+.tag-rejected {
+    background-color: rgba(183, 28, 28, 0.16);
+    border-width: 1px;
+    border-color: #B71C1C;
+    color: #B71C1C;
+}
+
+.tag-today {
+    background-color: rgba(198, 88, 7, 0.16);
+    border-width: 1px;
+    border-color: #C65807;
+    color: #C65807;
+}
+
+.tag-crisis {
+    background-color: rgba(183, 28, 28, 0.2);
+    border-width: 1px;
+    border-color: #B71C1C;
+    color: #B71C1C;
+}
+
+.tag-diplomacy {
+    background-color: rgba(21, 101, 192, 0.2);
+    border-width: 1px;
+    border-color: #1565C0;
+    color: #1565C0;
+}
+
+.tag-deadline {
+    background-color: rgba(198, 88, 7, 0.2);
+    border-width: 1px;
+    border-color: #C65807;
+    color: #C65807;
+}
+
+.tag-congress {
+    background-color: rgba(46, 125, 50, 0.2);
+    border-width: 1px;
+    border-color: #2E7D32;
+    color: #2E7D32;
+}
+
+/* BLOCO DO NPC */
+.tooltip-npc-block {
+    flex-direction: row;
+    margin-bottom: 10px;
+}
+
+.tooltip-portrait-frame {
+    width: 58px;
+    height: 70px;
+    border-width: 2px;
+    border-color: #4A3A2C;
+    background-color: #E2D7C3;
+    margin-right: 12px;
+    position: relative;
+    border-radius: 4px;
+}
+
+.paper-clip-deco {
+    position: absolute;
+    left: 8px;
+    top: -6px;
+    width: 10px;
+    height: 18px;
+    border-width: 2px;
+    border-color: #73614E;
+    border-radius: 5px;
+    background-color: #C2B4A1;
+}
+
+.tooltip-npc-portrait {
+    width: 100%;
+    height: 100%;
+    background-color: #C8BAA3;
+}
+
+.tooltip-npc-info {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.tooltip-npc-name {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #614B37;
+}
+
+.tooltip-proposal-title {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: #1F160E;
+    margin-top: 2px;
+    white-space: normal;
+}
+
+.tooltip-proposal-desc {
+    font-size: 11px;
+    color: #524030;
+    margin-top: 2px;
+    white-space: normal;
+}
+
+/* ATRIBUTOS */
+.tooltip-stats-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.stat-pill {
+    font-size: 11px;
+    -unity-font-style: bold;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.stat-pill--pos {
+    background-color: #E8F5E9;
+    color: #1B5E20;
+    border-width: 1px;
+    border-color: #81C784;
+}
+
+.stat-pill--neg {
+    background-color: #FFEBEE;
+    color: #B71C1C;
+    border-width: 1px;
+    border-color: #E57373;
+}
+
+/* PERKS */
+.tooltip-perk-row {
+    background-color: #FFF8E1;
+    border-width: 1px;
+    border-color: #FFE082;
+    border-radius: 4px;
+    padding: 4px 8px;
+}
+
+.tooltip-perk-text {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: #825807;
+}
+
+/* TEXTOS DE EVENTO FUTURO NO TOOLTIP */
+.tooltip-event-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: #1C150D;
+    margin-bottom: 4px;
+    white-space: normal;
+}
+
+.tooltip-event-desc {
+    font-size: 11px;
+    color: #4A3A2C;
+    margin-bottom: 4px;
+    white-space: normal;
+}
+
+.tooltip-event-impact {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: #8C2424;
+    white-space: normal;
+}
+
+/* --------------------------------------------------------------------------
+   SEÇÃO INFERIOR VERTICAL: AGENDAMENTOS FUTUROS + POST-IT
+   -------------------------------------------------------------------------- */
+.calendar-bottom-section {
+    height: 380px;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 4px;
+}
+
+/* PAINEL DE AGENDAMENTOS FUTUROS */
+.scheduled-panel {
+    width: 63%;
+    background-color: #F7F1E4;
+    border-width: 2.5px;
+    border-color: #4A3A2C;
+    border-radius: 8px;
+    padding: 12px 14px;
+    flex-direction: column;
+}
+
+.scheduled-header-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom-width: 2px;
+    border-bottom-color: #8C7A65;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+}
+
+.scheduled-title {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: #2D2115;
+    letter-spacing: 1px;
+}
+
+.scheduled-tag {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: #8C2424;
+    letter-spacing: 1.5px;
+}
+
+.scheduled-scroll {
+    flex-grow: 1;
+}
+
+/* ITENS DO CRONOGRAMA */
+.schedule-item {
+    flex-direction: row;
+    background-color: #FDFBF6;
+    border-width: 1.5px;
+    border-color: #C8BAA3;
+    border-left-width: 5px;
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin-bottom: 6px;
+}
+
+.item--crisis { border-left-color: #B71C1C; }
+.item--diplomacy { border-left-color: #1565C0; }
+.item--deadline { border-left-color: #C65807; }
+.item--congress { border-left-color: #2E7D32; }
+
+.schedule-date-col {
+    width: 32px;
+    align-items: center;
+    justify-content: center;
+    border-right-width: 1px;
+    border-right-color: #DDD0BC;
+    padding-right: 6px;
+    margin-right: 8px;
+}
+
+.schedule-day-txt {
+    font-size: 17px;
+    -unity-font-style: bold;
+    color: #23190F;
+}
+
+.schedule-mon-txt {
+    font-size: 10px;
+    -unity-font-style: bold;
+    color: #7D6B58;
+}
+
+.schedule-info-col {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.schedule-badge-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.badge-pill {
+    font-size: 9px;
+    -unity-font-style: bold;
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.badge-crisis { background-color: #FFEBEE; color: #B71C1C; }
+.badge-diplomacy { background-color: #E3F2FD; color: #1565C0; }
+.badge-deadline { background-color: #FFF3E0; color: #C65807; }
+.badge-congress { background-color: #E8F5E9; color: #2E7D32; }
+
+.badge-time {
+    font-size: 9px;
+    -unity-font-style: bold;
+    color: #8C7B68;
+}
+
+.schedule-name {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #1F1710;
+    white-space: normal;
+}
+
+.schedule-details {
+    font-size: 10px;
+    color: #544434;
+    white-space: normal;
+}
+
+/* --------------------------------------------------------------------------
+   POST-IT AMARELO DE ANOTAÇÃO DO GABINETE
+   -------------------------------------------------------------------------- */
+.postit-box {
+    width: 34%;
+    background-color: #FFF7B2;
+    border-width: 1px;
+    border-color: #D6CA74;
+    border-radius: 4px;
+    padding: 12px 14px;
+    position: relative;
+    rotate: -1.5deg;
+    justify-content: space-between;
+}
+
+.postit-pushpin {
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    margin-left: -5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: #C62828;
+    border-width: 1.5px;
+    border-color: #8A1515;
+}
+
+.postit-title-label {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: #5C5212;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.postit-content-label {
+    font-size: 11px;
+    color: #383207;
+    white-space: normal;
+    line-height: 15px;
+}
+
+.postit-signature-label {
+    -unity-font: url('project://database/Assets/Brother%20Signature.otf?fileID=12800000&guid=5e6a9f7a8b4c3d2e1f0a9b8c7d6e5f4a&type=3#Brother Signature');
+    -unity-font-definition: url('project://database/Assets/Brother%20Signature.otf?fileID=12800000&guid=5e6a9f7a8b4c3d2e1f0a9b8c7d6e5f4a&type=3#Brother Signature');
+    font-size: 20px;
+    color: #172D4D; /* Tinta azul caneta tinteiro */
+    margin-top: 4px;
+    -unity-text-align: middle-right;
+}

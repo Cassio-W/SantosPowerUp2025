@@ -10723,138 +10723,6 @@ MonoBehaviour:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_WorldSpaceCollider: {fileID: 0}
---- !u!114 &517683374
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 517683369}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 81920ae1938546ea947cf29184ba2091, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Mandato.Presentation::Mandato.Presentation.WorldSpaceUIInteraction
-  uiDocument: {fileID: 517683373}
-  interactionCamera: {fileID: 0}
-  interactableLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  maxRaycastDistance: 50
-  flipX: 1
-  flipY: 1
-  swapXY: 1
-  uvOffset: {x: -0.192, y: -0.04}
-  uvScale: {x: 1.239, y: 1.052}
-  showDebugLogs: 0
-  showOnScreenOverlay: 0
-  drawGizmos: 1
---- !u!114 &517683376
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 517683369}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec438687848c054409400951e5769943, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Mandato.UI::Mandato.UI.CalendarWallPresenter
-  uiDocument: {fileID: 517683373}
-  audioSource: {fileID: 0}
-  hoverSound: {fileID: 0}
-  clickSound: {fileID: 0}
-  currentYear: 2026
-  currentMonthIndex: 0
-  totalMonthsInMandate: 48
---- !u!114 &517683377
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 517683369}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 47f23b4d8a481cf41ba672c9f368b3c7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Mandato.Presentation::Mandato.Presentation.FocusableObject
-  cameraFocusPoint: {fileID: 517683379}
-  fallbackFocusOffset: {x: 0, y: 0, z: -2}
-  customTransitionDuration: 0.45
-  targetCameraFov: 50
-  enableCameraEffectOnFocus: 1
-  cameraEffectWeight: 0.7
-  enableHoverScale: 0
-  hoverScaleMultiplier: 1.05
-  hoverLiftOffset: {x: 0, y: 0, z: 0}
-  hoverTransitionSpeed: 12
-  enableHoverHop: 0
-  hoverHopIntensity: 0
-  hoverHopOffset: {x: 0, y: 0, z: 0}
-  hoverHopDuration: 0.15
-  hoverHopPunchScale: {x: 1, y: 1, z: 1}
-  enableOutlineHighlight: 1
-  highlightOutlineColor: {r: 1, g: 0.85, b: 0.15, a: 1}
-  targetRenderers:
-  - {fileID: 1400938977}
-  audioSource: {fileID: 0}
-  hoverSound: {fileID: 0}
-  hoverSoundVolume: 0.8
-  focusSound: {fileID: 0}
-  focusSoundVolume: 1
-  unfocusSound: {fileID: 0}
-  unfocusSoundVolume: 0.8
-  allowClickToFocus: 1
-  unfocusOnSecondClick: 1
-  allowUnfocusOnClickOutside: 1
-  onHoverEnter:
-    m_PersistentCalls:
-      m_Calls: []
-  onHoverExit:
-    m_PersistentCalls:
-      m_Calls: []
-  onFocused:
-    m_PersistentCalls:
-      m_Calls: []
-  onUnfocused:
-    m_PersistentCalls:
-      m_Calls: []
-  onClicked:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!1 &517683378
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 517683379}
-  m_Layer: 0
-  m_Name: Calendar_FocusPoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &517683379
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 517683378}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
-  m_LocalPosition: {x: 0.00000023841858, y: -0.9219997, z: 2.1185892}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1400938978}
-  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
 --- !u!1 &538931455
 GameObject:
   m_ObjectHideFlags: 0
@@ -22094,8 +21962,6 @@ MonoBehaviour:
     stampTool: {fileID: 7794165996475813415}
     approveInkPad: {fileID: 2101845561}
     rejectInkPad: {fileID: 407384068}
-    calendarPresenter: {fileID: 517683376}
-    calendarFocusable: {fileID: 517683377}
   flowCoordinatorRef: {fileID: 1189659390}
 --- !u!4 &1189659388
 Transform:
@@ -27284,59 +27150,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects:
-    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: bac10279275d55c4a9e734e4b052825c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 517683379}
+    m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: bac10279275d55c4a9e734e4b052825c, type: 3}
       insertIndex: -1
       addedObject: {fileID: 517683373}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: bac10279275d55c4a9e734e4b052825c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 517683374}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: bac10279275d55c4a9e734e4b052825c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 517683376}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: bac10279275d55c4a9e734e4b052825c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 517683377}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: bac10279275d55c4a9e734e4b052825c, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1400938979}
   m_SourcePrefab: {fileID: 100100000, guid: bac10279275d55c4a9e734e4b052825c, type: 3}
---- !u!23 &1400938977 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: bac10279275d55c4a9e734e4b052825c, type: 3}
-  m_PrefabInstance: {fileID: 1400938976}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1400938978 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: bac10279275d55c4a9e734e4b052825c, type: 3}
-  m_PrefabInstance: {fileID: 1400938976}
-  m_PrefabAsset: {fileID: 0}
---- !u!64 &1400938979
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 517683369}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 2534964839176971238, guid: bac10279275d55c4a9e734e4b052825c, type: 3}
 --- !u!1 &1402890041
 GameObject:
   m_ObjectHideFlags: 0

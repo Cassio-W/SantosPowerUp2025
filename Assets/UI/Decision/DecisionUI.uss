@@ -284,6 +284,20 @@
     padding-bottom: 0;
     padding-left: 0;
     padding-right: 0;
+    transition-property: scale, opacity;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out;
+}
+
+.header-date-container:hover,
+.header-date-btn:hover {
+    scale: 1.06 1.06;
+    cursor: link;
+}
+
+.header-date-container:active,
+.header-date-btn:active {
+    scale: 0.96 0.96;
 }
 
 .header-date-label {

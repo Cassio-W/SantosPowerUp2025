@@ -43,6 +43,10 @@ namespace Mandato.Infrastructure
         [SerializeField] private InkPad3D approveInkPad;
         [SerializeField] private InkPad3D rejectInkPad;
 
+        [Header("Calendário de Parede Presidencial")]
+        [SerializeField] private CalendarWallPresenter calendarPresenter;
+        [SerializeField] private FocusableObject calendarFocusable;
+
         public RunPresentationCoordinator PresentationCoordinator => presentationCoordinator;
         public PaperDocumentPresenter PaperPresenter => paperPresenter;
         public RetroMonitorPresenter RetroMonitorPresenter => retroMonitorPresenter;
@@ -59,6 +63,8 @@ namespace Mandato.Infrastructure
         public StampTool3D StampTool => stampTool;
         public InkPad3D ApproveInkPad => approveInkPad;
         public InkPad3D RejectInkPad => rejectInkPad;
+        public CalendarWallPresenter CalendarPresenter => calendarPresenter;
+        public FocusableObject CalendarFocusable => calendarFocusable;
 
         public bool Validate(out List<string> missingErrors)
         {

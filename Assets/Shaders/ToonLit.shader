@@ -19,6 +19,9 @@ Shader "ComicVFX/ToonLit"
         _SpecularColor ("Specular Color (Default Off)", Color) = (0, 0, 0, 0)
         _Smoothness ("Smoothness (Shininess)", Range(0.0, 1.0)) = 0.0
         _EmissionColor ("Emission Color", Color) = (0, 0, 0, 1)
+
+        [Header(UV Mapping and Rotation)]
+        _UVRotationAngle ("UV Rotation Angle (Degrees)", Float) = 0
     }
 
     SubShader
@@ -76,6 +79,7 @@ Shader "ComicVFX/ToonLit"
                 half4 _SpecularColor;
                 half _Smoothness;
                 half4 _EmissionColor;
+                float _UVRotationAngle;
             CBUFFER_END
 
             Varyings vert(Attributes input)
@@ -87,7 +91,17 @@ Shader "ComicVFX/ToonLit"
                 output.positionCS = posInputs.positionCS;
                 output.positionWS = posInputs.positionWS;
                 output.normalWS = normalInputs.normalWS;
-                output.uv = TRANSFORM_TEX(input.uv, _BaseMap);
+
+                float2 uv = input.uv;
+                if (abs(_UVRotationAngle) > 0.01)
+                {
+                    float rad = radians(_UVRotationAngle);
+                    float s = sin(rad);
+                    float c = cos(rad);
+                    float2 centered = uv - 0.5;
+                    uv = float2(centered.x * c - centered.y * s, centered.x * s + centered.y * c) + 0.5;
+                }
+                output.uv = TRANSFORM_TEX(uv, _BaseMap);
                 return output;
             }
 

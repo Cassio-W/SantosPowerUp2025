@@ -20,6 +20,7 @@ namespace Mandato.UI
         public event Action OnChoiceUnhovered;
         public event Action OnBackRequested;
         public event Action OnBackClicked;
+        public event Action OnCalendarRequested;
 
         [SerializeField] private UIDocument uiDocument;
         [SerializeField] private VisualTreeAsset uxmlAsset;
@@ -36,6 +37,8 @@ namespace Mandato.UI
         private Label lblPerkDesc;
         private Label headerDateLabel;
         private Label headerMonthLabel;
+        private VisualElement headerDateContainer;
+        private Button btnHeaderDate;
         private Button btnBack;
         private CardDefinition currentCard;
 
@@ -59,7 +62,7 @@ namespace Mandato.UI
 
         private void HandleContextChanged(InteractionContext newContext, InteractionContext oldContext)
         {
-            if (newContext == InteractionContext.PaperInspect)
+            if (newContext == InteractionContext.PaperInspect || newContext == InteractionContext.CalendarInspect)
             {
                 SetBackVisible(true);
             }
@@ -142,6 +145,21 @@ namespace Mandato.UI
             headerDateLabel = root.Q<Label>("header-date-label");
             headerMonthLabel = root.Q<Label>("header-month-label");
 
+            headerDateContainer = root.Q<VisualElement>("btn-header-date") ?? root.Q<VisualElement>("header-date-container");
+            if (headerDateContainer != null)
+            {
+                headerDateContainer.pickingMode = PickingMode.Position;
+                headerDateContainer.UnregisterCallback<ClickEvent>(OnHeaderDateClicked);
+                headerDateContainer.RegisterCallback<ClickEvent>(OnHeaderDateClicked);
+            }
+
+            btnHeaderDate = root.Q<Button>("btn-header-date") ?? headerDateContainer as Button;
+            if (btnHeaderDate != null)
+            {
+                btnHeaderDate.clicked -= OnHeaderDateButtonClicked;
+                btnHeaderDate.clicked += OnHeaderDateButtonClicked;
+            }
+
             if (perkModalPopup != null)
             {
                 perkModalPopup.style.display = DisplayStyle.None;
@@ -153,6 +171,19 @@ namespace Mandato.UI
                 btnBack.clicked -= OnBackButtonClicked;
                 btnBack.clicked += OnBackButtonClicked;
             }
+        }
+
+        private void OnHeaderDateClicked(ClickEvent evt)
+        {
+            if (btnHeaderDate == null)
+            {
+                OnCalendarRequested?.Invoke();
+            }
+        }
+
+        private void OnHeaderDateButtonClicked()
+        {
+            OnCalendarRequested?.Invoke();
         }
 
         private void OnBackButtonClicked()

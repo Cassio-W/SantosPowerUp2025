@@ -506,6 +506,8 @@ namespace Mandato.Presentation
             if (ancestor.ClassListContains("giant-card") ||
                 ancestor.ClassListContains("giant-corruption-pillar") ||
                 ancestor.ClassListContains("app-tile") ||
+                ancestor.ClassListContains("day-cell") ||
+                ancestor.ClassListContains("month-nav-btn") ||
                 ancestor is Button)
             {
                 if (isHovered)

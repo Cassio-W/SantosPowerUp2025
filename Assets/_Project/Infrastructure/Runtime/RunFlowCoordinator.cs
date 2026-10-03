@@ -143,6 +143,7 @@ namespace Mandato.Infrastructure
                 bindings.DecisionOverlayPresenter.OnChoiceHovered += HandlePlayerChoiceHovered;
                 bindings.DecisionOverlayPresenter.OnChoiceUnhovered += HandlePlayerChoiceUnhovered;
                 bindings.DecisionOverlayPresenter.OnBackRequested += HandleDecisionBackRequested;
+                bindings.DecisionOverlayPresenter.OnCalendarRequested += HandleCalendarRequested;
             }
 
             if (bindings.StampTool != null)
@@ -196,7 +197,10 @@ namespace Mandato.Infrastructure
                 modalCoordinator.OnContextChanged -= HandleContextChanged;
 
             if (bindings?.DecisionOverlayPresenter != null)
+            {
                 bindings.DecisionOverlayPresenter.OnBackRequested -= HandleDecisionBackRequested;
+                bindings.DecisionOverlayPresenter.OnCalendarRequested -= HandleCalendarRequested;
+            }
 
             if (bindings?.StampTool != null)
             {
@@ -295,6 +299,18 @@ namespace Mandato.Infrastructure
                     }
                     break;
 
+                case InteractionContext.CalendarInspect:
+                    bindings?.StampTool?.SetInspectActive(false);
+                    flipPhoneCoordinator?.ClosePhone();
+                    if (bindings != null)
+                    {
+                        bindings.FlipPhonePresenter?.SetInteractable(false);
+                        bindings.DeskCallButton?.SetInteractable(false);
+                        bindings.DecisionOverlayPresenter?.SetVisible(true);
+                        bindings.DecisionOverlayPresenter?.SetBackVisible(true);
+                    }
+                    break;
+
                 case InteractionContext.TutorialStep:
                     bindings?.StampTool?.SetInspectActive(false);
                     if (bindings != null)
@@ -333,7 +349,9 @@ namespace Mandato.Infrastructure
         {
             if (focusedObject == null)
             {
-                if (modalCoordinator != null && (modalCoordinator.CurrentContext == InteractionContext.PcTerminal || modalCoordinator.CurrentContext == InteractionContext.PaperInspect))
+                if (modalCoordinator != null && (modalCoordinator.CurrentContext == InteractionContext.PcTerminal ||
+                                                 modalCoordinator.CurrentContext == InteractionContext.PaperInspect ||
+                                                 modalCoordinator.CurrentContext == InteractionContext.CalendarInspect))
                 {
                     modalCoordinator.SetContext(InteractionContext.DeskOverview);
                 }
@@ -345,6 +363,10 @@ namespace Mandato.Infrastructure
             else if (focusedObject is PaperFocusableObject)
             {
                 modalCoordinator?.SetContext(InteractionContext.PaperInspect);
+            }
+            else if (IsCalendarFocusable(focusedObject))
+            {
+                modalCoordinator?.SetContext(InteractionContext.CalendarInspect);
             }
         }
 
@@ -376,6 +398,73 @@ namespace Mandato.Infrastructure
 
             string name = obj.name.ToLowerInvariant();
             return name.Contains("pc") || name.Contains("monitor") || name.Contains("computador") || name.Contains("computer") || name.Contains("tela");
+        }
+
+        public bool IsCalendarFocusable(FocusableObject obj)
+        {
+            if (obj == null) return false;
+
+            if (bindings?.CalendarFocusable != null && obj == bindings.CalendarFocusable)
+            {
+                return true;
+            }
+
+            if (bindings?.CalendarPresenter != null)
+            {
+                if (obj.gameObject == bindings.CalendarPresenter.gameObject ||
+                    obj.transform.IsChildOf(bindings.CalendarPresenter.transform) ||
+                    bindings.CalendarPresenter.transform.IsChildOf(obj.transform))
+                {
+                    return true;
+                }
+            }
+
+            string name = obj.name.ToLowerInvariant();
+            return name.Contains("calendar") || name.Contains("calendario");
+        }
+
+        private void HandleCalendarRequested()
+        {
+            if (modalCoordinator != null && modalCoordinator.CurrentContext == InteractionContext.CalendarInspect)
+            {
+                HandleDecisionBackRequested();
+                return;
+            }
+
+            var cam = CameraFocusManager.Instance ?? bindings?.CameraFocus;
+            FocusableObject targetFocusable = bindings?.CalendarFocusable;
+
+            if (targetFocusable == null && bindings?.CalendarPresenter != null)
+            {
+                targetFocusable = bindings.CalendarPresenter.GetComponent<FocusableObject>() ??
+                                  bindings.CalendarPresenter.GetComponentInChildren<FocusableObject>();
+            }
+
+            if (targetFocusable == null && CalendarWallPresenter.Instance != null)
+            {
+                targetFocusable = CalendarWallPresenter.Instance.GetComponent<FocusableObject>() ??
+                                  CalendarWallPresenter.Instance.GetComponentInChildren<FocusableObject>();
+            }
+
+            if (targetFocusable != null)
+            {
+                if (cam != null)
+                {
+                    cam.Focus(targetFocusable);
+                }
+                modalCoordinator?.SetContext(InteractionContext.CalendarInspect);
+            }
+            else
+            {
+                Transform calendarTransform = bindings?.CalendarPresenter != null ? bindings.CalendarPresenter.transform :
+                                             (CalendarWallPresenter.Instance != null ? CalendarWallPresenter.Instance.transform : null);
+
+                if (calendarTransform != null && cam != null)
+                {
+                    cam.FocusPoint(calendarTransform, 50f, 0.45f);
+                    modalCoordinator?.SetContext(InteractionContext.CalendarInspect);
+                }
+            }
         }
 
         public void SetPcFocusState(bool isFocused)
