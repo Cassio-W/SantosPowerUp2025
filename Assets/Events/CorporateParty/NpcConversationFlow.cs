@@ -98,7 +98,31 @@ public class NpcConversationFlow : MonoBehaviour
         hud.OnApproachSelected += activeApproachListener;
 
         while (chosenApproach == null)
+        {
+            // Atalhos de teclado para agilidade e acessibilidade
+            if ((Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1) || Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W)) && !used[0])
+            {
+                hud.HideWheel();
+                chosenApproach = ApproachStyle.Arrogante;
+            }
+            else if ((Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2) || Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D)) && !used[1])
+            {
+                hud.HideWheel();
+                chosenApproach = ApproachStyle.Brincalhao;
+            }
+            else if ((Input.GetKeyDown(KeyCode.Alpha3) || Input.GetKeyDown(KeyCode.Keypad3) || Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S)) && !used[2])
+            {
+                hud.HideWheel();
+                chosenApproach = ApproachStyle.Persuasivo;
+            }
+            else if ((Input.GetKeyDown(KeyCode.Alpha4) || Input.GetKeyDown(KeyCode.Keypad4) || Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A)) && !used[3])
+            {
+                hud.HideWheel();
+                chosenApproach = ApproachStyle.Romantico;
+            }
+
             yield return null;
+        }
 
         hud.OnApproachSelected -= activeApproachListener;
         activeApproachListener = null;

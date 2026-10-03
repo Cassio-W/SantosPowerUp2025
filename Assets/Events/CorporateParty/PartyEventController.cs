@@ -46,13 +46,36 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
 
     private void Start()
     {
-        // Se a cena foi iniciada diretamente no Editor sem passar pelo CorporatePartyLauncher
-        if (runState == null && autoInitializeInEditor && Application.isEditor)
+        // Se a cena foi iniciada diretamente no Editor sem passar pelo CorporatePartyLauncher (modo Standalone)
+        bool isStandalonePlay = UnityEngine.SceneManagement.SceneManager.sceneCount == 1
+            || UnityEngine.SceneManagement.SceneManager.GetActiveScene() == gameObject.scene;
+
+        if (runState == null && autoInitializeInEditor && Application.isEditor && isStandalonePlay)
         {
             if (debugEventDefinition != null)
             {
                 Debug.Log("[PartyEventController] Modo Standalone ativado: Inicializando festa para teste isolado.");
                 var mockState = new RunState();
+                mockState.stats.economy = 55;
+                mockState.stats.climaticChanges = 48;
+                mockState.stats.internationalRelations = 62;
+                mockState.stats.popularApproval = 50;
+                mockState.stats.corruption = 20;
+                mockState.politicalAxis.x = 1;
+                mockState.politicalAxis.y = -2;
+
+                if (debugEventDefinition.guestPool != null)
+                {
+                    foreach (var npc in debugEventDefinition.guestPool)
+                    {
+                        if (npc != null)
+                        {
+                            string id = !string.IsNullOrEmpty(npc.id) ? npc.id : npc.name;
+                            mockState.GetOrCreateNpcState(id);
+                        }
+                    }
+                }
+
                 Initialize(mockState, debugEventDefinition, result =>
                 {
                     Debug.Log($"[PartyEventController] [TESTE STANDALONE FINALIZADO] Evento concluído: {result.wasCompleted}");
@@ -102,6 +125,7 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
 
         SpawnGuests();
         BindFlipPhone();
+        ConnectDebugOverlay();
 
         if (hudPresenter != null)
         {
@@ -117,6 +141,13 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
     private void SpawnGuests()
     {
         if (definition == null || definition.guestPool == null || guestSlots == null) return;
+
+        // Limpa slots anteriores para evitar duplicatas em reinicializações
+        foreach (var s in guestSlots)
+        {
+            if (s != null)
+                s.Clear();
+        }
 
         var pool = new List<NpcDefinition>(definition.guestPool);
 
@@ -324,6 +355,13 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
             accumulatedRelationDeltas[npcId] = 0;
         accumulatedRelationDeltas[npcId] += delta;
 
+        // Em modo de teste isolado (sem RunFlowCoordinator gerenciando o retorno),
+        // aplica a relação diretamente no mockState
+        if (runState != null && MandatoBootstrap.Instance == null)
+        {
+            runState.ModifyNpcRelation(npcId, delta);
+        }
+
         remainingInteractions--;
         hudPresenter?.ConsumeInteraction();
 
@@ -349,20 +387,120 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
         };
     }
 
+    [Header("Ações do Celular")]
+    [SerializeField] private List<FlipPhoneActionDefinition> phoneActions = new List<FlipPhoneActionDefinition>();
+
+    private void EnsurePhoneActionsLoaded()
+    {
+        if (phoneActions != null && phoneActions.Count > 0) return;
+
+        phoneActions = new List<FlipPhoneActionDefinition>();
+
+        if (MandatoBootstrap.Instance?.ActionCatalog != null)
+        {
+            phoneActions.AddRange(MandatoBootstrap.Instance.ActionCatalog.Values);
+            return;
+        }
+
+        var loaded = Resources.LoadAll<FlipPhoneActionDefinition>("");
+        if (loaded != null && loaded.Length > 0)
+        {
+            phoneActions.AddRange(loaded);
+        }
+
+#if UNITY_EDITOR
+        if (phoneActions.Count == 0)
+        {
+            string[] guids = UnityEditor.AssetDatabase.FindAssets("t:FlipPhoneActionDefinition");
+            foreach (var g in guids)
+            {
+                string path = UnityEditor.AssetDatabase.GUIDToAssetPath(g);
+                var act = UnityEditor.AssetDatabase.LoadAssetAtPath<FlipPhoneActionDefinition>(path);
+                if (act != null && !phoneActions.Contains(act))
+                {
+                    phoneActions.Add(act);
+                }
+            }
+        }
+#endif
+    }
+
     private void RefreshFlipPhoneForNpc(NpcDefinition npc)
     {
         if (flipPhonePresenter == null) return;
+        EnsurePhoneActionsLoaded();
 
-        // Constrói lista de ações do celular filtradas ao NPC em conversa.
-        // Expansível: buscar FlipPhoneActionDefinitions do catálogo filtradas por linkedNpcId.
         var viewModels = new List<FlipPhoneActionViewModel>();
+        string targetNpcId = npc != null ? (!string.IsNullOrEmpty(npc.id) ? npc.id : npc.name) : string.Empty;
+
+        foreach (var action in phoneActions)
+        {
+            if (action == null) continue;
+
+            string linkedNpc = action.GetLinkedNpcId();
+            bool isNpcAvailable = string.IsNullOrEmpty(linkedNpc) || (runState != null && runState.IsNpcAvailable(linkedNpc));
+            bool isConsumed = action.cooldownType == FlipPhoneCooldownType.SingleUse && (runState != null && runState.IsActionConsumed(action.id));
+            bool onCooldown = runState != null && runState.IsActionOnCooldown(action.id);
+            int cooldownTurns = runState != null ? runState.GetActionCooldown(action.id) : 0;
+            bool conditionsMet = runState != null && action.AreConditionsMet(
+                runState.stats,
+                runState.calendar != null ? runState.calendar.currentMonthIndex : 1,
+                runState.activePerkIds,
+                runState.decisionHistory,
+                targetNpcId,
+                runState.GetNpcRelation
+            );
+            bool isUnlocked = runState != null && (runState.IsActionUnlocked(action.id) || action.unlockByDefault);
+
+            string statusText = string.Empty;
+            if (!isNpcAvailable) statusText = "INDISPONÍVEL";
+            else if (isConsumed) statusText = "USADO";
+            else if (onCooldown) statusText = $"{cooldownTurns}T RECARGA";
+            else if (!conditionsMet || !isUnlocked) statusText = "BLOQUEADO";
+
+            var vm = new FlipPhoneActionViewModel
+            {
+                id = action.id,
+                displayName = action.displayName,
+                description = action.description,
+                categoryTag = action.categoryTag,
+                icon = action.icon,
+                linkedNpcId = linkedNpc,
+                isAvailable = isUnlocked && !isConsumed && !onCooldown && conditionsMet && isNpcAvailable,
+                isOnCooldown = onCooldown,
+                cooldownTurnsRemaining = cooldownTurns,
+                isConsumed = isConsumed,
+                statusText = statusText
+            };
+            viewModels.Add(vm);
+        }
+
         flipPhonePresenter.Refresh(viewModels);
     }
 
     private void OnPhoneActionRequested(string actionId)
     {
-        Debug.Log($"[PartyEventController] Ação do celular solicitada: '{actionId}' (NPC: {npcInPhoneFocus?.displayName ?? "nenhum"})");
-        // Efeitos concretos (prisão, etc.) são registrados no resultado e aplicados pelo RunFlowCoordinator.
+        Debug.Log($"[PartyEventController] Ação do celular solicitada: '{actionId}' (NPC em foco: {npcInPhoneFocus?.displayName ?? "nenhum"})");
+
+        EnsurePhoneActionsLoaded();
+        var actionDef = phoneActions.Find(a => string.Equals(a.id, actionId, StringComparison.OrdinalIgnoreCase));
+        if (actionDef == null || runState == null) return;
+
+        var report = FlipPhoneResolver.ResolveUse(
+            runState,
+            deckState: null,
+            actionDef,
+            catalog: null,
+            currentCard: null,
+            perkCatalog: null,
+            npcCatalog: MandatoBootstrap.Instance?.NpcCatalog
+        );
+
+        if (report != null && report.success)
+        {
+            Debug.Log($"[PartyEventController] Ação '{actionId}' executada com sucesso!");
+            RefreshFlipPhoneForNpc(npcInPhoneFocus);
+        }
     }
 
     // ─── Encerramento da festa ────────────────────────────────────────────────
@@ -387,6 +525,67 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
         onCompleted?.Invoke(result);
     }
 
+    // ─── Telemetria e Debug Overlay ──────────────────────────────────────────
+
+    private void ConnectDebugOverlay()
+    {
+        var overlay = RuntimeDebugOverlay.EnsureExists();
+        overlay.SetDirectRunState(runState);
+        if (definition != null && definition.guestPool != null)
+        {
+            overlay.RegisterNpcs(definition.guestPool);
+        }
+        overlay.RegisterCustomSection(DrawPartyDebugSection);
+    }
+
+    private void DrawPartyDebugSection()
+    {
+        GUILayout.BeginVertical(GUI.skin.box);
+        var headerStyle = new GUIStyle(GUI.skin.label)
+        {
+            fontStyle = FontStyle.Bold,
+            fontSize = 12,
+            normal = { textColor = new Color(1f, 0.75f, 0.2f) }
+        };
+        GUILayout.Label("🍸 EVENTO: JANTAR / FESTA CORPORATIVA", headerStyle);
+
+        string focusName = npcInPhoneFocus != null ? npcInPhoneFocus.displayName : "Nenhum";
+        GUILayout.Label($"<b>Estado:</b> <color=#ffd166>{currentState}</color>  |  <b>Interações Restantes:</b> <color=#55ff55><b>{remainingInteractions}</b></color>");
+        GUILayout.Label($"<b>Foco Atual:</b> {focusName}");
+
+        if (accumulatedRelationDeltas != null && accumulatedRelationDeltas.Count > 0)
+        {
+            GUILayout.Label("<b>Deltas Acumulados Nesta Festa:</b>");
+            foreach (var kvp in accumulatedRelationDeltas)
+            {
+                string deltaColor = kvp.Value > 0 ? "#55ff55" : (kvp.Value < 0 ? "#ff5555" : "#cccccc");
+                GUILayout.Label($"  • <b>{kvp.Key}</b>: <color={deltaColor}><b>{kvp.Value:+0;-0;0}</b></color>");
+            }
+        }
+        else
+        {
+            GUILayout.Label("<i>Nenhum delta acumulado ainda nesta festa.</i>");
+        }
+
+        // Ações de teste rápido no Editor
+        if (Application.isEditor)
+        {
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("+1 Interação"))
+            {
+                remainingInteractions++;
+                hudPresenter?.SetupEnergyBar(remainingInteractions);
+            }
+            if (GUILayout.Button("Encerrar Festa"))
+            {
+                EndParty();
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        GUILayout.EndVertical();
+    }
+
     // ─── Utilitários ──────────────────────────────────────────────────────────
 
     private static void Shuffle<T>(List<T> list)
@@ -400,6 +599,11 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
 
     private void OnDestroy()
     {
+        if (RuntimeDebugOverlay.Instance != null)
+        {
+            RuntimeDebugOverlay.Instance.UnregisterCustomSection(DrawPartyDebugSection);
+        }
+
         if (hudPresenter != null)
         {
             hudPresenter.OnPartyEndRequested -= EndParty;

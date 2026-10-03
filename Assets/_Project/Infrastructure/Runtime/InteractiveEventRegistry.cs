@@ -34,9 +34,14 @@ namespace Mandato.Infrastructure
         public void Register(IInteractiveEvent ev)
         {
             if (ev == null || string.IsNullOrEmpty(ev.EventId)) return;
-            if (registry.ContainsKey(ev.EventId))
-                Debug.LogWarning($"[InteractiveEventRegistry] Evento '{ev.EventId}' registrado mais de uma vez. Sobrescrevendo.");
             registry[ev.EventId] = ev;
+        }
+
+        /// <summary>Registra um alias alternativo para o evento.</summary>
+        public void RegisterAlias(string alias, IInteractiveEvent ev)
+        {
+            if (string.IsNullOrEmpty(alias) || ev == null) return;
+            registry[alias] = ev;
         }
 
         public void Unregister(string eventId)
@@ -48,10 +53,23 @@ namespace Mandato.Infrastructure
         public bool TryGet(string eventId, out IInteractiveEvent ev)
         {
             ev = null;
-            return !string.IsNullOrEmpty(eventId) && registry.TryGetValue(eventId, out ev);
+            if (string.IsNullOrEmpty(eventId)) return false;
+
+            if (registry.TryGetValue(eventId, out ev)) return true;
+
+            // Busca tolerante a variações comuns (ex: FestaEvent, FestaCorporativa, JantarEvento)
+            foreach (var kvp in registry)
+            {
+                if (string.Equals(kvp.Key, eventId, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    ev = kvp.Value;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
-        public bool IsRegistered(string eventId) =>
-            !string.IsNullOrEmpty(eventId) && registry.ContainsKey(eventId);
+        public bool IsRegistered(string eventId) => TryGet(eventId, out _);
     }
 }

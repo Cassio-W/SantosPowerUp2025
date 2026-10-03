@@ -102,7 +102,8 @@ namespace Mandato.Run
         public ResolutionReport SubmitChoice(
             int choiceIndex,
             IReadOnlyDictionary<string, QuestDefinition> questCatalog = null,
-            IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null)
+            IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null,
+            IReadOnlyDictionary<string, NpcDefinition> npcCatalog = null)
         {
             if (CurrentPhase != RunPhase.AwaitingChoice || CurrentCard == null)
                 return null;
@@ -115,7 +116,7 @@ namespace Mandato.Run
 
             SetPhase(RunPhase.ResolvingChoice);
 
-            LastResolutionReport = DecisionResolver.Resolve(RunState, DeckState, CurrentCard, choiceIndex, questCatalog, perkCatalog);
+            LastResolutionReport = DecisionResolver.Resolve(RunState, DeckState, CurrentCard, choiceIndex, questCatalog, perkCatalog, npcCatalog);
             if (LastResolutionReport == null)
             {
                 SetPhase(RunPhase.AwaitingChoice);

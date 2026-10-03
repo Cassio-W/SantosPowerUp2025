@@ -22071,6 +22071,9 @@ MonoBehaviour:
   delayBetweenProposals: 1.5
   requireSpaceToCallNextNpc: 1
   callNextNpcKey: 32
+  enableDebugOverlay: 1
+  toggleDebugOverlayKey: 282
+  startDebugOverlayOpen: 0
   presentationBindings:
     presentationCoordinator: {fileID: 1189659389}
     paperPresenter: {fileID: 474556747}

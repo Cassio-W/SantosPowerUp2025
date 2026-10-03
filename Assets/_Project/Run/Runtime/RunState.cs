@@ -33,6 +33,12 @@ namespace Mandato.Run
         /// </summary>
         public string scheduledEventId = string.Empty;
 
+        /// <summary>
+        /// Eventos agendados por mês específico do calendário (1..totalMonths).
+        /// Mapeia: monthIndex → eventId.
+        /// </summary>
+        public Dictionary<int, string> scheduledEventsByMonth = new Dictionary<int, string>();
+
         public RunState(int seed = 0)
         {
             this.seed = seed;
@@ -58,6 +64,7 @@ namespace Mandato.Run
             preventStatLossThisMonth = false;
             isPreviewAttributesActive = false;
             scheduledEventId = string.Empty;
+            scheduledEventsByMonth.Clear();
         }
 
         public NpcRunState GetOrCreateNpcState(string npcId)
@@ -143,11 +150,50 @@ namespace Mandato.Run
         }
 
         /// <summary>
-        /// Consome e retorna o ID do evento agendado, limpando o campo.
+        /// Agenda um evento interativo para um mês específico do calendário (1..totalMonths).
+        /// </summary>
+        public void ScheduleEventForMonth(string eventId, int targetMonthIndex)
+        {
+            if (!string.IsNullOrEmpty(eventId) && targetMonthIndex >= 1)
+            {
+                scheduledEventsByMonth[targetMonthIndex] = eventId;
+            }
+        }
+
+        /// <summary>
+        /// Agenda um evento interativo para daqui a N meses a partir do mês atual.
+        /// </summary>
+        public void ScheduleEventInMonths(string eventId, int monthsAhead)
+        {
+            int currentMonth = calendar != null ? calendar.currentMonthIndex : 1;
+            ScheduleEventForMonth(eventId, currentMonth + Math.Max(1, monthsAhead));
+        }
+
+        /// <summary>
+        /// Verifica se há algum evento agendado para um determinado mês do calendário.
+        /// </summary>
+        public bool IsEventScheduledOnMonth(int monthIndex, out string eventId)
+        {
+            eventId = string.Empty;
+            return scheduledEventsByMonth != null && scheduledEventsByMonth.TryGetValue(monthIndex, out eventId);
+        }
+
+        /// <summary>
+        /// Consome e retorna o ID do evento agendado (por mês do calendário ou próximo turno), limpando o campo.
         /// Chamado pelo sistema de fluxo antes de sortear a próxima proposta.
         /// </summary>
         public string ConsumeScheduledEvent()
         {
+            // 1. Prioridade: evento agendado especificamente para o mês atual do calendário
+            int currentMonth = calendar != null ? calendar.currentMonthIndex : -1;
+            if (scheduledEventsByMonth != null && scheduledEventsByMonth.TryGetValue(currentMonth, out var monthEventId) && !string.IsNullOrEmpty(monthEventId))
+            {
+                scheduledEventsByMonth.Remove(currentMonth);
+                scheduledEventId = string.Empty;
+                return monthEventId;
+            }
+
+            // 2. Evento agendado diretamente para o próximo turno
             var id = scheduledEventId;
             scheduledEventId = string.Empty;
             return id;
@@ -285,6 +331,41 @@ namespace Mandato.Run
             if (!termination.IsOngoing) return;
 
             politicalAxis.ApplyDelta(deltaX, deltaY);
+        }
+
+        public (int deltaX, int deltaY) MovePoliticalAxisTowards(int targetX, int targetY, int step)
+        {
+            if (!termination.IsOngoing) return (0, 0);
+
+            return politicalAxis.MoveTowards(targetX, targetY, step);
+        }
+
+        public (int deltaX, int deltaY) MovePoliticalAxisTowardsNpc(NpcDefinition npc, int step)
+        {
+            if (npc == null || !termination.IsOngoing) return (0, 0);
+
+            return politicalAxis.MoveTowards(npc.politicalBiasX, npc.politicalBiasY, step);
+        }
+
+        public (int deltaX, int deltaY) ModifyNpcRelation(
+            string npcId,
+            int delta,
+            IReadOnlyDictionary<string, NpcDefinition> npcCatalog = null,
+            bool applyPoliticalMovement = true,
+            int politicalStep = PoliticalAxis.DefaultRelationStep)
+        {
+            if (string.IsNullOrEmpty(npcId)) return (0, 0);
+
+            var npcState = GetOrCreateNpcState(npcId);
+            npcState?.ModifyRelation(delta);
+
+            if (applyPoliticalMovement && delta > 0 && npcCatalog != null &&
+                npcCatalog.TryGetValue(npcId, out var npcDef) && npcDef != null)
+            {
+                return MovePoliticalAxisTowards(npcDef.politicalBiasX, npcDef.politicalBiasY, politicalStep);
+            }
+
+            return (0, 0);
         }
 
         public void LockPoliticalAxis() => politicalAxis.Lock();

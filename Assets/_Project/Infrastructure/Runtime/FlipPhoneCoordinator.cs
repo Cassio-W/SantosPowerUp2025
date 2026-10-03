@@ -177,7 +177,8 @@ namespace Mandato.Infrastructure
                 actionDef,
                 catalog.Cards,
                 stateMachine.CurrentCard,
-                catalog.Perks
+                catalog.Perks,
+                catalog.Npcs
             );
 
             if (report.success)

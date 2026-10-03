@@ -58,9 +58,16 @@ namespace Mandato.UI
         private int totalInteractions;
         private int remainingInteractions;
 
+        private bool isSelectingApproach = false;
+
         private void Awake()
         {
             var doc = GetComponent<UIDocument>();
+            if (doc != null)
+            {
+                doc.sortingOrder = 500;
+            }
+
             if (doc == null || doc.rootVisualElement == null) return;
 
             var uiRoot = doc.rootVisualElement;
@@ -128,6 +135,7 @@ namespace Mandato.UI
         /// </summary>
         public void ShowWheel(bool[] usedApproaches)
         {
+            isSelectingApproach = false;
             // usedApproaches[i] → (int)ApproachStyle: 0=Arrogante,1=Brincalhao,2=Persuasivo,3=Romantico
             SetButtonAvailable(btnUp,    !usedApproaches[0]); // Arrogante
             SetButtonAvailable(btnRight, !usedApproaches[1]); // Brincalhão
@@ -174,10 +182,34 @@ namespace Mandato.UI
 
         private void WireWheelButtons()
         {
-            if (btnUp    != null) btnUp.clicked    += () => { HideWheel(); OnApproachSelected?.Invoke(ApproachStyle.Arrogante); };
-            if (btnRight != null) btnRight.clicked += () => { HideWheel(); OnApproachSelected?.Invoke(ApproachStyle.Brincalhao); };
-            if (btnDown  != null) btnDown.clicked  += () => { HideWheel(); OnApproachSelected?.Invoke(ApproachStyle.Persuasivo); };
-            if (btnLeft  != null) btnLeft.clicked  += () => { HideWheel(); OnApproachSelected?.Invoke(ApproachStyle.Romantico); };
+            if (btnUp != null)
+            {
+                btnUp.clicked += () => SelectApproach(ApproachStyle.Arrogante);
+                btnUp.RegisterCallback<ClickEvent>(evt => { SelectApproach(ApproachStyle.Arrogante); evt.StopPropagation(); });
+            }
+            if (btnRight != null)
+            {
+                btnRight.clicked += () => SelectApproach(ApproachStyle.Brincalhao);
+                btnRight.RegisterCallback<ClickEvent>(evt => { SelectApproach(ApproachStyle.Brincalhao); evt.StopPropagation(); });
+            }
+            if (btnDown != null)
+            {
+                btnDown.clicked += () => SelectApproach(ApproachStyle.Persuasivo);
+                btnDown.RegisterCallback<ClickEvent>(evt => { SelectApproach(ApproachStyle.Persuasivo); evt.StopPropagation(); });
+            }
+            if (btnLeft != null)
+            {
+                btnLeft.clicked += () => SelectApproach(ApproachStyle.Romantico);
+                btnLeft.RegisterCallback<ClickEvent>(evt => { SelectApproach(ApproachStyle.Romantico); evt.StopPropagation(); });
+            }
+        }
+
+        private void SelectApproach(ApproachStyle style)
+        {
+            if (isSelectingApproach) return;
+            isSelectingApproach = true;
+            HideWheel();
+            OnApproachSelected?.Invoke(style);
         }
 
         private void SetButtonAvailable(Button btn, bool available)

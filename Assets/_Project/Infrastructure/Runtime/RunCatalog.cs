@@ -162,7 +162,9 @@ namespace Mandato.Infrastructure
             {
                 foreach (var npc in npcsList)
                 {
-                    if (npc != null && !string.IsNullOrEmpty(npc.id)) npcs[npc.id] = npc;
+                    if (npc == null) continue;
+                    if (!string.IsNullOrEmpty(npc.id)) npcs[npc.id] = npc;
+                    if (!string.IsNullOrEmpty(npc.name) && !npcs.ContainsKey(npc.name)) npcs[npc.name] = npc;
                 }
             }
         }
@@ -194,8 +196,9 @@ namespace Mandato.Infrastructure
         /// </summary>
         public void RegisterNpc(NpcDefinition npc)
         {
-            if (npc == null || string.IsNullOrEmpty(npc.id)) return;
-            npcs[npc.id] = npc;
+            if (npc == null) return;
+            if (!string.IsNullOrEmpty(npc.id)) npcs[npc.id] = npc;
+            if (!string.IsNullOrEmpty(npc.name) && !npcs.ContainsKey(npc.name)) npcs[npc.name] = npc;
         }
     }
 }

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49754ce4bb3718445be784c6e98a7242, type: 3}
   m_Name: FestaEvent
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CorporatePartyEventDefinition
-  eventId: 
+  eventId: FestaCorporativa
   guestPool:
   - {fileID: 11400000, guid: c1a000128471ade47bf5fc0f3da00012, type: 2}
   - {fileID: 11400000, guid: c1a000118471ade47bf5fc0f3da00011, type: 2}
@@ -31,4 +31,4 @@ MonoBehaviour:
   baseInteractionLimit: 4
   bonusInteractionPerkId: 
   bonusInteractionAmount: 1
-  sceneName: Event_CorporateParty
+  sceneName: JantarEvento

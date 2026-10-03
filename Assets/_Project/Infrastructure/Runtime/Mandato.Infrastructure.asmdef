@@ -6,7 +6,8 @@
         "Mandato.Content",
         "Mandato.Run",
         "Mandato.Presentation",
-        "Mandato.UI"
+        "Mandato.UI",
+        "Unity.RenderPipelines.Core.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -376,5 +376,149 @@ namespace Mandato.Run.Tests
             Assert.AreEqual(0, rep.npcRelationBefore);
             Assert.AreEqual(0, rep.npcRelationAfter);
         }
+
+        [Test]
+        public void Resolve_AcceptProposal_MovesPoliticalAxisTowardsNpcBiasByFixedProposalStep()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+
+            var npc = NpcDefinition.CreateRuntimeInstance("min_agro", "Ministro Agro", biasX: 6, biasY: 2);
+            var cardWithNpc = CardDefinition.CreateRuntimeInstance(
+                id: "card_agro",
+                title: "Subsídio ao Agro",
+                description: "Proposta do agro",
+                left: new ChoiceDefinition("Aprovar"),
+                right: new ChoiceDefinition("Rejeitar")
+            );
+            cardWithNpc.npc = npc;
+
+            // Run começa em (0, 0)
+            Assert.AreEqual(0, run.politicalAxis.x);
+            Assert.AreEqual(0, run.politicalAxis.y);
+
+            // Aceita proposta (choiceIndex = 0)
+            var rep = DecisionResolver.Resolve(run, deck, cardWithNpc, choiceIndex: 0);
+
+            Assert.IsNotNull(rep);
+            Assert.AreEqual(2, rep.npcPoliticalDeltaX);
+            Assert.AreEqual(2, rep.npcPoliticalDeltaY);
+            Assert.AreEqual(2, rep.deltaPoliticalX);
+            Assert.AreEqual(2, rep.deltaPoliticalY);
+            Assert.AreEqual(2, run.politicalAxis.x);
+            Assert.AreEqual(2, run.politicalAxis.y);
+        }
+
+        [Test]
+        public void Resolve_RejectProposal_DoesNotMovePoliticalAxisTowardsNpcBias()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+
+            var npc = NpcDefinition.CreateRuntimeInstance("min_agro", "Ministro Agro", biasX: 6, biasY: 2);
+            var cardWithNpc = CardDefinition.CreateRuntimeInstance(
+                id: "card_agro",
+                title: "Subsídio ao Agro",
+                description: "Proposta do agro",
+                left: new ChoiceDefinition("Aprovar"),
+                right: new ChoiceDefinition("Rejeitar")
+            );
+            cardWithNpc.npc = npc;
+
+            // Recusa proposta (choiceIndex = 1)
+            var rep = DecisionResolver.Resolve(run, deck, cardWithNpc, choiceIndex: 1);
+
+            Assert.IsNotNull(rep);
+            Assert.AreEqual(0, rep.npcPoliticalDeltaX);
+            Assert.AreEqual(0, rep.npcPoliticalDeltaY);
+            Assert.AreEqual(0, run.politicalAxis.x);
+            Assert.AreEqual(0, run.politicalAxis.y);
+            Assert.AreEqual(-5, rep.npcRelationDelta); // Relação cai por padrão
+        }
+
+        [Test]
+        public void Resolve_AcceptProposal_ResolvesNpcViaCatalog_WhenCardNpcFieldIsNull()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+
+            var npc = NpcDefinition.CreateRuntimeInstance("min_educacao", "Ministra da Educação", biasX: -6, biasY: -4);
+            var npcCatalog = new Dictionary<string, NpcDefinition> { { npc.id, npc } };
+
+            var card = CardDefinition.CreateRuntimeInstance(
+                id: "card_escolas",
+                title: "Construção de Escolas",
+                description: "Verba educacional",
+                left: new ChoiceDefinition("Aceitar"),
+                right: new ChoiceDefinition("Recusar"),
+                npcId: "min_educacao"
+            );
+
+            var rep = DecisionResolver.Resolve(run, deck, card, choiceIndex: 0, npcCatalog: npcCatalog);
+
+            Assert.IsNotNull(rep);
+            Assert.AreEqual(-2, rep.npcPoliticalDeltaX);
+            Assert.AreEqual(-2, rep.npcPoliticalDeltaY);
+            Assert.AreEqual(-2, run.politicalAxis.x);
+            Assert.AreEqual(-2, run.politicalAxis.y);
+        }
+
+        [Test]
+        public void RunState_ModifyNpcRelation_PositiveDelta_MovesPoliticalAxisTowardsNpcByFixedRelationStep()
+        {
+            var run = new RunState();
+            var npc = NpcDefinition.CreateRuntimeInstance("min_fazenda", "Ministro da Fazenda", biasX: 5, biasY: -3);
+            var npcCatalog = new Dictionary<string, NpcDefinition> { { npc.id, npc } };
+
+            // Aumento de relação (+10) deve deslocar 1 ponto em direção a (5, -3)
+            var (dx, dy) = run.ModifyNpcRelation("min_fazenda", delta: 10, npcCatalog);
+
+            Assert.AreEqual(1, dx);
+            Assert.AreEqual(-1, dy);
+            Assert.AreEqual(1, run.politicalAxis.x);
+            Assert.AreEqual(-1, run.politicalAxis.y);
+            Assert.AreEqual(10, run.GetNpcRelation("min_fazenda"));
+        }
+
+        [Test]
+        public void RunState_ModifyNpcRelation_NegativeDelta_DoesNotMovePoliticalAxis()
+        {
+            var run = new RunState();
+            var npc = NpcDefinition.CreateRuntimeInstance("min_fazenda", "Ministro da Fazenda", biasX: 5, biasY: -3);
+            var npcCatalog = new Dictionary<string, NpcDefinition> { { npc.id, npc } };
+
+            var (dx, dy) = run.ModifyNpcRelation("min_fazenda", delta: -10, npcCatalog);
+
+            Assert.AreEqual(0, dx);
+            Assert.AreEqual(0, dy);
+            Assert.AreEqual(0, run.politicalAxis.x);
+            Assert.AreEqual(0, run.politicalAxis.y);
+            Assert.AreEqual(-10, run.GetNpcRelation("min_fazenda"));
+        }
+
+        [Test]
+        public void Resolve_AcceptProposal_WhenAxisLocked_DoesNotMovePoliticalAxis()
+        {
+            var run = new RunState();
+            var deck = new DeckState();
+            run.LockPoliticalAxis();
+
+            var npc = NpcDefinition.CreateRuntimeInstance("min_agro", "Ministro Agro", biasX: 6, biasY: 2);
+            var cardWithNpc = CardDefinition.CreateRuntimeInstance(
+                id: "card_agro",
+                title: "Subsídio ao Agro",
+                description: "Proposta",
+                left: new ChoiceDefinition("Aprovar"),
+                right: new ChoiceDefinition("Rejeitar")
+            );
+            cardWithNpc.npc = npc;
+
+            var rep = DecisionResolver.Resolve(run, deck, cardWithNpc, choiceIndex: 0);
+
+            Assert.AreEqual(0, rep.npcPoliticalDeltaX);
+            Assert.AreEqual(0, rep.npcPoliticalDeltaY);
+            Assert.AreEqual(0, run.politicalAxis.x);
+            Assert.AreEqual(0, run.politicalAxis.y);
+        }
     }
 }

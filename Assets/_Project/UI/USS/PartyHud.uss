@@ -176,9 +176,9 @@
 
 .btn-approach {
     position: absolute;
-    width: 95px;
+    width: 105px;
     height: 38px;
-    font-size: 12px;
+    font-size: 11px;
     -unity-font-style: bold;
     color: #ffffff;
     border-radius: 8px;

@@ -41,7 +41,8 @@ namespace Mandato.Run
             FlipPhoneActionDefinition action,
             IReadOnlyDictionary<string, CardDefinition> catalog = null,
             CardDefinition currentCard = null,
-            IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null)
+            IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null,
+            IReadOnlyDictionary<string, NpcDefinition> npcCatalog = null)
         {
             if (runState == null || action == null)
             {
@@ -207,6 +208,32 @@ namespace Mandato.Run
                                 if (npcState != null)
                                 {
                                     npcState.ModifyRelation(effect.deltaNpcRelation);
+
+                                    // Aumento de relação desloca o eixo político na direção do NPC (1 ponto)
+                                    if (effect.deltaNpcRelation > 0)
+                                    {
+                                        NpcDefinition npcDef = null;
+                                        if (npcCatalog != null)
+                                        {
+                                            npcCatalog.TryGetValue(targetRelationNpc, out npcDef);
+                                        }
+                                        if (npcDef == null && currentCard != null && currentCard.npc != null &&
+                                            string.Equals(currentCard.GetNpcId(), targetRelationNpc, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            npcDef = currentCard.npc;
+                                        }
+
+                                        if (npcDef != null)
+                                        {
+                                            var (pDx, pDy) = runState.MovePoliticalAxisTowards(
+                                                npcDef.politicalBiasX,
+                                                npcDef.politicalBiasY,
+                                                PoliticalAxis.DefaultRelationStep
+                                            );
+                                            report.deltaPoliticalX += pDx;
+                                            report.deltaPoliticalY += pDy;
+                                        }
+                                    }
                                 }
                             }
                             break;

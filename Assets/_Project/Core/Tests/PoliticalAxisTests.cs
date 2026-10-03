@@ -87,5 +87,69 @@ namespace Mandato.Core.Tests
             Assert.AreEqual(6, clone.y);
             Assert.IsTrue(clone.isLocked);
         }
+
+        [Test]
+        public void MoveTowards_MovesByFixedStepTowardsTarget()
+        {
+            var axis = new PoliticalAxis(0, 0);
+
+            var (dx, dy) = axis.MoveTowards(targetX: 6, targetY: 2, step: PoliticalAxis.DefaultProposalStep);
+            Assert.AreEqual(2, dx);
+            Assert.AreEqual(2, dy);
+            Assert.AreEqual(2, axis.x);
+            Assert.AreEqual(2, axis.y);
+
+            // Segunda movimentação
+            var (dx2, dy2) = axis.MoveTowards(targetX: 6, targetY: 2, step: PoliticalAxis.DefaultProposalStep);
+            Assert.AreEqual(2, dx2);
+            Assert.AreEqual(0, dy2); // já estava em 2, não ultrapassa!
+            Assert.AreEqual(4, axis.x);
+            Assert.AreEqual(2, axis.y);
+        }
+
+        [Test]
+        public void MoveTowards_DoesNotOvershootTarget()
+        {
+            var axis = new PoliticalAxis(5, 1);
+
+            // Alvo a 1 de distância, mas step é 2
+            var (dx, dy) = axis.MoveTowards(targetX: 6, targetY: 2, step: 2);
+            Assert.AreEqual(1, dx);
+            Assert.AreEqual(1, dy);
+            Assert.AreEqual(6, axis.x);
+            Assert.AreEqual(2, axis.y);
+
+            // Já no alvo: delta deve ser 0
+            var (dx2, dy2) = axis.MoveTowards(targetX: 6, targetY: 2, step: 2);
+            Assert.AreEqual(0, dx2);
+            Assert.AreEqual(0, dy2);
+            Assert.AreEqual(6, axis.x);
+            Assert.AreEqual(2, axis.y);
+        }
+
+        [Test]
+        public void MoveTowards_DoesNothing_WhenLocked()
+        {
+            var axis = new PoliticalAxis(0, 0);
+            axis.Lock();
+
+            var (dx, dy) = axis.MoveTowards(targetX: 6, targetY: 2, step: 2);
+            Assert.AreEqual(0, dx);
+            Assert.AreEqual(0, dy);
+            Assert.AreEqual(0, axis.x);
+            Assert.AreEqual(0, axis.y);
+        }
+
+        [Test]
+        public void MoveTowards_NegativeDirection_MovesCorrectly()
+        {
+            var axis = new PoliticalAxis(3, 4);
+
+            var (dx, dy) = axis.MoveTowards(targetX: -3, targetY: -2, step: 1);
+            Assert.AreEqual(-1, dx);
+            Assert.AreEqual(-1, dy);
+            Assert.AreEqual(2, axis.x);
+            Assert.AreEqual(3, axis.y);
+        }
     }
 }

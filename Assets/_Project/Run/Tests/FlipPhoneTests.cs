@@ -661,5 +661,31 @@ namespace Mandato.Run.Tests
             Assert.IsTrue(report2.success);
             Assert.AreEqual(15, depState.relationScore);
         }
+
+        [Test]
+        public void ModifyNpcRelation_PositiveDelta_MovesPoliticalAxisTowardsNpcBias()
+        {
+            var npc = NpcDefinition.CreateRuntimeInstance("MinistroEco", "Ministro da Economia", biasX: 6, biasY: -4);
+            var npcCatalog = new Dictionary<string, NpcDefinition> { { npc.id, npc } };
+
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_afinar_relacao",
+                "Jantar de Confraternização",
+                "Melhora a relação com MinistroEco em +25."
+            );
+            action.effects.Add(FlipPhoneEffect.CreateModifyNpcRelation(25, "MinistroEco"));
+
+            Assert.AreEqual(0, runState.politicalAxis.x);
+            Assert.AreEqual(0, runState.politicalAxis.y);
+
+            var report = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog, npcCatalog: npcCatalog);
+
+            Assert.IsTrue(report.success);
+            // Deve ter se movido 1 ponto em direção a (6, -4)
+            Assert.AreEqual(1, runState.politicalAxis.x);
+            Assert.AreEqual(-1, runState.politicalAxis.y);
+            Assert.AreEqual(1, report.deltaPoliticalX);
+            Assert.AreEqual(-1, report.deltaPoliticalY);
+        }
     }
 }

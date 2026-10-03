@@ -51,6 +51,12 @@ namespace Mandato.Infrastructure
         [SerializeField] private bool requireSpaceToCallNextNpc = true;
         [SerializeField] private KeyCode callNextNpcKey = KeyCode.Space;
 
+        [Header("Telemetria e Debug em Jogo")]
+        [Tooltip("Se verdadeiro, ativa o painel de debug em tempo real (F1 para alternar) exibindo Eixo Político, Atributos e Relações de NPCs na tela.")]
+        [SerializeField] private bool enableDebugOverlay = true;
+        [SerializeField] private KeyCode toggleDebugOverlayKey = KeyCode.F1;
+        [SerializeField] private bool startDebugOverlayOpen = true;
+
         [Header("Amarrações de Apresentação (Obrigatórias)")]
         [SerializeField] private ScenePresentationBindings presentationBindings = new ScenePresentationBindings();
 
@@ -119,7 +125,21 @@ namespace Mandato.Infrastructure
                 presentationBindings.DecisionOverlayPresenter
             );
 
-            // 3. Inicializa o Coordenador de Fluxo da Run
+            // 3. Inicializa o Registro de Eventos e Launcher da Festa Corporativa
+            var eventRegistry = GetComponent<InteractiveEventRegistry>() ?? FindFirstObjectByType<InteractiveEventRegistry>();
+            if (eventRegistry == null)
+            {
+                eventRegistry = gameObject.AddComponent<InteractiveEventRegistry>();
+            }
+
+            var partyLauncher = GetComponent<CorporatePartyLauncher>() ?? FindFirstObjectByType<CorporatePartyLauncher>();
+            if (partyLauncher == null)
+            {
+                partyLauncher = gameObject.AddComponent<CorporatePartyLauncher>();
+            }
+            eventRegistry.Register(partyLauncher);
+
+            // 4. Inicializa o Coordenador de Fluxo da Run
             flowCoordinator = flowCoordinatorRef != null
                 ? flowCoordinatorRef
                 : GetComponent<RunFlowCoordinator>();
@@ -139,7 +159,9 @@ namespace Mandato.Infrastructure
                 requireSpaceToCallNextNpc,
                 callNextNpcKey,
                 delayBetweenProposals,
-                mainMenuSceneName
+                mainMenuSceneName,
+                modalCoordinator: null,
+                eventRegistry: eventRegistry
             );
 
             HookPhoneFocusableObject();
@@ -150,6 +172,13 @@ namespace Mandato.Infrastructure
         {
             presentationBindings?.CameraEffects?.ApplyAttributeEffects(StateMachine?.RunState?.stats, instant: true);
             flowCoordinator?.StartFlow();
+
+            if (enableDebugOverlay)
+            {
+                var overlay = GetComponent<RuntimeDebugOverlay>() ?? gameObject.AddComponent<RuntimeDebugOverlay>();
+                overlay.IsVisible = startDebugOverlayOpen;
+                overlay.Initialize(StateMachine, Catalog, flowCoordinator, toggleDebugOverlayKey);
+            }
         }
 
         private void Update()

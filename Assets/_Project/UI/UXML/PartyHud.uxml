@@ -27,12 +27,12 @@
             </ui:VisualElement>
 
             <!-- Roda de 4 Abordagens -->
-            <ui:VisualElement name="approach-wheel" class="approach-wheel hidden">
+            <ui:VisualElement name="approach-wheel" class="approach-wheel hidden" picking-mode="Ignore">
                 <ui:VisualElement class="approach-wheel-bg" picking-mode="Ignore" />
-                <ui:Button name="btn-approach-up" text="Arrogante" class="btn-approach btn-approach-up" />
-                <ui:Button name="btn-approach-right" text="Brincalhão" class="btn-approach btn-approach-right" />
-                <ui:Button name="btn-approach-down" text="Persuasivo" class="btn-approach btn-approach-down" />
-                <ui:Button name="btn-approach-left" text="Romântico" class="btn-approach btn-approach-left" />
+                <ui:Button name="btn-approach-up" text="[1] Arrogante" class="btn-approach btn-approach-up" />
+                <ui:Button name="btn-approach-right" text="[2] Brincalhão" class="btn-approach btn-approach-right" />
+                <ui:Button name="btn-approach-down" text="[3] Persuasivo" class="btn-approach btn-approach-down" />
+                <ui:Button name="btn-approach-left" text="[4] Romântico" class="btn-approach btn-approach-left" />
             </ui:VisualElement>
 
         </ui:VisualElement>

@@ -10,6 +10,9 @@ namespace Mandato.Core
         public const int MaxValue = 10;
         public const int Center = 0;
 
+        public const int DefaultProposalStep = 2;
+        public const int DefaultRelationStep = 1;
+
         [Range(MinValue, MaxValue)]
         public int x = Center; // -10 (Esquerda) a +10 (Direita)
 
@@ -41,6 +44,45 @@ namespace Mandato.Core
 
             x = Clamp(x + deltaX);
             y = Clamp(y + deltaY);
+        }
+
+        /// <summary>
+        /// Desloca as coordenadas do eixo na direção de um ponto alvo (targetX, targetY)
+        /// por um valor fixo de passo em cada coordenada.
+        /// Não ultrapassa o valor alvo e respeita os limites [-10, 10] e isLocked.
+        /// Retorna o delta efetivamente aplicado (deltaX, deltaY).
+        /// </summary>
+        public (int deltaX, int deltaY) MoveTowards(int targetX, int targetY, int step)
+        {
+            if (isLocked || step <= 0) return (0, 0);
+
+            targetX = Clamp(targetX);
+            targetY = Clamp(targetY);
+
+            int deltaX = 0;
+            if (x < targetX)
+            {
+                deltaX = Math.Min(step, targetX - x);
+            }
+            else if (x > targetX)
+            {
+                deltaX = -Math.Min(step, x - targetX);
+            }
+
+            int deltaY = 0;
+            if (y < targetY)
+            {
+                deltaY = Math.Min(step, targetY - y);
+            }
+            else if (y > targetY)
+            {
+                deltaY = -Math.Min(step, y - targetY);
+            }
+
+            x = Clamp(x + deltaX);
+            y = Clamp(y + deltaY);
+
+            return (deltaX, deltaY);
         }
 
         public bool IsInRange(int minX, int maxX, int minY, int maxY)

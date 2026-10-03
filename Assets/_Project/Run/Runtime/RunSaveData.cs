@@ -99,6 +99,9 @@ namespace Mandato.Run
         /// <summary>Evento interativo agendado para o próximo turno. Vazio = nenhum.</summary>
         public string scheduledEventId = string.Empty;
 
+        /// <summary>Eventos agendados por mês do calendário.</summary>
+        public List<ScheduledMonthEventEntry> scheduledEventsByMonth = new List<ScheduledMonthEventEntry>();
+
         public RunSaveData() { }
 
         public static RunSaveData FromRuntime(RunState runState, DeckState deckState)
@@ -155,6 +158,14 @@ namespace Mandato.Run
                 foreach (var kvp in runState.actionCooldowns)
                 {
                     save.actionCooldowns.Add(new ActionCooldownEntry(kvp.Key, kvp.Value));
+                }
+            }
+
+            if (runState.scheduledEventsByMonth != null)
+            {
+                foreach (var kvp in runState.scheduledEventsByMonth)
+                {
+                    save.scheduledEventsByMonth.Add(new ScheduledMonthEventEntry(kvp.Key, kvp.Value));
                 }
             }
 
@@ -226,7 +237,32 @@ namespace Mandato.Run
                 }
             }
 
+            runState.scheduledEventsByMonth.Clear();
+            if (scheduledEventsByMonth != null)
+            {
+                foreach (var entry in scheduledEventsByMonth)
+                {
+                    if (entry.monthIndex >= 1 && !string.IsNullOrEmpty(entry.eventId))
+                    {
+                        runState.scheduledEventsByMonth[entry.monthIndex] = entry.eventId;
+                    }
+                }
+            }
+
             deck?.ApplyTo(deckState);
+        }
+    }
+
+    [Serializable]
+    public struct ScheduledMonthEventEntry
+    {
+        public int monthIndex;
+        public string eventId;
+
+        public ScheduledMonthEventEntry(int monthIndex, string eventId)
+        {
+            this.monthIndex = monthIndex;
+            this.eventId = eventId;
         }
     }
 }

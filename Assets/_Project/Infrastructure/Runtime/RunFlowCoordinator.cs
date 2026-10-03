@@ -740,7 +740,7 @@ namespace Mandato.Infrastructure
                 bindings?.PaperPresenter?.SetPaperInteractable(true);
             }
 
-            stateMachine.SubmitChoice(choiceIndex, catalog.Quests, catalog.Perks);
+            stateMachine.SubmitChoice(choiceIndex, catalog.Quests, catalog.Perks, catalog.Npcs);
         }
 
         private void HandleConsequencesResolved(ResolutionReport report)
@@ -768,6 +768,11 @@ namespace Mandato.Infrastructure
 
             var monthlyReport = stateMachine.CompleteTurnAndAdvance(catalog.Perks, catalog.Events);
             SyncPresenters(applyCameraEffects: (monthlyReport != null), instantCamera: false);
+
+            if (!wasTutorial)
+            {
+                SaveCurrentRunState();
+            }
 
             if (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory)
                 return;
@@ -847,8 +852,7 @@ namespace Mandato.Infrastructure
                 {
                     foreach (var kvp in result.npcRelationDeltas)
                     {
-                        var npcState = runState.GetOrCreateNpcState(kvp.Key);
-                        npcState?.ModifyRelation(kvp.Value);
+                        runState.ModifyNpcRelation(kvp.Key, kvp.Value, catalog?.Npcs);
                     }
                 }
 
@@ -872,9 +876,12 @@ namespace Mandato.Infrastructure
             if (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory)
                 return;
 
-            // O evento substituiu a proposta: CompleteTurnAndAdvance aceita RunningEvent
+            // O evento substituiu a proposta: CompleteTurnAndAdvance aceita RunningEvent e avança o mês no calendário
             var monthlyReport = stateMachine.CompleteTurnAndAdvance(catalog.Perks, catalog.Events);
             SyncPresenters(applyCameraEffects: (monthlyReport != null), instantCamera: false);
+
+            // Salva as modificações e interações efetuadas durante o evento interativo
+            SaveCurrentRunState();
 
             if (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory)
                 return;
@@ -911,6 +918,20 @@ namespace Mandato.Infrastructure
 
             bindings?.DecisionOverlayPresenter?.ClearChoices();
             bindings?.EndScreenPresenter?.ShowEndScreen(termination, finalSnapshot);
+        }
+
+        private void SaveCurrentRunState()
+        {
+            if (stateMachine?.RunState == null) return;
+            try
+            {
+                var saveData = RunSaveData.FromRuntime(stateMachine.RunState, stateMachine.DeckState);
+                SaveSystem.SaveRun(saveData);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[RunFlowCoordinator] Erro ao salvar estado da partida: {ex.Message}");
+            }
         }
 
         private void SyncPresenters(RunSnapshot snapshot = null, ResolutionReport report = null, bool applyCameraEffects = true, bool instantCamera = false)

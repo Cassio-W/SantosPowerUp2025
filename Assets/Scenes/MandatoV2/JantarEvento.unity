@@ -719,8 +719,9 @@ MonoBehaviour:
   - {fileID: 71672462}
   - {fileID: 1388096842}
   - {fileID: 2038105721}
-  autoInitializeInEditor: 1
+  autoInitializeInEditor: 0
   debugEventDefinition: {fileID: 11400000, guid: 046c2c112fda5904bbfbe3981f542cf7, type: 2}
+  phoneActions: []
 --- !u!4 &696539937
 Transform:
   m_ObjectHideFlags: 0

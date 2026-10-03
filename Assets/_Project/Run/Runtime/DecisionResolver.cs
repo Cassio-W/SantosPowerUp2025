@@ -38,6 +38,8 @@ namespace Mandato.Run
 
         public int deltaPoliticalX = 0;
         public int deltaPoliticalY = 0;
+        public int npcPoliticalDeltaX = 0;
+        public int npcPoliticalDeltaY = 0;
 
         public List<string> injectedCardIds = new List<string>();
         public List<string> removedCardIds = new List<string>();
@@ -65,6 +67,8 @@ namespace Mandato.Run
     {
         public const int DefaultAcceptNpcRelationDelta = 5;
         public const int DefaultRejectNpcRelationDelta = -5;
+        public const int DefaultProposalPoliticalStep = PoliticalAxis.DefaultProposalStep;
+        public const int DefaultRelationPoliticalStep = PoliticalAxis.DefaultRelationStep;
 
         public static ResolutionReport Resolve(
             RunState runState,
@@ -72,13 +76,16 @@ namespace Mandato.Run
             CardDefinition card,
             int choiceIndex,
             IReadOnlyDictionary<string, QuestDefinition> questCatalog = null,
-            IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null)
+            IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null,
+            IReadOnlyDictionary<string, NpcDefinition> npcCatalog = null)
         {
             if (runState == null || card == null) return null;
             if (choiceIndex < 0 || choiceIndex > 1) return null;
 
             ChoiceDefinition choice = card.GetChoice(choiceIndex);
             if (choice == null) return null;
+
+            string resolvedNpcId = card.GetNpcId();
 
             var report = new ResolutionReport
             {
@@ -91,7 +98,7 @@ namespace Mandato.Run
                 deltaPoliticalY = choice.deltaPoliticalY,
                 grantedPerkId = choice.GetGrantPerkId(),
                 presentationCue = choice.presentationCue,
-                npcId = card.GetNpcId()
+                npcId = resolvedNpcId
             };
 
             // 1. Aplica impactos em atributos
@@ -99,11 +106,39 @@ namespace Mandato.Run
             report.statsAfter = runState.stats.Clone();
             report.impactsApplied = choice.statImpacts?.Clone() ?? new StatBlock(0, 0, 0, 0, 0);
 
-            // 2. Aplica deslocamento do eixo político
+            // 2. Aplica deslocamento do eixo político da escolha
             if (choice.deltaPoliticalX != 0 || choice.deltaPoliticalY != 0)
             {
                 runState.ApplyPoliticalDelta(choice.deltaPoliticalX, choice.deltaPoliticalY);
             }
+
+            // Deslocamento na direção do eixo político do NPC (ao aceitar proposta)
+            int npcPolDeltaX = 0;
+            int npcPolDeltaY = 0;
+            if (choiceIndex == 0) // Apenas aceitar proposta desloca em direção ao viés do NPC
+            {
+                NpcDefinition resolvedNpc = card.npc;
+                if (resolvedNpc == null && !string.IsNullOrEmpty(resolvedNpcId) && npcCatalog != null)
+                {
+                    npcCatalog.TryGetValue(resolvedNpcId, out resolvedNpc);
+                }
+
+                if (resolvedNpc != null)
+                {
+                    var (pDx, pDy) = runState.MovePoliticalAxisTowards(
+                        resolvedNpc.politicalBiasX,
+                        resolvedNpc.politicalBiasY,
+                        DefaultProposalPoliticalStep
+                    );
+                    npcPolDeltaX = pDx;
+                    npcPolDeltaY = pDy;
+                }
+            }
+
+            report.deltaPoliticalX = choice.deltaPoliticalX + npcPolDeltaX;
+            report.deltaPoliticalY = choice.deltaPoliticalY + npcPolDeltaY;
+            report.npcPoliticalDeltaX = npcPolDeltaX;
+            report.npcPoliticalDeltaY = npcPolDeltaY;
 
             // 3. Atualiza o baralho (injeção e remoção)
             if (deckState != null)
@@ -146,7 +181,6 @@ namespace Mandato.Run
             }
 
             // 6. Atualização de Relação com NPC
-            string resolvedNpcId = card.GetNpcId();
             if (!string.IsNullOrEmpty(resolvedNpcId))
             {
                 var npcState = runState.GetOrCreateNpcState(resolvedNpcId);
