@@ -107,6 +107,22 @@ namespace Mandato.Infrastructure
             if (listener != null) listener.enabled = false;
             if (mainCam != null) mainCam.gameObject.SetActive(false);
 
+            // Desativa todos os GameObjects raiz do gabinete (Mesa, Modelo do Player, Gabinete, Clima, etc.)
+            // exceto a raiz onde este launcher / GameManager reside, para isolar 100% o mundo 3D da festa.
+            var disabledCabinetRoots = new List<GameObject>();
+            Transform myRoot = transform.root;
+            if (cabinetScene.IsValid() && cabinetScene.isLoaded)
+            {
+                foreach (var rootGo in cabinetScene.GetRootGameObjects())
+                {
+                    if (rootGo != null && rootGo != gameObject && rootGo.transform != myRoot && rootGo.activeSelf)
+                    {
+                        disabledCabinetRoots.Add(rootGo);
+                        rootGo.SetActive(false);
+                    }
+                }
+            }
+
             // 1. Carrega a cena da festa de forma aditiva
             AsyncOperation loadOp = SceneManager.LoadSceneAsync(targetScene, LoadSceneMode.Additive);
             yield return loadOp;
@@ -180,7 +196,7 @@ namespace Mandato.Infrastructure
                     SceneManager.SetActiveScene(cabinetScene);
 
                 yield return SceneManager.UnloadSceneAsync(targetScene);
-                RestoreCabinetObjects(disabledLights, disabledVolumes, disabledEventSystems, disabledUiDocs, mainCam, camWasActive, listener, listenerWasEnabled);
+                RestoreCabinetObjects(disabledCabinetRoots, disabledLights, disabledVolumes, disabledEventSystems, disabledUiDocs, mainCam, camWasActive, listener, listenerWasEnabled);
                 onCompleted?.Invoke(new InteractiveEventResult { wasCompleted = false });
                 yield break;
             }
@@ -208,14 +224,15 @@ namespace Mandato.Infrastructure
             // 8. Descarrega a cena da festa
             yield return SceneManager.UnloadSceneAsync(targetScene);
 
-            // 9. Restaura os componentes do gabinete
-            RestoreCabinetObjects(disabledLights, disabledVolumes, disabledEventSystems, disabledUiDocs, mainCam, camWasActive, listener, listenerWasEnabled);
+            // 9. Restaura os objetos e componentes do gabinete
+            RestoreCabinetObjects(disabledCabinetRoots, disabledLights, disabledVolumes, disabledEventSystems, disabledUiDocs, mainCam, camWasActive, listener, listenerWasEnabled);
 
             // 10. Devolve o controle com o resultado
             onCompleted?.Invoke(finalResult ?? new InteractiveEventResult { wasCompleted = false });
         }
 
         private static void RestoreCabinetObjects(
+            List<GameObject> roots,
             List<Light> lights,
             List<Volume> volumes,
             List<UnityEngine.EventSystems.EventSystem> eventSystems,
@@ -225,6 +242,14 @@ namespace Mandato.Infrastructure
             AudioListener listener,
             bool listenerWasEnabled)
         {
+            if (roots != null)
+            {
+                foreach (var r in roots)
+                {
+                    if (r != null) r.SetActive(true);
+                }
+            }
+
             if (lights != null)
             {
                 foreach (var l in lights)
