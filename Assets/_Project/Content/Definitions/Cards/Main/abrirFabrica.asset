@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -38,6 +38,7 @@ MonoBehaviour:
     removeCardIds: []
     grantPerkId: 
     presentationCue: 
+    cityPropPrefab: {fileID: 6216956242168988236, guid: cf777763c7be2a646820731326a31302, type: 3}
   rightChoice:
     label: "Cheiro estranho? T\xF4 fora."
     statImpacts:
@@ -53,5 +54,6 @@ MonoBehaviour:
     removeCardIds: []
     grantPerkId: 
     presentationCue: 
+    cityPropPrefab: {fileID: 0}
   conditions: []
 

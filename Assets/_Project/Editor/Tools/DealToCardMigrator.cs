@@ -157,8 +157,10 @@ namespace Mandato.Editor
             string leftLabel = GetFieldValue<string>(legacyDeal, dealType, "leftAnswer", "Aceitar");
             object leftImpactsObj = GetFieldOrPropertyValue(legacyDeal, dealType, "impactsLeft");
             StatBlock leftImpacts = ExtractStatBlock(leftImpactsObj);
+            var leftProp = leftImpactsObj != null ? GetFieldValue<GameObject>(leftImpactsObj, leftImpactsObj.GetType(), "prop", null) : null;
 
             card.leftChoice = new ChoiceDefinition(string.IsNullOrEmpty(leftLabel) ? "Aceitar" : leftLabel, leftImpacts, hasCorruption);
+            card.leftChoice.cityPropPrefab = leftProp;
             card.leftChoice.injectCardIds = ExtractCardNamesFromList(legacyDeal, dealType, "newDealsIfLeft");
             card.leftChoice.grantPerkId = ExtractPerkName(legacyDeal, dealType, "perkIfLeft");
 
@@ -166,8 +168,10 @@ namespace Mandato.Editor
             string rightLabel = GetFieldValue<string>(legacyDeal, dealType, "rightAnswer", "Recusar");
             object rightImpactsObj = GetFieldOrPropertyValue(legacyDeal, dealType, "impactsRight");
             StatBlock rightImpacts = ExtractStatBlock(rightImpactsObj);
+            var rightProp = rightImpactsObj != null ? GetFieldValue<GameObject>(rightImpactsObj, rightImpactsObj.GetType(), "prop", null) : null;
 
             card.rightChoice = new ChoiceDefinition(string.IsNullOrEmpty(rightLabel) ? "Recusar" : rightLabel, rightImpacts, hasCorruption);
+            card.rightChoice.cityPropPrefab = rightProp;
             card.rightChoice.injectCardIds = ExtractCardNamesFromList(legacyDeal, dealType, "newDealsIfRight");
             card.rightChoice.grantPerkId = ExtractPerkName(legacyDeal, dealType, "perkIfRight");
         }

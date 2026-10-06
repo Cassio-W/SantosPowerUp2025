@@ -117,5 +117,26 @@ namespace Mandato.Content.Tests
             Assert.AreEqual(12, customChoice.deltaNpcRelation);
             Assert.AreEqual(5, customChoice.statImpacts.climaticChanges);
         }
+
+        [Test]
+        public void ChoiceDefinition_SupportsCityPropPrefab()
+        {
+            var testObj = new UnityEngine.GameObject("TestProp");
+            try
+            {
+                var choiceWithProp = new ChoiceDefinition("Construir", new StatBlock(10, 0, 0, -10, 0), testObj);
+                Assert.AreSame(testObj, choiceWithProp.cityPropPrefab);
+                Assert.AreEqual("Construir", choiceWithProp.label);
+
+                var choiceFull = new ChoiceDefinition("Aprovar", new StatBlock(10, 0, 0, -10, 0), 5, testObj, true);
+                Assert.AreSame(testObj, choiceFull.cityPropPrefab);
+                Assert.AreEqual(5, choiceFull.deltaNpcRelation);
+                Assert.IsTrue(choiceFull.hasCorruptionMods);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(testObj);
+            }
+        }
     }
 }

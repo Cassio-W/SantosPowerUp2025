@@ -390,12 +390,33 @@ namespace Mandato.Editor
 
             Undo.RecordObject(bootstrap, "Preencher Presentation Bindings");
 
-            // 1. Presentation Coordinator
+            // 1. Presentation Coordinator & Environment
             var presCoord = UnityEngine.Object.FindFirstObjectByType<RunPresentationCoordinator>(FindObjectsInactive.Include);
             if (presCoord == null)
             {
                 var go = GameObject.Find("PresentationCoordinator") ?? GameObject.Find("GameController") ?? bootstrap.gameObject;
                 presCoord = Undo.AddComponent<RunPresentationCoordinator>(go);
+            }
+
+            var envPres = UnityEngine.Object.FindFirstObjectByType<EnvironmentPresentation>(FindObjectsInactive.Include);
+            if (envPres == null && presCoord != null)
+            {
+                envPres = presCoord.GetComponent<EnvironmentPresentation>() ?? Undo.AddComponent<EnvironmentPresentation>(presCoord.gameObject);
+            }
+
+            var cityObj = GameObject.Find("Cidade") ?? GameObject.Find("cidade") ?? GameObject.Find("City");
+            if (envPres != null && cityObj != null && envPres.cityTransform == null)
+            {
+                Undo.RecordObject(envPres, "Vincular Transform da Cidade");
+                envPres.cityTransform = cityObj.transform;
+                EditorUtility.SetDirty(envPres);
+            }
+
+            if (presCoord != null && presCoord.environment == null && envPres != null)
+            {
+                Undo.RecordObject(presCoord, "Vincular EnvironmentPresentation");
+                presCoord.environment = envPres;
+                EditorUtility.SetDirty(presCoord);
             }
 
             // 2. Paper Presenter

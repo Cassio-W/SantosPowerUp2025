@@ -30,10 +30,19 @@ namespace Mandato.Presentation
 
         private GameObject activeNpcGameObject;
         private INpcController activeNpcController;
+        private CardDefinition activeCard;
 
         private void Awake()
         {
             enabled = true;
+            if (environment == null)
+            {
+                environment = GetComponent<EnvironmentPresentation>() ?? FindFirstObjectByType<EnvironmentPresentation>();
+                if (environment == null)
+                {
+                    environment = gameObject.AddComponent<EnvironmentPresentation>();
+                }
+            }
         }
 
         private void OnEnable()
@@ -87,6 +96,8 @@ namespace Mandato.Presentation
 
         private IEnumerator PresentProposalRoutine(CardDefinition card)
         {
+            activeCard = card;
+
             // Propostas de tutorial não usam NPC caminhando na porta (gerenciado pelo TutorialManager)
             bool isTutorialCard = card != null && (
                 card.isTutorial ||
@@ -211,10 +222,30 @@ namespace Mandato.Presentation
 
         private IEnumerator PresentConsequencesRoutine(ResolutionReport report)
         {
-            // 1. Toca efeitos de ambiente e sons de cue
+            // 1. Toca efeitos de ambiente, sons de cue e instancia props de cidade
             if (environment != null)
             {
                 environment.PlayPresentationCue(report.presentationCue);
+
+                // Resolve a CardDefinition para recuperar a escolha e seu cityPropPrefab
+                CardDefinition cardDef = activeCard;
+                if (cardDef == null && cardCatalog != null && !string.IsNullOrEmpty(report.cardId))
+                {
+                    cardCatalog.TryGetValue(report.cardId, out cardDef);
+                }
+                if (cardDef == null && stateMachine != null && stateMachine.CurrentCard != null)
+                {
+                    cardDef = stateMachine.CurrentCard;
+                }
+
+                if (cardDef != null)
+                {
+                    var chosenChoice = cardDef.GetChoice(report.choiceIndex);
+                    if (chosenChoice != null && chosenChoice.cityPropPrefab != null)
+                    {
+                        environment.SpawnCityProp(chosenChoice.cityPropPrefab);
+                    }
+                }
             }
 
             // 2. Comanda reação do NPC e saída
@@ -312,6 +343,7 @@ namespace Mandato.Presentation
             }
 
             activeNpc = null;
+            activeCard = null;
         }
 
         private void SafeDestroy(GameObject obj)

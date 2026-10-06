@@ -359,5 +359,36 @@ namespace Mandato.Infrastructure.Tests
 
             UnityEngine.Object.DestroyImmediate(go);
         }
+
+        [Test]
+        public void EnvironmentPresentation_SpawnCityProp_InstantiatesAndParentsToCity()
+        {
+            var cityGo = new GameObject("Cidade");
+            var envGo = new GameObject("EnvironmentPresentation");
+            var envPres = envGo.AddComponent<EnvironmentPresentation>();
+            envPres.cityTransform = cityGo.transform;
+
+            var propPrefab = new GameObject("TestTurbine");
+            propPrefab.transform.position = new Vector3(5, 2, 10);
+            propPrefab.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
+
+            try
+            {
+                var spawned = envPres.SpawnCityProp(propPrefab);
+
+                Assert.IsNotNull(spawned, "Prop instanciado não deve ser nulo");
+                Assert.AreSame(cityGo.transform, spawned.transform.parent, "Prop deve ser filho de cityTransform");
+                Assert.AreEqual(new Vector3(5, 2, 10), spawned.transform.localPosition, "Prop deve manter coordenadas locais do prefab");
+                Assert.AreEqual(Vector3.one, spawned.transform.localScale, "Prop deve ter escala final 1 (Vector3.one)");
+
+                envPres.ClearSpawnedProps();
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(propPrefab);
+                UnityEngine.Object.DestroyImmediate(envGo);
+                UnityEngine.Object.DestroyImmediate(cityGo);
+            }
+        }
     }
 }

@@ -34,6 +34,9 @@ namespace Mandato.Content
         public string grantPerkId = string.Empty;
         public string presentationCue = string.Empty;
 
+        [Tooltip("Arraste o prefab que será instanciado no cenário da cidade ao escolher esta opção.")]
+        public GameObject cityPropPrefab;
+
         [Tooltip("ID do evento interativo a agendar quando esta opção for escolhida. " +
                  "O evento substituirá a proposta do próximo mês disponível.")]
         public string scheduleEventId = string.Empty;
@@ -53,11 +56,28 @@ namespace Mandato.Content
             this.hasCorruptionMods = corruptionMods;
         }
 
+        public ChoiceDefinition(string label, StatBlock impacts, GameObject cityPropPrefab, bool corruptionMods = false)
+        {
+            this.label = label ?? string.Empty;
+            this.statImpacts = impacts ?? new StatBlock(0, 0, 0, 0, 0);
+            this.cityPropPrefab = cityPropPrefab;
+            this.hasCorruptionMods = corruptionMods;
+        }
+
         public ChoiceDefinition(string label, StatBlock impacts, int deltaNpcRelation, bool corruptionMods = false)
         {
             this.label = label ?? string.Empty;
             this.statImpacts = impacts ?? new StatBlock(0, 0, 0, 0, 0);
             this.deltaNpcRelation = deltaNpcRelation;
+            this.hasCorruptionMods = corruptionMods;
+        }
+
+        public ChoiceDefinition(string label, StatBlock impacts, int deltaNpcRelation, GameObject cityPropPrefab, bool corruptionMods = false)
+        {
+            this.label = label ?? string.Empty;
+            this.statImpacts = impacts ?? new StatBlock(0, 0, 0, 0, 0);
+            this.deltaNpcRelation = deltaNpcRelation;
+            this.cityPropPrefab = cityPropPrefab;
             this.hasCorruptionMods = corruptionMods;
         }
 
