@@ -431,6 +431,12 @@ namespace Mandato.Infrastructure
                 return;
             }
 
+            var calendar = bindings?.CalendarPresenter ?? CalendarWallPresenter.Instance;
+            if (calendar != null && stateMachine != null)
+            {
+                calendar.SyncWithRun(stateMachine.RunState, catalog?.Events, catalog?.Perks, stateMachine.CurrentCard);
+            }
+
             var cam = CameraFocusManager.Instance ?? bindings?.CameraFocus;
             FocusableObject targetFocusable = bindings?.CalendarFocusable;
 
@@ -651,6 +657,12 @@ namespace Mandato.Infrastructure
                 bindings.RetroMonitorPresenter.NotifyNewProposal(card);
                 bindings.RetroMonitorPresenter.UpdateDateDisplay(displayDate);
             }
+
+            var calendar = bindings?.CalendarPresenter ?? CalendarWallPresenter.Instance;
+            if (calendar != null)
+            {
+                calendar.SyncWithRun(stateMachine.RunState, catalog?.Events, catalog?.Perks, card);
+            }
         }
 
         private void HandlePlayerChoiceHovered(ChoiceDefinition choice)
@@ -868,6 +880,65 @@ namespace Mandato.Infrastructure
                     foreach (var cardId in result.removeCardIds ?? new System.Collections.Generic.List<string>())
                         stateMachine.DeckState.RemoveCard(cardId);
                 }
+
+                // Registra o evento no histórico do calendário
+                int eventMonth = stateMachine.RunState.calendar.currentMonthIndex;
+                string evTitle = !string.IsNullOrEmpty(result.eventTitle) ? result.eventTitle : "Festa Corporativa";
+                string stat1Txt = string.Empty;
+                bool stat1Pos = true;
+                string stat2Txt = string.Empty;
+                bool stat2Pos = true;
+
+                if (result.statImpacts != null)
+                {
+                    var impacts = new System.Collections.Generic.List<(string text, bool positive)>();
+                    if (result.statImpacts.popularApproval != 0)
+                        impacts.Add(($"{result.statImpacts.popularApproval:+0;-0} Popularidade", result.statImpacts.popularApproval > 0));
+                    if (result.statImpacts.economy != 0)
+                        impacts.Add(($"{result.statImpacts.economy:+0;-0} Economia", result.statImpacts.economy > 0));
+                    if (result.statImpacts.internationalRelations != 0)
+                        impacts.Add(($"{result.statImpacts.internationalRelations:+0;-0} Relações", result.statImpacts.internationalRelations > 0));
+                    if (result.statImpacts.climaticChanges != 0)
+                        impacts.Add(($"{result.statImpacts.climaticChanges:+0;-0} Clima", result.statImpacts.climaticChanges > 0));
+                    if (result.statImpacts.corruption != 0)
+                        impacts.Add(($"{result.statImpacts.corruption:+0;-0} Corrupção", result.statImpacts.corruption < 0));
+
+                    if (impacts.Count > 0)
+                    {
+                        stat1Txt = impacts[0].text;
+                        stat1Pos = impacts[0].positive;
+                    }
+                    if (impacts.Count > 1)
+                    {
+                        stat2Txt = impacts[1].text;
+                        stat2Pos = impacts[1].positive;
+                    }
+                }
+
+                string perkSum = string.Empty;
+                if (result.grantPerkIds != null && result.grantPerkIds.Count > 0)
+                {
+                    perkSum = $"★ Perk: {result.grantPerkIds[0]}";
+                }
+
+                var eventRecord = new MonthDecisionRecord
+                {
+                    monthIndex = eventMonth,
+                    cardId = string.Empty,
+                    title = evTitle,
+                    npcName = "Lideranças & Empresários",
+                    isApproved = result.wasCompleted,
+                    choiceLabel = result.wasCompleted ? "Participação Concluída" : "Evento Encerrado",
+                    stat1Text = stat1Txt,
+                    stat1Positive = stat1Pos,
+                    stat2Text = stat2Txt,
+                    stat2Positive = stat2Pos,
+                    perkText = perkSum,
+                    isEvent = true,
+                    eventId = result.eventId ?? "FestaCorporativa",
+                    eventDetails = "Interações e negociações com lideranças políticas e empresariais."
+                };
+                stateMachine.RunState.RecordMonthDecision(eventRecord);
             }
 
             // Retorna ao contexto da mesa e verifica término
@@ -959,6 +1030,12 @@ namespace Mandato.Infrastructure
             if (applyCameraEffects && bindings.CameraEffects != null)
             {
                 bindings.CameraEffects.ApplyAttributeEffects(runState.stats, instant: instantCamera);
+            }
+
+            var calendar = bindings.CalendarPresenter ?? CalendarWallPresenter.Instance;
+            if (calendar != null)
+            {
+                calendar.SyncWithRun(runState, catalog?.Events, catalog?.Perks, stateMachine?.CurrentCard);
             }
         }
 

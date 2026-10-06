@@ -251,6 +251,75 @@ namespace Mandato.Run
             );
             runState.decisionHistory.Add(record.cardId);
 
+            // Registra os detalhes completos da decisão para a UI diegética do calendário
+            string resolvedNpcName = resolvedNpcId;
+            if (card.npc != null && !string.IsNullOrEmpty(card.npc.displayName))
+            {
+                resolvedNpcName = card.npc.displayName;
+            }
+            else if (!string.IsNullOrEmpty(resolvedNpcId) && npcCatalog != null && npcCatalog.TryGetValue(resolvedNpcId, out var nDef) && nDef != null && !string.IsNullOrEmpty(nDef.displayName))
+            {
+                resolvedNpcName = nDef.displayName;
+            }
+            else if (string.IsNullOrEmpty(resolvedNpcName))
+            {
+                resolvedNpcName = "Ministério";
+            }
+
+            string stat1Txt = string.Empty;
+            bool stat1Pos = true;
+            string stat2Txt = string.Empty;
+            bool stat2Pos = true;
+
+            if (choice.statImpacts != null)
+            {
+                var impacts = new List<(string text, bool positive)>();
+                if (choice.statImpacts.popularApproval != 0)
+                    impacts.Add(($"{choice.statImpacts.popularApproval:+0;-0} Popularidade", choice.statImpacts.popularApproval > 0));
+                if (choice.statImpacts.economy != 0)
+                    impacts.Add(($"{choice.statImpacts.economy:+0;-0} Economia", choice.statImpacts.economy > 0));
+                if (choice.statImpacts.internationalRelations != 0)
+                    impacts.Add(($"{choice.statImpacts.internationalRelations:+0;-0} Relações", choice.statImpacts.internationalRelations > 0));
+                if (choice.statImpacts.climaticChanges != 0)
+                    impacts.Add(($"{choice.statImpacts.climaticChanges:+0;-0} Clima", choice.statImpacts.climaticChanges > 0));
+                if (choice.statImpacts.corruption != 0)
+                    impacts.Add(($"{choice.statImpacts.corruption:+0;-0} Corrupção", choice.statImpacts.corruption < 0));
+
+                if (impacts.Count > 0)
+                {
+                    stat1Txt = impacts[0].text;
+                    stat1Pos = impacts[0].positive;
+                }
+                if (impacts.Count > 1)
+                {
+                    stat2Txt = impacts[1].text;
+                    stat2Pos = impacts[1].positive;
+                }
+            }
+
+            string perkSum = string.Empty;
+            if (!string.IsNullOrEmpty(perkToGrant))
+            {
+                perkSum = $"★ Perk: {perkToGrant}";
+            }
+
+            var monthRecord = new MonthDecisionRecord
+            {
+                monthIndex = runState.calendar.currentMonthIndex,
+                cardId = card.id,
+                title = card.title,
+                npcName = resolvedNpcName,
+                isApproved = (choiceIndex == 0),
+                choiceLabel = choice.label,
+                stat1Text = stat1Txt,
+                stat1Positive = stat1Pos,
+                stat2Text = stat2Txt,
+                stat2Positive = stat2Pos,
+                perkText = perkSum,
+                isEvent = false
+            };
+            runState.RecordMonthDecision(monthRecord);
+
             // 8. Avalia e aplica perks de resgate emergencial caso algum atributo tenha zerado
             var rescued = runState.CheckAndApplyEmergencyRescue(perkCatalog);
             if (rescued != null && rescued.Count > 0)

@@ -14,6 +14,7 @@ namespace Mandato.Run
     public class InteractiveEventResult
     {
         public string eventId = string.Empty;
+        public string eventTitle = string.Empty;
 
         /// <summary>
         /// false = o evento foi abortado ou pulado (sem consequências aplicadas).

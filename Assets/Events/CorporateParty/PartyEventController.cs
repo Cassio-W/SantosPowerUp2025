@@ -518,6 +518,7 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
         var result = new InteractiveEventResult
         {
             eventId           = definition != null ? definition.eventId : string.Empty,
+            eventTitle        = "Festa Corporativa",
             wasCompleted      = true,
             npcRelationDeltas = accumulatedRelationDeltas
         };

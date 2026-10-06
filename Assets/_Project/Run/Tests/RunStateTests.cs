@@ -79,5 +79,81 @@ namespace Mandato.Run.Tests
             run.ApplyStatDelta(StatId.Economy, -30);
             Assert.AreEqual(75, snapshot.Stats.economy);
         }
+
+        [Test]
+        public void MonthDecisionRecord_AddAndRetrieve_WorksCorrectly()
+        {
+            var run = new RunState();
+            var record1 = new MonthDecisionRecord
+            {
+                monthIndex = 1,
+                cardId = "card_01",
+                title = "Reforma Tributária",
+                npcName = "Ministro da Fazenda",
+                isApproved = true,
+                choiceLabel = "Aprovar Projeto",
+                stat1Text = "+10 Economia",
+                stat1Positive = true
+            };
+
+            run.RecordMonthDecision(record1);
+
+            var retrieved = run.GetDecisionForMonth(1);
+            Assert.IsNotNull(retrieved);
+            Assert.AreEqual("Reforma Tributária", retrieved.title);
+            Assert.AreEqual("Ministro da Fazenda", retrieved.npcName);
+            Assert.IsTrue(retrieved.isApproved);
+            Assert.AreEqual("+10 Economia", retrieved.stat1Text);
+
+            // Substitui caso já exista para o mesmo mês
+            var record1Updated = new MonthDecisionRecord
+            {
+                monthIndex = 1,
+                cardId = "card_01_alt",
+                title = "Reforma Tributária Atualizada",
+                isApproved = false
+            };
+            run.RecordMonthDecision(record1Updated);
+            Assert.AreEqual(1, run.pastDecisions.Count);
+            Assert.AreEqual("Reforma Tributária Atualizada", run.GetDecisionForMonth(1).title);
+            Assert.IsFalse(run.GetDecisionForMonth(1).isApproved);
+        }
+
+        [Test]
+        public void RunSaveData_PersistsPastDecisionsCorrectly()
+        {
+            var run = new RunState();
+            run.RecordMonthDecision(new MonthDecisionRecord
+            {
+                monthIndex = 1,
+                title = "Decisão 1",
+                isApproved = true
+            });
+            run.RecordMonthDecision(new MonthDecisionRecord
+            {
+                monthIndex = 2,
+                title = "Festa Corporativa",
+                isEvent = true,
+                isApproved = true
+            });
+
+            var deck = new DeckState();
+            var saveData = RunSaveData.FromRuntime(run, deck);
+
+            Assert.IsNotNull(saveData.pastDecisions);
+            Assert.AreEqual(2, saveData.pastDecisions.Count);
+            Assert.AreEqual("Decisão 1", saveData.pastDecisions[0].title);
+            Assert.AreEqual("Festa Corporativa", saveData.pastDecisions[1].title);
+            Assert.IsTrue(saveData.pastDecisions[1].isEvent);
+
+            var restoredRun = new RunState();
+            saveData.ApplyToRuntime(restoredRun, deck);
+
+            Assert.AreEqual(2, restoredRun.pastDecisions.Count);
+            var dec2 = restoredRun.GetDecisionForMonth(2);
+            Assert.IsNotNull(dec2);
+            Assert.AreEqual("Festa Corporativa", dec2.title);
+            Assert.IsTrue(dec2.isEvent);
+        }
     }
 }

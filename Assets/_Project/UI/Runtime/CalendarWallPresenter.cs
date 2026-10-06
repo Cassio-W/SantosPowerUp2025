@@ -1,20 +1,25 @@
 using System;
 using System.Collections.Generic;
+using Mandato.Content;
+using Mandato.Core;
+using Mandato.Run;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Mandato.UI
 {
     /// <summary>
-    /// Dossier com os dados históricos ou previsões de um dia específico do calendário presidencial.
+    /// Dossier com os dados históricos ou previsões de um mês específico do calendário presidencial.
+    /// Mantém compatibilidade com a tipagem anterior.
     /// </summary>
     [Serializable]
     public class CalendarDayDossier
     {
         public int dayNumber;
+        public int monthNumber;
         public string dateLabel = string.Empty;
         public string statusText = string.Empty;
-        public string statusTagClass = "tag-approved"; // tag-approved, tag-rejected, tag-today, tag-crisis, tag-diplomacy, tag-deadline, tag-congress
+        public string statusTagClass = "tag-approved"; // tag-approved, tag-rejected, tag-today, tag-diplomacy
 
         public bool isEvent = false;
 
@@ -36,8 +41,9 @@ namespace Mandato.UI
 
     /// <summary>
     /// Presenter diegético do Calendário de Parede do Gabinete Presidencial.
-    /// Gerencia o dossiê dos dias, navegação de meses e garante que o popup de hover
-    /// seja renderizado em uma camada de overlay dedicada no topo absoluto do visual tree.
+    /// Exibe os 12 meses do ano do mandato selecionado (1º a 4º Ano).
+    /// Permite navegar pelos anos do mandato através dos botões de navegação lateral.
+    /// Sincroniza dinamicamente as decisões reais, agendamentos futuros e a deliberação na mesa do gabinete.
     /// </summary>
     [DisallowMultipleComponent]
     public class CalendarWallPresenter : MonoBehaviour
@@ -54,7 +60,6 @@ namespace Mandato.UI
 
         [Header("--- Configuração do Mandato ---")]
         [SerializeField] private int currentYear = 2026;
-        [SerializeField] private int currentMonthIndex = 0; // 0 = Janeiro
         [SerializeField] private int totalMonthsInMandate = 48;
 
         private static readonly string[] MonthNames = new string[]
@@ -63,15 +68,33 @@ namespace Mandato.UI
             "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"
         };
 
+        private static readonly string[] MonthShortNames = new string[]
+        {
+            "JAN", "FEV", "MAR", "ABR", "MAI", "JUN",
+            "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"
+        };
+
+        // Estado dinâmico do runtime da partida
+        private RunState _currentRunState;
+        private IReadOnlyDictionary<string, RunEventDefinition> _eventsCatalog;
+        private IReadOnlyDictionary<string, PerkDefinition> _perksCatalog;
+        private CardDefinition _currentCard;
+
+        // Navegação por anos (1 a 4)
+        private int _viewingYearIndex = 1; // 1 = 1º Ano, 2 = 2º Ano, etc.
+        private const int TotalYearsInMandate = 4;
+
         // Elementos da UI
         private VisualElement _calendarPage;
-        private Label _yearLabel;
-        private Label _monthNameLabel;
-        private Label _monthSubtitleLabel;
-        private Button _btnPrevMonth;
-        private Button _btnNextMonth;
+        private Label _yearNumberLabel;
+        private Label _yearTitleLabel;
+        private Label _yearSubtitleLabel;
+        private Button _btnPrevYear;
+        private Button _btnNextYear;
+        private ScrollView _scheduledEventsList;
+        private VisualElement _monthsGrid;
 
-        // Overlay do Tooltip (sempre o último elemento do DOM = topo absoluto)
+        // Overlay do Tooltip (topo absoluto)
         private VisualElement _tooltipOverlay;
         private VisualElement _tooltipCard;
         private Label _tooltipDateLabel;
@@ -90,16 +113,14 @@ namespace Mandato.UI
         private Label _tooltipEventDesc;
         private Label _tooltipEventImpact;
 
-        // Dicionário de dossiês dos dias
-        private readonly Dictionary<int, CalendarDayDossier> _dayDossiers = new Dictionary<int, CalendarDayDossier>();
-        private readonly List<VisualElement> _cachedDayCells = new List<VisualElement>();
+        // Dicionário de dossiês dos meses do mandato (1 a 48)
+        private readonly Dictionary<int, CalendarDayDossier> _monthDossiers = new Dictionary<int, CalendarDayDossier>();
         private VisualElement _currentlyHoveredCell = null;
 
         private void Awake()
         {
             if (Instance == null) Instance = this;
             EnsureReferences();
-            InitializeDefaultDossiers();
         }
 
         private void OnEnable()
@@ -134,11 +155,13 @@ namespace Mandato.UI
             var root = uiDocument.rootVisualElement;
             _calendarPage = root.Q<VisualElement>("calendar-page") ?? root;
 
-            _yearLabel = root.Q<Label>("year-number");
-            _monthNameLabel = root.Q<Label>("month-name");
-            _monthSubtitleLabel = root.Q<Label>("month-subtitle");
-            _btnPrevMonth = root.Q<Button>("btn-prev-month");
-            _btnNextMonth = root.Q<Button>("btn-next-month");
+            _yearNumberLabel = root.Q<Label>("year-number");
+            _yearTitleLabel = root.Q<Label>("year-title");
+            _yearSubtitleLabel = root.Q<Label>("year-subtitle");
+            _btnPrevYear = root.Q<Button>("btn-prev-year");
+            _btnNextYear = root.Q<Button>("btn-next-year");
+            _scheduledEventsList = root.Q<ScrollView>("scheduled-events-list");
+            _monthsGrid = root.Q<VisualElement>("months-grid");
 
             // Cache dos elementos do overlay de tooltip
             _tooltipOverlay = root.Q<VisualElement>("calendar-tooltip-overlay");
@@ -161,100 +184,776 @@ namespace Mandato.UI
 
             HideTooltip();
 
-            // Configura botões de navegação
-            if (_btnPrevMonth != null)
+            // Configura botões de navegação de anos
+            if (_btnPrevYear != null)
             {
-                _btnPrevMonth.clickable = null;
-                _btnPrevMonth.clicked += OnPrevMonthClicked;
+                _btnPrevYear.clickable = null;
+                _btnPrevYear.clicked += OnPrevYearClicked;
             }
 
-            if (_btnNextMonth != null)
+            if (_btnNextYear != null)
             {
-                _btnNextMonth.clickable = null;
-                _btnNextMonth.clicked += OnNextMonthClicked;
+                _btnNextYear.clickable = null;
+                _btnNextYear.clicked += OnNextYearClicked;
             }
 
-            // Cache e registro de hover nas 35 células da grade
-            _cachedDayCells.Clear();
-            var daysGrid = root.Q<VisualElement>("days-grid");
-            if (daysGrid != null)
+            // Registra callbacks de hover nos 12 cards de mês da grade anual
+            if (_monthsGrid != null)
             {
-                for (int day = 1; day <= 31; day++)
+                for (int slot = 1; slot <= 12; slot++)
                 {
-                    var cell = daysGrid.Q<VisualElement>($"day-cell-{day}");
-                    if (cell != null)
+                    var card = _monthsGrid.Q<VisualElement>($"month-card-{slot}");
+                    if (card != null)
                     {
-                        _cachedDayCells.Add(cell);
-
-                        // Oculta qualquer tooltip interno legado embutido na célula
-                        var legacyTooltip = cell.Q<VisualElement>(className: "day-hover-tooltip");
-                        if (legacyTooltip != null)
-                        {
-                            legacyTooltip.style.display = DisplayStyle.None;
-                        }
-
-                        int capturedDay = day;
-                        cell.UnregisterCallback<PointerEnterEvent>(OnDayPointerEnter);
-                        cell.UnregisterCallback<PointerLeaveEvent>(OnDayPointerLeave);
-
-                        cell.RegisterCallback<PointerEnterEvent>(OnDayPointerEnter);
-                        cell.RegisterCallback<PointerLeaveEvent>(OnDayPointerLeave);
+                        card.UnregisterCallback<PointerEnterEvent>(OnMonthCardPointerEnter);
+                        card.UnregisterCallback<PointerLeaveEvent>(OnMonthCardPointerLeave);
+                        card.RegisterCallback<PointerEnterEvent>(OnMonthCardPointerEnter);
+                        card.RegisterCallback<PointerLeaveEvent>(OnMonthCardPointerLeave);
                     }
                 }
             }
 
-            UpdateMonthDisplay();
+            RenderYear(_viewingYearIndex);
         }
 
-        private void OnDayPointerEnter(PointerEnterEvent evt)
+        /// <summary>
+        /// Sincroniza o calendário com o estado real e atual da partida.
+        /// </summary>
+        public void SyncWithRun(
+            RunState runState,
+            IReadOnlyDictionary<string, RunEventDefinition> eventsCatalog = null,
+            IReadOnlyDictionary<string, PerkDefinition> perksCatalog = null,
+            CardDefinition currentCard = null)
         {
-            if (evt.currentTarget is VisualElement cell)
+            _currentRunState = runState;
+            if (eventsCatalog != null) _eventsCatalog = eventsCatalog;
+            if (perksCatalog != null) _perksCatalog = perksCatalog;
+            _currentCard = currentCard;
+
+            int activeMonth = _currentRunState != null ? _currentRunState.calendar.currentMonthIndex : 1;
+            int activeYear = Mathf.Clamp((activeMonth - 1) / 12 + 1, 1, TotalYearsInMandate);
+
+            // Ajusta o ano visualizado para o ano do mês ativo
+            _viewingYearIndex = activeYear;
+
+            RenderYear(_viewingYearIndex);
+        }
+
+        /// <summary>
+        /// Compatibilidade com chamadas legadas que passavam o índice do mês (1 a 48).
+        /// </summary>
+        public void RenderMonth(int monthIndex)
+        {
+            int year = Mathf.Clamp((monthIndex - 1) / 12 + 1, 1, TotalYearsInMandate);
+            RenderYear(year);
+        }
+
+        /// <summary>
+        /// Renderiza o ano selecionado do mandato (1 a 4) com os seus 12 meses correspondentes.
+        /// </summary>
+        public void RenderYear(int yearIndex)
+        {
+            _viewingYearIndex = Mathf.Clamp(yearIndex, 1, TotalYearsInMandate);
+
+            int activeMonth = _currentRunState != null ? _currentRunState.calendar.currentMonthIndex : 1;
+            int startYear = _currentRunState != null && _currentRunState.calendar != null
+                ? _currentRunState.calendar.startYear
+                : currentYear;
+
+            int displayYear = startYear + (_viewingYearIndex - 1);
+            int startMonthOfThisYear = (_viewingYearIndex - 1) * 12 + 1;
+            int endMonthOfThisYear = _viewingYearIndex * 12;
+
+            if (_yearNumberLabel != null)
+                _yearNumberLabel.text = displayYear.ToString();
+
+            if (_yearTitleLabel != null)
+                _yearTitleLabel.text = $"{_viewingYearIndex}º ANO DO MANDATO";
+
+            if (_yearSubtitleLabel != null)
+                _yearSubtitleLabel.text = $"MESES {startMonthOfThisYear:D2} A {endMonthOfThisYear:D2} DE {totalMonthsInMandate} • CRONOGRAMA ANUAL DO GOVERNO";
+
+            if (_btnPrevYear != null)
+                _btnPrevYear.SetEnabled(_viewingYearIndex > 1);
+
+            if (_btnNextYear != null)
+                _btnNextYear.SetEnabled(_viewingYearIndex < TotalYearsInMandate);
+
+            // Renderiza cada um dos 12 meses na grade
+            if (_monthsGrid != null)
             {
-                int dayNumber = ExtractDayNumber(cell.name);
-                if (dayNumber > 0)
+                for (int slot = 1; slot <= 12; slot++)
                 {
-                    ShowTooltipForDay(dayNumber, cell);
+                    int mandateMonth = (_viewingYearIndex - 1) * 12 + slot;
+                    var card = _monthsGrid.Q<VisualElement>($"month-card-{slot}");
+                    if (card != null)
+                    {
+                        RenderMonthCard(card, slot, mandateMonth, activeMonth, displayYear);
+                    }
+                }
+            }
+
+            // Renderiza a lista de agendamentos e acontecimentos do ano no painel inferior
+            PopulateScheduledEventsList(_viewingYearIndex, activeMonth);
+        }
+
+        private void RenderMonthCard(
+            VisualElement card,
+            int slotIndex,
+            int mandateMonth,
+            int activeMonth,
+            int displayYear)
+        {
+            string monthName = MonthNames[slotIndex - 1];
+
+            // Atualiza cabeçalho do card
+            var titleLabel = card.Q<Label>($"month-card-title-{slotIndex}") ?? card.Q<Label>(className: "month-title-label");
+            if (titleLabel != null)
+            {
+                titleLabel.text = $"{slotIndex:D2} {monthName}";
+            }
+
+            var tagLabel = card.Q<Label>($"month-card-tag-{slotIndex}") ?? card.Q<Label>(className: "month-tag-label");
+            if (tagLabel != null)
+            {
+                tagLabel.text = $"MÊS {mandateMonth:D2}";
+            }
+
+            // Limpa classes anteriores do card
+            card.RemoveFromClassList("month-card--past");
+            card.RemoveFromClassList("month-card--current");
+            card.RemoveFromClassList("month-card--future");
+            card.RemoveFromClassList("month-card--event");
+
+            // Limpa corpo do card
+            var body = card.Q<VisualElement>($"month-card-body-{slotIndex}") ?? card.Q<VisualElement>(className: "month-card-body");
+            if (body != null)
+            {
+                body.Clear();
+            }
+
+            CalendarDayDossier dossier = null;
+
+            if (mandateMonth < activeMonth)
+            {
+                // =========================================================================
+                // ESTADO 1: MÊS PASSADO (Com carimbo ink stamp APROVADO, VETADO ou EVENTO)
+                // =========================================================================
+                card.AddToClassList("month-card--past");
+
+                var decision = _currentRunState?.GetDecisionForMonth(mandateMonth);
+                if (decision != null)
+                {
+                    if (decision.isEvent)
+                    {
+                        if (body != null)
+                        {
+                            var stamp = new VisualElement();
+                            stamp.AddToClassList("month-stamp");
+                            stamp.AddToClassList("stamp-event");
+                            stamp.pickingMode = PickingMode.Ignore;
+
+                            var stampLabel = new Label("★ EVENTO");
+                            stampLabel.AddToClassList("month-stamp-label");
+                            stampLabel.pickingMode = PickingMode.Ignore;
+                            stamp.Add(stampLabel);
+                            body.Add(stamp);
+
+                            var titleLbl = new Label(decision.title);
+                            titleLbl.AddToClassList("month-card-decision-title");
+                            titleLbl.pickingMode = PickingMode.Ignore;
+                            body.Add(titleLbl);
+
+                            if (!string.IsNullOrEmpty(decision.choiceLabel))
+                            {
+                                var subLbl = new Label(decision.choiceLabel);
+                                subLbl.AddToClassList("month-card-decision-sub");
+                                subLbl.pickingMode = PickingMode.Ignore;
+                                body.Add(subLbl);
+                            }
+                        }
+
+                        dossier = new CalendarDayDossier
+                        {
+                            monthNumber = mandateMonth,
+                            dateLabel = $"{monthName} DE {displayYear} • MÊS {mandateMonth:D2}",
+                            statusText = "EVENTO CONCLUÍDO",
+                            statusTagClass = "tag-diplomacy",
+                            isEvent = true,
+                            eventTitle = decision.title,
+                            eventDesc = decision.choiceLabel,
+                            eventImpact = $"{decision.stat1Text} {decision.stat2Text}".Trim()
+                        };
+                    }
+                    else
+                    {
+                        if (body != null)
+                        {
+                            var stamp = new VisualElement();
+                            stamp.AddToClassList("month-stamp");
+                            stamp.AddToClassList(decision.isApproved ? "stamp-approved" : "stamp-rejected");
+                            stamp.pickingMode = PickingMode.Ignore;
+
+                            var stampLabel = new Label(decision.isApproved ? "APROVADO" : "VETADO");
+                            stampLabel.AddToClassList("month-stamp-label");
+                            stampLabel.pickingMode = PickingMode.Ignore;
+                            stamp.Add(stampLabel);
+                            body.Add(stamp);
+
+                            var titleLbl = new Label(decision.title);
+                            titleLbl.AddToClassList("month-card-decision-title");
+                            titleLbl.pickingMode = PickingMode.Ignore;
+                            body.Add(titleLbl);
+
+                            if (!string.IsNullOrEmpty(decision.choiceLabel))
+                            {
+                                var subLbl = new Label(decision.choiceLabel);
+                                subLbl.AddToClassList("month-card-decision-sub");
+                                subLbl.pickingMode = PickingMode.Ignore;
+                                body.Add(subLbl);
+                            }
+                        }
+
+                        dossier = new CalendarDayDossier
+                        {
+                            monthNumber = mandateMonth,
+                            dateLabel = $"{monthName} DE {displayYear} • MÊS {mandateMonth:D2}",
+                            statusText = decision.isApproved ? "DESPACHADO: APROVADO" : "DESPACHADO: VETADO",
+                            statusTagClass = decision.isApproved ? "tag-approved" : "tag-rejected",
+                            isEvent = false,
+                            npcName = decision.npcName,
+                            proposalTitle = decision.title,
+                            proposalDesc = decision.choiceLabel,
+                            stat1Text = decision.stat1Text,
+                            stat1Positive = decision.stat1Positive,
+                            stat2Text = decision.stat2Text,
+                            stat2Positive = decision.stat2Positive,
+                            perkText = decision.perkText
+                        };
+                    }
+                }
+                else
+                {
+                    if (body != null)
+                    {
+                        var stamp = new VisualElement();
+                        stamp.AddToClassList("month-stamp");
+                        stamp.AddToClassList("stamp-approved");
+                        stamp.pickingMode = PickingMode.Ignore;
+
+                        var stampLabel = new Label("CONCLUÍDO");
+                        stampLabel.AddToClassList("month-stamp-label");
+                        stampLabel.pickingMode = PickingMode.Ignore;
+                        stamp.Add(stampLabel);
+                        body.Add(stamp);
+
+                        var titleLbl = new Label("Expediente da União");
+                        titleLbl.AddToClassList("month-card-decision-title");
+                        titleLbl.pickingMode = PickingMode.Ignore;
+                        body.Add(titleLbl);
+                    }
+
+                    dossier = new CalendarDayDossier
+                    {
+                        monthNumber = mandateMonth,
+                        dateLabel = $"{monthName} DE {displayYear} • MÊS {mandateMonth:D2}",
+                        statusText = "EXPEDIENTE CONCLUÍDO",
+                        statusTagClass = "tag-approved",
+                        isEvent = false,
+                        npcName = "Secretaria-Geral",
+                        proposalTitle = "Expediente Presidencial Concluído",
+                        proposalDesc = "Atividades ordinárias e despachos administrativos arquivados.",
+                        stat1Text = "Mês Encerrado",
+                        stat1Positive = true
+                    };
+                }
+            }
+            else if (mandateMonth == activeMonth)
+            {
+                // =========================================================================
+                // ESTADO 2: MÊS ATUAL (Destaque proeminente do despacho sob deliberação)
+                // =========================================================================
+                card.AddToClassList("month-card--current");
+
+                string scheduledThisMonth = string.Empty;
+                bool hasEvent = _currentRunState != null && (
+                    !string.IsNullOrEmpty(_currentRunState.scheduledEventId) ||
+                    _currentRunState.scheduledEventsByMonth.TryGetValue(activeMonth, out scheduledThisMonth)
+                );
+
+                if (body != null)
+                {
+                    var badge = new VisualElement();
+                    badge.AddToClassList("current-month-badge");
+                    badge.pickingMode = PickingMode.Ignore;
+
+                    var badgeLabel = new Label("● MÊS ATUAL");
+                    badgeLabel.AddToClassList("current-month-badge-label");
+                    badgeLabel.pickingMode = PickingMode.Ignore;
+                    badge.Add(badgeLabel);
+                    body.Add(badge);
+                }
+
+                if (hasEvent)
+                {
+                    string evId = !string.IsNullOrEmpty(_currentRunState.scheduledEventId)
+                        ? _currentRunState.scheduledEventId
+                        : scheduledThisMonth;
+                    string evTitle = ResolveEventTitle(evId);
+
+                    if (body != null)
+                    {
+                        var titleLbl = new Label(evTitle);
+                        titleLbl.AddToClassList("current-proposal-title");
+                        titleLbl.pickingMode = PickingMode.Ignore;
+                        body.Add(titleLbl);
+
+                        var subLbl = new Label("EVENTO EM ANDAMENTO");
+                        subLbl.AddToClassList("current-proposal-sub");
+                        subLbl.pickingMode = PickingMode.Ignore;
+                        body.Add(subLbl);
+                    }
+
+                    dossier = new CalendarDayDossier
+                    {
+                        monthNumber = mandateMonth,
+                        dateLabel = $"{monthName} DE {displayYear} • MÊS ATUAL",
+                        statusText = "EVENTO DESTE MÊS",
+                        statusTagClass = "tag-today",
+                        isEvent = true,
+                        eventTitle = evTitle,
+                        eventDesc = "Evento extraordinário agendado para o gabinete presidencial.",
+                        eventImpact = "Negociações e consequências diretas nos indicadores políticos."
+                    };
+                }
+                else if (_currentCard != null)
+                {
+                    string npcLabel = _currentCard.npc != null && !string.IsNullOrEmpty(_currentCard.npc.displayName)
+                        ? _currentCard.npc.displayName
+                        : (_currentCard.GetNpcId() ?? "Gabinete Presidencial");
+
+                    if (body != null)
+                    {
+                        var titleLbl = new Label(_currentCard.title);
+                        titleLbl.AddToClassList("current-proposal-title");
+                        titleLbl.pickingMode = PickingMode.Ignore;
+                        body.Add(titleLbl);
+
+                        var subLbl = new Label($"EM DELIBERAÇÃO • {npcLabel}");
+                        subLbl.AddToClassList("current-proposal-sub");
+                        subLbl.pickingMode = PickingMode.Ignore;
+                        body.Add(subLbl);
+                    }
+
+                    dossier = new CalendarDayDossier
+                    {
+                        monthNumber = mandateMonth,
+                        dateLabel = $"{monthName} DE {displayYear} • MÊS ATUAL",
+                        statusText = "EM DELIBERAÇÃO",
+                        statusTagClass = "tag-today",
+                        isEvent = false,
+                        npcName = npcLabel,
+                        proposalTitle = _currentCard.title,
+                        proposalDesc = _currentCard.description,
+                        stat1Text = "Aguardando Decisão (Carimbo A/D)",
+                        stat1Positive = true
+                    };
+                }
+                else
+                {
+                    if (body != null)
+                    {
+                        var titleLbl = new Label("Despacho em Análise");
+                        titleLbl.AddToClassList("current-proposal-title");
+                        titleLbl.pickingMode = PickingMode.Ignore;
+                        body.Add(titleLbl);
+
+                        var subLbl = new Label("EM DELIBERAÇÃO");
+                        subLbl.AddToClassList("current-proposal-sub");
+                        subLbl.pickingMode = PickingMode.Ignore;
+                        body.Add(subLbl);
+                    }
+
+                    dossier = new CalendarDayDossier
+                    {
+                        monthNumber = mandateMonth,
+                        dateLabel = $"{monthName} DE {displayYear} • MÊS ATUAL",
+                        statusText = "EM DELIBERAÇÃO",
+                        statusTagClass = "tag-today",
+                        isEvent = false,
+                        npcName = "Mesa Presidencial",
+                        proposalTitle = "Despacho em Análise",
+                        proposalDesc = "Avalie a proposta na mesa do gabinete presidencial.",
+                        stat1Text = "Decisão Pendente",
+                        stat1Positive = true
+                    };
+                }
+            }
+            else
+            {
+                // =========================================================================
+                // ESTADO 3: MÊS FUTURO (Agenda aberta ou Evento Agendado)
+                // =========================================================================
+                card.AddToClassList("month-card--future");
+
+                if (_currentRunState != null &&
+                    _currentRunState.scheduledEventsByMonth.TryGetValue(mandateMonth, out string schedEventId))
+                {
+                    card.AddToClassList("month-card--event");
+                    string evTitle = ResolveEventTitle(schedEventId);
+
+                    if (body != null)
+                    {
+                        var badge = new VisualElement();
+                        badge.AddToClassList("future-event-badge");
+                        badge.pickingMode = PickingMode.Ignore;
+
+                        var badgeLabel = new Label("★ EVENTO AGENDADO");
+                        badgeLabel.AddToClassList("future-event-badge-label");
+                        badgeLabel.pickingMode = PickingMode.Ignore;
+                        badge.Add(badgeLabel);
+                        body.Add(badge);
+
+                        var titleLbl = new Label(evTitle);
+                        titleLbl.AddToClassList("future-event-title");
+                        titleLbl.pickingMode = PickingMode.Ignore;
+                        body.Add(titleLbl);
+                    }
+
+                    dossier = new CalendarDayDossier
+                    {
+                        monthNumber = mandateMonth,
+                        dateLabel = $"{monthName} DE {displayYear} • PREVISÃO",
+                        statusText = "EVENTO AGENDADO",
+                        statusTagClass = "tag-diplomacy",
+                        isEvent = true,
+                        eventTitle = evTitle,
+                        eventDesc = "Evento programado no cronograma oficial da presidência.",
+                        eventImpact = "Audiências e decisões com lideranças nacionais."
+                    };
+                }
+                else
+                {
+                    if (body != null)
+                    {
+                        var openLabel = new Label("AGENDA ABERTA");
+                        openLabel.AddToClassList("future-open-agenda");
+                        openLabel.pickingMode = PickingMode.Ignore;
+                        body.Add(openLabel);
+
+                        var openSub = new Label("Pauta em definição");
+                        openSub.AddToClassList("future-open-sub");
+                        openSub.pickingMode = PickingMode.Ignore;
+                        body.Add(openSub);
+                    }
+
+                    dossier = new CalendarDayDossier
+                    {
+                        monthNumber = mandateMonth,
+                        dateLabel = $"{monthName} DE {displayYear} • FUTURO",
+                        statusText = "AGENDA FUTURA",
+                        statusTagClass = "tag-approved",
+                        isEvent = false,
+                        npcName = "Gabinete Presidencial",
+                        proposalTitle = "Calendário Aberto",
+                        proposalDesc = "Acontecimentos e novas propostas serão pautados conforme o avanço do mandato."
+                    };
+                }
+            }
+
+            if (dossier != null)
+            {
+                _monthDossiers[mandateMonth] = dossier;
+            }
+        }
+
+        private void PopulateScheduledEventsList(int yearIndex, int activeMonth)
+        {
+            if (_scheduledEventsList == null) return;
+            _scheduledEventsList.Clear();
+
+            int startMonthOfThisYear = (yearIndex - 1) * 12 + 1;
+            int endMonthOfThisYear = yearIndex * 12;
+
+            int itemsAdded = 0;
+
+            // 1. Proposta atual sob deliberação (se o mês ativo cair neste ano visualizado)
+            if (activeMonth >= startMonthOfThisYear && activeMonth <= endMonthOfThisYear)
+            {
+                if (_currentCard != null)
+                {
+                    string npcStr = _currentCard.npc != null && !string.IsNullOrEmpty(_currentCard.npc.displayName)
+                        ? _currentCard.npc.displayName
+                        : (_currentCard.GetNpcId() ?? "Gabinete");
+
+                    AddScheduleListItem(
+                        $"{((activeMonth - 1) % 12) + 1:D2}",
+                        MonthAbbreviation(activeMonth),
+                        "DELIBERAÇÃO",
+                        "badge-deadline",
+                        "MÊS ATUAL",
+                        _currentCard.title,
+                        $"Proposta sob despacho presidencial ({npcStr}).",
+                        "item--deadline"
+                    );
+                    itemsAdded++;
+                }
+
+                // Evento imediato agendado para este mês
+                string nextEventId = _currentRunState?.scheduledEventId;
+                if (!string.IsNullOrEmpty(nextEventId))
+                {
+                    AddScheduleListItem(
+                        $"{((activeMonth - 1) % 12) + 1:D2}",
+                        MonthAbbreviation(activeMonth),
+                        "EVENTO DO MÊS",
+                        "badge-diplomacy",
+                        "IMINENTE",
+                        ResolveEventTitle(nextEventId),
+                        "Evento especial agendado para o gabinete presidencial.",
+                        "item--diplomacy"
+                    );
+                    itemsAdded++;
+                }
+            }
+
+            // 2. Eventos agendados nos meses deste ano
+            if (_currentRunState != null && _currentRunState.scheduledEventsByMonth != null)
+            {
+                foreach (var kvp in _currentRunState.scheduledEventsByMonth)
+                {
+                    int m = kvp.Key;
+                    if (m >= startMonthOfThisYear && m <= endMonthOfThisYear)
+                    {
+                        int diff = m - activeMonth;
+                        string timeTxt = diff == 0 ? "ESTE MÊS" : (diff > 0 ? (diff == 1 ? "PRÓXIMO MÊS" : $"EM {diff} MESES") : "PASSADO");
+                        AddScheduleListItem(
+                            $"{((m - 1) % 12) + 1:D2}",
+                            MonthAbbreviation(m),
+                            "AGENDAMENTO",
+                            "badge-congress",
+                            timeTxt,
+                            ResolveEventTitle(kvp.Value),
+                            $"Evento confirmado no calendário oficial para o Mês {m:D2}.",
+                            "item--congress"
+                        );
+                        itemsAdded++;
+                    }
+                }
+            }
+
+            // 3. Decisões tomadas nos meses deste ano (histórico do ano)
+            if (_currentRunState != null && _currentRunState.pastDecisions != null)
+            {
+                foreach (var dec in _currentRunState.pastDecisions)
+                {
+                    if (dec.monthIndex >= startMonthOfThisYear && dec.monthIndex <= endMonthOfThisYear)
+                    {
+                        string badgeTxt = dec.isEvent ? "EVENTO" : (dec.isApproved ? "APROVADO" : "VETADO");
+                        string badgeCls = dec.isEvent ? "badge-diplomacy" : (dec.isApproved ? "badge-congress" : "badge-crisis");
+                        string itemCls = dec.isEvent ? "item--diplomacy" : (dec.isApproved ? "item--congress" : "item--crisis");
+
+                        AddScheduleListItem(
+                            $"{((dec.monthIndex - 1) % 12) + 1:D2}",
+                            MonthAbbreviation(dec.monthIndex),
+                            badgeTxt,
+                            badgeCls,
+                            "CONCLUÍDO",
+                            dec.title,
+                            $"Despacho: {dec.choiceLabel}. {dec.stat1Text} {dec.stat2Text}".Trim(),
+                            itemCls
+                        );
+                        itemsAdded++;
+                    }
+                }
+            }
+
+            // 4. Perks ativos do governo (se estivermos no ano ativo)
+            if (activeMonth >= startMonthOfThisYear && activeMonth <= endMonthOfThisYear && _currentRunState?.activePerks != null)
+            {
+                foreach (var perk in _currentRunState.activePerks)
+                {
+                    string pTitle = ResolvePerkTitle(perk.perkId);
+                    string pTime = perk.remainingMonths > 0 ? $"{perk.remainingMonths} MESES" : "PERMANENTE";
+                    AddScheduleListItem(
+                        "★",
+                        "PRK",
+                        "DIRETRIZ ATIVA",
+                        "badge-congress",
+                        pTime,
+                        pTitle,
+                        "Modificador governamental em vigor.",
+                        "item--congress"
+                    );
+                    itemsAdded++;
+                }
+            }
+
+            // Item padrão se a lista estiver vazia
+            if (itemsAdded == 0)
+            {
+                AddScheduleListItem(
+                    "--",
+                    MonthAbbreviation(startMonthOfThisYear),
+                    "ROTINA",
+                    "badge-congress",
+                    "ORDINÁRIO",
+                    "Expediente Administrativo da União",
+                    "Despachos de rotina e acompanhamento de indicadores nacionais.",
+                    "item--congress"
+                );
+            }
+        }
+
+        private void AddScheduleListItem(
+            string dayTxt,
+            string monTxt,
+            string badgeText,
+            string badgeClass,
+            string timeText,
+            string nameText,
+            string detailsText,
+            string itemClass = "item--diplomacy")
+        {
+            var item = new VisualElement();
+            item.AddToClassList("schedule-item");
+            item.AddToClassList(itemClass);
+            item.pickingMode = PickingMode.Ignore;
+
+            var dateCol = new VisualElement();
+            dateCol.AddToClassList("schedule-date-col");
+            dateCol.pickingMode = PickingMode.Ignore;
+            var dayLabel = new Label(dayTxt);
+            dayLabel.AddToClassList("schedule-day-txt");
+            dayLabel.pickingMode = PickingMode.Ignore;
+            var monLabel = new Label(monTxt);
+            monLabel.AddToClassList("schedule-mon-txt");
+            monLabel.pickingMode = PickingMode.Ignore;
+            dateCol.Add(dayLabel);
+            dateCol.Add(monLabel);
+
+            var infoCol = new VisualElement();
+            infoCol.AddToClassList("schedule-info-col");
+            infoCol.pickingMode = PickingMode.Ignore;
+
+            var badgeRow = new VisualElement();
+            badgeRow.AddToClassList("schedule-badge-row");
+            badgeRow.pickingMode = PickingMode.Ignore;
+
+            var badgePill = new Label(badgeText);
+            badgePill.AddToClassList("badge-pill");
+            badgePill.AddToClassList(badgeClass);
+            badgePill.pickingMode = PickingMode.Ignore;
+
+            var timeLabel = new Label(timeText);
+            timeLabel.AddToClassList("badge-time");
+            timeLabel.pickingMode = PickingMode.Ignore;
+
+            badgeRow.Add(badgePill);
+            badgeRow.Add(timeLabel);
+
+            var nameLabel = new Label(nameText);
+            nameLabel.AddToClassList("schedule-name");
+            nameLabel.pickingMode = PickingMode.Ignore;
+
+            var detailsLabel = new Label(detailsText);
+            detailsLabel.AddToClassList("schedule-details");
+            detailsLabel.pickingMode = PickingMode.Ignore;
+
+            infoCol.Add(badgeRow);
+            infoCol.Add(nameLabel);
+            infoCol.Add(detailsLabel);
+
+            item.Add(dateCol);
+            item.Add(infoCol);
+
+            _scheduledEventsList.Add(item);
+        }
+
+        private string ResolveEventTitle(string eventId)
+        {
+            if (string.IsNullOrEmpty(eventId)) return "Evento Presidencial";
+            if (eventId.Equals("FestaCorporativa", StringComparison.OrdinalIgnoreCase))
+                return "Festa Corporativa";
+            if (_eventsCatalog != null && _eventsCatalog.TryGetValue(eventId, out var evDef) && evDef != null)
+                return evDef.title;
+            return eventId;
+        }
+
+        private string ResolvePerkTitle(string perkId)
+        {
+            if (string.IsNullOrEmpty(perkId)) return "Diretriz Governamental";
+            if (_perksCatalog != null && _perksCatalog.TryGetValue(perkId, out var pDef) && pDef != null)
+                return pDef.title;
+            return perkId;
+        }
+
+        private string MonthAbbreviation(int monthIndex)
+        {
+            if (monthIndex < 1) monthIndex = 1;
+            int idx = (monthIndex - 1) % 12;
+            return MonthShortNames[idx];
+        }
+
+        private void OnMonthCardPointerEnter(PointerEnterEvent evt)
+        {
+            if (evt.currentTarget is VisualElement card)
+            {
+                int slot = ExtractMonthSlot(card.name);
+                if (slot >= 1 && slot <= 12)
+                {
+                    int mandateMonth = (_viewingYearIndex - 1) * 12 + slot;
+                    ShowTooltipForMonth(mandateMonth, card);
                 }
             }
         }
 
-        private void OnDayPointerLeave(PointerLeaveEvent evt)
+        private void OnMonthCardPointerLeave(PointerLeaveEvent evt)
         {
-            if (evt.currentTarget is VisualElement cell && cell == _currentlyHoveredCell)
+            if (evt.currentTarget is VisualElement card && card == _currentlyHoveredCell)
             {
                 HideTooltip();
             }
         }
 
-        private int ExtractDayNumber(string cellName)
+        private int ExtractMonthSlot(string cardName)
         {
-            if (string.IsNullOrEmpty(cellName)) return 0;
-            if (cellName.StartsWith("day-cell-") && int.TryParse(cellName.Substring(9), out int num))
+            if (string.IsNullOrEmpty(cardName)) return 0;
+            if (cardName.StartsWith("month-card-") && int.TryParse(cardName.Substring(11), out int num))
             {
                 return num;
             }
             return 0;
         }
 
-        public void ShowTooltipForDay(int dayNumber, VisualElement cell)
+        public void ShowTooltipForMonth(int mandateMonth, VisualElement card)
         {
-            if (_tooltipOverlay == null || _tooltipCard == null || cell == null) return;
+            if (_tooltipOverlay == null || _tooltipCard == null || card == null) return;
 
-            _currentlyHoveredCell = cell;
+            _currentlyHoveredCell = card;
 
-            // Busca ou gera o dossiê do dia
-            if (!_dayDossiers.TryGetValue(dayNumber, out var dossier))
+            if (!_monthDossiers.TryGetValue(mandateMonth, out var dossier))
             {
-                dossier = GenerateFallbackDossier(dayNumber);
+                int monthInYear = (mandateMonth - 1) % 12;
+                dossier = new CalendarDayDossier
+                {
+                    monthNumber = mandateMonth,
+                    dateLabel = $"{MonthNames[monthInYear]} • MÊS {mandateMonth:D2}",
+                    statusText = "EXPEDIENTE ORDINÁRIO",
+                    statusTagClass = "tag-approved",
+                    isEvent = false,
+                    npcName = "Gabinete Presidencial",
+                    proposalTitle = "Rotina Administrativa",
+                    proposalDesc = "Atividades ordinárias de governo e acompanhamento de políticas públicas."
+                };
             }
 
             PopulateTooltipData(dossier);
-            PositionTooltipOverlay(cell);
+            PositionTooltipOverlay(card);
 
             _tooltipOverlay.style.display = DisplayStyle.Flex;
             _tooltipOverlay.RemoveFromClassList("hidden");
 
-            // Garante que a camada de overlay esteja no final absoluto do container pai
             if (_calendarPage != null && _tooltipOverlay.parent == _calendarPage &&
                 _calendarPage.IndexOf(_tooltipOverlay) < _calendarPage.childCount - 1)
             {
@@ -277,11 +976,10 @@ namespace Mandato.UI
             }
         }
 
-        private void PositionTooltipOverlay(VisualElement cell)
+        private void PositionTooltipOverlay(VisualElement card)
         {
-            if (_tooltipCard == null || cell == null) return;
+            if (_tooltipCard == null || card == null) return;
 
-            // Medidas do painel/overlay
             float panelWidth = 1024f;
             float panelHeight = 1448f;
             if (_tooltipOverlay != null && _tooltipOverlay.layout.width > 10f)
@@ -290,42 +988,37 @@ namespace Mandato.UI
                 panelHeight = _tooltipOverlay.layout.height;
             }
 
-            const float tooltipWidth = 330f;
-            const float tooltipHeight = 260f; // altura aproximada máxima do card
+            const float tooltipWidth = 350f;
+            const float tooltipHeight = 280f;
 
-            // Bounding box da célula convertida com precisão para o espaço local do overlay
-            Rect cellRect = cell.worldBound;
-            float cellX, cellY, cellW;
+            Rect cardRect = card.worldBound;
+            float cardX, cardY, cardW;
 
-            if (_tooltipOverlay != null && cellRect.width > 1f)
+            if (_tooltipOverlay != null && cardRect.width > 1f)
             {
-                Vector2 localPos = _tooltipOverlay.WorldToLocal(new Vector2(cellRect.x, cellRect.y));
-                cellX = localPos.x;
-                cellY = localPos.y;
-                cellW = cellRect.width;
+                Vector2 localPos = _tooltipOverlay.WorldToLocal(new Vector2(cardRect.x, cardRect.y));
+                cardX = localPos.x;
+                cardY = localPos.y;
+                cardW = cardRect.width;
             }
             else
             {
-                cellX = cell.layout.x > 0 ? cell.layout.x : 200f;
-                cellY = cell.layout.y > 0 ? cell.layout.y : 350f;
-                cellW = cell.layout.width > 1f ? cell.layout.width : 130f;
+                cardX = card.layout.x > 0 ? card.layout.x : 200f;
+                cardY = card.layout.y > 0 ? card.layout.y : 350f;
+                cardW = card.layout.width > 1f ? card.layout.width : 280f;
             }
 
-            // Decisão inteligente de lado (esquerda vs direita) para nunca vazar da folha
             float targetX;
-            if (cellX < panelWidth * 0.5f)
+            if (cardX < panelWidth * 0.55f)
             {
-                // Células da metade esquerda da grade: posiciona à DIREITA da célula
-                targetX = cellX + cellW + 14f;
+                targetX = cardX + cardW + 14f;
             }
             else
             {
-                // Células da metade direita da grade: posiciona à ESQUERDA da célula
-                targetX = cellX - tooltipWidth - 14f;
+                targetX = cardX - tooltipWidth - 14f;
             }
 
-            // Alinhamento vertical com clamp rigoroso para nunca sumir em cima nem embaixo
-            float targetY = cellY - 10f;
+            float targetY = cardY - 10f;
             targetX = Mathf.Clamp(targetX, 20f, panelWidth - tooltipWidth - 20f);
             targetY = Mathf.Clamp(targetY, 20f, panelHeight - tooltipHeight - 20f);
 
@@ -351,7 +1044,6 @@ namespace Mandato.UI
 
             if (dossier.isEvent)
             {
-                // Modo Evento Futuro
                 SetVisible(_tooltipNpcSection, false);
                 SetVisible(_tooltipStatsSection, false);
                 SetVisible(_tooltipPerkSection, false);
@@ -367,7 +1059,6 @@ namespace Mandato.UI
             }
             else
             {
-                // Modo Proposta / Despacho Ordinário
                 SetVisible(_tooltipEventSection, false);
 
                 SetVisible(_tooltipNpcSection, true);
@@ -375,7 +1066,6 @@ namespace Mandato.UI
                 if (_tooltipProposalTitle != null) _tooltipProposalTitle.text = dossier.proposalTitle;
                 if (_tooltipProposalDesc != null) _tooltipProposalDesc.text = dossier.proposalDesc;
 
-                // Atributos
                 bool hasStat1 = !string.IsNullOrEmpty(dossier.stat1Text);
                 bool hasStat2 = !string.IsNullOrEmpty(dossier.stat2Text);
                 SetVisible(_tooltipStatsSection, hasStat1 || hasStat2);
@@ -404,7 +1094,6 @@ namespace Mandato.UI
                     }
                 }
 
-                // Perk
                 bool hasPerk = !string.IsNullOrEmpty(dossier.perkText);
                 SetVisible(_tooltipPerkSection, hasPerk);
                 if (_tooltipPerkText != null && hasPerk)
@@ -422,22 +1111,22 @@ namespace Mandato.UI
             else el.AddToClassList("hidden");
         }
 
-        private void OnPrevMonthClicked()
+        private void OnPrevYearClicked()
         {
-            if (currentMonthIndex > 0)
+            if (_viewingYearIndex > 1)
             {
-                currentMonthIndex--;
-                UpdateMonthDisplay();
+                _viewingYearIndex--;
+                RenderYear(_viewingYearIndex);
                 PlayClickSound();
             }
         }
 
-        private void OnNextMonthClicked()
+        private void OnNextYearClicked()
         {
-            if (currentMonthIndex < totalMonthsInMandate - 1)
+            if (_viewingYearIndex < TotalYearsInMandate)
             {
-                currentMonthIndex++;
-                UpdateMonthDisplay();
+                _viewingYearIndex++;
+                RenderYear(_viewingYearIndex);
                 PlayClickSound();
             }
         }
@@ -450,32 +1139,15 @@ namespace Mandato.UI
             }
         }
 
-        private void UpdateMonthDisplay()
-        {
-            int yearOffset = currentMonthIndex / 12;
-            int monthInYear = currentMonthIndex % 12;
-            int displayYear = currentYear + yearOffset;
-            string monthName = MonthNames[monthInYear];
-
-            if (_yearLabel != null) _yearLabel.text = displayYear.ToString();
-            if (_monthNameLabel != null) _monthNameLabel.text = monthName;
-            if (_monthSubtitleLabel != null)
-            {
-                int monthNumber1Based = currentMonthIndex + 1;
-                int mandateYear = yearOffset + 1;
-                _monthSubtitleLabel.text = $"MÊS {monthNumber1Based:D2} DE {totalMonthsInMandate} • {mandateYear}º ANO DO MANDATO • 31 DIAS";
-            }
-        }
-
         /// <summary>
-        /// Registra a decisão de uma proposta executada na partida no histórico do calendário.
+        /// Registra a decisão de uma proposta diretamente no histórico visual do calendário (compatibilidade).
         /// </summary>
-        public void RecordProposalDecision(int day, string proposalTitle, string npcName, bool approved, string stat1 = "", bool stat1Pos = true, string stat2 = "", bool stat2Pos = true, string perk = "")
+        public void RecordProposalDecision(int month, string proposalTitle, string npcName, bool approved, string stat1 = "", bool stat1Pos = true, string stat2 = "", bool stat2Pos = true, string perk = "")
         {
             var dossier = new CalendarDayDossier
             {
-                dayNumber = day,
-                dateLabel = $"{day:D2} DE {MonthNames[currentMonthIndex % 12]}",
+                monthNumber = month,
+                dateLabel = $"MÊS {month:D2}",
                 statusText = approved ? "DESPACHADO: APROVADO" : "DESPACHADO: VETADO",
                 statusTagClass = approved ? "tag-approved" : "tag-rejected",
                 isEvent = false,
@@ -489,204 +1161,8 @@ namespace Mandato.UI
                 perkText = perk
             };
 
-            _dayDossiers[day] = dossier;
-
-            // Atualiza visual da célula na grade se encontrada
-            if (uiDocument != null && uiDocument.rootVisualElement != null)
-            {
-                var cell = uiDocument.rootVisualElement.Q<VisualElement>($"day-cell-{day}");
-                if (cell != null)
-                {
-                    cell.AddToClassList("day-cell--past");
-                    cell.RemoveFromClassList("day-cell--today");
-                    cell.RemoveFromClassList("day-cell--future");
-
-                    // Garante selo de decisão
-                    var seal = cell.Q<VisualElement>(className: "day-decision-seal");
-                    if (seal != null)
-                    {
-                        seal.RemoveFromClassList("seal-approved");
-                        seal.RemoveFromClassList("seal-rejected");
-                        seal.AddToClassList(approved ? "seal-approved" : "seal-rejected");
-                    }
-                }
-            }
-        }
-
-        private CalendarDayDossier GenerateFallbackDossier(int day)
-        {
-            string monthStr = MonthNames[currentMonthIndex % 12];
-            if (day < 14)
-            {
-                return new CalendarDayDossier
-                {
-                    dayNumber = day,
-                    dateLabel = $"{day:D2} DE {monthStr}",
-                    statusText = "EXPEDIENTE CONCLUÍDO",
-                    statusTagClass = "tag-approved",
-                    isEvent = false,
-                    npcName = "Secretaria-Geral",
-                    proposalTitle = "Rotina Administrativa da União",
-                    proposalDesc = "Despachos ordinários de ministérios e acompanhamento de índices nacionais.",
-                    stat1Text = "+2 Estabilidade",
-                    stat1Positive = true
-                };
-            }
-            else if (day == 14)
-            {
-                return new CalendarDayDossier
-                {
-                    dayNumber = 14,
-                    dateLabel = "14 DE JANEIRO • HOJE",
-                    statusText = "EM DELIBERAÇÃO",
-                    statusTagClass = "tag-today",
-                    isEvent = false,
-                    npcName = "Mesa Presidencial",
-                    proposalTitle = "Despacho Pendente de Assinatura",
-                    proposalDesc = "Avalie a proposta em análise sobre a mesa do gabinete e decida com carimbo A ou D.",
-                    stat1Text = "Aguardando Decisão",
-                    stat1Positive = true
-                };
-            }
-            else
-            {
-                return new CalendarDayDossier
-                {
-                    dayNumber = day,
-                    dateLabel = $"{day:D2} DE {monthStr}",
-                    statusText = "AGENDA ABERTA",
-                    statusTagClass = "tag-approved",
-                    isEvent = false,
-                    npcName = "Gabinete Presidencial",
-                    proposalTitle = "Dia Livre na Agenda Governamental",
-                    proposalDesc = "Nenhuma audiência extraordinária ou evento de crise agendado para esta data."
-                };
-            }
-        }
-
-        private void InitializeDefaultDossiers()
-        {
-            _dayDossiers.Clear();
-
-            // DIA 01
-            _dayDossiers[1] = new CalendarDayDossier
-            {
-                dayNumber = 1,
-                dateLabel = "01 DE JANEIRO",
-                statusText = "DESPACHADO: APROVADO",
-                statusTagClass = "tag-approved",
-                isEvent = false,
-                npcName = "Ministro da Economia",
-                proposalTitle = "Diretrizes do Novo Mandato",
-                proposalDesc = "Aprovação do pacote inicial de governabilidade e metas fiscais do executivo.",
-                stat1Text = "+10 Popularidade",
-                stat1Positive = true,
-                stat2Text = "+5 Estabilidade",
-                stat2Positive = true,
-                perkText = "★ Perk: Lua de Mel Política"
-            };
-
-            // DIA 02
-            _dayDossiers[2] = new CalendarDayDossier
-            {
-                dayNumber = 2,
-                dateLabel = "02 DE JANEIRO",
-                statusText = "DESPACHADO: VETADO",
-                statusTagClass = "tag-rejected",
-                isEvent = false,
-                npcName = "Deputado Suspeito",
-                proposalTitle = "Emendas Secretas de Relator",
-                proposalDesc = "Veto integral ao mecanismo orçamentário por ausência de transparência pública.",
-                stat1Text = "+5 Popularidade",
-                stat1Positive = true,
-                stat2Text = "-8 Relações",
-                stat2Positive = false
-            };
-
-            // DIA 03
-            _dayDossiers[3] = new CalendarDayDossier
-            {
-                dayNumber = 3,
-                dateLabel = "03 DE JANEIRO",
-                statusText = "DESPACHADO: APROVADO",
-                statusTagClass = "tag-approved",
-                isEvent = false,
-                npcName = "Min. Meio Ambiente",
-                proposalTitle = "Operação Floresta Viva",
-                proposalDesc = "Fiscalização ambiental ostensiva em terras demarcadas contra o desmatamento ilegal.",
-                stat1Text = "+8 Clima",
-                stat1Positive = true,
-                stat2Text = "-4M Economia",
-                stat2Positive = false,
-                perkText = "★ Perk: Amazônia Sustentável"
-            };
-
-            // DIA 14
-            _dayDossiers[14] = new CalendarDayDossier
-            {
-                dayNumber = 14,
-                dateLabel = "14 DE JANEIRO • HOJE",
-                statusText = "EM DELIBERAÇÃO",
-                statusTagClass = "tag-today",
-                isEvent = false,
-                npcName = "Mesa Presidencial",
-                proposalTitle = "Despacho Pendente de Assinatura",
-                proposalDesc = "Avalie a proposta em análise sobre a mesa do gabinete e decida com carimbo A ou D.",
-                stat1Text = "Decisão Pendente",
-                stat1Positive = true
-            };
-
-            // DIA 18: CRISE
-            _dayDossiers[18] = new CalendarDayDossier
-            {
-                dayNumber = 18,
-                dateLabel = "18 DE JANEIRO",
-                statusText = "EVENTO: CRISE FEDERATIVA",
-                statusTagClass = "tag-crisis",
-                isEvent = true,
-                eventTitle = "Reunião de Emergência com Governadores",
-                eventDesc = "Governadores de oposição exigem repasse orçamentário extraordinário para a saúde pública.",
-                eventImpact = "Impacto previsto: Tensão nas Relações e Impacto no Orçamento."
-            };
-
-            // DIA 22: DIPLOMACIA
-            _dayDossiers[22] = new CalendarDayDossier
-            {
-                dayNumber = 22,
-                dateLabel = "22 DE JANEIRO",
-                statusText = "EVENTO: DIPLOMACIA",
-                statusTagClass = "tag-diplomacy",
-                isEvent = true,
-                eventTitle = "Cúpula Bilateral EUA - Brasil",
-                eventDesc = "Comitiva presidencial norte-americana para debate de tarifas aduaneiras de aço e etanol.",
-                eventImpact = "Impacto previsto: Oportunidade Econômica e Alianças Globais."
-            };
-
-            // DIA 25: FIM DE PRAZO
-            _dayDossiers[25] = new CalendarDayDossier
-            {
-                dayNumber = 25,
-                dateLabel = "25 DE JANEIRO",
-                statusText = "FIM DE PRAZO: MORATÓRIA",
-                statusTagClass = "tag-deadline",
-                isEvent = true,
-                eventTitle = "Término da Moratória de Juros",
-                eventDesc = "Encerra a vigência do benefício fiscal de emergência concedido a produtores rurais.",
-                eventImpact = "Impacto previsto: Normalização da Arrecadação Tributária."
-            };
-
-            // DIA 31: CONGRESSO
-            _dayDossiers[31] = new CalendarDayDossier
-            {
-                dayNumber = 31,
-                dateLabel = "31 DE JANEIRO",
-                statusText = "SESSÃO DO CONGRESSO",
-                statusTagClass = "tag-congress",
-                isEvent = true,
-                eventTitle = "Votação da Meta Fiscal Anual",
-                eventDesc = "Votação decisiva no plenário que definirá as diretrizes orçamentárias e limites de gastos.",
-                eventImpact = "Impacto previsto: Estabilidade Política e Confiança do Mercado."
-            };
+            _monthDossiers[month] = dossier;
+            RenderYear(_viewingYearIndex);
         }
     }
 }

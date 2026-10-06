@@ -6,6 +6,25 @@ using Mandato.Core;
 namespace Mandato.Run
 {
     [Serializable]
+    public class MonthDecisionRecord
+    {
+        public int monthIndex = 1;
+        public string cardId = string.Empty;
+        public string title = string.Empty;
+        public string npcName = string.Empty;
+        public bool isApproved = true;
+        public string choiceLabel = string.Empty;
+        public string stat1Text = string.Empty;
+        public bool stat1Positive = true;
+        public string stat2Text = string.Empty;
+        public bool stat2Positive = true;
+        public string perkText = string.Empty;
+        public bool isEvent = false;
+        public string eventId = string.Empty;
+        public string eventDetails = string.Empty;
+    }
+
+    [Serializable]
     public class RunState
     {
         public StatBlock stats = new StatBlock();
@@ -15,6 +34,7 @@ namespace Mandato.Run
 
         public List<string> activePerkIds = new List<string>();
         public List<string> decisionHistory = new List<string>();
+        public List<MonthDecisionRecord> pastDecisions = new List<MonthDecisionRecord>();
         public Dictionary<string, NpcRunState> npcStates = new Dictionary<string, NpcRunState>();
         public Dictionary<string, QuestRunState> questStates = new Dictionary<string, QuestRunState>();
         public List<ActiveEventState> activeEvents = new List<ActiveEventState>();
@@ -53,6 +73,7 @@ namespace Mandato.Run
             termination = RunTermination.Ongoing;
             activePerkIds.Clear();
             decisionHistory.Clear();
+            pastDecisions.Clear();
             npcStates.Clear();
             questStates.Clear();
             activeEvents.Clear();
@@ -65,6 +86,25 @@ namespace Mandato.Run
             isPreviewAttributesActive = false;
             scheduledEventId = string.Empty;
             scheduledEventsByMonth.Clear();
+        }
+
+        public void RecordMonthDecision(MonthDecisionRecord record)
+        {
+            if (record == null) return;
+            int existingIndex = pastDecisions.FindIndex(r => r.monthIndex == record.monthIndex);
+            if (existingIndex >= 0)
+            {
+                pastDecisions[existingIndex] = record;
+            }
+            else
+            {
+                pastDecisions.Add(record);
+            }
+        }
+
+        public MonthDecisionRecord GetDecisionForMonth(int monthIndex)
+        {
+            return pastDecisions?.Find(r => r.monthIndex == monthIndex);
         }
 
         public NpcRunState GetOrCreateNpcState(string npcId)

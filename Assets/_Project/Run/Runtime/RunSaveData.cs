@@ -84,6 +84,7 @@ namespace Mandato.Run
 
         public List<string> activePerkIds = new List<string>();
         public List<string> decisionHistory = new List<string>();
+        public List<MonthDecisionRecord> pastDecisions = new List<MonthDecisionRecord>();
         public List<ActiveEventState> activeEvents = new List<ActiveEventState>();
         public List<ActivePerkState> activePerks = new List<ActivePerkState>();
         public List<string> unlockedActionIds = new List<string>();
@@ -128,6 +129,7 @@ namespace Mandato.Run
                 termination = runState.termination,
                 activePerkIds = new List<string>(runState.activePerkIds ?? new List<string>()),
                 decisionHistory = new List<string>(runState.decisionHistory ?? new List<string>()),
+                pastDecisions = new List<MonthDecisionRecord>(runState.pastDecisions ?? new List<MonthDecisionRecord>()),
                 activeEvents = new List<ActiveEventState>(runState.activeEvents ?? new List<ActiveEventState>()),
                 activePerks = new List<ActivePerkState>(runState.activePerks ?? new List<ActivePerkState>()),
                 unlockedActionIds = new List<string>(runState.unlockedActionIds ?? new List<string>()),
@@ -194,6 +196,7 @@ namespace Mandato.Run
 
             runState.activePerkIds = new List<string>(activePerkIds ?? new List<string>());
             runState.decisionHistory = new List<string>(decisionHistory ?? new List<string>());
+            runState.pastDecisions = new List<MonthDecisionRecord>(pastDecisions ?? new List<MonthDecisionRecord>());
             runState.activeEvents = new List<ActiveEventState>(activeEvents ?? new List<ActiveEventState>());
             runState.activePerks = new List<ActivePerkState>(activePerks ?? new List<ActivePerkState>());
             runState.unlockedActionIds = new List<string>(unlockedActionIds ?? new List<string>());

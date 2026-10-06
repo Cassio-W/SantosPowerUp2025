@@ -1,7 +1,8 @@
 /* ==========================================================================
    CALENDÁRIO DE PAPEL VERTICAL PRESIDENCIAL — PROJETO MANDATO
-   Layout vertical (retrato), grade mensal com X preto nos dias passados,
-   detalhes históricos no hover, agendamentos futuros e compensação de rotação UV.
+   Design Anual por Meses (12 Meses por Ano do Mandato).
+   Navegação anual por setas (◀ 1º ANO ▶ .. 4º ANO).
+   Tipografia grande, carimbos expressivos, espaçamento generoso e hover diegético.
    ========================================================================== */
 
 :root {
@@ -15,7 +16,7 @@
     -unity-font-definition: url('project://database/Assets/BreeSerif-Regular.ttf?fileID=12800000&guid=59b91adeaaa5b7741a8f1ac398008a07&type=3#BreeSerif-Regular');
 }
 
-/* CONTAINER RAIZ DO CANVAS (100% LARGURA E ALTURA) */
+/* CONTAINER RAIZ DO CANVAS */
 .calendar-root {
     width: 100%;
     height: 100%;
@@ -50,7 +51,7 @@
     flex-direction: row;
     justify-content: space-around;
     align-items: center;
-    margin-bottom: -12px;
+    margin-bottom: -10px;
     align-self: center;
     z-index: 10;
 }
@@ -77,7 +78,7 @@
 }
 
 /* --------------------------------------------------------------------------
-   CABEÇALHO SUPERIOR: ANO NO CANTO, NOME DO MÊS E CHANCELARIA
+   CABEÇALHO SUPERIOR: ANO NO CANTO, NAVEGAÇÃO ANUAL E CHANCELARIA
    -------------------------------------------------------------------------- */
 .calendar-header {
     flex-direction: row;
@@ -86,7 +87,7 @@
     padding-bottom: 8px;
 }
 
-/* CANTO ESQUERDO: ANO GRANDE */
+/* CANTO ESQUERDO: ANO GRANDE EM DESTAQUE */
 .year-corner-box {
     flex-direction: column;
     align-items: flex-start;
@@ -97,99 +98,100 @@
 }
 
 .year-caption-label {
-    font-size: 12px;
+    font-size: 13px;
     -unity-font-style: bold;
     color: #6E5B49;
     letter-spacing: 2px;
 }
 
 .calendar-giant-year {
-    font-size: 56px;
+    font-size: 58px;
     -unity-font-style: bold;
     color: #17110A; /* Tinta tipográfica preta oficial */
-    line-height: 52px;
+    line-height: 54px;
     letter-spacing: 2px;
     margin-top: -2px;
     margin-bottom: -4px;
 }
 
 .year-stamp-tag {
-    font-size: 11px;
+    font-size: 12px;
     -unity-font-style: bold;
     color: #8C2424; /* Vermelho carimbo oficial */
     letter-spacing: 3px;
 }
 
-/* CENTRO: NOME DO MÊS E SUBTÍTULO */
+/* CENTRO: NOME DO ANO DO MANDATO E NAVEGAÇÃO ANUAL */
 .month-center-box {
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 
-.month-title-row {
+.year-title-row {
     flex-direction: row;
     align-items: center;
+    justify-content: center;
 }
 
-.month-nav-btn {
-    width: 30px;
-    height: 30px;
-    border-width: 2px;
+.year-nav-btn {
+    width: 44px;
+    height: 44px;
+    border-width: 2.5px;
     border-color: #5C4A38;
-    border-radius: 6px;
+    border-radius: 8px;
     background-color: #EDE2CD;
     color: #3B2E21;
-    font-size: 15px;
+    font-size: 20px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
-    margin-left: 8px;
-    margin-right: 8px;
+    margin-left: 12px;
+    margin-right: 12px;
     transition-duration: 0.12s;
 }
 
-.month-nav-btn:hover,
-.month-nav-btn.hovered {
+.year-nav-btn:hover,
+.year-nav-btn.hovered {
     background-color: #DCCBB1;
     border-color: #2D2217;
-    scale: 1.05;
+    scale: 1.08;
 }
 
-.calendar-month-name {
-    font-size: 38px;
+.calendar-year-title {
+    font-size: 34px;
     -unity-font-style: bold;
     color: #1F1710;
     letter-spacing: 3px;
 }
 
-.calendar-month-subtitle {
-    font-size: 12px;
+.calendar-year-subtitle {
+    font-size: 13px;
     -unity-font-style: bold;
     color: #7A6652;
     letter-spacing: 1.5px;
-    margin-top: 3px;
+    margin-top: 4px;
 }
 
 /* CANTO DIREITO: BRASÃO / CHANCELARIA */
 .cabinet-seal-box {
-    border-width: 2px;
+    border-width: 2.5px;
     border-color: #8C7B68;
-    border-radius: 4px;
-    padding: 6px 14px;
+    border-radius: 6px;
+    padding: 8px 16px;
     align-items: center;
     justify-content: center;
     background-color: rgba(140, 123, 104, 0.08);
 }
 
 .cabinet-seal-title {
-    font-size: 12px;
+    font-size: 13px;
     -unity-font-style: bold;
     color: #5C4C3C;
     letter-spacing: 2px;
 }
 
 .cabinet-seal-sub {
-    font-size: 10px;
+    font-size: 11px;
     color: #7A6856;
     letter-spacing: 1px;
     margin-top: 2px;
@@ -205,229 +207,267 @@
 }
 
 /* --------------------------------------------------------------------------
-   SEÇÃO CENTRAL: GRADE MENSAL DE DIAS (LARGURA TOTAL 100%)
+   SEÇÃO 1: GRADE ANUAL COM OS 12 MESES DO ANO (3 COLUNAS x 4 LINHAS)
    -------------------------------------------------------------------------- */
 .calendar-grid-section {
     flex-grow: 1;
     flex-direction: column;
-}
-
-/* CABEÇALHO DOS DIAS DA SEMANA */
-.weekdays-row {
-    flex-direction: row;
     justify-content: space-between;
-    border-bottom-width: 2px;
-    border-bottom-color: #6E5A46;
-    padding-bottom: 6px;
-    margin-bottom: 8px;
 }
 
-.weekday-label {
-    flex-grow: 1;
-    width: 14.28%;
-    font-size: 15px;
-    -unity-font-style: bold;
-    color: #382A1C;
-    letter-spacing: 1.5px;
-    -unity-text-align: middle-center;
-}
-
-.weekday-weekend {
-    color: #9C2E2E; /* Tinta vermelha de finais de semana */
-}
-
-/* GRADE DOS DIAS (7 COLUNAS x 5 LINHAS) */
-.days-grid {
+.months-grid {
     flex-grow: 1;
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-between;
     align-content: space-between;
+    width: 100%;
 }
 
-/* CÉLULA INDIVIDUAL DO DIA */
-.day-cell {
-    width: 13.5%;
-    height: 94px;
+/* CARD INDIVIDUAL DO MÊS */
+.month-card {
+    width: 32%;
+    height: 172px;
     background-color: #FDFBF6;
-    border-width: 2px;
+    border-width: 2.5px;
     border-color: #C8BAA3;
-    border-radius: 6px;
-    padding: 6px 8px;
+    border-radius: 8px;
+    padding: 10px 12px;
     box-sizing: border-box;
+    flex-direction: column;
+    justify-content: space-between;
     position: relative;
-    justify-content: flex-start;
-    align-items: flex-start;
+    overflow: hidden;
     transition-duration: 0.12s;
+    margin-bottom: 10px;
 }
 
-.day-cell:hover,
-.day-cell.hovered {
+.month-card:hover,
+.month-card.hovered {
     border-color: #94301B;
     background-color: #FFFDF9;
-    scale: 1.05;
-    z-index: 80;
+    scale: 1.03;
+    z-index: 50;
 }
 
-/* DIAS DE MESES ADJACENTES (FADED) */
-.day-cell--empty {
-    background-color: rgba(220, 210, 195, 0.35);
-    border-color: #DDD2BF;
-    opacity: 0.5;
-}
-
-.day-number--faded {
-    color: #A69784;
-}
-
-/* NÚMERO DO DIA */
-.day-number {
-    font-size: 20px;
-    -unity-font-style: bold;
-    color: #2B2117;
-}
-
-.day-number--today {
-    color: #9E1F1F;
-}
-
-/* --------------------------------------------------------------------------
-   ESTADO 1: DIAS PASSADOS (MARCADOS COM UM 'X' PRETO)
-   -------------------------------------------------------------------------- */
-.day-cell--past {
-    background-color: #F7F1E4;
-}
-
-.day-cross-x {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    justify-content: center;
+/* CABEÇALHO DO CARD DO MÊS */
+.month-card-header {
+    flex-direction: row;
+    justify-content: space-between;
     align-items: center;
-    rotate: -4deg;
+    border-bottom-width: 1.5px;
+    border-bottom-color: #DDD0BC;
+    padding-bottom: 6px;
+    margin-bottom: 4px;
 }
 
-.day-cross-symbol {
-    font-size: 48px;
+.month-title-label {
+    font-size: 19px;
     -unity-font-style: bold;
-    color: #120E0A; /* Tinta carvão preta pura de canetão/marcador */
-    -unity-text-align: middle-center;
-    opacity: 0.95;
-    letter-spacing: -2px;
-}
-
-/* SELO DE RESOLUÇÃO DO DIA */
-.day-decision-seal {
-    position: absolute;
-    right: 6px;
-    bottom: 6px;
-    width: 12px;
-    height: 12px;
-    border-radius: 6px;
-}
-
-.seal-approved {
-    background-color: #2E7D32;
-    border-width: 1px;
-    border-color: #1B5E20;
-}
-
-.seal-rejected {
-    background-color: #C62828;
-    border-width: 1px;
-    border-color: #8E0000;
-}
-
-/* --------------------------------------------------------------------------
-   ESTADO 2: DIA ATUAL (HOJE - CIRCULADO EM VERMELHO)
-   -------------------------------------------------------------------------- */
-.day-cell--today {
-    background-color: #FFF8EE;
-    border-color: #C62828;
-    border-width: 2.5px;
-}
-
-.today-ink-circle {
-    position: absolute;
-    left: 4px;
-    top: 4px;
-    width: 32px;
-    height: 32px;
-    border-radius: 16px;
-    border-width: 2.5px;
-    border-color: #B71C1C;
-    rotate: 6deg;
-}
-
-.today-tag-label {
-    position: absolute;
-    right: 6px;
-    bottom: 4px;
-    font-size: 11px;
-    -unity-font-style: bold;
-    color: #B71C1C;
+    color: #23190F;
     letter-spacing: 1px;
 }
 
-/* --------------------------------------------------------------------------
-   ESTADO 3: DIAS FUTUROS COM EVENTOS AGENDADOS
-   -------------------------------------------------------------------------- */
-.day-cell--future {
-    background-color: #FCF9F2;
-}
-
-.day-cell--event {
-    border-color: #7A583A;
-}
-
-.event-marker-badge {
-    position: absolute;
-    right: 6px;
-    bottom: 6px;
-    padding: 2px 6px;
+.month-tag-label {
+    font-size: 12px;
+    -unity-font-style: bold;
+    color: #8C7B68;
+    letter-spacing: 1px;
+    background-color: rgba(140, 123, 104, 0.12);
+    padding: 2px 7px;
     border-radius: 4px;
+}
+
+/* CORPO DO CARD DO MÊS */
+.month-card-body {
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    padding: 4px 2px;
+}
+
+/* --------------------------------------------------------------------------
+   ESTADOS VISUAIS DOS CARDS DE MÊS
+   -------------------------------------------------------------------------- */
+
+/* ESTADO 1: MÊS PASSADO (COM CARIMBO OFICIAL DE DECISÃO/EVENTO) */
+.month-card--past {
+    background-color: #F8F3E8;
+}
+
+.month-stamp {
+    border-width: 3px;
+    border-radius: 6px;
+    padding: 4px 12px;
+    margin-bottom: 6px;
+    rotate: -4deg;
+    align-self: center;
     justify-content: center;
     align-items: center;
 }
 
-.event-marker-symbol {
+.month-stamp-label {
+    font-size: 17px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    -unity-text-align: middle-center;
+}
+
+.stamp-approved {
+    border-color: #2E7D32;
+    background-color: rgba(46, 125, 50, 0.10);
+}
+.stamp-approved .month-stamp-label {
+    color: #2E7D32;
+}
+
+.stamp-rejected {
+    border-color: #C62828;
+    background-color: rgba(198, 40, 40, 0.10);
+    rotate: 4deg;
+}
+.stamp-rejected .month-stamp-label {
+    color: #C62828;
+}
+
+.stamp-event {
+    border-color: #1565C0;
+    background-color: rgba(21, 101, 192, 0.10);
+}
+.stamp-event .month-stamp-label {
+    color: #1565C0;
+}
+
+.month-card-decision-title {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: #3E3022;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    max-height: 38px;
+    overflow: hidden;
+}
+
+.month-card-decision-sub {
+    font-size: 11px;
+    color: #7A6652;
+    -unity-text-align: middle-center;
+    margin-top: 2px;
+    white-space: normal;
+}
+
+/* ESTADO 2: MÊS ATUAL (DESTAQUE DA PAUTA PRESIDENCIAL EM ANDAMENTO) */
+.month-card--current {
+    background-color: #FFF9F0;
+    border-color: #B71C1C;
+    border-width: 3px;
+}
+
+.month-card--current .month-title-label {
+    color: #B71C1C;
+}
+
+.month-card--current .month-tag-label {
+    color: #FFFFFF;
+    background-color: #B71C1C;
+}
+
+.current-month-badge {
+    background-color: #B71C1C;
+    border-radius: 4px;
+    padding: 3px 10px;
+    margin-bottom: 6px;
+    align-self: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.current-month-badge-label {
+    color: #FFFFFF;
     font-size: 12px;
     -unity-font-style: bold;
+    letter-spacing: 1.5px;
+    -unity-text-align: middle-center;
 }
 
-.marker-crisis {
-    background-color: rgba(183, 28, 28, 0.18);
-    border-width: 1px;
-    border-color: #B71C1C;
+.current-proposal-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: #17110A;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    max-height: 42px;
+    overflow: hidden;
 }
-.marker-crisis .event-marker-symbol { color: #B71C1C; }
 
-.marker-diplomacy {
-    background-color: rgba(21, 101, 192, 0.18);
-    border-width: 1px;
+.current-proposal-sub {
+    font-size: 11px;
+    -unity-font-style: bold;
+    color: #C65807;
+    -unity-text-align: middle-center;
+    margin-top: 4px;
+}
+
+/* ESTADO 3: MÊS FUTURO (AGENDA ABERTA OU EVENTO AGENDADO) */
+.month-card--future {
+    background-color: #FCFAF5;
+    opacity: 0.92;
+}
+
+.month-card--event {
     border-color: #1565C0;
+    background-color: #F8FBFE;
 }
-.marker-diplomacy .event-marker-symbol { color: #1565C0; }
 
-.marker-deadline {
-    background-color: rgba(198, 88, 7, 0.18);
-    border-width: 1px;
-    border-color: #C65807;
+.future-event-badge {
+    background-color: rgba(21, 101, 192, 0.14);
+    border-width: 1.5px;
+    border-color: #1565C0;
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin-bottom: 5px;
+    align-self: center;
+    justify-content: center;
+    align-items: center;
 }
-.marker-deadline .event-marker-symbol { color: #C65807; }
 
-.marker-congress {
-    background-color: rgba(46, 125, 50, 0.18);
-    border-width: 1px;
-    border-color: #2E7D32;
+.future-event-badge-label {
+    color: #1565C0;
+    font-size: 12px;
+    -unity-font-style: bold;
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
 }
-.marker-congress .event-marker-symbol { color: #2E7D32; }
+
+.future-event-title {
+    font-size: 13px;
+    -unity-font-style: bold;
+    color: #1F1710;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    max-height: 38px;
+    overflow: hidden;
+}
+
+.future-open-agenda {
+    font-size: 13px;
+    color: #8C7B68;
+    -unity-font-style: bold;
+    letter-spacing: 1.5px;
+    -unity-text-align: middle-center;
+}
+
+.future-open-sub {
+    font-size: 11px;
+    color: #A89B8C;
+    -unity-text-align: middle-center;
+    margin-top: 4px;
+}
 
 /* --------------------------------------------------------------------------
-   HOVER POPUP: CAMADA DE OVERLAY TOPMOST E CARD DE DOSSIÊ DO DIA
-   Garante que o popup seja sempre o elemento do topo absoluto da folha
+   HOVER POPUP: CAMADA DE OVERLAY TOPMOST E CARD DE DOSSIÊ DO MÊS
    -------------------------------------------------------------------------- */
 .calendar-tooltip-overlay {
     position: absolute;
@@ -441,22 +481,17 @@
 
 .calendar-tooltip-card {
     position: absolute;
-    width: 330px;
+    width: 350px;
     background-color: #FAF5EA;
     border-width: 3px;
     border-color: #4A3A2C;
     border-radius: 8px;
-    padding: 14px 16px;
+    padding: 16px 18px;
     box-sizing: border-box;
     flex-direction: column;
 }
 
 .hidden {
-    display: none;
-}
-
-/* Fallback legado caso alguma célula antiga tente instanciar tooltip interno */
-.day-hover-tooltip {
     display: none;
 }
 
@@ -466,12 +501,12 @@
     align-items: center;
     border-bottom-width: 2px;
     border-bottom-color: #8C7A65;
-    padding-bottom: 6px;
-    margin-bottom: 10px;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
 }
 
 .tooltip-date-label {
-    font-size: 13px;
+    font-size: 15px;
     -unity-font-style: bold;
     color: #2A1E14;
     letter-spacing: 1px;
@@ -481,7 +516,7 @@
     font-size: 11px;
     -unity-font-style: bold;
     letter-spacing: 1px;
-    padding: 2px 8px;
+    padding: 3px 9px;
     border-radius: 4px;
 }
 
@@ -506,13 +541,6 @@
     color: #C65807;
 }
 
-.tag-crisis {
-    background-color: rgba(183, 28, 28, 0.2);
-    border-width: 1px;
-    border-color: #B71C1C;
-    color: #B71C1C;
-}
-
 .tag-diplomacy {
     background-color: rgba(21, 101, 192, 0.2);
     border-width: 1px;
@@ -520,33 +548,19 @@
     color: #1565C0;
 }
 
-.tag-deadline {
-    background-color: rgba(198, 88, 7, 0.2);
-    border-width: 1px;
-    border-color: #C65807;
-    color: #C65807;
-}
-
-.tag-congress {
-    background-color: rgba(46, 125, 50, 0.2);
-    border-width: 1px;
-    border-color: #2E7D32;
-    color: #2E7D32;
-}
-
 /* BLOCO DO NPC */
 .tooltip-npc-block {
     flex-direction: row;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .tooltip-portrait-frame {
-    width: 58px;
-    height: 70px;
+    width: 62px;
+    height: 74px;
     border-width: 2px;
     border-color: #4A3A2C;
     background-color: #E2D7C3;
-    margin-right: 12px;
+    margin-right: 14px;
     position: relative;
     border-radius: 4px;
 }
@@ -576,13 +590,13 @@
 }
 
 .tooltip-npc-name {
-    font-size: 12px;
+    font-size: 13px;
     -unity-font-style: bold;
     color: #614B37;
 }
 
 .tooltip-proposal-title {
-    font-size: 13px;
+    font-size: 14px;
     -unity-font-style: bold;
     color: #1F160E;
     margin-top: 2px;
@@ -590,7 +604,7 @@
 }
 
 .tooltip-proposal-desc {
-    font-size: 11px;
+    font-size: 12px;
     color: #524030;
     margin-top: 2px;
     white-space: normal;
@@ -601,11 +615,11 @@
     flex-direction: row;
     flex-wrap: wrap;
     gap: 6px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
 .stat-pill {
-    font-size: 11px;
+    font-size: 12px;
     -unity-font-style: bold;
     padding: 3px 8px;
     border-radius: 4px;
@@ -631,49 +645,49 @@
     border-width: 1px;
     border-color: #FFE082;
     border-radius: 4px;
-    padding: 4px 8px;
+    padding: 5px 10px;
 }
 
 .tooltip-perk-text {
-    font-size: 11px;
+    font-size: 12px;
     -unity-font-style: bold;
     color: #825807;
 }
 
 /* TEXTOS DE EVENTO FUTURO NO TOOLTIP */
 .tooltip-event-title {
-    font-size: 14px;
+    font-size: 15px;
     -unity-font-style: bold;
     color: #1C150D;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
     white-space: normal;
 }
 
 .tooltip-event-desc {
-    font-size: 11px;
+    font-size: 12px;
     color: #4A3A2C;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
     white-space: normal;
 }
 
 .tooltip-event-impact {
-    font-size: 11px;
+    font-size: 12px;
     -unity-font-style: bold;
     color: #8C2424;
     white-space: normal;
 }
 
 /* --------------------------------------------------------------------------
-   SEÇÃO INFERIOR VERTICAL: AGENDAMENTOS FUTUROS + POST-IT
+   SEÇÃO INFERIOR VERTICAL: AGENDAMENTOS DO ANO + POST-IT
    -------------------------------------------------------------------------- */
 .calendar-bottom-section {
-    height: 380px;
+    height: 340px;
     flex-direction: row;
     justify-content: space-between;
     margin-top: 4px;
 }
 
-/* PAINEL DE AGENDAMENTOS FUTUROS */
+/* PAINEL DE AGENDAMENTOS DO ANO */
 .scheduled-panel {
     width: 63%;
     background-color: #F7F1E4;
@@ -695,14 +709,14 @@
 }
 
 .scheduled-title {
-    font-size: 13px;
+    font-size: 14px;
     -unity-font-style: bold;
     color: #2D2115;
     letter-spacing: 1px;
 }
 
 .scheduled-tag {
-    font-size: 10px;
+    font-size: 11px;
     -unity-font-style: bold;
     color: #8C2424;
     letter-spacing: 1.5px;
@@ -720,8 +734,8 @@
     border-color: #C8BAA3;
     border-left-width: 5px;
     border-radius: 6px;
-    padding: 6px 8px;
-    margin-bottom: 6px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
 }
 
 .item--crisis { border-left-color: #B71C1C; }
@@ -730,23 +744,23 @@
 .item--congress { border-left-color: #2E7D32; }
 
 .schedule-date-col {
-    width: 32px;
+    width: 55px;
     align-items: center;
     justify-content: center;
     border-right-width: 1px;
     border-right-color: #DDD0BC;
-    padding-right: 6px;
-    margin-right: 8px;
+    padding-right: 8px;
+    margin-right: 10px;
 }
 
 .schedule-day-txt {
-    font-size: 17px;
+    font-size: 18px;
     -unity-font-style: bold;
     color: #23190F;
 }
 
 .schedule-mon-txt {
-    font-size: 10px;
+    font-size: 11px;
     -unity-font-style: bold;
     color: #7D6B58;
 }
@@ -760,13 +774,13 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
 }
 
 .badge-pill {
-    font-size: 9px;
+    font-size: 10px;
     -unity-font-style: bold;
-    padding: 1px 5px;
+    padding: 2px 6px;
     border-radius: 3px;
 }
 
@@ -776,20 +790,20 @@
 .badge-congress { background-color: #E8F5E9; color: #2E7D32; }
 
 .badge-time {
-    font-size: 9px;
+    font-size: 10px;
     -unity-font-style: bold;
     color: #8C7B68;
 }
 
 .schedule-name {
-    font-size: 12px;
+    font-size: 13px;
     -unity-font-style: bold;
     color: #1F1710;
     white-space: normal;
 }
 
 .schedule-details {
-    font-size: 10px;
+    font-size: 11px;
     color: #544434;
     white-space: normal;
 }
@@ -803,7 +817,7 @@
     border-width: 1px;
     border-color: #D6CA74;
     border-radius: 4px;
-    padding: 12px 14px;
+    padding: 14px 16px;
     position: relative;
     rotate: -1.5deg;
     justify-content: space-between;
@@ -814,33 +828,33 @@
     top: 6px;
     left: 50%;
     margin-left: -5px;
-    width: 10px;
-    height: 10px;
-    border-radius: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 6px;
     background-color: #C62828;
     border-width: 1.5px;
     border-color: #8A1515;
 }
 
 .postit-title-label {
-    font-size: 11px;
+    font-size: 12px;
     -unity-font-style: bold;
     color: #5C5212;
     letter-spacing: 1px;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .postit-content-label {
-    font-size: 11px;
+    font-size: 12px;
     color: #383207;
     white-space: normal;
-    line-height: 15px;
+    line-height: 16px;
 }
 
 .postit-signature-label {
     -unity-font: url('project://database/Assets/Brother%20Signature.otf?fileID=12800000&guid=5e6a9f7a8b4c3d2e1f0a9b8c7d6e5f4a&type=3#Brother Signature');
     -unity-font-definition: url('project://database/Assets/Brother%20Signature.otf?fileID=12800000&guid=5e6a9f7a8b4c3d2e1f0a9b8c7d6e5f4a&type=3#Brother Signature');
-    font-size: 20px;
+    font-size: 22px;
     color: #172D4D; /* Tinta azul caneta tinteiro */
     margin-top: 4px;
     -unity-text-align: middle-right;
