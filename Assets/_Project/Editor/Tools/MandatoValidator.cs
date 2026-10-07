@@ -24,6 +24,7 @@ namespace Mandato.Editor
             var questIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var endingIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var actionIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var investmentIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             // 1. Carrega catálogo de Perks
             string[] perkGuids = AssetDatabase.FindAssets("t:PerkDefinition");
@@ -150,6 +151,31 @@ namespace Mandato.Editor
                 }
             }
 
+            // 5.1 Carrega catálogo de Investimentos a Longo Prazo
+            string[] investmentGuids = AssetDatabase.FindAssets("t:LongTermInvestmentDefinition");
+            foreach (string guid in investmentGuids)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                var inv = AssetDatabase.LoadAssetAtPath<LongTermInvestmentDefinition>(path);
+                if (inv == null) continue;
+
+                totalChecked++;
+                if (string.IsNullOrEmpty(inv.id))
+                {
+                    Debug.LogError($"[MandatoValidator] ❌ Investimento sem ID em: {path}");
+                    errorCount++;
+                }
+                else if (investmentIds.Contains(inv.id))
+                {
+                    Debug.LogError($"[MandatoValidator] ❌ ID de Investimento duplicado '{inv.id}' em: {path}");
+                    errorCount++;
+                }
+                else
+                {
+                    investmentIds.Add(inv.id);
+                }
+            }
+
             // 6. Valida CardDefinition e referências cruzadas
             var allCards = new List<(string path, CardDefinition card)>();
             string[] cardGuids = AssetDatabase.FindAssets("t:CardDefinition");
@@ -184,11 +210,11 @@ namespace Mandato.Editor
                 }
             }
 
-            // 7. Validação de referências cruzadas (injectCardIds e grantPerkId)
+            // 7. Validação de referências cruzadas (injectCardIds, grantPerkId e startInvestmentId)
             foreach (var (path, card) in allCards)
             {
-                ValidateChoiceReferences(card.leftChoice, card.id, "Escolha Esquerda", path, cardIds, perkIds, ref errorCount);
-                ValidateChoiceReferences(card.rightChoice, card.id, "Escolha Direita", path, cardIds, perkIds, ref errorCount);
+                ValidateChoiceReferences(card.leftChoice, card.id, "Escolha Esquerda", path, cardIds, perkIds, investmentIds, ref errorCount);
+                ValidateChoiceReferences(card.rightChoice, card.id, "Escolha Direita", path, cardIds, perkIds, investmentIds, ref errorCount);
 
                 if (card.conditions != null)
                 {
@@ -213,7 +239,7 @@ namespace Mandato.Editor
 
             if (errorCount == 0)
             {
-                Debug.Log($"<color=#00ffaa><b>[MandatoValidator] ✅ Catálogo Válido!</b></color> {totalChecked} assets verificados ({cardIds.Count} cartas, {perkIds.Count} perks, {eventIds.Count} eventos, {questIds.Count} quests, {endingIds.Count} finais, {actionIds.Count} ações). Nenhum erro encontrado.");
+                Debug.Log($"<color=#00ffaa><b>[MandatoValidator] ✅ Catálogo Válido!</b></color> {totalChecked} assets verificados ({cardIds.Count} cartas, {perkIds.Count} perks, {eventIds.Count} eventos, {questIds.Count} quests, {endingIds.Count} finais, {actionIds.Count} ações, {investmentIds.Count} investimentos). Nenhum erro encontrado.");
             }
             else
             {
@@ -230,6 +256,7 @@ namespace Mandato.Editor
             string path,
             HashSet<string> cardIds,
             HashSet<string> perkIds,
+            HashSet<string> investmentIds,
             ref int errorCount)
         {
             if (choice == null) return;
@@ -251,6 +278,13 @@ namespace Mandato.Editor
             if (!string.IsNullOrEmpty(grantPerk) && !perkIds.Contains(grantPerk))
             {
                 Debug.LogError($"[MandatoValidator] ❌ Carta '{cardId}' ({choiceName}) concede perk '{grantPerk}' não registrado no catálogo de Perks. Path: {path}");
+                errorCount++;
+            }
+
+            string startInv = choice.GetStartInvestmentId();
+            if (!string.IsNullOrEmpty(startInv) && !investmentIds.Contains(startInv))
+            {
+                Debug.LogError($"[MandatoValidator] ❌ Carta '{cardId}' ({choiceName}) inicia investimento '{startInv}' não registrado no catálogo de Investimentos. Path: {path}");
                 errorCount++;
             }
         }

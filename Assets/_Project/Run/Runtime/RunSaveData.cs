@@ -103,6 +103,9 @@ namespace Mandato.Run
         /// <summary>Eventos agendados por mês do calendário.</summary>
         public List<ScheduledMonthEventEntry> scheduledEventsByMonth = new List<ScheduledMonthEventEntry>();
 
+        /// <summary>Investimentos a Longo Prazo ativos no momento do save.</summary>
+        public List<ActiveInvestmentState> activeInvestments = new List<ActiveInvestmentState>();
+
         public RunSaveData() { }
 
         public static RunSaveData FromRuntime(RunState runState, DeckState deckState)
@@ -136,7 +139,8 @@ namespace Mandato.Run
                 consumedSingleUseActions = new List<string>(runState.consumedSingleUseActions ?? new List<string>()),
                 activeCharacterId = runState.activeCharacterId ?? string.Empty,
                 scheduledEventId = runState.scheduledEventId ?? string.Empty,
-                deck = new DeckSaveData(deckState)
+                deck = new DeckSaveData(deckState),
+                activeInvestments = new List<ActiveInvestmentState>(runState.activeInvestments ?? new List<ActiveInvestmentState>())
             };
 
             if (runState.npcStates != null)
@@ -251,6 +255,9 @@ namespace Mandato.Run
                     }
                 }
             }
+
+            runState.activeInvestments = new List<ActiveInvestmentState>(
+                activeInvestments ?? new List<ActiveInvestmentState>());
 
             deck?.ApplyTo(deckState);
         }

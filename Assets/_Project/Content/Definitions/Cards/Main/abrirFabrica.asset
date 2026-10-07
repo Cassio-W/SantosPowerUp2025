@@ -26,27 +26,11 @@ MonoBehaviour:
   leftChoice:
     label: "F\xE1brica \xE9 progresso, taca-lhe pau!"
     statImpacts:
-      climaticChanges: -30
+      climaticChanges: -5
       internationalRelations: 0
-      popularApproval: 20
-      economy: 25
-      corruption: 10
-    deltaPoliticalX: 0
-    deltaPoliticalY: 0
-    hasCorruptionMods: 1
-    injectCardIds: []
-    removeCardIds: []
-    grantPerkId: 
-    presentationCue: 
-    cityPropPrefab: {fileID: 6216956242168988236, guid: cf777763c7be2a646820731326a31302, type: 3}
-  rightChoice:
-    label: "Cheiro estranho? T\xF4 fora."
-    statImpacts:
-      climaticChanges: 25
-      internationalRelations: 0
-      popularApproval: -15
-      economy: -15
-      corruption: -5
+      popularApproval: 5
+      economy: 5
+      corruption: 0
     deltaPoliticalX: 0
     deltaPoliticalY: 0
     hasCorruptionMods: 1
@@ -55,5 +39,26 @@ MonoBehaviour:
     grantPerkId: 
     presentationCue: 
     cityPropPrefab: {fileID: 0}
+    scheduleEventId: 
+    startInvestment: {fileID: 11400000, guid: a10100028471ade47bf5fc0f3da00002, type: 2}
+    startInvestmentId: InvestimentoFabrica
+  rightChoice:
+    label: "Cheiro estranho? T\xF4 fora."
+    statImpacts:
+      climaticChanges: 10
+      internationalRelations: 0
+      popularApproval: -10
+      economy: -5
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 1
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+    cityPropPrefab: {fileID: 0}
+    scheduleEventId: 
+    startInvestment: {fileID: 0}
+    startInvestmentId: 
   conditions: []
-

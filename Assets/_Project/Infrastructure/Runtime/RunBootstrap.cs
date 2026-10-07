@@ -41,7 +41,8 @@ namespace Mandato.Infrastructure
             bool playTutorial = true,
             int customSeed = 0,
             CharacterDefinition selectedCharacter = null,
-            IEnumerable<NpcDefinition> npcs = null)
+            IEnumerable<NpcDefinition> npcs = null,
+            IEnumerable<LongTermInvestmentDefinition> investments = null)
         {
             var catalog = new RunCatalog();
             catalog.Build(
@@ -55,7 +56,8 @@ namespace Mandato.Infrastructure
                 startingActions,
                 playTutorial,
                 selectedCharacter != null ? new[] { selectedCharacter } : null,
-                npcs
+                npcs,
+                investments
             );
 
             var profileService = new RunProfileService();

@@ -124,7 +124,7 @@ namespace Mandato.Infrastructure
 
             if (bindings.PresentationCoordinator != null)
             {
-                bindings.PresentationCoordinator.Bind(stateMachine, catalog.Cards);
+                bindings.PresentationCoordinator.Bind(stateMachine, catalog.Cards, catalog.Investments);
                 bindings.PresentationCoordinator.OnProposalOnDesk += HandleProposalReadyOnDesk;
                 bindings.PresentationCoordinator.OnConsequencesFinished += HandleConsequencesFinishedAndAdvance;
             }
@@ -778,7 +778,7 @@ namespace Mandato.Infrastructure
             bool wasTutorial = IsTutorialCard(stateMachine.CurrentCard);
             bool hasMoreTutorial = HasRemainingTutorialCards();
 
-            var monthlyReport = stateMachine.CompleteTurnAndAdvance(catalog.Perks, catalog.Events);
+            var monthlyReport = stateMachine.CompleteTurnAndAdvance(catalog.Perks, catalog.Events, catalog.Investments);
             SyncPresenters(applyCameraEffects: (monthlyReport != null), instantCamera: false);
 
             if (!wasTutorial)
@@ -948,7 +948,7 @@ namespace Mandato.Infrastructure
                 return;
 
             // O evento substituiu a proposta: CompleteTurnAndAdvance aceita RunningEvent e avança o mês no calendário
-            var monthlyReport = stateMachine.CompleteTurnAndAdvance(catalog.Perks, catalog.Events);
+            var monthlyReport = stateMachine.CompleteTurnAndAdvance(catalog.Perks, catalog.Events, catalog.Investments);
             SyncPresenters(applyCameraEffects: (monthlyReport != null), instantCamera: false);
 
             // Salva as modificações e interações efetuadas durante o evento interativo

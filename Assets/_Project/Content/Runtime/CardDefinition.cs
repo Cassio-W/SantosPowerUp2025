@@ -41,6 +41,11 @@ namespace Mandato.Content
                  "O evento substituirá a proposta do próximo mês disponível.")]
         public string scheduleEventId = string.Empty;
 
+        [Tooltip("Arraste o Investimento a Longo Prazo iniciado ao escolher esta opção.")]
+        public LongTermInvestmentDefinition startInvestment;
+        [Tooltip("ID do Investimento a Longo Prazo (fallback).")]
+        public string startInvestmentId = string.Empty;
+
         public ChoiceDefinition() { }
 
         public ChoiceDefinition(string label)
@@ -126,6 +131,13 @@ namespace Mandato.Content
             if (grantPerk != null)
                 return !string.IsNullOrEmpty(grantPerk.id) ? grantPerk.id : grantPerk.name;
             return grantPerkId ?? string.Empty;
+        }
+
+        public string GetStartInvestmentId()
+        {
+            if (startInvestment != null)
+                return !string.IsNullOrEmpty(startInvestment.id) ? startInvestment.id : startInvestment.name;
+            return startInvestmentId ?? string.Empty;
         }
     }
 

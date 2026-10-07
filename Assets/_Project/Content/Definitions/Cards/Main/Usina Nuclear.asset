@@ -26,10 +26,10 @@ MonoBehaviour:
   leftChoice:
     label: "Construam uma usina ent\xE3o!"
     statImpacts:
-      climaticChanges: 30
-      internationalRelations: -15
+      climaticChanges: 5
+      internationalRelations: -5
       popularApproval: 0
-      economy: -15
+      economy: -10
       corruption: 0
     deltaPoliticalX: 0
     deltaPoliticalY: 0
@@ -37,13 +37,16 @@ MonoBehaviour:
     injectCardIds:
     - Usina Nuclear Explode
     removeCardIds: []
-    grantPerkId: InvestimentoUsina
+    grantPerkId: 
     presentationCue: 
-    cityPropPrefab: {fileID: 7150650116262898621, guid: 0355a69ce37447c458b521ae5030157a, type: 3}
+    cityPropPrefab: {fileID: 0}
+    scheduleEventId: 
+    startInvestment: {fileID: 11400000, guid: a10100038471ade47bf5fc0f3da00003, type: 2}
+    startInvestmentId: InvestimentoNuclear
   rightChoice:
     label: "Jamais, isso \xE9 muito perigoso!"
     statImpacts:
-      climaticChanges: -15
+      climaticChanges: -10
       internationalRelations: 0
       popularApproval: 0
       economy: 0
@@ -56,5 +59,7 @@ MonoBehaviour:
     grantPerkId: 
     presentationCue: 
     cityPropPrefab: {fileID: 0}
+    scheduleEventId: 
+    startInvestment: {fileID: 0}
+    startInvestmentId: 
   conditions: []
-

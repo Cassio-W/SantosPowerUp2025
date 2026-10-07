@@ -32,6 +32,12 @@ namespace Mandato.Run
         public event Action<MonthlyEffectsReport> OnMonthAdvanced;
         public event Action<RunTermination> OnRunTerminated;
 
+        public void TriggerMonthAdvanced(MonthlyEffectsReport report)
+        {
+            LastMonthlyReport = report;
+            OnMonthAdvanced?.Invoke(report);
+        }
+
         private Random rng;
 
         public RunStateMachine(RunState runState = null, DeckState deckState = null, int seed = 0)
@@ -137,7 +143,8 @@ namespace Mandato.Run
 
         public MonthlyEffectsReport CompleteTurnAndAdvance(
             IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null,
-            IReadOnlyDictionary<string, RunEventDefinition> eventCatalog = null)
+            IReadOnlyDictionary<string, RunEventDefinition> eventCatalog = null,
+            IReadOnlyDictionary<string, LongTermInvestmentDefinition> investmentCatalog = null)
         {
             // Aceita PresentingConsequences (fluxo normal de proposta) e
             // RunningEvent (fluxo de evento interativo — o evento substituiu a proposta)
@@ -161,7 +168,7 @@ namespace Mandato.Run
             if (!isTutorialCard)
             {
                 SetPhase(RunPhase.AdvancingTime);
-                LastMonthlyReport = RunState.AdvanceMonth(perkCatalog, eventCatalog);
+                LastMonthlyReport = RunState.AdvanceMonth(perkCatalog, eventCatalog, investmentCatalog);
                 OnMonthAdvanced?.Invoke(LastMonthlyReport);
 
                 if (RunState.termination.IsDefeat || RunState.termination.IsVictory)
@@ -176,7 +183,7 @@ namespace Mandato.Run
             return LastMonthlyReport;
         }
 
-        public void DismissCurrentProposal(bool advanceMonth = false, IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null, IReadOnlyDictionary<string, RunEventDefinition> eventCatalog = null)
+        public void DismissCurrentProposal(bool advanceMonth = false, IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null, IReadOnlyDictionary<string, RunEventDefinition> eventCatalog = null, IReadOnlyDictionary<string, LongTermInvestmentDefinition> investmentCatalog = null)
         {
             CurrentCard = null;
 
@@ -190,7 +197,7 @@ namespace Mandato.Run
             if (advanceMonth)
             {
                 SetPhase(RunPhase.AdvancingTime);
-                LastMonthlyReport = RunState.AdvanceMonth(perkCatalog, eventCatalog);
+                LastMonthlyReport = RunState.AdvanceMonth(perkCatalog, eventCatalog, investmentCatalog);
                 OnMonthAdvanced?.Invoke(LastMonthlyReport);
 
                 if (RunState.termination.IsDefeat || RunState.termination.IsVictory)

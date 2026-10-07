@@ -16,6 +16,7 @@ namespace Mandato.Infrastructure
         private readonly Dictionary<string, FlipPhoneActionDefinition> actions = new Dictionary<string, FlipPhoneActionDefinition>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, CharacterDefinition> characters = new Dictionary<string, CharacterDefinition>(StringComparer.OrdinalIgnoreCase);
         private readonly Dictionary<string, NpcDefinition> npcs = new Dictionary<string, NpcDefinition>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, LongTermInvestmentDefinition> investments = new Dictionary<string, LongTermInvestmentDefinition>(StringComparer.OrdinalIgnoreCase);
 
         private readonly List<string> tutorialCardIds = new List<string>();
         private readonly List<string> mainDeckCardIds = new List<string>();
@@ -28,6 +29,7 @@ namespace Mandato.Infrastructure
         public IReadOnlyDictionary<string, FlipPhoneActionDefinition> Actions => actions;
         public IReadOnlyDictionary<string, CharacterDefinition> Characters => characters;
         public IReadOnlyDictionary<string, NpcDefinition> Npcs => npcs;
+        public IReadOnlyDictionary<string, LongTermInvestmentDefinition> Investments => investments;
 
         public IReadOnlyList<string> TutorialCardIds => tutorialCardIds;
         public IReadOnlyList<string> MainDeckCardIds => mainDeckCardIds;
@@ -55,7 +57,8 @@ namespace Mandato.Infrastructure
             IEnumerable<FlipPhoneActionDefinition> startingActionsList,
             bool playTutorial = true,
             IEnumerable<CharacterDefinition> charactersList = null,
-            IEnumerable<NpcDefinition> npcsList = null)
+            IEnumerable<NpcDefinition> npcsList = null,
+            IEnumerable<LongTermInvestmentDefinition> investmentsList = null)
         {
             cards.Clear();
             perks.Clear();
@@ -65,6 +68,7 @@ namespace Mandato.Infrastructure
             actions.Clear();
             characters.Clear();
             npcs.Clear();
+            investments.Clear();
             tutorialCardIds.Clear();
             mainDeckCardIds.Clear();
 
@@ -165,6 +169,15 @@ namespace Mandato.Infrastructure
                     if (npc == null) continue;
                     if (!string.IsNullOrEmpty(npc.id)) npcs[npc.id] = npc;
                     if (!string.IsNullOrEmpty(npc.name) && !npcs.ContainsKey(npc.name)) npcs[npc.name] = npc;
+                }
+            }
+
+            // 11. Investimentos a Longo Prazo
+            if (investmentsList != null)
+            {
+                foreach (var inv in investmentsList)
+                {
+                    if (inv != null && !string.IsNullOrEmpty(inv.id)) investments[inv.id] = inv;
                 }
             }
         }

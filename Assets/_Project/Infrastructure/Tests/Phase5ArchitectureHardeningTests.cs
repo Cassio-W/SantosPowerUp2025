@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using Mandato.Content;
 using Mandato.Core;
 using Mandato.Infrastructure;
 using Mandato.Presentation;
+using Mandato.Run;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -387,6 +389,60 @@ namespace Mandato.Infrastructure.Tests
             {
                 UnityEngine.Object.DestroyImmediate(propPrefab);
                 UnityEngine.Object.DestroyImmediate(envGo);
+                UnityEngine.Object.DestroyImmediate(cityGo);
+            }
+        }
+
+        [Test]
+        public void RunPresentationCoordinator_CompletedInvestment_SpawnsCityProp()
+        {
+            var cityGo = new GameObject("Cidade");
+            var coordGo = new GameObject("PresentationCoordinator");
+            var envPres = coordGo.AddComponent<EnvironmentPresentation>();
+            envPres.cityTransform = cityGo.transform;
+
+            var coord = coordGo.AddComponent<RunPresentationCoordinator>();
+            coord.environment = envPres;
+
+            var propPrefab = new GameObject("CompletionPropPrefab");
+            var invDef = LongTermInvestmentDefinition.CreateRuntimeInstance(
+                id: "inv_test_prop",
+                title: "Test Prop Investment",
+                description: "Test",
+                durationMonths: 1
+            );
+            invDef.completionCityPropPrefab = propPrefab;
+
+            var stateMachine = new RunStateMachine();
+            var invCatalog = new Dictionary<string, LongTermInvestmentDefinition>
+            {
+                { "inv_test_prop", invDef }
+            };
+
+            try
+            {
+                coord.Bind(stateMachine, new Dictionary<string, CardDefinition>(), invCatalog);
+
+                var report = new MonthlyEffectsReport
+                {
+                    isSuccess = true,
+                    completedInvestmentIds = new List<string> { "inv_test_prop" }
+                };
+
+                // Dispara o evento de avanço de mês
+                stateMachine.TriggerMonthAdvanced(report);
+
+                // Verifica que o prop foi instanciado como filho de Cidade
+                Assert.AreEqual(1, cityGo.transform.childCount, "Prop de conclusão deve ter sido instanciado na cidade.");
+                var child = cityGo.transform.GetChild(0).gameObject;
+                Assert.IsTrue(child.name.StartsWith("CompletionPropPrefab"));
+            }
+            finally
+            {
+                envPres.ClearSpawnedProps();
+                UnityEngine.Object.DestroyImmediate(propPrefab);
+                UnityEngine.Object.DestroyImmediate(invDef);
+                UnityEngine.Object.DestroyImmediate(coordGo);
                 UnityEngine.Object.DestroyImmediate(cityGo);
             }
         }

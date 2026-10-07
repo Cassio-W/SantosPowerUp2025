@@ -26,6 +26,7 @@ namespace Mandato.Presentation
 
         private RunStateMachine stateMachine;
         private IReadOnlyDictionary<string, CardDefinition> cardCatalog;
+        private IReadOnlyDictionary<string, LongTermInvestmentDefinition> investmentCatalog;
         private Coroutine activePresentationRoutine;
 
         private GameObject activeNpcGameObject;
@@ -50,10 +51,14 @@ namespace Mandato.Presentation
             enabled = true;
         }
 
-        public void Bind(RunStateMachine runStateMachine, IReadOnlyDictionary<string, CardDefinition> catalog)
+        public void Bind(
+            RunStateMachine runStateMachine,
+            IReadOnlyDictionary<string, CardDefinition> catalog,
+            IReadOnlyDictionary<string, LongTermInvestmentDefinition> investments = null)
         {
             stateMachine = runStateMachine;
             cardCatalog = catalog;
+            investmentCatalog = investments;
 
             // Auto-preenche a lista de prefabs a partir do catálogo caso esteja vazia
             if ((npcPrefabs == null || npcPrefabs.Count == 0) && catalog != null)
@@ -76,6 +81,31 @@ namespace Mandato.Presentation
             {
                 stateMachine.OnProposalReady += PresentProposal;
                 stateMachine.OnConsequencesReady += PresentConsequences;
+                stateMachine.OnMonthAdvanced += HandleMonthAdvanced;
+            }
+        }
+
+        private void HandleMonthAdvanced(MonthlyEffectsReport report)
+        {
+            if (report == null || report.completedInvestmentIds == null || report.completedInvestmentIds.Count == 0)
+                return;
+
+            if (environment == null) return;
+
+            foreach (var invId in report.completedInvestmentIds)
+            {
+                if (string.IsNullOrEmpty(invId)) continue;
+
+                LongTermInvestmentDefinition invDef = null;
+                if (investmentCatalog != null)
+                {
+                    investmentCatalog.TryGetValue(invId, out invDef);
+                }
+
+                if (invDef != null && invDef.completionCityPropPrefab != null)
+                {
+                    environment.SpawnCityProp(invDef.completionCityPropPrefab);
+                }
             }
         }
 
@@ -386,6 +416,7 @@ namespace Mandato.Presentation
             {
                 stateMachine.OnProposalReady -= PresentProposal;
                 stateMachine.OnConsequencesReady -= PresentConsequences;
+                stateMachine.OnMonthAdvanced -= HandleMonthAdvanced;
             }
         }
     }

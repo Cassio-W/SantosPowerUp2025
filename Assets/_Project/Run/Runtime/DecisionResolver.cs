@@ -60,6 +60,9 @@ namespace Mandato.Run
 
         public RunTermination resultingTermination;
 
+        /// <summary>ID do investimento iniciado por esta decisão. Vazio se nenhum.</summary>
+        public string startedInvestmentId = string.Empty;
+
         public bool IsRunTerminated => resultingTermination.IsDefeat || resultingTermination.IsVictory;
     }
 
@@ -178,6 +181,17 @@ namespace Mandato.Run
             if (!string.IsNullOrEmpty(choice.scheduleEventId))
             {
                 runState.ScheduleEvent(choice.scheduleEventId);
+            }
+
+            // 5b. Inicia Investimento a Longo Prazo se a escolha definir um
+            string investmentIdToStart = choice.GetStartInvestmentId();
+            if (!string.IsNullOrEmpty(investmentIdToStart))
+            {
+                int duration = choice.startInvestment != null
+                    ? choice.startInvestment.durationMonths
+                    : 12; // fallback genérico se só ID foi configurado
+                runState.StartInvestment(investmentIdToStart, duration);
+                report.startedInvestmentId = investmentIdToStart;
             }
 
             // 6. Atualização de Relação com NPC

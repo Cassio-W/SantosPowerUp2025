@@ -59,6 +59,12 @@ namespace Mandato.Run
         /// </summary>
         public Dictionary<int, string> scheduledEventsByMonth = new Dictionary<int, string>();
 
+        /// <summary>
+        /// Investimentos a Longo Prazo ativos. Cada entrada é decrementada mensalmente
+        /// pelo MonthlyEffectsResolver; ao concluir, seus efeitos são disparados.
+        /// </summary>
+        public List<ActiveInvestmentState> activeInvestments = new List<ActiveInvestmentState>();
+
         public RunState(int seed = 0)
         {
             this.seed = seed;
@@ -86,6 +92,7 @@ namespace Mandato.Run
             isPreviewAttributesActive = false;
             scheduledEventId = string.Empty;
             scheduledEventsByMonth.Clear();
+            activeInvestments.Clear();
         }
 
         public void RecordMonthDecision(MonthDecisionRecord record)
@@ -237,6 +244,47 @@ namespace Mandato.Run
             var id = scheduledEventId;
             scheduledEventId = string.Empty;
             return id;
+        }
+
+        /// <summary>
+        /// Inicia um Investimento a Longo Prazo. Se já existir um investimento com o mesmo ID,
+        /// reinicia sua contagem.
+        /// </summary>
+        public void StartInvestment(string investmentId, int durationMonths)
+        {
+            if (string.IsNullOrEmpty(investmentId) || durationMonths <= 0) return;
+
+            var existing = activeInvestments.Find(i =>
+                string.Equals(i.investmentId, investmentId, StringComparison.OrdinalIgnoreCase));
+
+            if (existing != null)
+            {
+                existing.remainingMonths = durationMonths;
+                existing.totalMonths = durationMonths;
+                existing.isCancelled = false;
+            }
+            else
+            {
+                activeInvestments.Add(new ActiveInvestmentState(investmentId, durationMonths));
+            }
+        }
+
+        /// <summary>
+        /// Cancela um investimento ativo sem disparar seus efeitos de conclusão.
+        /// </summary>
+        public void CancelInvestment(string investmentId)
+        {
+            if (string.IsNullOrEmpty(investmentId)) return;
+            var inv = activeInvestments.Find(i =>
+                string.Equals(i.investmentId, investmentId, StringComparison.OrdinalIgnoreCase));
+            if (inv != null) inv.isCancelled = true;
+        }
+
+        public ActiveInvestmentState GetInvestment(string investmentId)
+        {
+            if (string.IsNullOrEmpty(investmentId)) return null;
+            return activeInvestments.Find(i =>
+                string.Equals(i.investmentId, investmentId, StringComparison.OrdinalIgnoreCase));
         }
 
         public void GrantPerk(string perkId, int duration = 0)
@@ -484,9 +532,10 @@ namespace Mandato.Run
 
         public MonthlyEffectsReport AdvanceMonth(
             IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null,
-            IReadOnlyDictionary<string, RunEventDefinition> eventCatalog = null)
+            IReadOnlyDictionary<string, RunEventDefinition> eventCatalog = null,
+            IReadOnlyDictionary<string, LongTermInvestmentDefinition> investmentCatalog = null)
         {
-            return MonthlyEffectsResolver.ResolveMonth(this, perkCatalog, eventCatalog);
+            return MonthlyEffectsResolver.ResolveMonth(this, perkCatalog, eventCatalog, investmentCatalog);
         }
 
         public void ForceDefeat(string reason)

@@ -26,26 +26,10 @@ MonoBehaviour:
   leftChoice:
     label: Mi casa es tu casa
     statImpacts:
-      climaticChanges: 20
-      internationalRelations: 10
-      popularApproval: 15
-      economy: -20
-      corruption: 0
-    deltaPoliticalX: 0
-    deltaPoliticalY: 0
-    hasCorruptionMods: 0
-    injectCardIds: []
-    removeCardIds: []
-    grantPerkId: 
-    presentationCue: 
-    cityPropPrefab: {fileID: 5839588874061950967, guid: c790fc018f47b1e41825d5abe54fe418, type: 3}
-  rightChoice:
-    label: "N\xE3o acho que \xE9 um bom investimento"
-    statImpacts:
-      climaticChanges: 0
-      internationalRelations: -15
-      popularApproval: 0
-      economy: 15
+      climaticChanges: 5
+      internationalRelations: 5
+      popularApproval: 5
+      economy: -5
       corruption: 0
     deltaPoliticalX: 0
     deltaPoliticalY: 0
@@ -55,5 +39,26 @@ MonoBehaviour:
     grantPerkId: 
     presentationCue: 
     cityPropPrefab: {fileID: 0}
+    scheduleEventId: 
+    startInvestment: {fileID: 11400000, guid: a10100018471ade47bf5fc0f3da00001, type: 2}
+    startInvestmentId: InvestimentoSolar
+  rightChoice:
+    label: "N\xE3o acho que \xE9 um bom investimento"
+    statImpacts:
+      climaticChanges: 0
+      internationalRelations: -10
+      popularApproval: 0
+      economy: 5
+      corruption: 0
+    deltaPoliticalX: 0
+    deltaPoliticalY: 0
+    hasCorruptionMods: 0
+    injectCardIds: []
+    removeCardIds: []
+    grantPerkId: 
+    presentationCue: 
+    cityPropPrefab: {fileID: 0}
+    scheduleEventId: 
+    startInvestment: {fileID: 0}
+    startInvestmentId: 
   conditions: []
-

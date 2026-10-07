@@ -128,4 +128,51 @@ namespace Mandato.Run
             remainingMonths--;
         }
     }
+
+    /// <summary>
+    /// Estado de runtime de um Investimento a Longo Prazo ativo.
+    /// Rastreia quantos meses restam e o ID da definição do investimento.
+    /// A definição completa é consultada via catálogo; este estado é puro dado da run.
+    /// </summary>
+    [Serializable]
+    public class ActiveInvestmentState
+    {
+        /// <summary>ID da LongTermInvestmentDefinition associada.</summary>
+        public string investmentId = string.Empty;
+
+        /// <summary>Meses restantes até a conclusão.</summary>
+        public int remainingMonths = 0;
+
+        /// <summary>Duração original do investimento (para exibição de progresso).</summary>
+        public int totalMonths = 0;
+
+        /// <summary>Se verdadeiro, o investimento foi cancelado e não produzirá recompensas.</summary>
+        public bool isCancelled = false;
+
+        public bool IsCompleted => !isCancelled && remainingMonths <= 0;
+
+        public ActiveInvestmentState() { }
+
+        public ActiveInvestmentState(string id, int duration)
+        {
+            investmentId = id ?? string.Empty;
+            remainingMonths = Math.Max(1, duration);
+            totalMonths = remainingMonths;
+        }
+
+        /// <summary>
+        /// Decrementa um mês e retorna true se o investimento foi concluído neste tick.
+        /// </summary>
+        public bool TickMonth()
+        {
+            if (isCancelled || remainingMonths <= 0) return false;
+            remainingMonths--;
+            return remainingMonths <= 0;
+        }
+
+        /// <summary>Progresso de 0.0 a 1.0 (0 = início, 1 = concluído).</summary>
+        public float Progress => totalMonths > 0
+            ? Math.Clamp(1f - (float)remainingMonths / totalMonths, 0f, 1f)
+            : 1f;
+    }
 }

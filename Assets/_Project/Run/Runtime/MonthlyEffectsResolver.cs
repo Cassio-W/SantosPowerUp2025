@@ -19,6 +19,12 @@ namespace Mandato.Run
         public List<string> expiredEventIds = new List<string>();
         public List<string> triggeredEventIds = new List<string>();
 
+        // Investimentos a Longo Prazo
+        public List<string> completedInvestmentIds = new List<string>();
+        public List<string> cancelledInvestmentIds = new List<string>();
+        public List<string> investmentGrantedPerkIds = new List<string>();
+        public List<string> investmentTriggeredEventIds = new List<string>();
+
         public int advancedToMonthIndex = 1;
         public string advancedToDisplayDate = string.Empty;
         public RunTermination resultingTermination = RunTermination.Ongoing;
@@ -49,7 +55,8 @@ namespace Mandato.Run
         public static MonthlyEffectsReport ResolveMonth(
             RunState runState,
             IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null,
-            IReadOnlyDictionary<string, RunEventDefinition> eventCatalog = null)
+            IReadOnlyDictionary<string, RunEventDefinition> eventCatalog = null,
+            IReadOnlyDictionary<string, LongTermInvestmentDefinition> investmentCatalog = null)
         {
             if (runState == null)
             {
@@ -155,6 +162,75 @@ namespace Mandato.Run
 
             // 7. Cooldowns de Ações do Flip-Phone
             runState.TickActionCooldowns();
+
+            // 7b. Tick de Investimentos a Longo Prazo
+            if (runState.activeInvestments != null && runState.activeInvestments.Count > 0)
+            {
+                for (int i = runState.activeInvestments.Count - 1; i >= 0; i--)
+                {
+                    var inv = runState.activeInvestments[i];
+                    if (inv == null) continue;
+
+                    if (inv.isCancelled)
+                    {
+                        report.cancelledInvestmentIds.Add(inv.investmentId);
+                        runState.activeInvestments.RemoveAt(i);
+                        continue;
+                    }
+
+                    // Cobra o custo mensal antes de decrementar
+                    LongTermInvestmentDefinition invDef = null;
+                    if (investmentCatalog != null)
+                        investmentCatalog.TryGetValue(inv.investmentId, out invDef);
+
+                    if (invDef != null && invDef.HasMonthlyCost)
+                    {
+                        runState.ApplyStatImpacts(invDef.costPerMonth);
+                    }
+
+                    // Decrementa o contador; TickMonth() retorna true se concluiu agora
+                    bool justCompleted = inv.TickMonth();
+
+                    if (justCompleted)
+                    {
+                        report.completedInvestmentIds.Add(inv.investmentId);
+                        runState.activeInvestments.RemoveAt(i);
+
+                        if (invDef != null)
+                        {
+                            // Bônus instantâneo de atributos
+                            if (invDef.HasCompletionStatBonus)
+                                runState.ApplyStatImpacts(invDef.completionStatBonus);
+
+                            // Perks de conclusão
+                            foreach (string perkId in invDef.GetCompletionPerkIds())
+                            {
+                                if (string.IsNullOrEmpty(perkId)) continue;
+                                int dur = 0;
+                                if (perkCatalog != null && perkCatalog.TryGetValue(perkId, out var pDef) && pDef != null)
+                                    dur = pDef.durationMonths;
+                                runState.GrantPerk(perkId, dur);
+                                report.investmentGrantedPerkIds.Add(perkId);
+                            }
+
+                            // Eventos de run de conclusão
+                            foreach (string evId in invDef.GetCompletionRunEventIds())
+                            {
+                                if (string.IsNullOrEmpty(evId)) continue;
+                                int dur = 3;
+                                if (eventCatalog != null && eventCatalog.TryGetValue(evId, out var eDef) && eDef != null)
+                                    dur = eDef.durationMonths;
+                                runState.TriggerEvent(evId, dur);
+                                report.investmentTriggeredEventIds.Add(evId);
+                            }
+
+                            // Evento interativo agendado
+                            if (!string.IsNullOrEmpty(invDef.completionScheduleEventId))
+                                runState.ScheduleEvent(invDef.completionScheduleEventId);
+                        }
+                    }
+                }
+            }
 
             // 8. Decremento de Suspensão de NPCs
             if (runState.npcStates != null)
