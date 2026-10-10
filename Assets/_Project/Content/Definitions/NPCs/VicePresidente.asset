@@ -22,3 +22,8 @@ MonoBehaviour:
   politicalBiasY: 4
   bio: "Sempre pronto com uma carta aberta no bolso e um cafezinho para a oposi\xE7\xE3o.
     Se o presidente tossir duas vezes, ele j\xE1 come\xE7a a medir a cadeira de chefe."
+  approachDeltas:
+  - 2
+  - 0
+  - -2
+  - 1

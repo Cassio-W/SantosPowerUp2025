@@ -23,3 +23,8 @@ MonoBehaviour:
   bio: "Promete colocar disciplina nas escolas, armas na cintura de todo cidad\xE3o
     e acabar com a corrup\xE7\xE3o... nomeando seus sobrinhos e coron\xE9is para
     cargos comissionados."
+  approachDeltas:
+  - 2
+  - -2
+  - 0
+  - -1

@@ -23,3 +23,8 @@ MonoBehaviour:
   bio: "Oferece parceria e diplomacia... desde que a gente compre petr\xF3leo refinado
     em d\xF3lar e siga as ordens de Washington. Adora aplicar um embargo nas horas
     vagas."
+  approachDeltas:
+  - 1
+  - 2
+  - -1
+  - -2

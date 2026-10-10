@@ -2,37 +2,73 @@
     <Style src="project://database/Assets/_Project/UI/USS/PartyHud.uss" />
     <ui:VisualElement name="party-hud-root" class="party-hud-root" picking-mode="Ignore">
         
-        <!-- Top Bar: Ânimo/Interações + Botão Sair -->
+        <!-- Barra Superior: Botão Voltar (durante diálogo) e Botão Sair da Festa (discreto à direita) -->
         <ui:VisualElement name="party-top-bar" class="party-top-bar" picking-mode="Ignore">
-            <ui:VisualElement name="energy-container" class="energy-container" picking-mode="Ignore">
-                <ui:Label text="Ânimo:" class="energy-label" />
-                <ui:VisualElement name="energy-bar" class="energy-bar" picking-mode="Ignore" />
-            </ui:VisualElement>
-            <ui:Button name="btn-end-party" text="Sair da Festa" class="btn-end-party" />
+            <ui:Button name="btn-back-conversation" text="⮌ Salão Principal" class="btn-back-conversation hidden" />
+            <ui:VisualElement class="top-spacer" picking-mode="Ignore" />
+            <ui:Button name="btn-end-party" text="🚪 Deixar o Jantar" class="btn-end-party" />
         </ui:VisualElement>
 
-        <!-- Botão Voltar da Conversa (aparece durante o diálogo) -->
-        <ui:Button name="btn-back-conversation" text="⮌ Voltar (ESC)" class="btn-back-conversation hidden" />
+        <!-- Feedback Central de Relação (+2 Relação / -1 Relação) -->
+        <ui:VisualElement name="feedback-container" class="feedback-container hidden" picking-mode="Ignore">
+            <ui:Label name="approach-feedback-label" text="+2 Relação" class="approach-feedback-label" />
+        </ui:VisualElement>
 
-        <!-- Feedback momentâneo central (+2 Relação, etc) -->
-        <ui:Label name="approach-feedback-label" text="+2 Relação" class="approach-feedback-label hidden" />
+        <!-- Medidor Vertical de Ânimo (Canto Inferior Esquerdo) -->
+        <ui:VisualElement name="energy-gauge-widget" class="energy-gauge-widget" picking-mode="Ignore">
+            <ui:VisualElement class="gauge-header" picking-mode="Ignore">
+                <ui:Label text="🍸" class="gauge-icon" />
+                <ui:Label text="ÂNIMO" class="gauge-title" />
+            </ui:VisualElement>
+            <ui:VisualElement class="gauge-meter-frame" picking-mode="Ignore">
+                <ui:VisualElement name="energy-bar" class="energy-bar-vertical" picking-mode="Ignore" />
+            </ui:VisualElement>
+            <ui:Label name="energy-count-label" text="4/4" class="gauge-count-label" />
+        </ui:VisualElement>
 
-        <!-- Bottom Area: Balão de Fala + Roda de Abordagem -->
+        <!-- Área Inferior: Balão de Fala + Roda Circular de Abordagem -->
         <ui:VisualElement name="party-bottom-area" class="party-bottom-area" picking-mode="Ignore">
             
-            <!-- Balão de diálogo do NPC -->
+            <!-- Balão / Cartão de Conversa com o Convidado -->
             <ui:VisualElement name="npc-speech-bubble" class="npc-speech-bubble hidden">
-                <ui:Label name="npc-name-label" text="Nome do NPC" class="npc-name-label" />
-                <ui:Label name="npc-speech-text" text="Texto de abertura do NPC..." class="npc-speech-text" />
+                <ui:VisualElement class="bubble-header" picking-mode="Ignore">
+                    <ui:Label name="npc-name-label" text="Nome do Convidado" class="npc-name-label" />
+                    <ui:VisualElement class="bubble-tag" picking-mode="Ignore">
+                        <ui:Label text="CONVERSA PRESENCIAL" class="bubble-tag-text" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Label name="npc-speech-text" text="Texto da conversa com o convidado..." class="npc-speech-text" />
             </ui:VisualElement>
 
-            <!-- Roda de 4 Abordagens -->
-            <ui:VisualElement name="approach-wheel" class="approach-wheel hidden" picking-mode="Ignore">
-                <ui:VisualElement class="approach-wheel-bg" picking-mode="Ignore" />
-                <ui:Button name="btn-approach-up" text="[1] Arrogante" class="btn-approach btn-approach-up" />
-                <ui:Button name="btn-approach-right" text="[2] Brincalhão" class="btn-approach btn-approach-right" />
-                <ui:Button name="btn-approach-down" text="[3] Persuasivo" class="btn-approach btn-approach-down" />
-                <ui:Button name="btn-approach-left" text="[4] Romântico" class="btn-approach btn-approach-left" />
+            <!-- A Verdadeira Roda de Abordagem Triangular em X (Opção A: Canvas Vetorial Painter2D) -->
+            <ui:VisualElement name="approach-wheel" class="approach-wheel hidden">
+                <!-- Canvas vetorial nativo onde as 4 fatias triangulares cortadas em X são renderizadas -->
+                <ui:VisualElement name="wheel-slice-canvas" class="wheel-slice-canvas" picking-mode="Ignore" />
+
+                <!-- Conteúdo do Setor Superior: Arrogante -->
+                <ui:VisualElement name="slice-content-up" class="slice-content slice-up" picking-mode="Ignore">
+                    <ui:Label text="ARROGANTE" class="quadrant-title" />
+                </ui:VisualElement>
+
+                <!-- Conteúdo do Setor Direito: Brincalhão -->
+                <ui:VisualElement name="slice-content-right" class="slice-content slice-right" picking-mode="Ignore">
+                    <ui:Label text="BRINCALHÃO" class="quadrant-title" />
+                </ui:VisualElement>
+
+                <!-- Conteúdo do Setor Inferior: Persuasivo -->
+                <ui:VisualElement name="slice-content-down" class="slice-content slice-down" picking-mode="Ignore">
+                    <ui:Label text="PERSUASIVO" class="quadrant-title" />
+                </ui:VisualElement>
+
+                <!-- Conteúdo do Setor Esquerdo: Romântico -->
+                <ui:VisualElement name="slice-content-left" class="slice-content slice-left" picking-mode="Ignore">
+                    <ui:Label text="ROMÂNTICO" class="quadrant-title" />
+                </ui:VisualElement>
+
+                <!-- Selo / Medalhão Central em Latão Envelhecido -->
+                <ui:VisualElement class="wheel-center-seal" picking-mode="Ignore">
+                    <ui:Label text="POSTURA" class="seal-text" />
+                </ui:VisualElement>
             </ui:VisualElement>
 
         </ui:VisualElement>

@@ -27,7 +27,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c1a000078471ade47bf5fc0f3da00007, type: 2}
   - {fileID: 11400000, guid: c1a000028471ade47bf5fc0f3da00002, type: 2}
   minGuests: 3
-  maxGuests: 6
+  maxGuests: 4
   baseInteractionLimit: 4
   bonusInteractionPerkId: 
   bonusInteractionAmount: 1

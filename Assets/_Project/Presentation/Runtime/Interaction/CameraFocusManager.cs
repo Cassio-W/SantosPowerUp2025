@@ -16,7 +16,19 @@ namespace Mandato.Presentation
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class CameraFocusManager : MonoBehaviour
     {
-        public static CameraFocusManager Instance { get; private set; }
+        private static CameraFocusManager _instance;
+        public static CameraFocusManager Instance
+        {
+            get
+            {
+                if (_instance == null || !_instance.isActiveAndEnabled)
+                {
+                    _instance = FindFirstObjectByType<CameraFocusManager>();
+                }
+                return _instance;
+            }
+            private set => _instance = value;
+        }
 
         [Header("--- Referencias de Camera ---")]
         [Tooltip("Camera a ser movimentada. Se deixada vazia, utiliza a Camera.main automaticamente.")]
@@ -96,16 +108,6 @@ namespace Mandato.Presentation
 
         private void Awake()
         {
-            if (Instance != null && Instance != this)
-            {
-                if (Application.isPlaying)
-                    Destroy(this);
-                else
-                    DestroyImmediate(this);
-                return;
-            }
-            Instance = this;
-
             if (targetCamera == null)
             {
                 targetCamera = GetComponent<Camera>() ?? Camera.main;
@@ -118,6 +120,19 @@ namespace Mandato.Presentation
                 {
                     targetCamera.nearClipPlane = targetNearClipPlane;
                 }
+            }
+        }
+
+        private void OnEnable()
+        {
+            Instance = this;
+        }
+
+        private void OnDisable()
+        {
+            if (_instance == this)
+            {
+                _instance = null;
             }
         }
 

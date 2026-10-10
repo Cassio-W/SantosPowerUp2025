@@ -48,7 +48,7 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
     {
         // Se a cena foi iniciada diretamente no Editor sem passar pelo CorporatePartyLauncher (modo Standalone)
         bool isStandalonePlay = UnityEngine.SceneManagement.SceneManager.sceneCount == 1
-            || UnityEngine.SceneManagement.SceneManager.GetActiveScene() == gameObject.scene;
+            && MandatoBootstrap.Instance == null;
 
         if (runState == null && autoInitializeInEditor && Application.isEditor && isStandalonePlay)
         {
@@ -118,18 +118,22 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
         definition  = def;
         onCompleted = completionCallback;
 
-        remainingInteractions = def.GetInteractionLimit(state.activePerkIds);
+        remainingInteractions = def != null ? def.GetInteractionLimit(state?.activePerkIds) : 4;
+        Debug.Log($"[PartyEventController] Inicializando festa corporativa. Limite de ânimo/interações: {remainingInteractions}");
 
         conversationFlow?.SetHud(hudPresenter);
         hudPresenter?.SetupEnergyBar(remainingInteractions);
 
         SpawnGuests();
         BindFlipPhone();
+        BindCameraFocus();
         ConnectDebugOverlay();
 
         if (hudPresenter != null)
         {
+            hudPresenter.OnPartyEndRequested -= EndParty;
             hudPresenter.OnPartyEndRequested += EndParty;
+            hudPresenter.OnConversationCancelled -= CancelCurrentConversation;
             hudPresenter.OnConversationCancelled += CancelCurrentConversation;
         }
 
@@ -175,6 +179,7 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
             if (npcDef.prefab != null)
             {
                 instance = Instantiate(npcDef.prefab, slot.transform.position, slot.transform.rotation);
+                instance.transform.SetParent(slot.transform, true);
 
                 // Desativa comportamentos de proposta/gabinete dos prefabs de NPC
                 var presentationNpc = instance.GetComponent<INpcController>();
@@ -191,17 +196,6 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
 
                 // Garante que o NPC fique em Idle estático no slot
                 SetNpcIdleAnimation(instance);
-
-                // Garante um CapsuleCollider generoso cobrindo todo o corpo do NPC para clique fácil
-                var col = instance.GetComponent<CapsuleCollider>();
-                if (col == null)
-                {
-                    col = instance.AddComponent<CapsuleCollider>();
-                }
-                col.center = new Vector3(0f, 0.9f, 0f);
-                col.radius = 0.5f;
-                col.height = 1.9f;
-                col.isTrigger = false;
             }
 
             slot.Assign(npcDef, instance);
@@ -210,21 +204,114 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
 
     private void Update()
     {
-        // Se estiver em conversa com um NPC, tecla ESC cancela o diálogo
+        // Se estiver em conversa com um NPC, tecla ESC cancela o diálogo e desfaz o foco
         if (currentState == PartyState.TalkingToNpc)
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                CancelCurrentConversation();
+                CancelCurrentConversation(revertCamera: true);
                 return;
             }
         }
-
-        if (currentState != PartyState.Roaming) return;
-
-        if (Input.GetMouseButtonDown(0))
+        else if (currentState == PartyState.Roaming)
         {
-            HandleNpcClickRaycast();
+            // Fallback de clique direto no NPC caso o jogador clique diretamente na mesa
+            if (Input.GetMouseButtonDown(0))
+            {
+                HandleRoamingClickFallback();
+            }
+        }
+    }
+
+    private void HandleRoamingClickFallback()
+    {
+        var cam = Camera.main;
+        if (cam == null) return;
+
+        // Se o cursor estiver sobre elementos interativos de tela da UI, ignora
+        if (CameraFocusManager.Instance != null && CameraFocusManager.Instance.IsPointerOverInteractiveUI())
+            return;
+
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        RaycastHit[] hits = Physics.RaycastAll(ray, 100f);
+        Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+
+        foreach (var hit in hits)
+        {
+            if (hit.collider == null) continue;
+
+            PartyGuestSlot slot = hit.collider.GetComponentInParent<PartyGuestSlot>();
+            if (slot == null && guestSlots != null)
+            {
+                foreach (var s in guestSlots)
+                {
+                    if (s != null && s.IsOccupied && (hit.collider.transform == s.transform || hit.collider.transform.IsChildOf(s.transform)))
+                    {
+                        slot = s;
+                        break;
+                    }
+                }
+            }
+
+            if (slot != null && slot.IsOccupied)
+            {
+                OnNpcClicked(slot);
+                break;
+            }
+        }
+    }
+
+    private void BindCameraFocus()
+    {
+        var focusMgr = CameraFocusManager.Instance;
+        if (focusMgr != null)
+        {
+            focusMgr.OnObjectFocusChanged += HandleObjectFocusChanged;
+        }
+    }
+
+    private void UnbindCameraFocus()
+    {
+        var focusMgr = CameraFocusManager.Instance;
+        if (focusMgr != null)
+        {
+            focusMgr.OnObjectFocusChanged -= HandleObjectFocusChanged;
+        }
+    }
+
+    private void HandleObjectFocusChanged(FocusableObject focusedObj)
+    {
+        if (currentState == PartyState.Finished) return;
+
+        if (focusedObj != null)
+        {
+            PartyGuestSlot targetSlot = null;
+            if (guestSlots != null)
+            {
+                foreach (var slot in guestSlots)
+                {
+                    if (slot != null && (slot.Focusable == focusedObj || (slot.NpcInstance != null && focusedObj.transform.IsChildOf(slot.transform))))
+                    {
+                        targetSlot = slot;
+                        break;
+                    }
+                }
+            }
+
+            if (targetSlot != null && targetSlot.IsOccupied)
+            {
+                if (currentState == PartyState.Roaming)
+                {
+                    OnNpcFocused(targetSlot);
+                }
+            }
+        }
+        else
+        {
+            if (currentState == PartyState.TalkingToNpc)
+            {
+                CancelCurrentConversation(revertCamera: false);
+            }
         }
     }
 
@@ -232,39 +319,19 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
     /// Cancela a conversa ativa com o NPC e retorna a festa para o estado de Roaming.
     /// Não consome tentativas de conversa / ânimo.
     /// </summary>
-    public void CancelCurrentConversation()
+    public void CancelCurrentConversation() => CancelCurrentConversation(revertCamera: true);
+
+    public void CancelCurrentConversation(bool revertCamera)
     {
         if (currentState != PartyState.TalkingToNpc) return;
 
         conversationFlow?.Cancel();
         npcInPhoneFocus = null;
         currentState = PartyState.Roaming;
-    }
 
-    private void HandleNpcClickRaycast()
-    {
-        var cam = Camera.main;
-        if (cam == null) return;
-
-        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-        RaycastHit[] hits = Physics.RaycastAll(ray, 100f);
-
-        PartyGuestSlot closestSlot = null;
-        float closestDist = float.MaxValue;
-
-        foreach (var hit in hits)
+        if (revertCamera && CameraFocusManager.Instance != null && CameraFocusManager.Instance.HasActiveFocus)
         {
-            var slot = hit.collider.GetComponentInParent<PartyGuestSlot>();
-            if (slot != null && slot.IsOccupied && hit.distance < closestDist)
-            {
-                closestDist = hit.distance;
-                closestSlot = slot;
-            }
-        }
-
-        if (closestSlot != null)
-        {
-            OnNpcClicked(closestSlot);
+            CameraFocusManager.Instance.Unfocus();
         }
     }
 
@@ -312,12 +379,27 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
     // ─── Interação com NPCs ───────────────────────────────────────────────────
 
     /// <summary>
-    /// Chamado por clique no NPC (via raycast ou botão 3D na cena).
-    /// Inicia o fluxo de conversa se o estado permitir.
+    /// Chamado programaticamente ou por clique direto: foca o NPC via CameraFocusManager.
     /// </summary>
     public void OnNpcClicked(PartyGuestSlot slot)
     {
-        if (currentState != PartyState.Roaming) return;
+        if (slot != null && slot.Focusable != null)
+        {
+            CameraFocusManager.Instance?.Focus(slot.Focusable);
+        }
+        else
+        {
+            OnNpcFocused(slot);
+        }
+    }
+
+    /// <summary>
+    /// Chamado quando a câmera conclui ou estabelece foco no NPC do slot.
+    /// Inicia o diálogo e atualiza o FlipPhone para esse NPC.
+    /// </summary>
+    public void OnNpcFocused(PartyGuestSlot slot)
+    {
+        if (currentState != PartyState.Roaming && currentState != PartyState.TalkingToNpc) return;
         if (slot == null || !slot.IsOccupied) return;
 
         var npc   = slot.AssignedNpc;
@@ -344,6 +426,8 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
 
     private void OnConversationFinished(string npcId, ApproachStyle approach, int delta)
     {
+        // Retorna a câmera suavemente para a visão geral
+        CameraFocusManager.Instance?.Unfocus();
         if (!usedApproaches.TryGetValue(npcId, out var used))
         {
             used = new HashSet<ApproachStyle>();
@@ -363,13 +447,17 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
         }
 
         remainingInteractions--;
+        Debug.Log($"[PartyEventController] Conversa concluída com '{npcId}' ({approach}). Ânimo consumido! Restante: {remainingInteractions}");
         hudPresenter?.ConsumeInteraction();
 
         npcInPhoneFocus = null;
         currentState    = PartyState.Roaming;
 
         if (remainingInteractions <= 0)
+        {
+            Debug.Log("[PartyEventController] Ânimo esgotado (0 interações restantes)! Encerrando festa corporativa...");
             EndParty();
+        }
     }
 
     // ─── Integração com o Flip-Phone ─────────────────────────────────────────
@@ -452,10 +540,13 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
             );
             bool isUnlocked = runState != null && (runState.IsActionUnlocked(action.id) || action.unlockByDefault);
 
+            bool isPartyApplicable = FlipPhoneResolver.IsActionApplicable(action, hasActiveCard: false, hasDeck: false, contextNpcId: targetNpcId);
+
             string statusText = string.Empty;
             if (!isNpcAvailable) statusText = "INDISPONÍVEL";
             else if (isConsumed) statusText = "USADO";
             else if (onCooldown) statusText = $"{cooldownTurns}T RECARGA";
+            else if (!isPartyApplicable) statusText = "SÓ NO GABINETE";
             else if (!conditionsMet || !isUnlocked) statusText = "BLOQUEADO";
 
             var vm = new FlipPhoneActionViewModel
@@ -466,7 +557,7 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
                 categoryTag = action.categoryTag,
                 icon = action.icon,
                 linkedNpcId = linkedNpc,
-                isAvailable = isUnlocked && !isConsumed && !onCooldown && conditionsMet && isNpcAvailable,
+                isAvailable = isUnlocked && !isConsumed && !onCooldown && conditionsMet && isNpcAvailable && isPartyApplicable,
                 isOnCooldown = onCooldown,
                 cooldownTurnsRemaining = cooldownTurns,
                 isConsumed = isConsumed,
@@ -486,6 +577,8 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
         var actionDef = phoneActions.Find(a => string.Equals(a.id, actionId, StringComparison.OrdinalIgnoreCase));
         if (actionDef == null || runState == null) return;
 
+        string targetNpcId = npcInPhoneFocus != null ? (!string.IsNullOrEmpty(npcInPhoneFocus.id) ? npcInPhoneFocus.id : npcInPhoneFocus.name) : null;
+
         var report = FlipPhoneResolver.ResolveUse(
             runState,
             deckState: null,
@@ -493,12 +586,42 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
             catalog: null,
             currentCard: null,
             perkCatalog: null,
-            npcCatalog: MandatoBootstrap.Instance?.NpcCatalog
+            npcCatalog: MandatoBootstrap.Instance?.NpcCatalog,
+            contextNpcId: targetNpcId
         );
 
         if (report != null && report.success)
         {
             Debug.Log($"[PartyEventController] Ação '{actionId}' executada com sucesso!");
+
+            // Se a ação removeu um NPC (ex: assassinato/exoneração), limpa o slot do NPC da festa
+            if (report.removedNpcIds != null && report.removedNpcIds.Count > 0)
+            {
+                foreach (var removedId in report.removedNpcIds)
+                {
+                    if (guestSlots != null)
+                    {
+                        foreach (var slot in guestSlots)
+                        {
+                            if (slot != null && slot.IsOccupied)
+                            {
+                                string sId = !string.IsNullOrEmpty(slot.AssignedNpc.id) ? slot.AssignedNpc.id : slot.AssignedNpc.name;
+                                if (string.Equals(sId, removedId, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    slot.Clear();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Se o NPC focado foi removido, fecha a conversa e desfaz o foco
+                if (!string.IsNullOrEmpty(targetNpcId) && report.removedNpcIds.Contains(targetNpcId))
+                {
+                    CancelCurrentConversation(revertCamera: true);
+                }
+            }
+
             RefreshFlipPhoneForNpc(npcInPhoneFocus);
         }
     }
@@ -613,5 +736,7 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
 
         if (flipPhonePresenter != null)
             flipPhonePresenter.OnActionRequested -= OnPhoneActionRequested;
+
+        UnbindCameraFocus();
     }
 }

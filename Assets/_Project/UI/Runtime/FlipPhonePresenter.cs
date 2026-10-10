@@ -322,6 +322,8 @@ namespace Mandato.UI
 
             IsOpen = true;
 
+            EnsurePhoneGameObject();
+
             if (phoneGameObject != null)
             {
                 phoneGameObject.SetActive(true);
@@ -375,6 +377,28 @@ namespace Mandato.UI
             if (!isInteractable) return;
             if (IsPhoneOpen()) Close();
             else Open();
+        }
+
+        private void EnsurePhoneGameObject()
+        {
+            if (phoneGameObject != null) return;
+
+            var cam = Camera.main;
+            if (cam != null)
+            {
+                var phoneTr = cam.transform.Find("celular");
+                if (phoneTr != null)
+                {
+                    phoneGameObject = phoneTr.gameObject;
+                    return;
+                }
+            }
+
+            var found = GameObject.Find("celular");
+            if (found != null)
+            {
+                phoneGameObject = found;
+            }
         }
 
         public void Refresh(IEnumerable<FlipPhoneActionViewModel> actions, string statusMessage = "")

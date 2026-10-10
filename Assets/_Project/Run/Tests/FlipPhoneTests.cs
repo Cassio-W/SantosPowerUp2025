@@ -687,5 +687,58 @@ namespace Mandato.Run.Tests
             Assert.AreEqual(1, report.deltaPoliticalX);
             Assert.AreEqual(-1, report.deltaPoliticalY);
         }
+
+        [Test]
+        public void ResolveUse_InPartyContext_WithContextNpcId_RemovesNpcEvenWithoutCurrentProposal()
+        {
+            // Simula proposta de assassinato com múltiplos efeitos: remover NPC e cancelar proposta
+            var actionKill = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_assassinar_festa",
+                "Operação Silenciosa",
+                "Elimina o NPC e cancela proposta atual"
+            );
+            actionKill.effects.Add(FlipPhoneEffect.CreateRemoveNpcFromGame(""));
+            actionKill.effects.Add(FlipPhoneEffect.CreateDismissCurrentProposal());
+
+            var depState = runState.GetOrCreateNpcState("DeputadoSuspeito");
+            depState.relationScore = 0;
+
+            // Na festa, não há proposta (currentCard = null), mas há contextNpcId = "DeputadoSuspeito"
+            var report = FlipPhoneResolver.ResolveUse(
+                runState,
+                deckState: null,
+                actionKill,
+                catalog: null,
+                currentCard: null,
+                contextNpcId: "DeputadoSuspeito"
+            );
+
+            Assert.IsTrue(report.success, "Ação com múltiplos efeitos deve ter sucesso na festa se o efeito de NPC for aplicável");
+            Assert.IsTrue(report.removedNpcIds.Contains("DeputadoSuspeito"));
+            Assert.IsFalse(runState.IsNpcAvailable("DeputadoSuspeito"));
+        }
+
+        [Test]
+        public void IsActionApplicable_FiltersCabinetOnlyActionsInParty()
+        {
+            // Ação exclusiva de proposta (só cancela proposta)
+            var actionOnlyDismiss = FlipPhoneActionDefinition.CreateRuntimeInstance("act_dismiss", "Comprar Voto", "Descarta proposta");
+            actionOnlyDismiss.effects.Add(FlipPhoneEffect.CreateDismissCurrentProposal());
+
+            Assert.IsFalse(
+                FlipPhoneResolver.IsActionApplicable(actionOnlyDismiss, hasActiveCard: false, hasDeck: false, contextNpcId: "QualquerNpc"),
+                "Ação que apenas descarta proposta deve ficar desativada na festa"
+            );
+
+            // Ação mista: descarta proposta E remove NPC
+            var actionMixed = FlipPhoneActionDefinition.CreateRuntimeInstance("act_mixed", "Assassinar", "Remove e descarta");
+            actionMixed.effects.Add(FlipPhoneEffect.CreateDismissCurrentProposal());
+            actionMixed.effects.Add(FlipPhoneEffect.CreateRemoveNpcFromGame(""));
+
+            Assert.IsTrue(
+                FlipPhoneResolver.IsActionApplicable(actionMixed, hasActiveCard: false, hasDeck: false, contextNpcId: "QualquerNpc"),
+                "Ação mista com efeito de NPC aplicável deve ficar disponível na festa"
+            );
+        }
     }
 }

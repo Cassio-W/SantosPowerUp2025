@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Mandato.Content
@@ -37,26 +38,54 @@ namespace Mandato.Content
         [TextArea(3, 6)] public string bio = string.Empty;
 
         [Header("Festa Corporativa — Abordagens")]
-        [Tooltip("Abordagem preferida: +2 de relação ao ser usada.")]
-        public ApproachStyle favoriteApproach  = ApproachStyle.Persuasivo;
-        [Tooltip("Abordagem gostada: +1 de relação ao ser usada.")]
-        public ApproachStyle likedApproach     = ApproachStyle.Brincalhao;
-        [Tooltip("Abordagem desgostada: -1 de relação ao ser usada.")]
-        public ApproachStyle dislikedApproach  = ApproachStyle.Arrogante;
-        [Tooltip("Abordagem odiada: -2 de relação ao ser usada.")]
-        public ApproachStyle hatedApproach     = ApproachStyle.Romantico;
+        [Tooltip("Deltas de relação (-2 a +2) para cada abordagem: [0]=Arrogante(↑), [1]=Brincalhão(→), [2]=Persuasivo(↓), [3]=Romântico(←)")]
+        [SerializeField] private int[] approachDeltas = new int[4] { -1, 1, 2, -2 };
+
+        public IReadOnlyList<int> ApproachDeltas => approachDeltas;
 
         /// <summary>
-        /// Retorna o delta de relação que este NPC recebe ao ser abordado com o estilo dado.
-        /// Tabela: favorita=+2, gostada=+1, desgostada=-1, odiada=-2.
+        /// Retorna o delta de relação (-2 a +2) que este NPC recebe ao ser abordado com o estilo dado.
         /// </summary>
         public int GetApproachDelta(ApproachStyle approach)
         {
-            if (approach == favoriteApproach)  return  2;
-            if (approach == likedApproach)     return  1;
-            if (approach == dislikedApproach)  return -1;
-            if (approach == hatedApproach)     return -2;
-            return 0; // segurança: abordagem não mapeada
+            int index = (int)approach;
+            if (approachDeltas != null && index >= 0 && index < approachDeltas.Length)
+            {
+                return Mathf.Clamp(approachDeltas[index], -2, 2);
+            }
+            return 0;
+        }
+
+        public void SetApproachDeltas(int arrogante, int brincalhao, int persuasivo, int romantico)
+        {
+            approachDeltas = new int[4]
+            {
+                Mathf.Clamp(arrogante, -2, 2),
+                Mathf.Clamp(brincalhao, -2, 2),
+                Mathf.Clamp(persuasivo, -2, 2),
+                Mathf.Clamp(romantico, -2, 2)
+            };
+        }
+
+        private void OnValidate()
+        {
+            if (approachDeltas == null || approachDeltas.Length != 4)
+            {
+                var newDeltas = new int[4] { -1, 1, 2, -2 };
+                if (approachDeltas != null)
+                {
+                    for (int i = 0; i < Mathf.Min(approachDeltas.Length, 4); i++)
+                        newDeltas[i] = Mathf.Clamp(approachDeltas[i], -2, 2);
+                }
+                approachDeltas = newDeltas;
+            }
+            else
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    approachDeltas[i] = Mathf.Clamp(approachDeltas[i], -2, 2);
+                }
+            }
         }
 
         public static NpcDefinition CreateRuntimeInstance(

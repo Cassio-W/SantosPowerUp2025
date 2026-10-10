@@ -22,3 +22,8 @@ MonoBehaviour:
   politicalBiasY: 8
   bio: "Especialista em pintar cal\xE7adas de branco e emitir notas cifradas de preocupa\xE7\xE3o
     institucional. S\xF3 precisa de cloroquina e blindados fumegando na pra\xE7a."
+  approachDeltas:
+  - 2
+  - -1
+  - 1
+  - -2

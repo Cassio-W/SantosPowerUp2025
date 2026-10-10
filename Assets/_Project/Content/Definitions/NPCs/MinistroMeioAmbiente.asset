@@ -23,3 +23,8 @@ MonoBehaviour:
   bio: "Especialista em passar a boiada enquanto a imprensa olha pro outro lado.
     Para ele, \xE1rvore boa \xE9 \xE1rvore que d\xE1 lugar para pasto ou planta\xE7\xE3o
     de soja."
+  approachDeltas:
+  - -2
+  - 1
+  - 0
+  - 2

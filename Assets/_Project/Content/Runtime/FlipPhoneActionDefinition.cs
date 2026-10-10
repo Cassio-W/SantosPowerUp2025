@@ -68,6 +68,7 @@ namespace Mandato.Content
         public static FlipPhoneEffect CreateGrantPerk(string perkId, int duration = 0) => new FlipPhoneEffect { effectType = FlipPhoneEffectType.GrantPerk, targetId = perkId, duration = duration };
         public static FlipPhoneEffect CreateTriggerEvent(string eventId, int duration = 3) => new FlipPhoneEffect { effectType = FlipPhoneEffectType.TriggerEvent, targetId = eventId, duration = duration };
         public static FlipPhoneEffect CreateDismissProposal() => new FlipPhoneEffect { effectType = FlipPhoneEffectType.DismissCurrentProposal };
+        public static FlipPhoneEffect CreateDismissCurrentProposal() => CreateDismissProposal();
         public static FlipPhoneEffect CreateSuspendNpc(int duration = 24, string npcId = "") => new FlipPhoneEffect { effectType = FlipPhoneEffectType.SuspendNpc, duration = duration, targetId = npcId };
         public static FlipPhoneEffect CreatePeekImpacts() => new FlipPhoneEffect { effectType = FlipPhoneEffectType.PeekStatImpacts };
         public static FlipPhoneEffect CreatePreventStatLoss() => new FlipPhoneEffect { effectType = FlipPhoneEffectType.PreventStatLoss };

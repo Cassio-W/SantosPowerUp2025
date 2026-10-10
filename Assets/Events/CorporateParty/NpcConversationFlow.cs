@@ -94,7 +94,11 @@ public class NpcConversationFlow : MonoBehaviour
 
         // Aguarda o jogador escolher uma abordagem via roda de interação
         ApproachStyle? chosenApproach = null;
-        activeApproachListener = style => chosenApproach = style;
+        activeApproachListener = style =>
+        {
+            Debug.Log($"[NpcConversationFlow] Abordagem recebida: {style}");
+            chosenApproach = style;
+        };
         hud.OnApproachSelected += activeApproachListener;
 
         while (chosenApproach == null)

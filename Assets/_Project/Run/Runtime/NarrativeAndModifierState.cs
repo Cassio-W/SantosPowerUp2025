@@ -21,7 +21,7 @@ namespace Mandato.Run
         public int relationship
         {
             get => relationScore;
-            set => relationScore = Math.Clamp(value, -100, 100);
+            set => relationScore = Clamp(value, -100, 100);
         }
 
         public NpcRunState() { }
@@ -29,13 +29,16 @@ namespace Mandato.Run
         public NpcRunState(string id, int initialRelation = 0)
         {
             npcId = id ?? string.Empty;
-            relationScore = Math.Clamp(initialRelation, -100, 100);
+            relationScore = Clamp(initialRelation, -100, 100);
         }
 
         public void ModifyRelation(int delta)
         {
-            relationScore = Math.Clamp(relationScore + delta, -100, 100);
+            relationScore = Clamp(relationScore + delta, -100, 100);
         }
+
+        private static int Clamp(int value, int min, int max) => value < min ? min : (value > max ? max : value);
+        private static float Clamp(float value, float min, float max) => value < min ? min : (value > max ? max : value);
 
         public void RecordInteraction()
         {
@@ -170,9 +173,11 @@ namespace Mandato.Run
             return remainingMonths <= 0;
         }
 
+        private static float Clamp(float value, float min, float max) => value < min ? min : (value > max ? max : value);
+
         /// <summary>Progresso de 0.0 a 1.0 (0 = início, 1 = concluído).</summary>
         public float Progress => totalMonths > 0
-            ? Math.Clamp(1f - (float)remainingMonths / totalMonths, 0f, 1f)
+            ? Clamp(1f - (float)remainingMonths / totalMonths, 0f, 1f)
             : 1f;
     }
 }

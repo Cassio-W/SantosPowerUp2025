@@ -23,3 +23,8 @@ MonoBehaviour:
   bio: "N\xE3o l\xEA projetos de lei, s\xF3 l\xEA os coment\xE1rios da live. Cria
     esc\xE2ndalo em comiss\xE3o pra viralizar e governa pelo algoritmo do Twitter
     e TikTok."
+  approachDeltas:
+  - -1
+  - 2
+  - 0
+  - 1

@@ -23,3 +23,8 @@ MonoBehaviour:
   bio: "Chega com maleta preta e sorriso no rosto. Vota com o governo se a emenda
     for paga \xE0 vista, mas n\xE3o atende liga\xE7\xE3o se a Pol\xEDcia Federal
     bater na porta."
+  approachDeltas:
+  - 0
+  - 1
+  - 2
+  - -2

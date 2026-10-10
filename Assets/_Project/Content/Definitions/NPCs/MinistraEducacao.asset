@@ -23,3 +23,8 @@ MonoBehaviour:
   bio: "Vive pedindo mais verba para a merenda enquanto tenta explicar por que os
     livros de hist\xF3ria mudam a cada quatro anos e ningu\xE9m aprende regra de
     tr\xEAs."
+  approachDeltas:
+  - -2
+  - 0
+  - 2
+  - 1

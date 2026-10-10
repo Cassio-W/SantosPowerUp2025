@@ -22,3 +22,8 @@ MonoBehaviour:
   politicalBiasY: -2
   bio: "Organiza jantares de gala, reformula o gabinete com feng shui e gasta o or\xE7amento
     de rela\xE7\xF5es internacionais em farofa de luxo e viagens diplom\xE1ticas."
+  approachDeltas:
+  - -1
+  - 1
+  - -2
+  - 2

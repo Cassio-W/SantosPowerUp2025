@@ -35,6 +35,40 @@ namespace Mandato.Run
 
     public static class FlipPhoneResolver
     {
+        public static bool IsActionApplicable(FlipPhoneActionDefinition action, bool hasActiveCard, bool hasDeck, string contextNpcId = null)
+        {
+            if (action == null || action.effects == null || action.effects.Count == 0) return true;
+
+            bool hasAtLeastOneExecutableEffect = false;
+            foreach (var effect in action.effects)
+            {
+                if (effect == null) continue;
+                string targetId = effect.GetTargetId();
+                bool hasTarget = !string.IsNullOrEmpty(targetId) || hasActiveCard || !string.IsNullOrEmpty(contextNpcId);
+
+                switch (effect.effectType)
+                {
+                    case FlipPhoneEffectType.DismissCurrentProposal:
+                        if (hasActiveCard) hasAtLeastOneExecutableEffect = true;
+                        break;
+                    case FlipPhoneEffectType.InjectCard:
+                    case FlipPhoneEffectType.RemoveCard:
+                        if (hasDeck) hasAtLeastOneExecutableEffect = true;
+                        break;
+                    case FlipPhoneEffectType.RemoveNpcFromGame:
+                    case FlipPhoneEffectType.SuspendNpc:
+                    case FlipPhoneEffectType.ModifyNpcRelation:
+                        if (hasTarget) hasAtLeastOneExecutableEffect = true;
+                        break;
+                    default:
+                        // Efeitos de stats, política, perks, etc. são sempre executáveis
+                        hasAtLeastOneExecutableEffect = true;
+                        break;
+                }
+            }
+            return hasAtLeastOneExecutableEffect;
+        }
+
         public static FlipPhoneUseReport ResolveUse(
             RunState runState,
             DeckState deckState,
@@ -42,7 +76,8 @@ namespace Mandato.Run
             IReadOnlyDictionary<string, CardDefinition> catalog = null,
             CardDefinition currentCard = null,
             IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null,
-            IReadOnlyDictionary<string, NpcDefinition> npcCatalog = null)
+            IReadOnlyDictionary<string, NpcDefinition> npcCatalog = null,
+            string contextNpcId = null)
         {
             if (runState == null || action == null)
             {
@@ -81,24 +116,17 @@ namespace Mandato.Run
                 return new FlipPhoneUseReport { success = false, failReason = $"Ação em recarga ({remaining} turno(s) restante(s))." };
             }
 
-            // 6. Valida efeitos que requerem proposta ou visitante ativo
-            if (action.effects != null)
+            // 6. Valida se a ação possui ao menos um efeito executável no contexto atual
+            bool hasActiveCard = currentCard != null;
+            bool hasDeck = deckState != null;
+            if (!IsActionApplicable(action, hasActiveCard, hasDeck, contextNpcId))
             {
-                bool requiresProposal = action.effects.Exists(e => e != null && (
-                    e.effectType == FlipPhoneEffectType.DismissCurrentProposal ||
-                    (e.effectType == FlipPhoneEffectType.RemoveNpcFromGame && string.IsNullOrEmpty(e.GetTargetId())) ||
-                    (e.effectType == FlipPhoneEffectType.SuspendNpc && string.IsNullOrEmpty(e.GetTargetId())) ||
-                    (e.effectType == FlipPhoneEffectType.ModifyNpcRelation && string.IsNullOrEmpty(e.GetTargetId()))
-                ));
-                if (requiresProposal && currentCard == null)
-                {
-                    return new FlipPhoneUseReport { success = false, failReason = "Nenhuma proposta ativa para esta ação." };
-                }
+                return new FlipPhoneUseReport { success = false, failReason = "Esta ação só pode ser utilizada durante propostas no Gabinete." };
             }
 
             // 7. Valida condições
-            string currentNpcId = currentCard != null ? currentCard.GetNpcId() : string.Empty;
-            if (!action.AreConditionsMet(runState.stats, runState.calendar.currentMonthIndex, runState.activePerkIds, runState.decisionHistory, currentNpcId, runState.GetNpcRelation))
+            string activeNpcTarget = currentCard != null ? currentCard.GetNpcId() : (contextNpcId ?? string.Empty);
+            if (!action.AreConditionsMet(runState.stats, runState.calendar.currentMonthIndex, runState.activePerkIds, runState.decisionHistory, activeNpcTarget, runState.GetNpcRelation))
             {
                 return new FlipPhoneUseReport { success = false, failReason = "Condições da ação não atendidas." };
             }
@@ -159,7 +187,7 @@ namespace Mandato.Run
                         case FlipPhoneEffectType.RemoveNpcFromGame:
                             string targetRemoveNpc = !string.IsNullOrEmpty(effTargetId)
                                 ? effTargetId
-                                : (currentCard != null ? currentCard.GetNpcId() : string.Empty);
+                                : (currentCard != null ? currentCard.GetNpcId() : (contextNpcId ?? string.Empty));
                             if (!string.IsNullOrEmpty(targetRemoveNpc))
                             {
                                 var npcState = runState.GetOrCreateNpcState(targetRemoveNpc);
@@ -186,7 +214,7 @@ namespace Mandato.Run
                         case FlipPhoneEffectType.SuspendNpc:
                             string targetSuspendNpc = !string.IsNullOrEmpty(effTargetId)
                                 ? effTargetId
-                                : (currentCard != null ? currentCard.GetNpcId() : string.Empty);
+                                : (currentCard != null ? currentCard.GetNpcId() : (contextNpcId ?? string.Empty));
                             if (!string.IsNullOrEmpty(targetSuspendNpc))
                             {
                                 var npcState = runState.GetOrCreateNpcState(targetSuspendNpc);
@@ -201,7 +229,7 @@ namespace Mandato.Run
                         case FlipPhoneEffectType.ModifyNpcRelation:
                             string targetRelationNpc = !string.IsNullOrEmpty(effTargetId)
                                 ? effTargetId
-                                : (currentCard != null ? currentCard.GetNpcId() : string.Empty);
+                                : (currentCard != null ? currentCard.GetNpcId() : (contextNpcId ?? string.Empty));
                             if (!string.IsNullOrEmpty(targetRelationNpc))
                             {
                                 var npcState = runState.GetOrCreateNpcState(targetRelationNpc);

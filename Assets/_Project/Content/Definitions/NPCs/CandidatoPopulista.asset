@@ -23,3 +23,8 @@ MonoBehaviour:
   bio: "Promete p\xE3o, circo, isen\xE7\xE3o de impostos e rezas coletivas para expulsar
     a infla\xE7\xE3o. Aparece em debate eleitoral s\xF3 para tumultuar e pedir voto
     aos fi\xE9is."
+  approachDeltas:
+  - -2
+  - 2
+  - 1
+  - 0

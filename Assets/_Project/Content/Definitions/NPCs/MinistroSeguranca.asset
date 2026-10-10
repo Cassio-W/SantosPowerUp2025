@@ -23,3 +23,8 @@ MonoBehaviour:
   bio: "Resolve qualquer problema com decreto de interven\xE7\xE3o e coletiva de
     imprensa \xE0s 6h da manh\xE3. Se pudesse, colocava tornozeleira eletr\xF4nica
     no Congresso inteiro."
+  approachDeltas:
+  - 1
+  - -2
+  - 2
+  - 0

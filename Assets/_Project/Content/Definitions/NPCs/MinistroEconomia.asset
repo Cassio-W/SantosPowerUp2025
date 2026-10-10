@@ -23,3 +23,8 @@ MonoBehaviour:
   bio: "Jura que o d\xF3lar s\xF3 sobe se fizerem besteira e que privatizar a gravidade
     vai resolver a infla\xE7\xE3o. Ama cortar verba social e criar taxa com nome
     bonito em ingl\xEAs."
+  approachDeltas:
+  - 1
+  - -2
+  - 2
+  - -1
