@@ -44,7 +44,7 @@ public class PartyGuestSlot : MonoBehaviour
         Focusable.HighlightOutlineColor = new Color(1f, 0.85f, 0.25f, 1f);
         Focusable.AllowClickToFocus = true;
         Focusable.UnfocusOnSecondClick = false;
-        Focusable.AllowUnfocusOnClickOutside = true;
+        Focusable.AllowUnfocusOnClickOutside = false;
 
         var col = GetComponent<CapsuleCollider>();
         if (col == null)
@@ -116,11 +116,11 @@ public class PartyGuestSlot : MonoBehaviour
             }
         }
 
-        // Cria ponto de foco procedural em frente ao convidado
+        // Cria ponto de foco procedural em frente ao convidado enquadrando o NPC à esquerda e abrindo a direita para a UI
         var go = new GameObject("FocusPoint");
         go.transform.SetParent(transform, false);
-        go.transform.localPosition = new Vector3(0f, 1.55f, 1.8f);
-        go.transform.localRotation = Quaternion.Euler(4f, 180f, 0f);
+        go.transform.localPosition = new Vector3(-0.3f, 1.6f, 2.4f);
+        go.transform.localRotation = Quaternion.Euler(4f, 188f, 0f);
         cameraFocusPoint = go.transform;
         return cameraFocusPoint;
     }

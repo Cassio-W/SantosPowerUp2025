@@ -30,6 +30,12 @@ public class NpcConversationFlow : MonoBehaviour
     [Header("Diálogos de Abertura (placeholder genérico)")]
     [SerializeField] private string defaultOpeningLine = "Que bom te ver por aqui, {nome}.";
 
+    /// <summary>
+    /// Indica se o jogador já escolheu uma abordagem e o desfecho está sendo exibido / resolvido.
+    /// Enquanto for verdadeiro, o fluxo não pode ser cancelado externamente.
+    /// </summary>
+    public bool IsResolving { get; private set; }
+
     public void SetHud(PartyHudPresenter hudPresenter) => hud = hudPresenter;
 
     /// <summary>
@@ -44,14 +50,22 @@ public class NpcConversationFlow : MonoBehaviour
         Action<string, ApproachStyle, int> onFinished)
     {
         Cancel();
+        IsResolving = false;
         activeRoutine = StartCoroutine(ConversationRoutine(npc, usedApproaches, onFinished));
     }
 
     /// <summary>
     /// Cancela a conversa em andamento e fecha as UIs sem consumir ânimo nem aplicar efeitos.
+    /// Não cancela se o jogador já tiver selecionado a abordagem e estiver no período de resolução.
     /// </summary>
     public void Cancel()
     {
+        if (IsResolving)
+        {
+            // Abordagem já selecionada e sendo resolvida; não interrompe o desfecho
+            return;
+        }
+
         if (activeRoutine != null)
         {
             StopCoroutine(activeRoutine);
@@ -128,6 +142,8 @@ public class NpcConversationFlow : MonoBehaviour
             yield return null;
         }
 
+        IsResolving = true;
+
         hud.OnApproachSelected -= activeApproachListener;
         activeApproachListener = null;
 
@@ -144,6 +160,7 @@ public class NpcConversationFlow : MonoBehaviour
         hud.HideFeedback();
 
         activeRoutine = null;
+        IsResolving = false;
         string npcId = npc != null ? (!string.IsNullOrEmpty(npc.id) ? npc.id : npc.name) : string.Empty;
         onFinished?.Invoke(npcId, chosenApproach.Value, delta);
     }
@@ -158,6 +175,6 @@ public class NpcConversationFlow : MonoBehaviour
     {
         if (delta > 0)  return $"+{delta} Relação";
         if (delta < 0)  return $"{delta} Relação";
-        return "Nenhuma reação";
+        return "0 Relação (Neutro)";
     }
 }

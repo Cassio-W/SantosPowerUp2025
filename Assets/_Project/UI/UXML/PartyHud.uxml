@@ -4,9 +4,9 @@
         
         <!-- Barra Superior: Botão Voltar (durante diálogo) e Botão Sair da Festa (discreto à direita) -->
         <ui:VisualElement name="party-top-bar" class="party-top-bar" picking-mode="Ignore">
-            <ui:Button name="btn-back-conversation" text="⮌ Salão Principal" class="btn-back-conversation hidden" />
+            <ui:Button name="btn-back-conversation" text="Salão Principal" class="btn-back-conversation hidden" />
             <ui:VisualElement class="top-spacer" picking-mode="Ignore" />
-            <ui:Button name="btn-end-party" text="🚪 Deixar o Jantar" class="btn-end-party" />
+            <ui:Button name="btn-end-party" text="Deixar o Jantar" class="btn-end-party" />
         </ui:VisualElement>
 
         <!-- Feedback Central de Relação (+2 Relação / -1 Relação) -->
@@ -17,7 +17,6 @@
         <!-- Medidor Vertical de Ânimo (Canto Inferior Esquerdo) -->
         <ui:VisualElement name="energy-gauge-widget" class="energy-gauge-widget" picking-mode="Ignore">
             <ui:VisualElement class="gauge-header" picking-mode="Ignore">
-                <ui:Label text="🍸" class="gauge-icon" />
                 <ui:Label text="ÂNIMO" class="gauge-title" />
             </ui:VisualElement>
             <ui:VisualElement class="gauge-meter-frame" picking-mode="Ignore">
@@ -26,10 +25,10 @@
             <ui:Label name="energy-count-label" text="4/4" class="gauge-count-label" />
         </ui:VisualElement>
 
-        <!-- Área Inferior: Balão de Fala + Roda Circular de Abordagem -->
-        <ui:VisualElement name="party-bottom-area" class="party-bottom-area" picking-mode="Ignore">
+        <!-- Área Lateral Direita: Balão de Fala + Roda Circular de Abordagem Empilhados -->
+        <ui:VisualElement name="party-conversation-area" class="party-conversation-area" picking-mode="Ignore">
             
-            <!-- Balão / Cartão de Conversa com o Convidado -->
+            <!-- Balão / Cartão de Conversa com o Convidado (Em Cima) -->
             <ui:VisualElement name="npc-speech-bubble" class="npc-speech-bubble hidden">
                 <ui:VisualElement class="bubble-header" picking-mode="Ignore">
                     <ui:Label name="npc-name-label" text="Nome do Convidado" class="npc-name-label" />
@@ -40,7 +39,7 @@
                 <ui:Label name="npc-speech-text" text="Texto da conversa com o convidado..." class="npc-speech-text" />
             </ui:VisualElement>
 
-            <!-- A Verdadeira Roda de Abordagem Triangular em X (Opção A: Canvas Vetorial Painter2D) -->
+            <!-- A Verdadeira Roda de Abordagem Triangular em X (Embaixo) -->
             <ui:VisualElement name="approach-wheel" class="approach-wheel hidden">
                 <!-- Canvas vetorial nativo onde as 4 fatias triangulares cortadas em X são renderizadas -->
                 <ui:VisualElement name="wheel-slice-canvas" class="wheel-slice-canvas" picking-mode="Ignore" />

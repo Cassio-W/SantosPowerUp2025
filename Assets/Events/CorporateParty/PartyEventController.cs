@@ -170,9 +170,12 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
 
         Shuffle(pool);
 
+        var shuffledSlots = new List<PartyGuestSlot>(guestSlots);
+        Shuffle(shuffledSlots);
+
         for (int i = 0; i < count; i++)
         {
-            var slot   = guestSlots[i];
+            var slot   = shuffledSlots[i];
             var npcDef = pool[i];
 
             GameObject instance = null;
@@ -267,6 +270,10 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
         if (focusMgr != null)
         {
             focusMgr.OnObjectFocusChanged += HandleObjectFocusChanged;
+            if (hudPresenter != null && hudPresenter.TryGetComponent<UnityEngine.UIElements.UIDocument>(out var uiDoc))
+            {
+                focusMgr.RegisterUIDocument(uiDoc);
+            }
         }
     }
 
@@ -310,6 +317,7 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
         {
             if (currentState == PartyState.TalkingToNpc)
             {
+                if (conversationFlow != null && conversationFlow.IsResolving) return;
                 CancelCurrentConversation(revertCamera: false);
             }
         }
@@ -324,6 +332,7 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
     public void CancelCurrentConversation(bool revertCamera)
     {
         if (currentState != PartyState.TalkingToNpc) return;
+        if (conversationFlow != null && conversationFlow.IsResolving) return;
 
         conversationFlow?.Cancel();
         npcInPhoneFocus = null;
@@ -426,6 +435,9 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
 
     private void OnConversationFinished(string npcId, ApproachStyle approach, int delta)
     {
+        npcInPhoneFocus = null;
+        currentState    = PartyState.Roaming;
+
         // Retorna a câmera suavemente para a visão geral
         CameraFocusManager.Instance?.Unfocus();
         if (!usedApproaches.TryGetValue(npcId, out var used))
@@ -449,9 +461,6 @@ public class PartyEventController : MonoBehaviour, IPartyEventController
         remainingInteractions--;
         Debug.Log($"[PartyEventController] Conversa concluída com '{npcId}' ({approach}). Ânimo consumido! Restante: {remainingInteractions}");
         hudPresenter?.ConsumeInteraction();
-
-        npcInPhoneFocus = null;
-        currentState    = PartyState.Roaming;
 
         if (remainingInteractions <= 0)
         {

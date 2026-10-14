@@ -121,7 +121,10 @@ namespace Mandato.Run
             bool hasDeck = deckState != null;
             if (!IsActionApplicable(action, hasActiveCard, hasDeck, contextNpcId))
             {
-                return new FlipPhoneUseReport { success = false, failReason = "Esta ação só pode ser utilizada durante propostas no Gabinete." };
+                string reason = !hasActiveCard
+                    ? "Nenhuma proposta ativa para esta ação (só pode ser utilizada durante propostas no Gabinete)."
+                    : "Esta ação não é aplicável no contexto atual.";
+                return new FlipPhoneUseReport { success = false, failReason = reason };
             }
 
             // 7. Valida condições

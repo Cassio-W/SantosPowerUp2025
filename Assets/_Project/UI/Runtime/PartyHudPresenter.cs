@@ -293,8 +293,8 @@ namespace Mandato.UI
         private void DrawWheelSlices(MeshGenerationContext ctx)
         {
             var p = ctx.painter2D;
-            float width = sliceCanvas.resolvedStyle.width > 0 ? sliceCanvas.resolvedStyle.width : 280f;
-            float height = sliceCanvas.resolvedStyle.height > 0 ? sliceCanvas.resolvedStyle.height : 280f;
+            float width = sliceCanvas.resolvedStyle.width > 0 ? sliceCanvas.resolvedStyle.width : 400f;
+            float height = sliceCanvas.resolvedStyle.height > 0 ? sliceCanvas.resolvedStyle.height : 400f;
             Vector2 center = new Vector2(width * 0.5f, height * 0.5f);
             float R = Mathf.Min(center.x, center.y) - 4f;
 
@@ -376,13 +376,13 @@ namespace Mandato.UI
             p.BeginPath();
             p.Arc(center, R, Angle.Degrees(0f), Angle.Degrees(360f), ArcDirection.Clockwise);
             p.strokeColor = new Color(0.83f, 0.69f, 0.34f, 0.85f);
-            p.lineWidth = 2.5f;
+            p.lineWidth = 3.5f;
             p.Stroke();
 
             p.BeginPath();
-            p.Arc(center, 38f, Angle.Degrees(0f), Angle.Degrees(360f), ArcDirection.Clockwise);
+            p.Arc(center, width * 0.135f, Angle.Degrees(0f), Angle.Degrees(360f), ArcDirection.Clockwise);
             p.strokeColor = new Color(0.83f, 0.69f, 0.34f, 0.65f);
-            p.lineWidth = 1.5f;
+            p.lineWidth = 2.0f;
             p.Stroke();
         }
 
@@ -391,13 +391,13 @@ namespace Mandato.UI
         private int GetSectorFromLocalPos(Vector2 localPos)
         {
             if (wheelRoot == null) return -1;
-            float width = wheelRoot.resolvedStyle.width > 0 ? wheelRoot.resolvedStyle.width : 280f;
-            float height = wheelRoot.resolvedStyle.height > 0 ? wheelRoot.resolvedStyle.height : 280f;
+            float width = wheelRoot.resolvedStyle.width > 0 ? wheelRoot.resolvedStyle.width : 400f;
+            float height = wheelRoot.resolvedStyle.height > 0 ? wheelRoot.resolvedStyle.height : 400f;
             Vector2 center = new Vector2(width * 0.5f, height * 0.5f);
             Vector2 offset = localPos - center;
             float dist = offset.magnitude;
             float maxR = (width * 0.5f) - 2f;
-            float minR = 36f; // Limite do selo central
+            float minR = width * 0.13f; // Limite do selo central proporcional (52px em 400px de diâmetro)
 
             if (dist < minR || dist > maxR)
                 return -1;
@@ -436,13 +436,15 @@ namespace Mandato.UI
             }
         }
 
+        public bool IsSelectingApproach => isSelectingApproach;
+
         private void OnWheelPointerDown(PointerDownEvent evt)
         {
+            evt.StopPropagation();
             int sector = GetSectorFromLocalPos(evt.localPosition);
             if (sector >= 0 && sector < 4 && !usedApproaches[sector])
             {
                 SelectApproach((ApproachStyle)sector);
-                evt.StopPropagation();
             }
         }
 

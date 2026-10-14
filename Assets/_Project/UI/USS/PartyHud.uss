@@ -35,10 +35,10 @@
 .btn-back-conversation {
     background-color: rgba(28, 24, 21, 0.92);
     color: #f5eedc;
-    font-size: 13px;
+    font-size: 18px;
     -unity-font-style: bold;
-    padding: 8px 16px;
-    border-radius: 8px;
+    padding: 12px 24px;
+    border-radius: 10px;
     border-width: 1px;
     border-color: rgba(212, 175, 55, 0.45);
     transition-duration: 0.15s;
@@ -53,10 +53,10 @@
 .btn-end-party {
     background-color: rgba(42, 28, 25, 0.9);
     color: #ebd8c8;
-    font-size: 13px;
+    font-size: 18px;
     -unity-font-style: bold;
-    padding: 8px 18px;
-    border-radius: 8px;
+    padding: 12px 26px;
+    border-radius: 10px;
     border-width: 1px;
     border-color: rgba(180, 80, 70, 0.4);
     transition-duration: 0.15s;
@@ -72,43 +72,38 @@
 /* ─── MEDIDOR VERTICAL DE ÂNIMO (CANTO INFERIOR ESQUERDO) ────────────────── */
 .energy-gauge-widget {
     position: absolute;
-    left: 32px;
-    bottom: 32px;
-    width: 72px;
+    left: 36px;
+    bottom: 36px;
+    width: 100px;
     background-color: rgba(24, 20, 18, 0.94);
-    border-radius: 14px;
+    border-radius: 18px;
     border-width: 2px;
     border-color: rgba(212, 175, 55, 0.4);
-    padding: 10px 8px;
+    padding: 14px 10px;
     align-items: center;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
 }
 
 .gauge-header {
     align-items: center;
-    margin-bottom: 8px;
-}
-
-.gauge-icon {
-    font-size: 18px;
-    margin-bottom: 2px;
+    margin-bottom: 10px;
 }
 
 .gauge-title {
     color: #d4af37;
-    font-size: 10px;
+    font-size: 14px;
     -unity-font-style: bold;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
 }
 
 .gauge-meter-frame {
-    width: 32px;
-    min-height: 120px;
+    width: 44px;
+    min-height: 165px;
     background-color: rgba(12, 10, 9, 0.85);
-    border-radius: 8px;
+    border-radius: 10px;
     border-width: 1px;
     border-color: rgba(255, 255, 255, 0.1);
-    padding: 4px;
+    padding: 5px;
     justify-content: flex-end;
 }
 
@@ -121,9 +116,9 @@
 
 .energy-segment {
     width: 100%;
-    height: 22px;
-    margin-top: 3px;
-    border-radius: 4px;
+    height: 32px;
+    margin-top: 4px;
+    border-radius: 5px;
     border-width: 1px;
     border-color: rgba(0, 0, 0, 0.4);
     transition-duration: 0.2s;
@@ -142,9 +137,9 @@
 
 .gauge-count-label {
     color: #e6dfd1;
-    font-size: 12px;
+    font-size: 17px;
     -unity-font-style: bold;
-    margin-top: 8px;
+    margin-top: 10px;
 }
 
 /* ─── FEEDBACK MOMENTÂNEO DE RELAÇÃO ─────────────────────────────────────── */
@@ -157,37 +152,39 @@
 }
 
 .approach-feedback-label {
-    font-size: 28px;
+    font-size: 38px;
     -unity-font-style: bold;
     color: #f5eedc;
     background-color: rgba(28, 24, 21, 0.95);
-    padding: 12px 30px;
-    border-radius: 14px;
+    padding: 16px 42px;
+    border-radius: 18px;
     border-width: 2px;
     border-color: #d4af37;
     -unity-text-align: middle-center;
 }
 
-/* ─── ÁREA INFERIOR (BALÃO + RODA) ───────────────────────────────────────── */
-.party-bottom-area {
-    width: 100%;
-    flex-direction: row;
+/* ─── ÁREA LATERAL DIREITA DE CONVERSA (BALÃO + RODA EMPILHADOS) ─────────── */
+.party-conversation-area {
+    position: absolute;
+    right: 56px;
+    top: 0;
+    bottom: 0;
+    width: 560px;
+    flex-direction: column;
     justify-content: center;
-    align-items: flex-end;
-    margin-bottom: 8px;
-    padding-left: 90px; /* Compensa o espaço da barra de ânimo */
+    align-items: center;
 }
 
-/* ─── CARTÃO / BALÃO DE FALA DO NPC ──────────────────────────────────────── */
+/* ─── CARTÃO / BALÃO DE FALA DO NPC (EM CIMA) ────────────────────────────── */
 .npc-speech-bubble {
-    width: 480px;
-    min-height: 160px;
+    width: 540px;
+    min-height: 180px;
     background-color: rgba(26, 22, 19, 0.95);
-    border-radius: 16px;
+    border-radius: 20px;
     border-width: 2px;
     border-color: rgba(212, 175, 55, 0.45);
-    padding: 18px 22px;
-    margin-right: 32px;
+    padding: 22px 26px;
+    margin-bottom: 24px;
     justify-content: space-between;
 }
 
@@ -197,47 +194,47 @@
     align-items: center;
     border-bottom-width: 1px;
     border-bottom-color: rgba(212, 175, 55, 0.25);
-    padding-bottom: 6px;
-    margin-bottom: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
 }
 
 .npc-name-label {
     color: #d4af37;
-    font-size: 19px;
+    font-size: 26px;
     -unity-font-style: bold;
 }
 
 .bubble-tag {
     background-color: rgba(212, 175, 55, 0.15);
-    border-radius: 4px;
-    padding: 2px 8px;
+    border-radius: 6px;
+    padding: 4px 10px;
 }
 
 .bubble-tag-text {
     color: #c5a059;
-    font-size: 9px;
+    font-size: 13px;
     -unity-font-style: bold;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
 }
 
 .npc-speech-text {
     color: #f5eedc;
-    font-size: 15px;
+    font-size: 21px;
     white-space: normal;
-    line-height: 20px;
+    line-height: 29px;
     margin-bottom: 0;
 }
 
 /* ─── A VERDADEIRA RODA CIRCULAR DE ABORDAGEM (APPROACH WHEEL) ───────────── */
 .approach-wheel {
-    width: 280px;
-    height: 280px;
-    border-radius: 140px;
+    width: 400px;
+    height: 400px;
+    border-radius: 200px;
     position: relative;
     justify-content: center;
     align-items: center;
     background-color: rgba(18, 15, 13, 0.98);
-    border-width: 2px;
+    border-width: 3px;
     border-color: rgba(197, 160, 89, 0.45);
 }
 
@@ -259,41 +256,41 @@
 
 /* Fatia Superior: Arrogante */
 .slice-up {
-    top: 18px;
-    left: 80px;
-    right: 80px;
-    height: 54px;
+    top: 24px;
+    left: 110px;
+    right: 110px;
+    height: 76px;
 }
 
 /* Fatia Direita: Brincalhão */
 .slice-right {
-    right: 14px;
-    top: 80px;
-    bottom: 80px;
-    width: 66px;
+    right: 18px;
+    top: 110px;
+    bottom: 110px;
+    width: 92px;
 }
 
 /* Fatia Inferior: Persuasivo */
 .slice-down {
-    bottom: 18px;
-    left: 80px;
-    right: 80px;
-    height: 54px;
+    bottom: 24px;
+    left: 110px;
+    right: 110px;
+    height: 76px;
 }
 
 /* Fatia Esquerda: Romântico */
 .slice-left {
-    left: 14px;
-    top: 80px;
-    bottom: 80px;
-    width: 66px;
+    left: 18px;
+    top: 110px;
+    bottom: 110px;
+    width: 92px;
 }
 
 .quadrant-title {
     color: #f5eedc;
-    font-size: 11px;
+    font-size: 16px;
     -unity-font-style: bold;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.8px;
     -unity-text-align: middle-center;
 }
 
@@ -309,11 +306,11 @@
 /* ─── SELO CENTRAL DA RODA EM LATÃO ENVELHECIDO ──────────────────────────── */
 .wheel-center-seal {
     position: absolute;
-    width: 74px;
-    height: 74px;
-    border-radius: 37px;
+    width: 104px;
+    height: 104px;
+    border-radius: 52px;
     background-color: #1a1614;
-    border-width: 2px;
+    border-width: 3px;
     border-color: #d4af37;
     justify-content: center;
     align-items: center;
@@ -322,9 +319,9 @@
 
 .seal-text {
     color: #d4af37;
-    font-size: 9px;
+    font-size: 13px;
     -unity-font-style: bold;
-    letter-spacing: 1px;
+    letter-spacing: 1.4px;
 }
 
 /* ─── ABORDAGEM JÁ USADA / DESABILITADA ─────────────────────────────────── */

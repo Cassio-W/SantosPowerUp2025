@@ -412,7 +412,8 @@ namespace Mandato.Presentation
                             picked.GetFirstAncestorOfType<Button>() != null ||
                             picked.ClassListContains("decision-btn") || picked.ClassListContains("selectable") ||
                             picked.GetFirstAncestorOfType<VisualElement>()?.ClassListContains("decision-btn") == true ||
-                            picked.GetFirstAncestorOfType<VisualElement>()?.ClassListContains("selectable") == true)
+                            picked.GetFirstAncestorOfType<VisualElement>()?.ClassListContains("selectable") == true ||
+                            IsInteractiveCardOrWidget(picked))
                         {
                             return true;
                         }
@@ -420,6 +421,33 @@ namespace Mandato.Presentation
                 }
             }
 
+            return false;
+        }
+
+        private static bool IsInteractiveCardOrWidget(VisualElement el)
+        {
+            VisualElement curr = el;
+            while (curr != null)
+            {
+                if (curr.ClassListContains("approach-wheel") ||
+                    curr.ClassListContains("wheel-slice-canvas") ||
+                    curr.ClassListContains("slice-content") ||
+                    curr.ClassListContains("npc-speech-bubble") ||
+                    curr.ClassListContains("energy-gauge-widget") ||
+                    curr.ClassListContains("party-top-bar") ||
+                    curr.ClassListContains("feedback-container") ||
+                    curr.ClassListContains("flip-phone-root") ||
+                    curr.ClassListContains("interactive-ui") ||
+                    curr.name == "approach-wheel" ||
+                    curr.name == "npc-speech-bubble" ||
+                    curr.name == "energy-gauge-widget" ||
+                    curr.name == "btn-back-conversation" ||
+                    curr.name == "btn-end-party")
+                {
+                    return true;
+                }
+                curr = curr.parent;
+            }
             return false;
         }
 
