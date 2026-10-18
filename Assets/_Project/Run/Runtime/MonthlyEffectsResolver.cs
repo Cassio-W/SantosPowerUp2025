@@ -25,6 +25,9 @@ namespace Mandato.Run
         public List<string> investmentGrantedPerkIds = new List<string>();
         public List<string> investmentTriggeredEventIds = new List<string>();
 
+        /// <summary>Resultado da rodada mensal da guerra. Null se não havia guerra ativa.</summary>
+        public WarMonthReport war;
+
         public int advancedToMonthIndex = 1;
         public string advancedToDisplayDate = string.Empty;
         public RunTermination resultingTermination = RunTermination.Ongoing;
@@ -49,6 +52,7 @@ namespace Mandato.Run
         /// 5. Decremento de duração e expiração de Perks temporários
         /// 6. Decremento de duração e expiração de Eventos temporários
         /// 7. Decremento de Cooldowns de Ações do Flip-Phone
+        /// 7c. Rodada mensal do Evento de Guerra (WarRules.ResolveMonthEnd)
         /// 8. Avanço do Calendário
         /// 9. Avaliação das Regras Terminais (Vitória / Derrota)
         /// </summary>
@@ -231,6 +235,9 @@ namespace Mandato.Run
                     }
                 }
             }
+
+            // 7c. Rodada mensal do Evento de Guerra (upkeep, falha de manutenção, ofensiva e desfecho)
+            report.war = WarRules.ResolveMonthEnd(runState);
 
             // 8. Decremento de Suspensão de NPCs
             if (runState.npcStates != null)

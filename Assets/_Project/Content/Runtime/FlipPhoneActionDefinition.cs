@@ -25,7 +25,8 @@ namespace Mandato.Content
         SuspendNpc,
         PeekStatImpacts,
         PreventStatLoss,
-        ModifyNpcRelation
+        ModifyNpcRelation,
+        TriggerWar
     }
 
     [Serializable]
@@ -44,9 +45,12 @@ namespace Mandato.Content
         public RunEventDefinition targetEvent;
 
         [Header("Alvo por ID Legado / Fallback")]
-        public string targetId = string.Empty; // cardId, npcId, perkId, eventId
+        public string targetId = string.Empty; // cardId, npcId, perkId, eventId (ou país-alvo em TriggerWar)
         public int duration = 0;
         public bool injectOnTop = true;
+
+        [Header("Evento de Guerra (apenas TriggerWar)")]
+        public WarLevel warLevel = WarLevel.None;
 
         public string GetTargetId()
         {
@@ -73,6 +77,7 @@ namespace Mandato.Content
         public static FlipPhoneEffect CreatePeekImpacts() => new FlipPhoneEffect { effectType = FlipPhoneEffectType.PeekStatImpacts };
         public static FlipPhoneEffect CreatePreventStatLoss() => new FlipPhoneEffect { effectType = FlipPhoneEffectType.PreventStatLoss };
         public static FlipPhoneEffect CreateModifyNpcRelation(int delta, string npcId = "") => new FlipPhoneEffect { effectType = FlipPhoneEffectType.ModifyNpcRelation, deltaNpcRelation = delta, targetId = npcId };
+        public static FlipPhoneEffect CreateTriggerWar(WarLevel level, string targetCountryId = "") => new FlipPhoneEffect { effectType = FlipPhoneEffectType.TriggerWar, warLevel = level, targetId = targetCountryId };
     }
 
     [Serializable]

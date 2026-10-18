@@ -46,6 +46,12 @@ namespace Mandato.Content
         [Tooltip("ID do Investimento a Longo Prazo (fallback).")]
         public string startInvestmentId = string.Empty;
 
+        [Tooltip("Resolução diplomática extremamente hostil: se diferente de None, esta opção declara guerra neste nível. " +
+                 "Ignorado se uma guerra já ocorreu na run.")]
+        public WarLevel triggersWar = WarLevel.None;
+        [Tooltip("Identificador do país/alvo atacado (exibido na barra de guerra). Obrigatório se triggersWar != None.")]
+        public string warTargetId = string.Empty;
+
         public ChoiceDefinition() { }
 
         public ChoiceDefinition(string label)

@@ -47,6 +47,15 @@ namespace Mandato.Run
         public bool isPreviewAttributesActive = false;
         public int seed;
 
+        /// <summary>Estado do Evento de Guerra (inativo até ser declarado).</summary>
+        public WarState war = new WarState();
+
+        /// <summary>
+        /// Balanceamento da guerra (configuração imutável injetada pelo bootstrap a partir do WarEventDefinition).
+        /// Não é estado da partida: não é salvo e sobrevive ao Reset().
+        /// </summary>
+        [NonSerialized] public WarBalance warBalance = WarBalance.CreateDefault();
+
         /// <summary>
         /// ID do evento interativo agendado para o próximo turno disponível.
         /// Quando preenchido, o próximo DrawAndPresentProposal será substituído pelo evento.
@@ -93,6 +102,7 @@ namespace Mandato.Run
             scheduledEventId = string.Empty;
             scheduledEventsByMonth.Clear();
             activeInvestments.Clear();
+            war = new WarState();
         }
 
         public void RecordMonthDecision(MonthDecisionRecord record)
@@ -550,7 +560,7 @@ namespace Mandato.Run
 
         public void UpdateTermination()
         {
-            termination = RunRules.Evaluate(stats, calendar);
+            termination = RunRules.Evaluate(stats, calendar, war != null ? war.outcome : WarOutcome.None);
         }
 
         public RunSnapshot GetSnapshot()
@@ -563,7 +573,8 @@ namespace Mandato.Run
                 termination.IsOngoing,
                 termination.IsDefeat,
                 termination.IsVictory,
-                termination.reason
+                termination.reason,
+                WarRules.CreateSnapshot(this)
             );
         }
     }

@@ -19,6 +19,10 @@ namespace Mandato.Content
         public int minPopularApproval = -1;
         public int minCorruption = -1;
 
+        [Header("Evento de Guerra")]
+        [Tooltip("None = não exige guerra. Vitória/Rendição/Derrota exigem esse desfecho. Dê prioridade maior que finais genéricos.")]
+        public Mandato.Core.WarOutcome requiredWarOutcome = Mandato.Core.WarOutcome.None;
+
         [Header("Quest Obrigatória (ScriptableObject)")]
         public QuestDefinition requiredCompletedQuest;
 

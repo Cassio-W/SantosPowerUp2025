@@ -106,6 +106,12 @@ namespace Mandato.Run
         /// <summary>Investimentos a Longo Prazo ativos no momento do save.</summary>
         public List<ActiveInvestmentState> activeInvestments = new List<ActiveInvestmentState>();
 
+        /// <summary>
+        /// Estado do Evento de Guerra. Saves antigos (sem este campo) carregam com guerra inativa,
+        /// pois o JsonUtility preserva o valor padrão do inicializador.
+        /// </summary>
+        public WarState war = new WarState();
+
         public RunSaveData() { }
 
         public static RunSaveData FromRuntime(RunState runState, DeckState deckState)
@@ -140,7 +146,8 @@ namespace Mandato.Run
                 activeCharacterId = runState.activeCharacterId ?? string.Empty,
                 scheduledEventId = runState.scheduledEventId ?? string.Empty,
                 deck = new DeckSaveData(deckState),
-                activeInvestments = new List<ActiveInvestmentState>(runState.activeInvestments ?? new List<ActiveInvestmentState>())
+                activeInvestments = new List<ActiveInvestmentState>(runState.activeInvestments ?? new List<ActiveInvestmentState>()),
+                war = runState.war != null ? runState.war.Clone() : new WarState()
             };
 
             if (runState.npcStates != null)
@@ -258,6 +265,8 @@ namespace Mandato.Run
 
             runState.activeInvestments = new List<ActiveInvestmentState>(
                 activeInvestments ?? new List<ActiveInvestmentState>());
+
+            runState.war = war != null ? war.Clone() : new WarState();
 
             deck?.ApplyTo(deckState);
         }

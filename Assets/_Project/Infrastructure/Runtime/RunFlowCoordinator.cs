@@ -189,6 +189,14 @@ namespace Mandato.Infrastructure
             {
                 bindings.CameraFocus.OnObjectFocusChanged += HandleObjectFocusChanged;
             }
+
+            if (bindings.RetroMonitorPresenter != null)
+            {
+                bindings.RetroMonitorPresenter.OnWarInvestmentRequested -= SubmitWarInvestment;
+                bindings.RetroMonitorPresenter.OnWarInvestmentRequested += SubmitWarInvestment;
+                bindings.RetroMonitorPresenter.OnWarSurrenderRequested -= SurrenderWar;
+                bindings.RetroMonitorPresenter.OnWarSurrenderRequested += SurrenderWar;
+            }
         }
 
         private void OnDestroy()
@@ -217,6 +225,12 @@ namespace Mandato.Infrastructure
 
             if (bindings?.CameraFocus != null)
                 bindings.CameraFocus.OnObjectFocusChanged -= HandleObjectFocusChanged;
+
+            if (bindings?.RetroMonitorPresenter != null)
+            {
+                bindings.RetroMonitorPresenter.OnWarInvestmentRequested -= SubmitWarInvestment;
+                bindings.RetroMonitorPresenter.OnWarSurrenderRequested -= SurrenderWar;
+            }
         }
 
         private void HandleStampPreviewUpdated(bool isVisible, bool isApproved, Vector2 uv)
@@ -487,9 +501,18 @@ namespace Mandato.Infrastructure
 
         private void HandleFlipPhoneActionExecuted(FlipPhoneUseReport report)
         {
-            if (report != null && report.success && report.dismissedCurrentProposal)
+            if (report != null && report.success)
             {
-                DismissCurrentProposal();
+                if (report.startedWarLevel != WarLevel.None && bindings?.RetroMonitorPresenter != null)
+                {
+                    bindings.RetroMonitorPresenter.SetLogVariantClass("log-alert");
+                    bindings.RetroMonitorPresenter.LogMessage($"> [DEFESA] Conflito bélico deflagrado! {report.startedWarLevel.DisplayName()}");
+                }
+
+                if (report.dismissedCurrentProposal)
+                {
+                    DismissCurrentProposal();
+                }
             }
         }
 
@@ -759,6 +782,12 @@ namespace Mandato.Infrastructure
         {
             if (report == null || stateMachine == null) return;
 
+            if (report.startedWarLevel != WarLevel.None && bindings?.RetroMonitorPresenter != null)
+            {
+                bindings.RetroMonitorPresenter.SetLogVariantClass("log-alert");
+                bindings.RetroMonitorPresenter.LogMessage($"> [DEFESA] Resolução hostil deflagrou guerra! {report.startedWarLevel.DisplayName()}");
+            }
+
             bindings?.DecisionOverlayPresenter?.ClearChoices();
             SyncPresenters(report: report, applyCameraEffects: true, instantCamera: false);
 
@@ -779,6 +808,27 @@ namespace Mandato.Infrastructure
             bool hasMoreTutorial = HasRemainingTutorialCards();
 
             var monthlyReport = stateMachine.CompleteTurnAndAdvance(catalog.Perks, catalog.Events, catalog.Investments);
+
+            if (monthlyReport?.war != null && bindings?.RetroMonitorPresenter != null)
+            {
+                if (monthlyReport.war.maintenanceFailed)
+                {
+                    bindings.RetroMonitorPresenter.SetLogVariantClass("log-alert");
+                    bindings.RetroMonitorPresenter.LogMessage("> [ALERTA MILITAR] Falha de manutenção! Tropas ou Tecnologia esgotadas.");
+                }
+                else if (monthlyReport.war.offensiveBonusApplied)
+                {
+                    bindings.RetroMonitorPresenter.SetLogVariantClass("log-system");
+                    bindings.RetroMonitorPresenter.LogMessage("> [OFENSIVA] Vantagem tática consolidada (+10% no conflito).");
+                }
+
+                if (monthlyReport.war.outcome == WarOutcome.Victory)
+                {
+                    bindings.RetroMonitorPresenter.SetLogVariantClass("log-system");
+                    bindings.RetroMonitorPresenter.LogMessage("> [VITÓRIA TOTAL] Conflito bélico concluído com vitória esmagadora!");
+                }
+            }
+
             SyncPresenters(applyCameraEffects: (monthlyReport != null), instantCamera: false);
 
             if (!wasTutorial)
@@ -1080,6 +1130,42 @@ namespace Mandato.Infrastructure
             if (!string.IsNullOrEmpty(mainMenuSceneName) && Application.isPlaying)
             {
                 SceneManager.LoadScene(mainMenuSceneName);
+            }
+        }
+
+        public void SubmitWarInvestment(int economy, int popularity)
+        {
+            if (stateMachine?.RunState == null) return;
+            var result = WarRules.Invest(stateMachine.RunState, economy, popularity);
+            if (result.success)
+            {
+                if (bindings?.RetroMonitorPresenter != null)
+                {
+                    bindings.RetroMonitorPresenter.SetLogVariantClass("log-positive");
+                    if (result.economySpent > 0 && result.popularitySpent > 0)
+                        bindings.RetroMonitorPresenter.LogMessage($"> [DEFESA] Investimento belico: +{result.economySpent}% TECNOLOGIA, +{result.popularitySpent}% TROPAS.");
+                    else if (result.economySpent > 0)
+                        bindings.RetroMonitorPresenter.LogMessage($"> [DEFESA] Investimento em TECNOLOGIA: +{result.economySpent}% (-{result.economySpent}% Economia).");
+                    else if (result.popularitySpent > 0)
+                        bindings.RetroMonitorPresenter.LogMessage($"> [DEFESA] Investimento em TROPAS: +{result.popularitySpent}% (-{result.popularitySpent}% Populacao).");
+                }
+                SyncPresenters();
+                SaveCurrentRunState();
+            }
+        }
+
+        public void SurrenderWar()
+        {
+            if (stateMachine?.RunState == null) return;
+            if (WarRules.Surrender(stateMachine.RunState))
+            {
+                if (bindings?.RetroMonitorPresenter != null)
+                {
+                    bindings.RetroMonitorPresenter.SetLogVariantClass("log-alert");
+                    bindings.RetroMonitorPresenter.LogMessage("> [DEFESA] RENDICAO ASSINADA: O pais tornou-se um protetorado estrangeiro.");
+                }
+                SyncPresenters();
+                SaveCurrentRunState();
             }
         }
     }

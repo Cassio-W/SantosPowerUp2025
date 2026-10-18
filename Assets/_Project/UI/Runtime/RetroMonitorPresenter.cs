@@ -62,6 +62,43 @@ namespace Mandato.UI
         private Label situationLabel;
         private Label dynamicLogEntry;
 
+        // Tabs & Aba de Guerra
+        public const int WarInvestmentStep = 5;
+        public event Action<int, int> OnWarInvestmentRequested;
+        public event Action OnWarSurrenderRequested;
+
+        private VisualElement pcTabsContainer;
+        private Button btnTabGov;
+        private Button btnTabWar;
+        private VisualElement mainWorkspace;
+        private VisualElement warWorkspace;
+
+        private Label warPcTitle;
+        private Label warPcPercent;
+        private VisualElement warPcPlayerFill;
+        private VisualElement warPcEnemyFill;
+        private Button btnWarSurrenderPc;
+
+        private VisualElement fillWarTech, fillWarTroops;
+        private VisualElement ghostWarTech, ghostWarTroops;
+        private Label valueWarTech, valueWarTroops;
+        private Label arrowWarTech, arrowWarTroops;
+        private VisualElement deadOverlayWarTech, deadOverlayWarTroops;
+        private Label statusInvestTech, statusInvestTroops;
+        private Button btnInvestTech, btnInvestTroops;
+
+        private VisualElement tooltipInvestTech, tooltipInvestTroops;
+        private VisualElement tooltipFillEconomy, tooltipFillPeople;
+        private Label tooltipValueEconomy, tooltipValuePeople;
+
+        private WarSnapshot currentWarSnapshot = WarSnapshot.Inactive;
+        private bool isWarTabActive = false;
+        private bool wasWarActive = false;
+        private bool isHoveringTechBtn = false;
+        private bool isHoveringTroopsBtn = false;
+        private bool surrenderArmed = false;
+        private int lastButtonClickFrame = -1;
+
         // Agendamentos UI Toolkit
         private readonly Dictionary<Label, IVisualElementScheduledItem> _activeTypewriters =
             new Dictionary<Label, IVisualElementScheduledItem>();
@@ -80,6 +117,8 @@ namespace Mandato.UI
         private float curRelations = 50f, targetRelations = 50f;
         private float curPeople = 50f, targetPeople = 50f;
         private float curCorruption = 0f, targetCorruption = 0f;
+        private float curWarTech = 25f, targetWarTech = 25f;
+        private float curWarTroops = 25f, targetWarTroops = 25f;
 
         private bool isInitialSetupDone = false;
 
@@ -227,6 +266,88 @@ namespace Mandato.UI
             dateLabel = root.Q<Label>("date-display") ?? root.Q<Label>("monitor-date") ?? root.Q<Label>("date-label");
             situationLabel = root.Q<Label>("situation-label") ?? root.Q<Label>("situation-display");
             dynamicLogEntry = root.Q<Label>("dynamic-log-entry");
+
+            // Tabs & Workspaces
+            pcTabsContainer = root.Q<VisualElement>("pc-tabs-container");
+            mainWorkspace = root.Q<VisualElement>("main-workspace");
+            warWorkspace = root.Q<VisualElement>("war-workspace");
+
+            btnTabGov = root.Q<Button>("btn-tab-gov");
+            if (btnTabGov != null)
+            {
+                btnTabGov.userData = (Action)OnTabGovClicked;
+                btnTabGov.clicked -= OnTabGovClicked;
+                btnTabGov.clicked += OnTabGovClicked;
+            }
+
+            btnTabWar = root.Q<Button>("btn-tab-war");
+            if (btnTabWar != null)
+            {
+                btnTabWar.userData = (Action)OnTabWarClicked;
+                btnTabWar.clicked -= OnTabWarClicked;
+                btnTabWar.clicked += OnTabWarClicked;
+            }
+
+            // Barra Geral da Guerra
+            warPcTitle = root.Q<Label>("war-pc-title");
+            warPcPercent = root.Q<Label>("war-pc-percent");
+            warPcPlayerFill = root.Q<VisualElement>("war-pc-player-fill");
+            warPcEnemyFill = root.Q<VisualElement>("war-pc-enemy-fill");
+            btnWarSurrenderPc = root.Q<Button>("btn-war-surrender-pc");
+            if (btnWarSurrenderPc != null)
+            {
+                btnWarSurrenderPc.userData = (Action)OnSurrenderButtonClicked;
+                btnWarSurrenderPc.clicked -= OnSurrenderButtonClicked;
+                btnWarSurrenderPc.clicked += OnSurrenderButtonClicked;
+            }
+
+            // Barras de Tecnologia e Tropas
+            fillWarTech = root.Q<VisualElement>("fill-war-tech");
+            ghostWarTech = root.Q<VisualElement>("ghost-fill-war-tech");
+            valueWarTech = root.Q<Label>("value-war-tech");
+            arrowWarTech = root.Q<Label>("arrow-war-tech");
+            deadOverlayWarTech = root.Q<VisualElement>("dead-overlay-war-tech");
+            statusInvestTech = root.Q<Label>("status-invest-tech");
+
+            fillWarTroops = root.Q<VisualElement>("fill-war-troops");
+            ghostWarTroops = root.Q<VisualElement>("ghost-fill-war-troops");
+            valueWarTroops = root.Q<Label>("value-war-troops");
+            arrowWarTroops = root.Q<Label>("arrow-war-troops");
+            deadOverlayWarTroops = root.Q<VisualElement>("dead-overlay-war-troops");
+            statusInvestTroops = root.Q<Label>("status-invest-troops");
+
+            // Botões de Investir (+) e Tooltips
+            tooltipInvestTech = root.Q<VisualElement>("tooltip-invest-tech");
+            tooltipFillEconomy = root.Q<VisualElement>("tooltip-fill-economy");
+            tooltipValueEconomy = root.Q<Label>("tooltip-value-economy");
+
+            tooltipInvestTroops = root.Q<VisualElement>("tooltip-invest-troops");
+            tooltipFillPeople = root.Q<VisualElement>("tooltip-fill-people");
+            tooltipValuePeople = root.Q<Label>("tooltip-value-people");
+
+            btnInvestTech = root.Q<Button>("btn-invest-tech");
+            if (btnInvestTech != null)
+            {
+                btnInvestTech.userData = (Action)OnInvestTechClicked;
+                btnInvestTech.clicked -= OnInvestTechClicked;
+                btnInvestTech.clicked += OnInvestTechClicked;
+                btnInvestTech.RegisterCallback<PointerEnterEvent>(_ => isHoveringTechBtn = true);
+                btnInvestTech.RegisterCallback<MouseOverEvent>(_ => isHoveringTechBtn = true);
+                btnInvestTech.RegisterCallback<PointerLeaveEvent>(_ => isHoveringTechBtn = false);
+                btnInvestTech.RegisterCallback<MouseOutEvent>(_ => isHoveringTechBtn = false);
+            }
+
+            btnInvestTroops = root.Q<Button>("btn-invest-troops");
+            if (btnInvestTroops != null)
+            {
+                btnInvestTroops.userData = (Action)OnInvestTroopsClicked;
+                btnInvestTroops.clicked -= OnInvestTroopsClicked;
+                btnInvestTroops.clicked += OnInvestTroopsClicked;
+                btnInvestTroops.RegisterCallback<PointerEnterEvent>(_ => isHoveringTroopsBtn = true);
+                btnInvestTroops.RegisterCallback<MouseOverEvent>(_ => isHoveringTroopsBtn = true);
+                btnInvestTroops.RegisterCallback<PointerLeaveEvent>(_ => isHoveringTroopsBtn = false);
+                btnInvestTroops.RegisterCallback<MouseOutEvent>(_ => isHoveringTroopsBtn = false);
+            }
         }
 
         private Coroutine fadeRoutineNature;
@@ -234,6 +355,220 @@ namespace Mandato.UI
         private Coroutine fadeRoutineRelations;
         private Coroutine fadeRoutinePeople;
         private Coroutine fadeRoutineCorruption;
+        private Coroutine fadeRoutineWarTech;
+        private Coroutine fadeRoutineWarTroops;
+
+        private void OnTabGovClicked()
+        {
+            if (Time.frameCount == lastButtonClickFrame) return;
+            lastButtonClickFrame = Time.frameCount;
+            PlayTypewriterSound();
+            SetWarTabActive(false);
+        }
+
+        private void OnTabWarClicked()
+        {
+            if (Time.frameCount == lastButtonClickFrame) return;
+            lastButtonClickFrame = Time.frameCount;
+            if (currentWarSnapshot == null || !currentWarSnapshot.IsActive) return;
+            PlayTypewriterSound();
+            SetWarTabActive(true);
+        }
+
+        public void SetWarTabActive(bool warTab)
+        {
+            if (currentWarSnapshot == null || !currentWarSnapshot.IsActive)
+                warTab = false;
+
+            isWarTabActive = warTab;
+
+            SetElementVisible(mainWorkspace, !isWarTabActive);
+            SetElementVisible(warWorkspace, isWarTabActive);
+
+            if (btnTabGov != null)
+            {
+                if (!isWarTabActive) btnTabGov.AddToClassList("active-tab");
+                else btnTabGov.RemoveFromClassList("active-tab");
+            }
+
+            if (btnTabWar != null)
+            {
+                if (isWarTabActive) btnTabWar.AddToClassList("active-tab");
+                else btnTabWar.RemoveFromClassList("active-tab");
+            }
+
+            if (!isWarTabActive)
+            {
+                isHoveringTechBtn = false;
+                isHoveringTroopsBtn = false;
+                SetElementVisible(tooltipInvestTech, false);
+                SetElementVisible(tooltipInvestTroops, false);
+            }
+        }
+
+        private void OnInvestTechClicked()
+        {
+            if (Time.frameCount == lastButtonClickFrame) return;
+            lastButtonClickFrame = Time.frameCount;
+            if (currentWarSnapshot == null || !currentWarSnapshot.IsActive) return;
+
+            int amount = Mathf.Min(WarInvestmentStep, currentWarSnapshot.MaxEconomyInvestment);
+            if (amount <= 0)
+            {
+                PlayTypewriterSound();
+                LogMessage("> [ORCAMENTO MILITAR] Limite mensal de Tecnologia atingido ou Economia no piso.", "log-warning");
+                return;
+            }
+
+            PlayTypewriterSound();
+            LogMessage($"> [ORCAMENTO MILITAR] +{amount}% Tecnologia (-{amount}% Economia).", "log-system");
+            OnWarInvestmentRequested?.Invoke(amount, 0);
+        }
+
+        private void OnInvestTroopsClicked()
+        {
+            if (Time.frameCount == lastButtonClickFrame) return;
+            lastButtonClickFrame = Time.frameCount;
+            if (currentWarSnapshot == null || !currentWarSnapshot.IsActive) return;
+
+            int amount = Mathf.Min(WarInvestmentStep, currentWarSnapshot.MaxPopularityInvestment);
+            if (amount <= 0)
+            {
+                PlayTypewriterSound();
+                LogMessage("> [ORCAMENTO MILITAR] Limite mensal de Tropas atingido ou Populacao no piso.", "log-warning");
+                return;
+            }
+
+            PlayTypewriterSound();
+            LogMessage($"> [ORCAMENTO MILITAR] +{amount}% Tropas (-{amount}% Populacao).", "log-system");
+            OnWarInvestmentRequested?.Invoke(0, amount);
+        }
+
+        private void OnSurrenderButtonClicked()
+        {
+            if (Time.frameCount == lastButtonClickFrame) return;
+            lastButtonClickFrame = Time.frameCount;
+            if (currentWarSnapshot == null || !currentWarSnapshot.IsActive || !currentWarSnapshot.CanSurrender) return;
+
+            PlayTypewriterSound();
+            if (!surrenderArmed)
+            {
+                surrenderArmed = true;
+                if (btnWarSurrenderPc != null) btnWarSurrenderPc.text = "CONFIRMAR?";
+                LogMessage("> [ALERTA] Clique novamente em CONFIRMAR? para aceitar rendicao incondicional.", "log-alert");
+                return;
+            }
+
+            surrenderArmed = false;
+            if (btnWarSurrenderPc != null) btnWarSurrenderPc.text = "RENDER-SE";
+            OnWarSurrenderRequested?.Invoke();
+        }
+
+        private static void SetElementVisible(VisualElement el, bool visible)
+        {
+            if (el == null) return;
+            if (visible)
+            {
+                el.RemoveFromClassList("hidden");
+                el.style.display = DisplayStyle.Flex;
+                el.style.visibility = Visibility.Visible;
+                el.style.opacity = 1f;
+            }
+            else
+            {
+                el.AddToClassList("hidden");
+                el.style.display = DisplayStyle.None;
+            }
+        }
+
+        public void RenderWar(WarSnapshot war)
+        {
+            currentWarSnapshot = war ?? WarSnapshot.Inactive;
+            bool active = currentWarSnapshot.IsActive;
+
+            SetElementVisible(pcTabsContainer, active);
+            if (situationLabel?.parent != null)
+            {
+                SetElementVisible(situationLabel.parent, !active);
+            }
+
+            if (active && !wasWarActive)
+            {
+                wasWarActive = true;
+                curWarTech = currentWarSnapshot.Technology;
+                targetWarTech = currentWarSnapshot.Technology;
+                curWarTroops = currentWarSnapshot.Troops;
+                targetWarTroops = currentWarSnapshot.Troops;
+                SetWarTabActive(true);
+                UpdateSituation("EM GUERRA");
+                LogMessage("> [ALERTA MILITAR] Conflito armado iniciado! Aba GUERRA liberada no topo.", "log-alert");
+            }
+            else if (!active && wasWarActive)
+            {
+                wasWarActive = false;
+                surrenderArmed = false;
+                SetWarTabActive(false);
+                UpdateSituation("ESTAVEL");
+            }
+            else if (!active)
+            {
+                SetWarTabActive(false);
+            }
+
+            if (!active) return;
+
+            int progress = currentWarSnapshot.Progress;
+            if (warPcPlayerFill != null) warPcPlayerFill.style.width = Length.Percent(progress);
+            if (warPcEnemyFill != null) warPcEnemyFill.style.width = Length.Percent(100 - progress);
+            if (warPcPercent != null) warPcPercent.text = SanitizeRetroText($"BRASIL {progress}% X {100 - progress}% INIMIGO");
+
+            if (warPcTitle != null)
+            {
+                string levelShort = currentWarSnapshot.Level switch
+                {
+                    WarLevel.Neighbor => "NIVEL 1",
+                    WarLevel.Dominant => "NIVEL 2",
+                    WarLevel.WorldDomination => "NIVEL 3",
+                    _ => "ATIVA"
+                };
+                string target = string.IsNullOrEmpty(currentWarSnapshot.TargetId) ? string.Empty : $" VS {currentWarSnapshot.TargetId}";
+                warPcTitle.text = SanitizeRetroText($"GUERRA ({levelShort}){target}").ToUpperInvariant();
+            }
+
+            if (btnWarSurrenderPc != null)
+            {
+                SetElementVisible(btnWarSurrenderPc, currentWarSnapshot.CanSurrender);
+                if (!currentWarSnapshot.CanSurrender)
+                {
+                    surrenderArmed = false;
+                    btnWarSurrenderPc.text = "RENDER-SE";
+                }
+            }
+
+            bool canInvestTech = currentWarSnapshot.MaxEconomyInvestment > 0;
+            if (btnInvestTech != null)
+            {
+                if (canInvestTech) btnInvestTech.RemoveFromClassList("btn-disabled");
+                else btnInvestTech.AddToClassList("btn-disabled");
+            }
+            if (statusInvestTech != null)
+            {
+                int step = Mathf.Min(WarInvestmentStep, currentWarSnapshot.MaxEconomyInvestment);
+                statusInvestTech.text = canInvestTech ? $"INVESTIR (+{step})" : "MAX ATINGIDO";
+            }
+
+            bool canInvestTroops = currentWarSnapshot.MaxPopularityInvestment > 0;
+            if (btnInvestTroops != null)
+            {
+                if (canInvestTroops) btnInvestTroops.RemoveFromClassList("btn-disabled");
+                else btnInvestTroops.AddToClassList("btn-disabled");
+            }
+            if (statusInvestTroops != null)
+            {
+                int step = Mathf.Min(WarInvestmentStep, currentWarSnapshot.MaxPopularityInvestment);
+                statusInvestTroops.text = canInvestTroops ? $"INVESTIR (+{step})" : "MAX ATINGIDO";
+            }
+        }
 
         public void UpdateSnapshot(RunSnapshot snapshot, ResolutionReport lastReport = null)
         {
@@ -247,12 +582,27 @@ namespace Mandato.UI
             float prevRelations = targetRelations;
             float prevPeople = targetPeople;
             float prevCorruption = targetCorruption;
+            float prevWarTech = targetWarTech;
+            float prevWarTroops = targetWarTroops;
 
             targetNature = snapshot.Stats.climaticChanges;
             targetEconomy = snapshot.Stats.economy;
             targetRelations = snapshot.Stats.internationalRelations;
             targetPeople = snapshot.Stats.popularApproval;
             targetCorruption = snapshot.Stats.corruption;
+
+            bool wasActiveBeforeRender = wasWarActive;
+            RenderWar(snapshot.War);
+            if (snapshot.War != null && snapshot.War.IsActive)
+            {
+                targetWarTech = snapshot.War.Technology;
+                targetWarTroops = snapshot.War.Troops;
+                if (!wasActiveBeforeRender)
+                {
+                    prevWarTech = targetWarTech;
+                    prevWarTroops = targetWarTroops;
+                }
+            }
 
             UpdateDateDisplay(snapshot.DisplayDate);
 
@@ -264,6 +614,8 @@ namespace Mandato.UI
                 curRelations = targetRelations;
                 curPeople = targetPeople;
                 curCorruption = targetCorruption;
+                curWarTech = targetWarTech;
+                curWarTroops = targetWarTroops;
                 ApplyVisualValues();
                 isInitialSetupDone = true;
                 return;
@@ -275,6 +627,8 @@ namespace Mandato.UI
             float dRelations = targetRelations - prevRelations;
             float dPeople = targetPeople - prevPeople;
             float dCorruption = targetCorruption - prevCorruption;
+            float dWarTech = targetWarTech - prevWarTech;
+            float dWarTroops = targetWarTroops - prevWarTroops;
 
             if (lastReport != null && lastReport.impactsApplied != null)
             {
@@ -291,6 +645,8 @@ namespace Mandato.UI
             if (Mathf.Abs(dRelations) >= 0.1f) ShowArrow(arrowRelations, dRelations, isCorruption: false, isPreview: false, ref fadeRoutineRelations);
             if (Mathf.Abs(dPeople) >= 0.1f) ShowArrow(arrowPeople, dPeople, isCorruption: false, isPreview: false, ref fadeRoutinePeople);
             if (Mathf.Abs(dCorruption) >= 0.1f) ShowArrow(arrowCorruption, dCorruption, isCorruption: true, isPreview: false, ref fadeRoutineCorruption);
+            if (Mathf.Abs(dWarTech) >= 0.1f) ShowArrow(arrowWarTech, dWarTech, isCorruption: false, isPreview: false, ref fadeRoutineWarTech);
+            if (Mathf.Abs(dWarTroops) >= 0.1f) ShowArrow(arrowWarTroops, dWarTroops, isCorruption: false, isPreview: false, ref fadeRoutineWarTroops);
 
             // Ghost fills
             if (Mathf.Abs(dNature) >= 0.1f) TriggerGhost(ghostNature, prevNature, targetNature);
@@ -298,10 +654,13 @@ namespace Mandato.UI
             if (Mathf.Abs(dRelations) >= 0.1f) TriggerGhost(ghostRelations, prevRelations, targetRelations);
             if (Mathf.Abs(dPeople) >= 0.1f) TriggerGhost(ghostPeople, prevPeople, targetPeople);
             if (Mathf.Abs(dCorruption) >= 0.1f) TriggerGhost(ghostCorruption, prevCorruption, targetCorruption);
+            if (Mathf.Abs(dWarTech) >= 0.1f) TriggerGhost(ghostWarTech, prevWarTech, targetWarTech);
+            if (Mathf.Abs(dWarTroops) >= 0.1f) TriggerGhost(ghostWarTroops, prevWarTroops, targetWarTroops);
 
             bool hasChange = Mathf.Abs(dNature) > 0.1f || Mathf.Abs(dEconomy) > 0.1f ||
                              Mathf.Abs(dRelations) > 0.1f || Mathf.Abs(dPeople) > 0.1f ||
-                             Mathf.Abs(dCorruption) > 0.1f;
+                             Mathf.Abs(dCorruption) > 0.1f || Mathf.Abs(dWarTech) > 0.1f ||
+                             Mathf.Abs(dWarTroops) > 0.1f;
 
             // Dispara animação de interpolação sincronizada de preenchimento e números
             AnimateStatsInterpolation(targetNature, targetEconomy, targetRelations, targetPeople, targetCorruption, statsInterpolationDuration);
@@ -490,6 +849,14 @@ namespace Mandato.UI
             {
                 ApplyVisualValues();
             }
+
+            if (Application.isPlaying && isWarTabActive)
+            {
+                bool showTech = btnInvestTech != null && (isHoveringTechBtn || btnInvestTech.ClassListContains("hovered"));
+                bool showTroops = btnInvestTroops != null && (isHoveringTroopsBtn || btnInvestTroops.ClassListContains("hovered"));
+                SetElementVisible(tooltipInvestTech, showTech);
+                SetElementVisible(tooltipInvestTroops, showTroops);
+            }
         }
 
         private void ApplyVisualValues()
@@ -499,6 +866,12 @@ namespace Mandato.UI
             ApplyBar(fillRelations, valueRelations, deadOverlayRelations, curRelations);
             ApplyBar(fillPeople, valuePeople, deadOverlayPeople, curPeople);
             ApplyBar(fillCorruption, valueCorruption, null, curCorruption);
+
+            ApplyBar(fillWarTech, valueWarTech, deadOverlayWarTech, curWarTech);
+            ApplyBar(fillWarTroops, valueWarTroops, deadOverlayWarTroops, curWarTroops);
+
+            ApplyBar(tooltipFillEconomy, tooltipValueEconomy, null, curEconomy);
+            ApplyBar(tooltipFillPeople, tooltipValuePeople, null, curPeople);
         }
 
         private void ApplyBar(VisualElement fill, Label label, VisualElement deadOverlay, float val)
@@ -526,6 +899,8 @@ namespace Mandato.UI
             HideArrowImmediate(arrowRelations);
             HideArrowImmediate(arrowPeople);
             HideArrowImmediate(arrowCorruption);
+            HideArrowImmediate(arrowWarTech);
+            HideArrowImmediate(arrowWarTroops);
         }
 
         private void ShowArrow(Label arrow, float delta, bool isCorruption, bool isPreview, ref Coroutine fadeRoutine)
@@ -804,13 +1179,17 @@ namespace Mandato.UI
             float startRelations = curRelations;
             float startPeople = curPeople;
             float startCorruption = curCorruption;
+            float startTech = curWarTech;
+            float startTroops = curWarTroops;
 
             // Se não houve alteração relevante entre os valores atuais e alvos, não precisa animar
             bool needsAnimation = Mathf.Abs(targetClimate - startClimate) >= 0.1f ||
                                   Mathf.Abs(targetEconomy - startEconomy) >= 0.1f ||
                                   Mathf.Abs(targetRelations - startRelations) >= 0.1f ||
                                   Mathf.Abs(targetPeople - startPeople) >= 0.1f ||
-                                  Mathf.Abs(targetCorruption - startCorruption) >= 0.1f;
+                                  Mathf.Abs(targetCorruption - startCorruption) >= 0.1f ||
+                                  Mathf.Abs(targetWarTech - startTech) >= 0.1f ||
+                                  Mathf.Abs(targetWarTroops - startTroops) >= 0.1f;
 
             if (!needsAnimation)
             {
@@ -819,6 +1198,8 @@ namespace Mandato.UI
                 curRelations = targetRelations;
                 curPeople = targetPeople;
                 curCorruption = targetCorruption;
+                curWarTech = targetWarTech;
+                curWarTroops = targetWarTroops;
                 ApplyVisualValues();
                 return;
             }
@@ -832,6 +1213,8 @@ namespace Mandato.UI
                 curRelations = targetRelations;
                 curPeople = targetPeople;
                 curCorruption = targetCorruption;
+                curWarTech = targetWarTech;
+                curWarTroops = targetWarTroops;
                 ApplyVisualValues();
                 return;
             }
@@ -851,6 +1234,8 @@ namespace Mandato.UI
                 curRelations = Mathf.Lerp(startRelations, targetRelations, t);
                 curPeople = Mathf.Lerp(startPeople, targetPeople, t);
                 curCorruption = Mathf.Lerp(startCorruption, targetCorruption, t);
+                curWarTech = Mathf.Lerp(startTech, targetWarTech, t);
+                curWarTroops = Mathf.Lerp(startTroops, targetWarTroops, t);
 
                 ApplyVisualValues();
 
@@ -883,7 +1268,7 @@ namespace Mandato.UI
             if (string.IsNullOrEmpty(text))
                 return string.Empty;
 
-            text = text.Replace('•', '-');
+            text = text.Replace('•', '-').Replace('—', '-').Replace('–', '-');
 
             string normalized = text.Normalize(System.Text.NormalizationForm.FormD);
             var sb = new System.Text.StringBuilder(normalized.Length);

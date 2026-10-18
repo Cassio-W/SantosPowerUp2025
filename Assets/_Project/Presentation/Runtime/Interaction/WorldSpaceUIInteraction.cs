@@ -43,6 +43,9 @@ namespace Mandato.Presentation
     [SerializeField] private Vector2 uvScale = Vector2.one;
 
     [Header("--- Debug & Visualização ---")]
+    [Tooltip("Se ativo, exige que o FocusableObject pai/associado esteja em foco (ex: modo foco do PC) para permitir hover e clique na UI.")]
+    [SerializeField] private bool requireFocusWhenFocusablePresent = true;
+
     [Tooltip("Exibe logs detalhados no Console durante hover e cliques.")]
     [SerializeField] private bool showDebugLogs = false;
 
@@ -53,6 +56,8 @@ namespace Mandato.Presentation
     [SerializeField] private bool drawGizmos = true;
 
     private Collider _collider;
+    private FocusableObject _parentFocusable;
+    private bool _wasFocusedReady = false;
     private VisualElement _lastHoveredElement;
     private VisualElement _pointerDownTarget;
     private bool _isPointerDown = false;
@@ -69,6 +74,11 @@ namespace Mandato.Presentation
     public Vector2 LastPanelPosition => _lastPanelPosition;
     public VisualElement LastHoveredElement => _lastHoveredElement;
     public Collider ScreenCollider => _collider;
+    public bool RequireFocusWhenFocusablePresent
+    {
+        get => requireFocusWhenFocusablePresent;
+        set => requireFocusWhenFocusablePresent = value;
+    }
 
     private void Awake()
     {
@@ -99,6 +109,11 @@ namespace Mandato.Presentation
             {
                 uiDocument = GetComponentInParent<UIDocument>();
             }
+        }
+
+        if (_parentFocusable == null)
+        {
+            _parentFocusable = GetComponentInParent<FocusableObject>();
         }
 
         if (interactionCamera == null)
@@ -163,6 +178,34 @@ namespace Mandato.Presentation
         {
             interactionCamera = Camera.main;
             if (interactionCamera == null) return;
+        }
+
+        // Se pertence a um objeto focável (como o PC) e CameraFocusManager está ativo,
+        // só permite interagir com a UI interna quando estiver em modo foco.
+        if (requireFocusWhenFocusablePresent && _parentFocusable != null && CameraFocusManager.Instance != null)
+        {
+            bool isFocusedNow = _parentFocusable.IsFocused || CameraFocusManager.Instance.CurrentFocusedObject == _parentFocusable;
+            if (!isFocusedNow)
+            {
+                ClearHover();
+                _isCurrentlyHit = false;
+                _isPointerDown = false;
+                _pointerDownTarget = null;
+                _wasFocusedReady = false;
+                return;
+            }
+
+            // No frame exato em que acabou de entrar em foco (clique para focar o PC),
+            // aguarda o próximo frame para não disparar clique acidental num botão interno.
+            if (!_wasFocusedReady)
+            {
+                _wasFocusedReady = true;
+                return;
+            }
+        }
+        else
+        {
+            _wasFocusedReady = true;
         }
 
         Ray ray = interactionCamera.ScreenPointToRay(Input.mousePosition);

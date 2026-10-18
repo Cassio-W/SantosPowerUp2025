@@ -10417,6 +10417,7 @@ MonoBehaviour:
   swapXY: 1
   uvOffset: {x: -0.192, y: -0.04}
   uvScale: {x: 1.239, y: 1.052}
+  requireFocusWhenFocusablePresent: 1
   showDebugLogs: 0
   showOnScreenOverlay: 0
   drawGizmos: 1
@@ -21642,8 +21643,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Mandato.Infrastructure::Mandato.Infrastructure.MandatoBootstrap
   startingCards:
-  - {fileID: 11400000, guid: 1cff78574d1305741b48caf48d962e84, type: 2}
-  - {fileID: 11400000, guid: 228466c43dce5054dadad717d02a33d7, type: 2}
+  - {fileID: 11400000, guid: ff63e9717b9cb5041ba40e38875753e8, type: 2}
   catalogCards:
   - {fileID: 11400000, guid: 2a711165b7d2a13488735663eda1e0fa, type: 2}
   - {fileID: 11400000, guid: a6dd096c11794aa4aab71b295c1aba95, type: 2}
@@ -21673,6 +21673,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a10100028471ade47bf5fc0f3da00002, type: 2}
   - {fileID: 11400000, guid: a10100038471ade47bf5fc0f3da00003, type: 2}
   - {fileID: 11400000, guid: a10100048471ade47bf5fc0f3da00004, type: 2}
+  warEventDefinition: {fileID: 11400000, guid: bc778674003dffc4c95391a2c9b91584, type: 2}
   startingActions:
   - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00002, type: 2}
   - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00005, type: 2}

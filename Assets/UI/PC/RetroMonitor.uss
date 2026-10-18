@@ -13,7 +13,6 @@
     height: 100%;
     background-color: #03070b;
     padding: 10px;
-    box-sizing: border-box;
     justify-content: space-between;
 }
 
@@ -22,7 +21,6 @@
     height: 100%;
     background-color: #03070b;
     padding: 10px;
-    box-sizing: border-box;
     justify-content: space-between;
 }
 
@@ -614,3 +612,451 @@ Label {
     border-right-color: #ffffff;
     border-bottom-color: #ffffff;
 }
+
+/* ============================================================
+   TABS DE NAVEGAÇÃO NO TOPO (GOVERNO / GUERRA)
+   ============================================================ */
+Button {
+    -unity-font: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+    -unity-font-definition: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+}
+
+.pc-tabs-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.pc-tab-btn {
+    height: 28px;
+    padding: 0 20px;
+    margin: 0 4px;
+    font-size: 14px;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+    background-color: #050d14;
+    color: #64748b;
+
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #1e364e;
+    border-left-color: #1e364e;
+    border-right-color: #020508;
+    border-bottom-color: #020508;
+    border-radius: 0;
+}
+
+.pc-tab-btn.active-tab {
+    background-color: #0c2538;
+    color: #38bdf8;
+    border-top-color: #38bdf8;
+    border-left-color: #38bdf8;
+    border-right-color: #075985;
+    border-bottom-color: #075985;
+}
+
+.pc-tab-war.active-tab {
+    background-color: #31090e;
+    color: #ff4d5e;
+    border-top-color: #ff3344;
+    border-left-color: #ff3344;
+    border-right-color: #7f1d1d;
+    border-bottom-color: #7f1d1d;
+}
+
+.pc-tab-btn.hovered,
+.pc-tab-btn:hover {
+    color: #ffffff;
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
+}
+
+/* ============================================================
+   ABA DE GUERRA (WAR WORKSPACE)
+   ============================================================ */
+.war-workspace {
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: space-between;
+    overflow: visible;
+}
+
+.war-general-panel {
+    width: 100%;
+    height: 78px;
+    min-height: 78px;
+    background-color: #09131c;
+    padding: 6px 12px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+    justify-content: space-between;
+
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #ff3344;
+    border-left-color: #ff3344;
+    border-right-color: #4a080f;
+    border-bottom-color: #4a080f;
+    border-radius: 0;
+}
+
+.war-general-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.war-general-right-box {
+    flex-direction: row;
+    align-items: center;
+}
+
+.war-pc-title {
+    font-size: 14px;
+    color: #facc15;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+}
+
+.war-pc-percent {
+    font-size: 14px;
+    color: #ffffff;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+}
+
+.war-surrender-pc-btn {
+    height: 22px;
+    padding: 0 10px;
+    margin-right: 10px;
+    font-size: 11px;
+    -unity-font-style: bold;
+    background-color: #3b0a11;
+    color: #fca5a5;
+    border-width: 2px;
+    border-top-color: #ff3344;
+    border-left-color: #ff3344;
+    border-right-color: #4a080f;
+    border-bottom-color: #4a080f;
+    border-radius: 0;
+}
+
+.war-surrender-pc-btn.hovered,
+.war-surrender-pc-btn:hover {
+    background-color: #5c101b;
+    color: #ffffff;
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
+}
+
+.war-pc-bar-track {
+    flex-direction: row;
+    width: 100%;
+    height: 32px;
+    background-color: #03080e;
+
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #010408;
+    border-left-color: #010408;
+    border-right-color: #1e364e;
+    border-bottom-color: #1e364e;
+    border-radius: 0;
+}
+
+.war-pc-player-fill {
+    height: 100%;
+    width: 50%;
+    flex-shrink: 0;
+    background-color: #22c55e;
+}
+
+.war-pc-bar-divider {
+    width: 3px;
+    height: 100%;
+    flex-shrink: 0;
+    background-color: #ffffff;
+}
+
+.war-pc-enemy-fill {
+    height: 100%;
+    width: 50%;
+    flex-grow: 1;
+    flex-shrink: 1;
+    background-color: #dc2626;
+}
+
+/* ============================================================
+   CARDS DE TECNOLOGIA & TROPAS NA ABA DE GUERRA
+   ============================================================ */
+.war-cards-row {
+    flex-direction: row;
+    width: 100%;
+    flex-grow: 1;
+    justify-content: space-between;
+    overflow: visible;
+}
+
+.card-war-tech {
+    border-top-color: #38bdf8;
+    border-left-color: #38bdf8;
+    border-right-color: #0c3954;
+    border-bottom-color: #0c3954;
+    overflow: visible;
+}
+
+.card-war-tech .giant-value {
+    color: #7dd3fc;
+    border-right-color: #38bdf8;
+    border-bottom-color: #38bdf8;
+}
+
+.fill-tech-bg {
+    background-color: rgba(56, 189, 248, 0.42);
+    border-top-width: 4px;
+    border-top-color: #7dd3fc;
+}
+
+.ghost-tech {
+    background-color: rgba(56, 189, 248, 0.22);
+    border-top-width: 3px;
+    border-top-color: rgba(125, 211, 252, 0.65);
+}
+
+.card-war-troops {
+    border-top-color: #4ade80;
+    border-left-color: #4ade80;
+    border-right-color: #0f4024;
+    border-bottom-color: #0f4024;
+    overflow: visible;
+}
+
+.card-war-troops .giant-value {
+    color: #4ade80;
+    border-right-color: #22c55e;
+    border-bottom-color: #22c55e;
+}
+
+.fill-troops-bg {
+    background-color: rgba(34, 197, 94, 0.42);
+    border-top-width: 4px;
+    border-top-color: #4ade80;
+}
+
+.ghost-troops {
+    background-color: rgba(34, 197, 94, 0.22);
+    border-top-width: 3px;
+    border-top-color: rgba(74, 222, 128, 0.65);
+}
+
+.war-card-foreground {
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 10px 14px;
+}
+
+.war-card-top-info {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.war-card-title-tech {
+    font-size: 20px;
+    color: #7dd3fc;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+}
+
+.war-card-title-troops {
+    font-size: 20px;
+    color: #4ade80;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+}
+
+.war-card-subtitle {
+    font-size: 11px;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    background-color: rgba(3, 8, 14, 0.85);
+    padding: 2px 6px;
+}
+
+.war-card-center-readout {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.war-giant-value {
+    font-size: 34px;
+    padding: 4px 16px;
+}
+
+.war-card-bottom-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(3, 8, 14, 0.9);
+    padding: 4px 10px;
+
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #010408;
+    border-left-color: #010408;
+    border-right-color: #1e364e;
+    border-bottom-color: #1e364e;
+    border-radius: 0;
+}
+
+.war-invest-caption {
+    font-size: 14px;
+    color: #e2e8f0;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+}
+
+.war-invest-plus-btn {
+    width: 52px;
+    height: 36px;
+    font-size: 28px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    background-color: #0d2b1d;
+    color: #4ade80;
+    padding: 0;
+    margin: 0;
+
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #4ade80;
+    border-left-color: #4ade80;
+    border-right-color: #05140d;
+    border-bottom-color: #05140d;
+    border-radius: 0;
+}
+
+.war-invest-plus-btn.hovered,
+.war-invest-plus-btn:hover {
+    background-color: #194d34;
+    color: #ffffff;
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
+}
+
+.war-invest-plus-btn.btn-disabled {
+    background-color: #070d12;
+    color: #475569;
+    border-top-color: #1e293b;
+    border-left-color: #1e293b;
+    border-right-color: #020508;
+    border-bottom-color: #020508;
+}
+
+/* ============================================================
+   TOOLTIP CARD SOBRE O BOTÃO + (MOSTRA BARRA E % DO ATRIBUTO)
+   ============================================================ */
+.war-invest-tooltip {
+    position: absolute;
+    bottom: 58px;
+    right: 12px;
+    width: 220px;
+    height: 118px;
+    background-color: #060d14;
+    border-width: 2px;
+    border-radius: 0;
+    overflow: hidden;
+    justify-content: flex-end;
+}
+
+.tooltip-foreground {
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 8px 10px;
+}
+
+.tooltip-header-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(3, 8, 14, 0.88);
+    padding: 3px 8px;
+}
+
+.tooltip-attr-title {
+    font-size: 13px;
+    color: #ffffff;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+}
+
+.tooltip-cost-tag {
+    font-size: 12px;
+    color: #ef4444;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+}
+
+.tooltip-body-row {
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-grow: 1;
+}
+
+.tooltip-mini-icon {
+    width: 44px;
+    height: 44px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: #ffffff;
+}
+
+.tooltip-mini-value {
+    font-size: 24px;
+    color: #ffffff;
+    background-color: #03080e;
+    padding: 4px 10px;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #010408;
+    border-left-color: #010408;
+    border-right-color: #1e364e;
+    border-bottom-color: #1e364e;
+    border-radius: 0;
+}
+
+.card-economy .tooltip-mini-value {
+    color: #facc15;
+    border-right-color: #eab308;
+    border-bottom-color: #eab308;
+}
+
+.card-people .tooltip-mini-value {
+    color: #f472b6;
+    border-right-color: #f472b6;
+    border-bottom-color: #f472b6;
+}
+
+

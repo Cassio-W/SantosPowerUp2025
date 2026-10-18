@@ -63,6 +63,9 @@ namespace Mandato.Run
         /// <summary>ID do investimento iniciado por esta decisão. Vazio se nenhum.</summary>
         public string startedInvestmentId = string.Empty;
 
+        /// <summary>Nível da guerra declarada por esta decisão. None se nenhuma.</summary>
+        public WarLevel startedWarLevel = WarLevel.None;
+
         public bool IsRunTerminated => resultingTermination.IsDefeat || resultingTermination.IsVictory;
     }
 
@@ -192,6 +195,14 @@ namespace Mandato.Run
                     : 12; // fallback genérico se só ID foi configurado
                 runState.StartInvestment(investmentIdToStart, duration);
                 report.startedInvestmentId = investmentIdToStart;
+            }
+
+            // 5c. Declara guerra se a escolha for uma resolução diplomática extremamente hostil.
+            // Ocorre após os impactos da escolha: a Soberania inicial considera o dano diplomático causado.
+            if (choice.triggersWar != WarLevel.None &&
+                WarRules.StartWar(runState, choice.triggersWar, choice.warTargetId))
+            {
+                report.startedWarLevel = choice.triggersWar;
             }
 
             // 6. Atualização de Relação com NPC

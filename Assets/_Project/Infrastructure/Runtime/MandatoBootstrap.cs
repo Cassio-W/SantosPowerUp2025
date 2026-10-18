@@ -37,6 +37,10 @@ namespace Mandato.Infrastructure
         [Tooltip("Catálogo de Investimentos a Longo Prazo disponíveis nesta partida.")]
         [SerializeField] private List<LongTermInvestmentDefinition> investmentsCatalog = new List<LongTermInvestmentDefinition>();
 
+        [Header("Evento de Guerra")]
+        [Tooltip("Balanceamento do Evento de Guerra. Opcional: sem asset, vale o padrão (WarBalance.CreateDefault).")]
+        [SerializeField] private WarEventDefinition warEventDefinition;
+
         [Header("Flip-Phone & Ações")]
         [SerializeField] private List<FlipPhoneActionDefinition> startingActions = new List<FlipPhoneActionDefinition>();
 
@@ -118,7 +122,8 @@ namespace Mandato.Infrastructure
                 customSeed,
                 selectedCharacter,
                 npcsCatalog,
-                investmentsCatalog
+                investmentsCatalog,
+                warEventDefinition
             );
 
             // 2. Inicializa o Coordenador do Flip-Phone

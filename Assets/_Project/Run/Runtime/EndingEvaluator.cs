@@ -38,6 +38,13 @@ namespace Mandato.Run
                 if (ending.minPopularApproval >= 0 && runState.stats.popularApproval < ending.minPopularApproval) continue;
                 if (ending.minCorruption >= 0 && runState.stats.corruption < ending.minCorruption) continue;
 
+                // 3b. Checa desfecho do Evento de Guerra (None = sem exigência)
+                if (ending.requiredWarOutcome != WarOutcome.None &&
+                    (runState.war == null || runState.war.outcome != ending.requiredWarOutcome))
+                {
+                    continue;
+                }
+
                 // 4. Checa quests concluídas
                 string reqQuest = ending.GetRequiredCompletedQuestId();
                 if (!string.IsNullOrEmpty(reqQuest))

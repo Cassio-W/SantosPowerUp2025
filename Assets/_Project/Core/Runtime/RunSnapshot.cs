@@ -13,6 +13,7 @@ namespace Mandato.Core
         public bool IsDefeat { get; }
         public bool IsVictory { get; }
         public string TerminationReason { get; }
+        public WarSnapshot War { get; }
 
         public RunSnapshot(
             StatBlock stats,
@@ -22,8 +23,10 @@ namespace Mandato.Core
             bool isOngoing,
             bool isDefeat,
             bool isVictory,
-            string terminationReason)
+            string terminationReason,
+            WarSnapshot war = null)
         {
+            War = war ?? WarSnapshot.Inactive;
             Stats = stats?.Clone() ?? new StatBlock();
             PoliticalAxis = politicalAxis?.Clone() ?? new PoliticalAxis();
             MonthIndex = monthIndex;

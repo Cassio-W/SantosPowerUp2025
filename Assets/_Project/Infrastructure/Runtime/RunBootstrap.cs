@@ -42,7 +42,8 @@ namespace Mandato.Infrastructure
             int customSeed = 0,
             CharacterDefinition selectedCharacter = null,
             IEnumerable<NpcDefinition> npcs = null,
-            IEnumerable<LongTermInvestmentDefinition> investments = null)
+            IEnumerable<LongTermInvestmentDefinition> investments = null,
+            WarEventDefinition warDefinition = null)
         {
             var catalog = new RunCatalog();
             catalog.Build(
@@ -68,6 +69,18 @@ namespace Mandato.Infrastructure
 
             var stateMachine = new RunStateMachine(seed: seed);
             stateMachine.StartRun(catalog.MainDeckCardIds, seed, priorityIds);
+
+            // Balanceamento do Evento de Guerra: asset opcional (sem ele vale o padrão do código).
+            // Falha cedo se o asset estiver inconsistente, em vez de adivinhar valores em plena guerra.
+            if (warDefinition != null)
+            {
+                if (!warDefinition.balance.Validate(out var warErrors))
+                {
+                    throw new InvalidOperationException(
+                        $"WarEventDefinition '{warDefinition.name}' inválido: {string.Join("; ", warErrors)}");
+                }
+                stateMachine.RunState.warBalance = warDefinition.balance;
+            }
 
             // Aplica overrides do personagem escolhido após a inicialização padrão
             if (selectedCharacter != null)

@@ -33,7 +33,7 @@ namespace Mandato.Run
 
     public static class RunRules
     {
-        public static RunTermination Evaluate(StatBlock stats, RunCalendar calendar)
+        public static RunTermination Evaluate(StatBlock stats, RunCalendar calendar, WarOutcome warOutcome = WarOutcome.None)
         {
             if (stats == null) return RunTermination.Ongoing;
 
@@ -53,9 +53,19 @@ namespace Mandato.Run
             if (stats.corruption >= StatBlock.MaxValue)
                 return RunTermination.CreateDefeat("Escândalo de Corrupção: O governo ruiu diante de escândalos sistemáticos.");
 
+            // Derrota na Guerra (barra do evento chegou a 0%)
+            if (warOutcome == WarOutcome.Defeat)
+                return RunTermination.CreateDefeat(WarRules.DefeatReason);
+
             // Condição de Vitória (Conclusão dos 48 meses de mandato)
             if (calendar != null && calendar.IsTermCompleted)
+            {
+                // Rendição: o mandato termina, mas com final ruim (país virou protetorado)
+                if (warOutcome == WarOutcome.Surrendered)
+                    return RunTermination.CreateDefeat(WarRules.ProtectorateReason);
+
                 return RunTermination.CreateVictory("Mandato Concluído: Você governou o país durante os 4 anos completos!");
+            }
 
             return RunTermination.Ongoing;
         }

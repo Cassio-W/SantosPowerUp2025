@@ -30,6 +30,9 @@ namespace Mandato.Run
         public bool dismissedCurrentProposal = false;
         public bool revealedMonthImpacts = false;
         public bool preventedStatLoss = false;
+
+        /// <summary>Nível da guerra declarada por esta ação (TriggerWar ou assassinato de líder estrangeiro).</summary>
+        public WarLevel startedWarLevel = WarLevel.None;
         public RunTermination resultingTermination;
     }
 
@@ -211,6 +214,21 @@ namespace Mandato.Run
                                 }
 
                                 report.removedNpcIds.Add(targetRemoveNpc);
+
+                                // Assassinato de líder estrangeiro engatilha o Evento de Guerra
+                                NpcDefinition removedNpcDef = null;
+                                npcCatalog?.TryGetValue(targetRemoveNpc, out removedNpcDef);
+                                if (removedNpcDef == null && currentCard != null && currentCard.npc != null &&
+                                    string.Equals(currentCard.GetNpcId(), targetRemoveNpc, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    removedNpcDef = currentCard.npc;
+                                }
+
+                                if (removedNpcDef != null && removedNpcDef.isForeignLeader &&
+                                    WarRules.StartWar(runState, removedNpcDef.warLevelIfAssassinated, targetRemoveNpc))
+                                {
+                                    report.startedWarLevel = removedNpcDef.warLevelIfAssassinated;
+                                }
                             }
                             break;
 
@@ -297,6 +315,13 @@ namespace Mandato.Run
                             {
                                 runState.TriggerEvent(effTargetId, effect.duration > 0 ? effect.duration : 3);
                                 report.triggeredEventIds.Add(effTargetId);
+                            }
+                            break;
+
+                        case FlipPhoneEffectType.TriggerWar:
+                            if (WarRules.StartWar(runState, effect.warLevel, effTargetId))
+                            {
+                                report.startedWarLevel = effect.warLevel;
                             }
                             break;
 

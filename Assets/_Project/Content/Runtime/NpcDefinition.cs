@@ -37,6 +37,12 @@ namespace Mandato.Content
         [Header("Biografia Cômica / Satírica")]
         [TextArea(3, 6)] public string bio = string.Empty;
 
+        [Header("Evento de Guerra")]
+        [Tooltip("Se verdadeiro, remover este NPC do jogo (assassinato) engatilha o Evento de Guerra.")]
+        public bool isForeignLeader = false;
+        [Tooltip("Nível da guerra disparada se este líder estrangeiro for assassinado.")]
+        public Mandato.Core.WarLevel warLevelIfAssassinated = Mandato.Core.WarLevel.Neighbor;
+
         [Header("Festa Corporativa — Abordagens")]
         [Tooltip("Deltas de relação (-2 a +2) para cada abordagem: [0]=Arrogante(↑), [1]=Brincalhão(→), [2]=Persuasivo(↓), [3]=Romântico(←)")]
         [SerializeField] private int[] approachDeltas = new int[4] { -1, 1, 2, -2 };
