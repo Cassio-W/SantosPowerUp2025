@@ -197,11 +197,12 @@ namespace Mandato.Run
                 report.startedInvestmentId = investmentIdToStart;
             }
 
-            // 5c. Declara guerra se a escolha for uma resolução diplomática extremamente hostil.
-            // Ocorre após os impactos da escolha: a Soberania inicial considera o dano diplomático causado.
-            if (choice.triggersWar != WarLevel.None &&
-                WarRules.StartWar(runState, choice.triggersWar, choice.warTargetId))
+            // 5c. Agenda a declaração de guerra se a escolha for uma resolução diplomática extremamente hostil.
+            // A guerra é deflagrada de fato quando o NPC sai da sala e o mês vira (MonthlyEffectsResolver).
+            if (choice.triggersWar != WarLevel.None && (runState.war == null || !runState.war.HasStarted))
             {
+                runState.pendingWarLevel = choice.triggersWar;
+                runState.pendingWarTargetId = choice.warTargetId ?? string.Empty;
                 report.startedWarLevel = choice.triggersWar;
             }
 

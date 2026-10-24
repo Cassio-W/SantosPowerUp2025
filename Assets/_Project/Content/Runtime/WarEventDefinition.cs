@@ -5,20 +5,15 @@ using UnityEngine;
 
 namespace Mandato.Content
 {
-    /// <summary>Parâmetros de um nível de dificuldade da guerra.</summary>
+    /// <summary>
+    /// Parâmetros de um nível de dificuldade da guerra. A drenagem mensal de Tecnologia/Tropas não é
+    /// configurável: perde-se 1/2/3 níveis (25/50/75 pontos) nos níveis de guerra 1/2/3.
+    /// </summary>
     [Serializable]
     public class WarLevelConfig
     {
         public WarLevel level = WarLevel.Neighbor;
         public string displayName = string.Empty;
-
-        [Header("Drenagem de Tropas (todo mês)")]
-        public int troopsDrainMin = 1;
-        public int troopsDrainMax = 3;
-
-        [Header("Drenagem de Tecnologia (a cada N meses)")]
-        public int technologyDrainMin = 3;
-        public int technologyDrainMax = 9;
 
         [Header("Pressão do inimigo")]
         [Tooltip("Pontos de progresso perdidos todo mês de guerra, independentemente do upkeep.")]
@@ -26,14 +21,10 @@ namespace Mandato.Content
 
         public WarLevelConfig() { }
 
-        public WarLevelConfig(WarLevel level, string displayName, int troopsMin, int troopsMax, int techMin, int techMax, int pressure)
+        public WarLevelConfig(WarLevel level, string displayName, int pressure)
         {
             this.level = level;
             this.displayName = displayName;
-            troopsDrainMin = troopsMin;
-            troopsDrainMax = troopsMax;
-            technologyDrainMin = techMin;
-            technologyDrainMax = techMax;
             enemyPressurePerMonth = pressure;
         }
     }
@@ -48,14 +39,10 @@ namespace Mandato.Content
         [Header("Cabo de guerra")]
         public int startingProgress = 50;
 
-        [Header("Upkeep mensal")]
-        [Tooltip("Tecnologia só sofre drenagem a cada N meses de guerra.")]
-        public int technologyDrainIntervalMonths = 3;
-
         [Header("Recompensa (ofensiva)")]
         public int offensiveBonusPercent = 10;
-        [Tooltip("Tecnologia E Tropas precisam estar ACIMA deste valor após a drenagem do mês.")]
-        public int offensiveThreshold = 10;
+        [Tooltip("Tecnologia E Tropas precisam estar ACIMA deste valor (em pontos, 25 = 1 nível) após a drenagem do mês.")]
+        public int offensiveThreshold = 25;
 
         [Header("Falha de manutenção")]
         [Tooltip("Progresso perdido por atributo oculto zerado (Tecnologia e/ou Tropas).")]
@@ -64,8 +51,10 @@ namespace Mandato.Content
         public int climateHitAmount = 10;
 
         [Header("Investimento mensal (Economia→Tecnologia, Popularidade→Tropas)")]
-        [Tooltip("Máximo de pontos de cada atributo convertido por mês (conversão 1:1).")]
-        public int investmentCapPerStatPerMonth = 5;
+        [Tooltip("Máximo de cliques de investimento permitidos por mês (distribuídos livremente entre Tecnologia e Tropas).")]
+        public int maxInvestmentClicksPerMonth = 3;
+        [Tooltip("Pontos de Economia/Popularidade gastos por clique (cada clique sobe 1 nível = 25 pontos de Tecnologia/Tropas).")]
+        public int investmentPointsPerClick = 5;
         [Tooltip("O investimento nunca deixa Economia/Popularidade abaixo deste piso (evita auto-derrota acidental).")]
         public int investmentStatFloor = 10;
 
@@ -96,9 +85,12 @@ namespace Mandato.Content
         public static WarBalance CreateDefault()
         {
             var b = new WarBalance();
-            b.levels.Add(new WarLevelConfig(WarLevel.Neighbor, "Médio", 1, 3, 3, 9, 0));
-            b.levels.Add(new WarLevelConfig(WarLevel.Dominant, "Difícil", 3, 5, 10, 15, 2));
-            b.levels.Add(new WarLevelConfig(WarLevel.WorldDomination, "Impossível", 5, 10, 15, 20, 4));
+            b.maxInvestmentClicksPerMonth = 3;
+            b.investmentPointsPerClick = 5;
+            b.investmentStatFloor = 10;
+            b.levels.Add(new WarLevelConfig(WarLevel.Neighbor, "Médio", 0));
+            b.levels.Add(new WarLevelConfig(WarLevel.Dominant, "Difícil", 0));
+            b.levels.Add(new WarLevelConfig(WarLevel.WorldDomination, "Impossível", 0));
             return b;
         }
 
@@ -109,22 +101,14 @@ namespace Mandato.Content
 
             foreach (var level in new[] { WarLevel.Neighbor, WarLevel.Dominant, WarLevel.WorldDomination })
             {
-                var cfg = GetLevel(level);
-                if (cfg == null)
-                {
+                if (GetLevel(level) == null)
                     errors.Add($"Nível {level} ausente em WarBalance.levels.");
-                    continue;
-                }
-                if (cfg.troopsDrainMin < 0 || cfg.troopsDrainMin > cfg.troopsDrainMax)
-                    errors.Add($"Nível {level}: drenagem de Tropas inválida (min {cfg.troopsDrainMin}, max {cfg.troopsDrainMax}).");
-                if (cfg.technologyDrainMin < 0 || cfg.technologyDrainMin > cfg.technologyDrainMax)
-                    errors.Add($"Nível {level}: drenagem de Tecnologia inválida (min {cfg.technologyDrainMin}, max {cfg.technologyDrainMax}).");
             }
 
-            if (technologyDrainIntervalMonths < 1)
-                errors.Add("technologyDrainIntervalMonths deve ser >= 1.");
             if (startingProgress <= 0 || startingProgress >= 100)
                 errors.Add("startingProgress deve estar entre 1 e 99.");
+            if (investmentPointsPerClick < 0)
+                errors.Add("investmentPointsPerClick não pode ser negativo.");
 
             return errors.Count == 0;
         }

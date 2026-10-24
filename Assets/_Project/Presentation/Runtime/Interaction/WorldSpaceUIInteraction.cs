@@ -68,6 +68,7 @@ namespace Mandato.Presentation
 
     private bool _isDispatchingWorldSpaceEvent = false;
     private VisualElement _attachedRoot = null;
+    private IPanel _lastSuppressedPanel = null;
 
     public bool IsCurrentlyHit => _isCurrentlyHit;
     public Vector2 LastHitUV => _lastHitUV;
@@ -173,6 +174,8 @@ namespace Mandato.Presentation
 
         if (uiDocument == null || uiDocument.rootVisualElement == null || uiDocument.rootVisualElement.panel == null)
             return;
+
+        SuppressNativeScreenPicking();
 
         if (interactionCamera == null)
         {
@@ -287,9 +290,10 @@ namespace Mandato.Presentation
 
             // 4. Processa Scrollwheel
             float scroll = Input.GetAxis("Mouse ScrollWheel");
-            if (Mathf.Abs(scroll) > 0.001f)
+            Vector2 mouseScrollDelta = Input.mouseScrollDelta;
+            if (Mathf.Abs(scroll) > 0.001f || Mathf.Abs(mouseScrollDelta.y) > 0.001f)
             {
-                ProcessScroll(target);
+                ProcessScroll(target, scroll, mouseScrollDelta);
             }
         }
         else
@@ -413,8 +417,38 @@ namespace Mandato.Presentation
         return new Vector2(1920, 1080);
     }
 
+    /// <summary>
+    /// Desacopla o painel UI Toolkit de coordenadas de tela padrão do jogo.
+    /// Como o painel é renderizado para uma RenderTexture projetada em um modelo 3D,
+    /// permitir que o EventDispatcher padrão mapeie o mouse da tela diretamente no painel
+    /// causaria hovers/cliques "fantasmas" globais na tela.
+    /// </summary>
+    public void SuppressNativeScreenPicking()
+    {
+        if (uiDocument == null || uiDocument.rootVisualElement == null) return;
+        var panel = uiDocument.rootVisualElement.panel;
+        if (panel == null || _lastSuppressedPanel == panel) return;
+
+        try
+        {
+            var prop = panel.GetType().GetProperty("screenToPanelSpace",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (prop != null && prop.CanWrite)
+            {
+                Func<Vector2, Vector3> offscreen = _ => new Vector3(-99999f, -99999f, 0f);
+                prop.SetValue(panel, offscreen);
+                _lastSuppressedPanel = panel;
+            }
+        }
+        catch
+        {
+            // Silencioso se a propriedade não estiver acessível
+        }
+    }
+
     private void EnsureEventBlocker()
     {
+        SuppressNativeScreenPicking();
         if (uiDocument == null || uiDocument.rootVisualElement == null) return;
         if (_attachedRoot == uiDocument.rootVisualElement) return;
 
@@ -437,6 +471,7 @@ namespace Mandato.Presentation
 
     private void DetachEventBlocker()
     {
+        _lastSuppressedPanel = null;
         if (_attachedRoot == null) return;
 
         _attachedRoot.UnregisterCallback<PointerDownEvent>(BlockScreenEvent, TrickleDown.TrickleDown);
@@ -672,11 +707,49 @@ namespace Mandato.Presentation
         }
     }
 
-    private void ProcessScroll(VisualElement target)
+    private void ProcessScroll(VisualElement target, float scrollAxis, Vector2 mouseScrollDelta)
     {
         if (target == null) return;
 
-        using var wheelEvent = WheelEvent.GetPooled();
+        float scrollY = Mathf.Abs(mouseScrollDelta.y) > 0.001f ? mouseScrollDelta.y : (scrollAxis * 10f);
+        if (Mathf.Abs(scrollY) < 0.001f) return;
+
+        // 1. Tenta manipular diretamente o ScrollView caso exista no target ou na hierarquia do documento
+        var scrollView = target as ScrollView ?? target.GetFirstAncestorOfType<ScrollView>();
+        if (scrollView == null && uiDocument != null && uiDocument.rootVisualElement != null)
+        {
+            scrollView = uiDocument.rootVisualElement.Q<ScrollView>();
+        }
+
+        if (scrollView != null)
+        {
+            float step = scrollView.mouseWheelScrollSize > 0f ? scrollView.mouseWheelScrollSize : 54f;
+            // No Unity: mouseScrollDelta.y positivo = scroll para cima (diminui scrollOffset.y)
+            // mouseScrollDelta.y negativo = scroll para baixo (aumenta scrollOffset.y)
+            float deltaOffset = -scrollY * step;
+
+            if (scrollView.verticalScroller != null)
+            {
+                float targetValue = scrollView.verticalScroller.value + deltaOffset;
+                float clamped = Mathf.Clamp(targetValue, scrollView.verticalScroller.lowValue, scrollView.verticalScroller.highValue);
+                scrollView.verticalScroller.value = clamped;
+            }
+            else
+            {
+                scrollView.scrollOffset = new Vector2(
+                    scrollView.scrollOffset.x,
+                    Mathf.Max(0f, scrollView.scrollOffset.y + deltaOffset)
+                );
+            }
+        }
+
+        // 2. Dispara também o WheelEvent padrão do UI Toolkit com o delta devidamente preenchido
+        var sysEvent = new Event
+        {
+            type = EventType.ScrollWheel,
+            delta = new Vector2(0f, -scrollY * 18f)
+        };
+        using var wheelEvent = WheelEvent.GetPooled(sysEvent);
         wheelEvent.target = target;
         SendWorldSpaceEvent(target, wheelEvent);
     }

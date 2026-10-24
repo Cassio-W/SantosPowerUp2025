@@ -265,6 +265,18 @@ namespace Mandato.UI.Tests
             Object.DestroyImmediate(go);
         }
 
+        [Test]
+        public void FlipPhonePresenter_ScrollBy_DoesNotThrowAndAdjustsScrollOffset()
+        {
+            var go = new GameObject("FlipPhoneScrollTest");
+            var presenter = go.AddComponent<FlipPhonePresenter>();
+
+            Assert.DoesNotThrow(() => presenter.ScrollBy(-1f));
+            Assert.DoesNotThrow(() => presenter.ScrollBy(1f));
+
+            Object.DestroyImmediate(go);
+        }
+
         // ── RetroMonitorPresenter Snapshot Logic Tests ────────────
 
         [Test]
@@ -503,6 +515,18 @@ namespace Mandato.UI.Tests
             Assert.DoesNotThrow(() => clickAction());
 
             Assert.IsTrue(presenter.IsModalOpen);
+
+            Object.DestroyImmediate(go);
+        }
+
+        [Test]
+        public void RetroMonitorPresenter_SetInteractable_WorksWithoutThrowing()
+        {
+            var go = new GameObject("RetroMonitorInteractableTest");
+            var presenter = go.AddComponent<RetroMonitorPresenter>();
+
+            Assert.DoesNotThrow(() => presenter.SetInteractable(true));
+            Assert.DoesNotThrow(() => presenter.SetInteractable(false));
 
             Object.DestroyImmediate(go);
         }

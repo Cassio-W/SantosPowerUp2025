@@ -24,6 +24,7 @@ namespace Mandato.Run
         public bool investedThisMonth = false;
         public int economyInvestedThisMonth = 0;
         public int popularityInvestedThisMonth = 0;
+        public int investmentClicksThisMonth = 0;
 
         /// <summary>None enquanto a guerra não existe ou está em andamento.</summary>
         public WarOutcome outcome = WarOutcome.None;
@@ -45,6 +46,7 @@ namespace Mandato.Run
                 investedThisMonth = investedThisMonth,
                 economyInvestedThisMonth = economyInvestedThisMonth,
                 popularityInvestedThisMonth = popularityInvestedThisMonth,
+                investmentClicksThisMonth = investmentClicksThisMonth,
                 outcome = outcome
             };
         }
@@ -55,6 +57,7 @@ namespace Mandato.Run
     public class WarInvestmentResult
     {
         public bool success;
+        public WarAttribute attribute;
         public string failReason = string.Empty;
         public int economySpent;
         public int popularitySpent;
@@ -68,9 +71,11 @@ namespace Mandato.Run
         public int progressBefore;
         public int progressAfter;
 
+        /// <summary>Pontos de Tropas efetivamente perdidos no mês (múltiplo de 25).</summary>
         public int troopsDrained;
-        public int technologyDrained;     // 0 se não houve drenagem de tecnologia neste mês
-        public bool technologyDrainApplied;
+
+        /// <summary>Pontos de Tecnologia efetivamente perdidos no mês (múltiplo de 25).</summary>
+        public int technologyDrained;
 
         public bool maintenanceFailed;
         public int maintenancePenalty;
@@ -92,12 +97,21 @@ namespace Mandato.Run
         public const string DefeatReason = "Guerra Perdida: o país foi devastado pelo conflito.";
         public const string ProtectorateReason = "Mandato Encerrado sob Protetorado: o país se rendeu na guerra e virou uma colônia.";
 
+        /// <summary>Pontos de Tecnologia/Tropas que equivalem a 1 nível (alterações são sempre em múltiplos disso).</summary>
+        public const int AttributeStep = WarSnapshot.LevelStep;
+
+        private static int RoundToLevel(int points)
+        {
+            return StatBlock.Clamp((int)(Math.Round(points / (double)AttributeStep, MidpointRounding.AwayFromZero) * AttributeStep));
+        }
+
         private static WarBalance BalanceOf(RunState run) => run.warBalance ?? WarBalance.CreateDefault();
 
         /// <summary>
         /// Declara a guerra. Falha (retorna false) se já houve guerra nesta run, se a run terminou
-        /// ou se o nível for None. Tecnologia e Tropas iniciais = metade da Soberania
-        /// (Soberania = Relações Internacionais) no momento da declaração.
+        /// ou se o nível for None. Tecnologia e Tropas iniciais = Soberania
+        /// (Soberania = Relações Internacionais) no momento da declaração, arredondada para o nível
+        /// mais próximo (múltiplos de 25).
         /// </summary>
         public static bool StartWar(RunState run, WarLevel level, string targetId = "")
         {
@@ -106,7 +120,7 @@ namespace Mandato.Run
             if (run.war != null && run.war.HasStarted) return false;
 
             var balance = BalanceOf(run);
-            int initial = run.stats.internationalRelations / 2;
+            int initial = RoundToLevel(run.stats.internationalRelations);
 
             run.war = new WarState
             {
@@ -120,39 +134,48 @@ namespace Mandato.Run
                 investedThisMonth = false,
                 economyInvestedThisMonth = 0,
                 popularityInvestedThisMonth = 0,
+                investmentClicksThisMonth = 0,
                 outcome = WarOutcome.None
             };
             return true;
         }
 
-        public static int GetMaxInvestment(RunState run, StatId stat)
+        public static int GetRemainingInvestmentClicks(RunState run)
         {
             if (run == null || run.war == null || !run.war.isActive) return 0;
-            if (stat != StatId.Economy && stat != StatId.PopularApproval) return 0;
-
             var balance = BalanceOf(run);
-            int alreadyInvested = stat == StatId.Economy
-                ? run.war.economyInvestedThisMonth
-                : run.war.popularityInvestedThisMonth;
-
-            if (run.war.investedThisMonth && run.war.economyInvestedThisMonth == 0 && run.war.popularityInvestedThisMonth == 0)
-            {
-                return 0;
-            }
-
-            int remainingCap = Math.Max(0, balance.investmentCapPerStatPerMonth - alreadyInvested);
-            int available = Math.Max(0, run.stats.Get(stat) - balance.investmentStatFloor);
-            return Math.Min(remainingCap, available);
+            int maxClicks = balance.maxInvestmentClicksPerMonth > 0 ? balance.maxInvestmentClicksPerMonth : 3;
+            return Math.Max(0, maxClicks - run.war.investmentClicksThisMonth);
         }
 
         /// <summary>
-        /// Investimento mensal: converte Economia → Tecnologia e Popularidade → Tropas (1:1).
-        /// Os valores pedidos são limitados pelo teto mensal de cada atributo e pelo piso de segurança.
-        /// A despesa NÃO é bloqueada por "preventStatLossThisMonth" (é um gasto voluntário, não uma perda).
+        /// Verdadeiro se um clique de investimento no atributo seria aceito agora: há guerra ativa,
+        /// sobram cliques no mês, o atributo militar não está no nível máximo e o atributo de origem
+        /// (Economia para Tecnologia, Popularidade para Tropas) continua acima do piso depois do gasto.
         /// </summary>
-        public static WarInvestmentResult Invest(RunState run, int economyAmount, int popularityAmount)
+        public static bool CanInvest(RunState run, WarAttribute attribute)
         {
-            var result = new WarInvestmentResult();
+            if (run == null || run.war == null || !run.war.isActive || !run.termination.IsOngoing) return false;
+            if (GetRemainingInvestmentClicks(run) <= 0) return false;
+
+            var balance = BalanceOf(run);
+            int current = attribute == WarAttribute.Technology ? run.war.technology : run.war.troops;
+            if (current >= StatBlock.MaxValue) return false;
+
+            StatId source = attribute == WarAttribute.Technology ? StatId.Economy : StatId.PopularApproval;
+            return run.stats.Get(source) - balance.investmentPointsPerClick >= balance.investmentStatFloor;
+        }
+
+        /// <summary>
+        /// Investimento mensal: 1 clique sobe 1 nível (+25) de Tecnologia ou Tropas e gasta
+        /// <see cref="WarBalance.investmentPointsPerClick"/> (5) de Economia ou Popularidade, respectivamente.
+        /// São permitidos até 3 cliques por mês, distribuídos livremente entre Tecnologia e Tropas.
+        /// O gasto respeita o piso de segurança (10) e NÃO é bloqueado por "preventStatLossThisMonth"
+        /// (é um gasto voluntário, não uma perda).
+        /// </summary>
+        public static WarInvestmentResult Invest(RunState run, WarAttribute attribute)
+        {
+            var result = new WarInvestmentResult { attribute = attribute };
 
             if (run == null || run.war == null || !run.war.isActive || !run.termination.IsOngoing)
             {
@@ -160,35 +183,54 @@ namespace Mandato.Run
                 return result;
             }
 
-            int econ = Math.Min(Math.Max(0, economyAmount), GetMaxInvestment(run, StatId.Economy));
-            int pop = Math.Min(Math.Max(0, popularityAmount), GetMaxInvestment(run, StatId.PopularApproval));
-
-            if (econ <= 0 && pop <= 0)
+            var balance = BalanceOf(run);
+            if (GetRemainingInvestmentClicks(run) <= 0)
             {
-                result.failReason = "Nada a investir (limite mensal atingido ou atributos no piso de segurança).";
+                result.failReason = $"Limite de {balance.maxInvestmentClicksPerMonth} investimentos mensais atingido.";
                 return result;
             }
 
-            run.stats.ApplyDelta(StatId.Economy, -econ);
-            run.stats.ApplyDelta(StatId.PopularApproval, -pop);
-            run.war.technology = StatBlock.Clamp(run.war.technology + econ);
-            run.war.troops = StatBlock.Clamp(run.war.troops + pop);
-            run.war.economyInvestedThisMonth += econ;
-            run.war.popularityInvestedThisMonth += pop;
-            run.war.investedThisMonth = GetMaxInvestment(run, StatId.Economy) <= 0 &&
-                                        GetMaxInvestment(run, StatId.PopularApproval) <= 0;
+            bool tech = attribute == WarAttribute.Technology;
+            if ((tech ? run.war.technology : run.war.troops) >= StatBlock.MaxValue)
+            {
+                result.failReason = tech ? "Tecnologia já está no nível máximo." : "Tropas já estão no nível máximo.";
+                return result;
+            }
+
+            if (!CanInvest(run, attribute))
+            {
+                result.failReason = "Atributo de origem no piso de segurança.";
+                return result;
+            }
+
+            int cost = balance.investmentPointsPerClick;
+            if (tech)
+            {
+                run.stats.ApplyDelta(StatId.Economy, -cost);
+                run.war.technology = StatBlock.Clamp(run.war.technology + AttributeStep);
+                run.war.economyInvestedThisMonth += cost;
+                result.economySpent = cost;
+            }
+            else
+            {
+                run.stats.ApplyDelta(StatId.PopularApproval, -cost);
+                run.war.troops = StatBlock.Clamp(run.war.troops + AttributeStep);
+                run.war.popularityInvestedThisMonth += cost;
+                result.popularitySpent = cost;
+            }
+
+            run.war.investmentClicksThisMonth++;
+            run.war.investedThisMonth = GetRemainingInvestmentClicks(run) <= 0 ||
+                                        (!CanInvest(run, WarAttribute.Technology) && !CanInvest(run, WarAttribute.Troops));
 
             run.UpdateTermination();
 
             result.success = true;
-            result.economySpent = econ;
-            result.popularitySpent = pop;
             return result;
         }
-
         /// <summary>
         /// Rodada de fim de mês. Ordem estrita:
-        /// 1. drenagem de Tropas (todo mês) e de Tecnologia (a cada N meses);
+        /// 1. drenagem de N níveis (N x 25 pontos, N = nível da guerra), sorteados entre Tecnologia e Tropas;
         /// 2. falha de manutenção (algum atributo oculto zerado): perde progresso + chance de -10 no Meio Ambiente;
         /// 3. senão, se ambos > limiar: ofensiva (+10%);
         /// 4. pressão base do inimigo (por nível);
@@ -215,18 +257,43 @@ namespace Mandato.Run
             {
                 level = war.level,
                 progressBefore = war.progress,
-                enemyPressure = cfg.enemyPressurePerMonth
+                enemyPressure = 0
             };
 
-            // 1. Drenagem
-            report.troopsDrained = NextInclusive(rng, cfg.troopsDrainMin, cfg.troopsDrainMax);
-            war.troops = StatBlock.Clamp(war.troops - report.troopsDrained);
+            // 1. Drenagem aleatória por nível:
+            //    - Nível 1: 0% a 50% (0 a 2 passos de 25%)
+            //    - Nível 2: 25% a 75% (1 a 3 passos de 25%)
+            //    - Nível 3: 50% a 100% (2 a 4 passos de 25%)
+            int minSteps = Math.Max(0, (int)war.level - 1);
+            int maxSteps = Math.Min(4, (int)war.level + 1);
+            int drainSteps = rng.Next(minSteps, maxSteps + 1);
 
-            if (war.monthsInWar % Math.Max(1, balance.technologyDrainIntervalMonths) == 0)
+            for (int i = 0; i < drainSteps; i++)
             {
-                report.technologyDrainApplied = true;
-                report.technologyDrained = NextInclusive(rng, cfg.technologyDrainMin, cfg.technologyDrainMax);
-                war.technology = StatBlock.Clamp(war.technology - report.technologyDrained);
+                if (war.technology > 0 && war.troops > 0)
+                {
+                    bool hitTechnology = rng.Next(0, 2) == 0;
+                    if (hitTechnology)
+                    {
+                        war.technology = Math.Max(0, war.technology - AttributeStep);
+                        report.technologyDrained += AttributeStep;
+                    }
+                    else
+                    {
+                        war.troops = Math.Max(0, war.troops - AttributeStep);
+                        report.troopsDrained += AttributeStep;
+                    }
+                }
+                else if (war.technology > 0)
+                {
+                    war.technology = Math.Max(0, war.technology - AttributeStep);
+                    report.technologyDrained += AttributeStep;
+                }
+                else if (war.troops > 0)
+                {
+                    war.troops = Math.Max(0, war.troops - AttributeStep);
+                    report.troopsDrained += AttributeStep;
+                }
             }
 
             // 2/3. Falha de manutenção x ofensiva (mutuamente exclusivas)
@@ -254,12 +321,12 @@ namespace Mandato.Run
                 progress += report.offensiveBonus;
             }
 
-            // 4. Pressão do inimigo
-            progress -= cfg.enemyPressurePerMonth;
+            // 4. Sem dano passivo fixo (removido por balanceamento)
             war.progress = Math.Max(0, Math.Min(100, progress));
             war.investedThisMonth = false;
             war.economyInvestedThisMonth = 0;
             war.popularityInvestedThisMonth = 0;
+            war.investmentClicksThisMonth = 0;
 
             // 5. Desfecho
             if (run.termination.IsOngoing)
@@ -330,9 +397,12 @@ namespace Mandato.Run
             if (run == null || run.war == null) return WarSnapshot.Inactive;
 
             var war = run.war;
+            var balance = BalanceOf(run);
+            int maxClicks = balance.maxInvestmentClicksPerMonth > 0 ? balance.maxInvestmentClicksPerMonth : 3;
+
             if (!war.isActive)
             {
-                return new WarSnapshot(false, war.level, war.targetId, war.progress, false, false, 0, 0, war.outcome, war.technology, war.troops);
+                return new WarSnapshot(false, war.level, war.targetId, war.progress, false, false, false, false, war.outcome, war.technology, war.troops, 0, maxClicks, balance.investmentPointsPerClick);
             }
 
             return new WarSnapshot(
@@ -342,18 +412,14 @@ namespace Mandato.Run
                 war.progress,
                 CanSurrender(run),
                 war.investedThisMonth,
-                GetMaxInvestment(run, StatId.Economy),
-                GetMaxInvestment(run, StatId.PopularApproval),
+                CanInvest(run, WarAttribute.Technology),
+                CanInvest(run, WarAttribute.Troops),
                 war.outcome,
                 war.technology,
-                war.troops);
-        }
-
-        private static int NextInclusive(Random rng, int min, int max)
-        {
-            if (max < min) max = min;
-            return rng.Next(min, max + 1);
+                war.troops,
+                GetRemainingInvestmentClicks(run),
+                maxClicks,
+                balance.investmentPointsPerClick);
         }
     }
 }
-

@@ -85,6 +85,7 @@ namespace Mandato.UI
         private UIDocument uiDocument;
         private VisualElement root;
         private VisualElement screenRoot;
+        private ScrollView scrollView;
         private VisualElement appsContainer;
         private Label emptyLabel;
         private Button closeBtn;
@@ -141,16 +142,62 @@ namespace Mandato.UI
         {
             if (!isInteractable) return;
 
-            if (IsOpen && Input.GetKeyDown(KeyCode.Escape))
+            if (IsOpen)
             {
-                if (isModalOpen)
+                if (Input.GetKeyDown(KeyCode.Escape))
                 {
-                    CloseActionModal();
+                    if (isModalOpen)
+                    {
+                        CloseActionModal();
+                    }
+                    else
+                    {
+                        Close();
+                    }
                 }
-                else
+                else if (!isModalOpen)
                 {
-                    Close();
+                    // Navegação e scroll via teclado (Setas Cima/Baixo, W/S)
+                    float keyScroll = 0f;
+                    if (Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S))
+                        keyScroll -= 1f;
+                    else if (Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W))
+                        keyScroll += 1f;
+
+                    if (Mathf.Abs(keyScroll) > 0.001f)
+                    {
+                        ScrollBy(keyScroll);
+                    }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Desloca o ScrollView da lista de contatos por uma quantidade de passos (positivo = sobe, negativo = desce).
+        /// </summary>
+        public void ScrollBy(float scrollY)
+        {
+            if (scrollView == null)
+            {
+                CacheVisualElements();
+            }
+            if (scrollView == null) return;
+
+            float step = scrollView.mouseWheelScrollSize > 0f ? scrollView.mouseWheelScrollSize : 54f;
+            float deltaOffset = -scrollY * step;
+
+            if (scrollView.verticalScroller != null)
+            {
+                float targetValue = scrollView.verticalScroller.value + deltaOffset;
+                float clamped = Mathf.Clamp(targetValue, scrollView.verticalScroller.lowValue, scrollView.verticalScroller.highValue);
+                scrollView.verticalScroller.value = clamped;
+            }
+            else
+            {
+                scrollView.scrollOffset = new Vector2(
+                    scrollView.scrollOffset.x,
+                    Mathf.Max(0f, scrollView.scrollOffset.y + deltaOffset)
+                );
             }
         }
 
@@ -275,6 +322,7 @@ namespace Mandato.UI
 
             root = uiDocument.rootVisualElement;
             screenRoot = root.Q<VisualElement>("phone-screen-root");
+            scrollView = root.Q<ScrollView>("apps-scroll-view");
             appsContainer = root.Q<VisualElement>("apps-grid-container") ?? root.Q<VisualElement>("contacts-list-container");
             emptyLabel = root.Q<Label>("empty-actions-label");
             closeBtn = root.Q<Button>("phone-close-btn");
@@ -332,6 +380,11 @@ namespace Mandato.UI
             EnsureDocument();
             CacheVisualElements();
             CloseActionModal();
+
+            if (scrollView != null && scrollView.verticalScroller != null)
+            {
+                scrollView.verticalScroller.value = 0f;
+            }
 
             if (screenRoot != null)
             {

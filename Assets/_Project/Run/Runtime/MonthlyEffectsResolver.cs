@@ -236,8 +236,17 @@ namespace Mandato.Run
                 }
             }
 
-            // 7c. Rodada mensal do Evento de Guerra (upkeep, falha de manutenção, ofensiva e desfecho)
-            report.war = WarRules.ResolveMonthEnd(runState);
+            // 7c. Rodada mensal do Evento de Guerra (início da guerra agendada ou resolução mensal)
+            if (runState.pendingWarLevel != WarLevel.None)
+            {
+                WarRules.StartWar(runState, runState.pendingWarLevel, runState.pendingWarTargetId);
+                runState.pendingWarLevel = WarLevel.None;
+                runState.pendingWarTargetId = string.Empty;
+            }
+            else
+            {
+                report.war = WarRules.ResolveMonthEnd(runState);
+            }
 
             // 8. Decremento de Suspensão de NPCs
             if (runState.npcStates != null)

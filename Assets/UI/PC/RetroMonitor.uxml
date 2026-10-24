@@ -128,19 +128,33 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- TAB 2: GUERRA (BARRA GERAL DA GUERRA + BARRAS DE TECNOLOGIA E TROPAS + BOTÕES + COM TOOLTIP) -->
+        <!-- TAB 2: GUERRA (BARRA GERAL + 2 BARRAS DE NIVEL + BOTOES DE INVESTIR + BARRA DE INVESTIMENTOS) -->
         <ui:VisualElement name="war-workspace" class="war-workspace hidden" picking-mode="Ignore">
-            
-            <!-- BARRA GERAL DA GUERRA (CABO DE GUERRA) -->
+
+            <!-- BARRA GERAL DA GUERRA (PARTE PRINCIPAL DA TELA, LEGIVEL DE LONGE) -->
             <ui:VisualElement name="war-general-panel" class="war-general-panel" picking-mode="Ignore">
-                <ui:VisualElement class="war-general-header" picking-mode="Ignore">
-                    <ui:Label name="war-pc-title" text="GUERRA - NIVEL 1" class="war-pc-title" picking-mode="Ignore" />
-                    <ui:VisualElement class="war-general-right-box" picking-mode="Ignore">
+
+                <ui:VisualElement class="war-hero-readout-row" picking-mode="Ignore">
+                    <!-- LADO ESQUERDO: PAIS DO JOGADOR -->
+                    <ui:VisualElement class="war-side-box war-side-player" picking-mode="Ignore">
+                        <ui:Label name="war-pc-player-name" text="BRASIL" class="war-side-label war-label-player" picking-mode="Ignore" />
+                        <ui:Label name="war-pc-player-percent" text="50%" class="war-giant-percent war-percent-player" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <!-- CENTRO: VS + BOTAO DE RENDICAO (SO APARECE QUANDO PERMITIDO) -->
+                    <ui:VisualElement class="war-center-status-box" picking-mode="Ignore">
+                        <ui:Label text="VS" class="war-vs-badge" picking-mode="Ignore" />
                         <ui:Button name="btn-war-surrender-pc" text="RENDER-SE" class="war-surrender-pc-btn hidden" picking-mode="Position" />
-                        <ui:Label name="war-pc-percent" text="BRASIL 50% X 50% INIMIGO" class="war-pc-percent" picking-mode="Ignore" />
+                    </ui:VisualElement>
+
+                    <!-- LADO DIREITO: PAIS INIMIGO -->
+                    <ui:VisualElement class="war-side-box war-side-enemy" picking-mode="Ignore">
+                        <ui:Label name="war-pc-enemy-percent" text="50%" class="war-giant-percent war-percent-enemy" picking-mode="Ignore" />
+                        <ui:Label name="war-pc-enemy-name" text="INIMIGO" class="war-side-label war-label-enemy" picking-mode="Ignore" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
+                <!-- BARRA GERAL: VERDE (JOGADOR) VS VERMELHO (INIMIGO) -->
                 <ui:VisualElement name="war-pc-bar-track" class="war-pc-bar-track" picking-mode="Ignore">
                     <ui:VisualElement name="war-pc-player-fill" class="war-pc-player-fill" style="width: 50%;" picking-mode="Ignore" />
                     <ui:VisualElement name="war-pc-bar-divider" class="war-pc-bar-divider" picking-mode="Ignore" />
@@ -148,95 +162,67 @@
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- 2 CARDS DE ATRIBUTOS MILITARES: TECNOLOGIA (ESQ) & TROPAS (DIR) -->
-            <ui:VisualElement name="war-cards-row" class="war-cards-row" picking-mode="Ignore">
-                
-                <!-- CARD TECNOLOGIA (ORIGEM: ECONOMIA) -->
-                <ui:VisualElement name="card-war-tech" class="giant-card card-war-tech" picking-mode="Ignore">
-                    <ui:VisualElement name="fill-war-tech" class="card-bg-fill fill-tech-bg" style="height: 25%;" picking-mode="Ignore" />
-                    <ui:VisualElement name="ghost-fill-war-tech" class="ghost-fill ghost-tech" style="height: 25%; opacity: 0;" picking-mode="Ignore" />
+            <!-- AREA INFERIOR: BARRAS DE NIVEL (ESQ) + BARRA DE INVESTIMENTOS (DIR) -->
+            <ui:VisualElement name="war-lower-area" class="war-lower-area" picking-mode="Ignore">
 
-                    <ui:VisualElement class="war-card-foreground" picking-mode="Ignore">
-                        <ui:VisualElement class="war-card-top-info" picking-mode="Ignore">
-                            <ui:Label text="TECNOLOGIA" class="war-card-title-tech" picking-mode="Ignore" />
-                            <ui:Label text="TRIMESTRAL" class="war-card-subtitle" picking-mode="Ignore" />
+                <ui:VisualElement name="war-attributes-column" class="war-attributes-column" picking-mode="Ignore">
+
+                    <!-- TECNOLOGIA (ORIGEM: ECONOMIA) -->
+                    <ui:VisualElement name="war-row-tech" class="war-attr-row" picking-mode="Ignore">
+                        <ui:VisualElement name="icon-war-tech" class="war-attr-icon war-icon-tech" picking-mode="Ignore" />
+                        <ui:VisualElement name="war-bar-tech" class="war-level-bar" picking-mode="Ignore">
+                            <ui:VisualElement class="war-level-seg war-seg-1" picking-mode="Ignore"><ui:VisualElement class="war-level-seg-fill war-fill-1" picking-mode="Ignore" /></ui:VisualElement>
+                            <ui:VisualElement class="war-level-seg war-seg-2" picking-mode="Ignore"><ui:VisualElement class="war-level-seg-fill war-fill-2" picking-mode="Ignore" /></ui:VisualElement>
+                            <ui:VisualElement class="war-level-seg war-seg-3" picking-mode="Ignore"><ui:VisualElement class="war-level-seg-fill war-fill-3" picking-mode="Ignore" /></ui:VisualElement>
+                            <ui:VisualElement class="war-level-seg war-seg-4" picking-mode="Ignore"><ui:VisualElement class="war-level-seg-fill war-fill-4" picking-mode="Ignore" /></ui:VisualElement>
                         </ui:VisualElement>
-
-                        <ui:VisualElement class="war-card-center-readout" picking-mode="Ignore">
-                            <ui:Label name="value-war-tech" text="25%" class="giant-value war-giant-value" picking-mode="Ignore" />
-                        </ui:VisualElement>
-
-                        <ui:VisualElement class="war-card-bottom-bar" picking-mode="Ignore">
-                            <ui:Label name="status-invest-tech" text="INVESTIR (+5)" class="war-invest-caption" picking-mode="Ignore" />
+                        <ui:Label name="arrow-war-tech" class="war-attr-arrow" text="" picking-mode="Ignore" />
+                        <ui:VisualElement class="war-btn-slot" picking-mode="Ignore">
                             <ui:Button name="btn-invest-tech" text="+" class="war-invest-plus-btn" picking-mode="Position" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-
-                    <!-- TOOLTIP SOBRE O BOTÃO + DE TECNOLOGIA (MOSTRA CARDZINHO DE ECONOMIA) -->
-                    <ui:VisualElement name="tooltip-invest-tech" class="war-invest-tooltip card-economy hidden" picking-mode="Ignore">
-                        <ui:VisualElement name="tooltip-fill-economy" class="card-bg-fill fill-economy-bg" style="height: 50%;" picking-mode="Ignore" />
-                        <ui:VisualElement class="tooltip-foreground" picking-mode="Ignore">
-                            <ui:VisualElement class="tooltip-header-row" picking-mode="Ignore">
-                                <ui:Label text="ECONOMIA" class="tooltip-attr-title" picking-mode="Ignore" />
-                                <ui:Label text="-5%" class="tooltip-cost-tag" picking-mode="Ignore" />
-                            </ui:VisualElement>
-                            <ui:VisualElement class="tooltip-body-row" picking-mode="Ignore">
-                                <ui:VisualElement class="tooltip-mini-icon" style="background-image: url(&apos;project://database/Assets/Sprites/moneynew.png?fileID=21300000&amp;guid=1ff9b9ecfbad1924eb51f51a6f3863ec&amp;type=3#moneynew&apos;);" picking-mode="Ignore" />
+                            <!-- TOOLTIP DISCRETO: MOSTRA A ECONOMIA (ICONE + BARRA + %) -->
+                            <ui:VisualElement name="tooltip-invest-tech" class="war-invest-tooltip tooltip-economy hidden" picking-mode="Ignore">
+                                <ui:VisualElement class="tooltip-mini-icon tooltip-icon-economy" picking-mode="Ignore" />
+                                <ui:VisualElement class="tooltip-mini-track" picking-mode="Ignore">
+                                    <ui:VisualElement name="tooltip-fill-economy" class="tooltip-mini-fill" style="width: 50%;" picking-mode="Ignore" />
+                                </ui:VisualElement>
                                 <ui:Label name="tooltip-value-economy" text="50%" class="tooltip-mini-value" picking-mode="Ignore" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <ui:Label name="arrow-war-tech" class="attr-arrow" text="" picking-mode="Ignore" />
-
-                    <ui:VisualElement name="dead-overlay-war-tech" class="dead-overlay hidden" picking-mode="Ignore">
-                        <ui:Label text="X" class="dead-x-label" picking-mode="Ignore" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-
-                <!-- CARD TROPAS (ORIGEM: POPULAÇÃO) -->
-                <ui:VisualElement name="card-war-troops" class="giant-card card-war-troops" picking-mode="Ignore">
-                    <ui:VisualElement name="fill-war-troops" class="card-bg-fill fill-troops-bg" style="height: 25%;" picking-mode="Ignore" />
-                    <ui:VisualElement name="ghost-fill-war-troops" class="ghost-fill ghost-troops" style="height: 25%; opacity: 0;" picking-mode="Ignore" />
-
-                    <ui:VisualElement class="war-card-foreground" picking-mode="Ignore">
-                        <ui:VisualElement class="war-card-top-info" picking-mode="Ignore">
-                            <ui:Label text="TROPAS" class="war-card-title-troops" picking-mode="Ignore" />
-                            <ui:Label text="MENSAL" class="war-card-subtitle" picking-mode="Ignore" />
+                    <!-- TROPAS (ORIGEM: POPULARIDADE) -->
+                    <ui:VisualElement name="war-row-troops" class="war-attr-row" picking-mode="Ignore">
+                        <ui:VisualElement name="icon-war-troops" class="war-attr-icon war-icon-troops" picking-mode="Ignore" />
+                        <ui:VisualElement name="war-bar-troops" class="war-level-bar" picking-mode="Ignore">
+                            <ui:VisualElement class="war-level-seg war-seg-1" picking-mode="Ignore"><ui:VisualElement class="war-level-seg-fill war-fill-1" picking-mode="Ignore" /></ui:VisualElement>
+                            <ui:VisualElement class="war-level-seg war-seg-2" picking-mode="Ignore"><ui:VisualElement class="war-level-seg-fill war-fill-2" picking-mode="Ignore" /></ui:VisualElement>
+                            <ui:VisualElement class="war-level-seg war-seg-3" picking-mode="Ignore"><ui:VisualElement class="war-level-seg-fill war-fill-3" picking-mode="Ignore" /></ui:VisualElement>
+                            <ui:VisualElement class="war-level-seg war-seg-4" picking-mode="Ignore"><ui:VisualElement class="war-level-seg-fill war-fill-4" picking-mode="Ignore" /></ui:VisualElement>
                         </ui:VisualElement>
-
-                        <ui:VisualElement class="war-card-center-readout" picking-mode="Ignore">
-                            <ui:Label name="value-war-troops" text="25%" class="giant-value war-giant-value" picking-mode="Ignore" />
-                        </ui:VisualElement>
-
-                        <ui:VisualElement class="war-card-bottom-bar" picking-mode="Ignore">
-                            <ui:Label name="status-invest-troops" text="INVESTIR (+5)" class="war-invest-caption" picking-mode="Ignore" />
+                        <ui:Label name="arrow-war-troops" class="war-attr-arrow" text="" picking-mode="Ignore" />
+                        <ui:VisualElement class="war-btn-slot" picking-mode="Ignore">
                             <ui:Button name="btn-invest-troops" text="+" class="war-invest-plus-btn" picking-mode="Position" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-
-                    <!-- TOOLTIP SOBRE O BOTÃO + DE TROPAS (MOSTRA CARDZINHO DE POPULAÇÃO) -->
-                    <ui:VisualElement name="tooltip-invest-troops" class="war-invest-tooltip card-people hidden" picking-mode="Ignore">
-                        <ui:VisualElement name="tooltip-fill-people" class="card-bg-fill fill-people-bg" style="height: 50%;" picking-mode="Ignore" />
-                        <ui:VisualElement class="tooltip-foreground" picking-mode="Ignore">
-                            <ui:VisualElement class="tooltip-header-row" picking-mode="Ignore">
-                                <ui:Label text="POPULACAO" class="tooltip-attr-title" picking-mode="Ignore" />
-                                <ui:Label text="-5%" class="tooltip-cost-tag" picking-mode="Ignore" />
-                            </ui:VisualElement>
-                            <ui:VisualElement class="tooltip-body-row" picking-mode="Ignore">
-                                <ui:VisualElement class="tooltip-mini-icon" style="background-image: url(&apos;project://database/Assets/Sprites/peopleSlider.png?fileID=1537655665&amp;guid=f498b99f7dc683646b439a837578e287&amp;type=3#peopleSlider&apos;);" picking-mode="Ignore" />
+                            <!-- TOOLTIP DISCRETO: MOSTRA A POPULARIDADE (ICONE + BARRA + %) -->
+                            <ui:VisualElement name="tooltip-invest-troops" class="war-invest-tooltip tooltip-people hidden" picking-mode="Ignore">
+                                <ui:VisualElement class="tooltip-mini-icon tooltip-icon-people" picking-mode="Ignore" />
+                                <ui:VisualElement class="tooltip-mini-track" picking-mode="Ignore">
+                                    <ui:VisualElement name="tooltip-fill-people" class="tooltip-mini-fill" style="width: 50%;" picking-mode="Ignore" />
+                                </ui:VisualElement>
                                 <ui:Label name="tooltip-value-people" text="50%" class="tooltip-mini-value" picking-mode="Ignore" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
-
-                    <ui:Label name="arrow-war-troops" class="attr-arrow" text="" picking-mode="Ignore" />
-
-                    <ui:VisualElement name="dead-overlay-war-troops" class="dead-overlay hidden" picking-mode="Ignore">
-                        <ui:Label text="X" class="dead-x-label" picking-mode="Ignore" />
-                    </ui:VisualElement>
                 </ui:VisualElement>
 
+                <!-- INVESTIMENTOS DISPONIVEIS: BARRA FINA VERTICAL (CRESCE DE BAIXO PARA CIMA) -->
+                <ui:VisualElement name="war-invest-column" class="war-invest-column" picking-mode="Ignore">
+                    <ui:Label text="INVESTIMENTOS" class="war-invest-label" picking-mode="Ignore" />
+                    <ui:VisualElement name="war-invest-bar" class="war-invest-bar" picking-mode="Ignore">
+                        <ui:VisualElement class="war-invest-seg" picking-mode="Ignore"><ui:VisualElement class="war-invest-seg-fill" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement class="war-invest-seg" picking-mode="Ignore"><ui:VisualElement class="war-invest-seg-fill" picking-mode="Ignore" /></ui:VisualElement>
+                        <ui:VisualElement class="war-invest-seg" picking-mode="Ignore"><ui:VisualElement class="war-invest-seg-fill" picking-mode="Ignore" /></ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 

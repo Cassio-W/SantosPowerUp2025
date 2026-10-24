@@ -22,6 +22,24 @@ namespace Mandato.Run.Tests
         private static ScriptedRandom MinRng(double d = 0.99) => new ScriptedRandom { useMax = false, doubleValue = d };
         private static ScriptedRandom MaxRng(double d = 0.99) => new ScriptedRandom { useMax = true, doubleValue = d };
 
+        /// <summary>RNG que devolve uma sequência fixa de sorteios (0 = Tecnologia, 1 = Tropas na drenagem mensal).</summary>
+        private class SequencedRandom : System.Random
+        {
+            private readonly int[] picks;
+            private int index;
+
+            public SequencedRandom(params int[] picks) { this.picks = picks; }
+
+            public override int Next(int minValue, int maxValue) => picks[index++ % picks.Length];
+            public override double NextDouble() => 0.99;
+        }
+
+        private static void MaxOutMilitary(RunState run)
+        {
+            run.war.technology = 100;
+            run.war.troops = 100;
+        }
+
         private static RunState NewRun(int seed = 1) => new RunState(seed);
 
         private static RunState NewWar(WarLevel level = WarLevel.Neighbor, int relations = 50)
@@ -35,7 +53,7 @@ namespace Mandato.Run.Tests
         // ---------------------------------------------------------------- Início
 
         [Test]
-        public void StartWar_InitializesBarAtFiftyAndHiddenStatsAsHalfOfSovereignty()
+        public void StartWar_InitializesBarAtFiftyAndHiddenStatsAsSovereignty()
         {
             var run = NewRun();
             run.stats.internationalRelations = 51;
@@ -47,8 +65,8 @@ namespace Mandato.Run.Tests
             Assert.AreEqual(WarLevel.Dominant, run.war.level);
             Assert.AreEqual("Nação", run.war.targetId);
             Assert.AreEqual(50, run.war.progress);
-            Assert.AreEqual(25, run.war.technology); // 51 / 2 (divisão inteira)
-            Assert.AreEqual(25, run.war.troops);
+            Assert.AreEqual(50, run.war.technology); // 51 arredonda para 50 (múltiplo de 25 mais próximo)
+            Assert.AreEqual(50, run.war.troops);
         }
 
         [Test]
@@ -83,61 +101,72 @@ namespace Mandato.Run.Tests
         // ---------------------------------------------------------------- Drenagem
 
         [Test]
-        public void ResolveMonthEnd_DrainsTroopsEveryMonth_WithinLevelRange()
+        public void StartWar_RoundsHiddenStatsToTheNearestLevel()
         {
-            foreach (var (level, min, max) in new[]
+            var low = NewWar(WarLevel.Neighbor, 10);   // 10 -> 0
+            Assert.AreEqual(0, low.war.technology);
+
+            var mid = NewWar(WarLevel.Neighbor, 30);   // 30 -> 25
+            Assert.AreEqual(25, mid.war.technology);
+
+            var high = NewWar(WarLevel.Neighbor, 100); // 100 -> 100
+            Assert.AreEqual(100, high.war.troops);
+        }
+
+        [Test]
+        public void ResolveMonthEnd_DrainsRandomRanges_ByWarLevel()
+        {
+            // Nível 1: min 0 passos (0%), max 2 passos (50%)
+            // Nível 2: min 1 passo (25%), max 3 passos (75%)
+            // Nível 3: min 2 passos (50%), max 4 passos (100%)
+            foreach (var (level, minPoints, maxPoints) in new[]
                      {
-                         (WarLevel.Neighbor, 1, 3),
-                         (WarLevel.Dominant, 3, 5),
-                         (WarLevel.WorldDomination, 5, 10)
+                         (WarLevel.Neighbor, 0, 50),
+                         (WarLevel.Dominant, 25, 75),
+                         (WarLevel.WorldDomination, 50, 100)
                      })
             {
                 var runMin = NewWar(level, 100);
                 var runMax = NewWar(level, 100);
+                MaxOutMilitary(runMin);
+                MaxOutMilitary(runMax);
 
-                var rMin = WarRules.ResolveMonthEnd(runMin, MinRng());
-                var rMax = WarRules.ResolveMonthEnd(runMax, MaxRng());
+                var rMin = WarRules.ResolveMonthEnd(runMin, MinRng()); // min steps
+                var rMax = WarRules.ResolveMonthEnd(runMax, MaxRng()); // max steps
 
-                Assert.AreEqual(min, rMin.troopsDrained, $"{level} min");
-                Assert.AreEqual(max, rMax.troopsDrained, $"{level} max");
-                Assert.AreEqual(50 - min, runMin.war.troops);
-                Assert.AreEqual(50 - max, runMax.war.troops);
+                Assert.AreEqual(minPoints, rMin.technologyDrained + rMin.troopsDrained, $"{level} Min");
+                Assert.AreEqual(maxPoints, rMax.technologyDrained + rMax.troopsDrained, $"{level} Max");
             }
         }
 
         [Test]
-        public void ResolveMonthEnd_DrainsTechnologyOnlyEveryThirdMonth_WithinLevelRange()
+        public void ResolveMonthEnd_DrainCanBeSplitBetweenBothAttributes()
         {
-            foreach (var (level, min, max) in new[]
-                     {
-                         (WarLevel.Neighbor, 3, 9),
-                         (WarLevel.Dominant, 10, 15),
-                         (WarLevel.WorldDomination, 15, 20)
-                     })
-            {
-                var runMin = NewWar(level, 100);
-                var runMax = NewWar(level, 100);
+            var run = NewWar(WarLevel.Dominant, 100);
+            MaxOutMilitary(run);
 
-                for (int month = 1; month <= 3; month++)
-                {
-                    var rMin = WarRules.ResolveMonthEnd(runMin, MinRng());
-                    var rMax = WarRules.ResolveMonthEnd(runMax, MaxRng());
+            // SequencedRandom: primeiro valor (2) escolhe 2 drain steps, depois 0 (tech), depois 1 (troops)
+            var report = WarRules.ResolveMonthEnd(run, new SequencedRandom(2, 0, 1));
 
-                    if (month < 3)
-                    {
-                        Assert.IsFalse(rMin.technologyDrainApplied, $"{level} mês {month}");
-                        Assert.AreEqual(50, runMin.war.technology);
-                    }
-                    else
-                    {
-                        Assert.IsTrue(rMin.technologyDrainApplied);
-                        Assert.AreEqual(min, rMin.technologyDrained, $"{level} min");
-                        Assert.AreEqual(max, rMax.technologyDrained, $"{level} max");
-                        Assert.AreEqual(50 - min, runMin.war.technology);
-                        Assert.AreEqual(50 - max, runMax.war.technology);
-                    }
-                }
-            }
+            Assert.AreEqual(25, report.technologyDrained);
+            Assert.AreEqual(25, report.troopsDrained);
+            Assert.AreEqual(75, run.war.technology);
+            Assert.AreEqual(75, run.war.troops);
+        }
+
+        [Test]
+        public void ResolveMonthEnd_DrainNeverGoesBelowZero()
+        {
+            var run = NewWar(WarLevel.WorldDomination, 100);
+            run.war.technology = 25;
+            run.war.troops = 0;
+
+            // Nível 3 com MaxRng escolheria 4 passos, mas como só há 25 pontos, drena no máximo 25
+            var report = WarRules.ResolveMonthEnd(run, MaxRng());
+
+            Assert.AreEqual(0, run.war.technology);
+            Assert.AreEqual(0, run.war.troops);
+            Assert.AreEqual(25, report.technologyDrained);
         }
 
         // ---------------------------------------------------------------- Recompensa x falha
@@ -145,46 +174,52 @@ namespace Mandato.Run.Tests
         [Test]
         public void ResolveMonthEnd_BothAboveThreshold_AdvancesTenPercent()
         {
-            var run = NewWar(WarLevel.Neighbor, 100); // 50/50
+            var run = NewWar(WarLevel.Neighbor, 100);
+            MaxOutMilitary(run);
 
             var report = WarRules.ResolveMonthEnd(run, MinRng());
 
             Assert.IsTrue(report.offensiveBonusApplied);
             Assert.IsFalse(report.maintenanceFailed);
-            Assert.AreEqual(60, run.war.progress);
+            Assert.AreEqual(60, run.war.progress); // 50 + 10 (sem pressão passiva)
         }
 
         [Test]
         public void ResolveMonthEnd_ExactlyAtThreshold_DoesNotAdvance()
         {
             var run = NewWar(WarLevel.Neighbor, 100);
-            run.war.troops = 11; // após drenar 1 => 10, que NÃO é "acima de 10"
+            MaxOutMilitary(run);
+            // Com MaxRng no Nível 1 drena 2 passos de tropas (50 pontos)
+            // Se tropas começam com 75, 75 - 50 = 25, que NÃO é "acima de 25"
+            run.war.troops = 75;
 
-            var report = WarRules.ResolveMonthEnd(run, MinRng());
+            var report = WarRules.ResolveMonthEnd(run, MaxRng());
 
-            Assert.AreEqual(10, run.war.troops);
+            Assert.AreEqual(25, run.war.troops);
             Assert.IsFalse(report.offensiveBonusApplied);
             Assert.IsFalse(report.maintenanceFailed);
             Assert.AreEqual(50, run.war.progress);
         }
 
         [Test]
-        public void ResolveMonthEnd_EnemyPressureAppliesByLevel()
+        public void ResolveMonthEnd_NoEnemyPressureApplied()
         {
             var run = NewWar(WarLevel.Dominant, 100);
+            MaxOutMilitary(run);
 
             WarRules.ResolveMonthEnd(run, MinRng());
 
-            Assert.AreEqual(50 + 10 - 2, run.war.progress);
+            // 50 (inicial) + 10 (ofensiva) - 0 (sem dano passivo) = 60
+            Assert.AreEqual(60, run.war.progress);
         }
 
         [Test]
         public void ResolveMonthEnd_ZeroTroops_IsMaintenanceFailure_AndLosesProgress()
         {
             var run = NewWar(WarLevel.Neighbor, 100);
-            run.war.troops = 1;
+            run.war.troops = 25;
 
-            var report = WarRules.ResolveMonthEnd(run, MinRng(0.99));
+            var report = WarRules.ResolveMonthEnd(run, MaxRng(0.99));
 
             Assert.IsTrue(report.maintenanceFailed);
             Assert.IsFalse(report.offensiveBonusApplied);
@@ -195,29 +230,31 @@ namespace Mandato.Run.Tests
         [Test]
         public void ResolveMonthEnd_BothZero_PenalizesEachAttribute()
         {
-            var run = NewWar(WarLevel.Neighbor, 100);
-            run.war.monthsInWar = 2; // próximo tick é o 3º mês (drena tecnologia)
-            run.war.troops = 1;
-            run.war.technology = 1;
+            var run = NewWar(WarLevel.Dominant, 100);
+            run.war.troops = 25;
+            run.war.technology = 25;
 
-            WarRules.ResolveMonthEnd(run, MinRng(0.99));
+            // SequencedRandom: 2 drain steps, primeiro 0 (tech -> 0), segundo 1 (troops -> 0)
+            WarRules.ResolveMonthEnd(run, new SequencedRandom(2, 0, 1));
 
-            Assert.AreEqual(50 - 16, run.war.progress);
+            Assert.AreEqual(0, run.war.technology);
+            Assert.AreEqual(0, run.war.troops);
+            Assert.AreEqual(50 - 16, run.war.progress); // 2 falhas de manutenção (-16) sem dano passivo
         }
 
         [Test]
         public void ResolveMonthEnd_MaintenanceFailure_ClimateDropsByTen_OnlyWhenRollSucceeds()
         {
             var hit = NewWar(WarLevel.Neighbor, 100);
-            hit.war.troops = 1;
-            var hitReport = WarRules.ResolveMonthEnd(hit, MinRng(0.0));
+            hit.war.troops = 25;
+            var hitReport = WarRules.ResolveMonthEnd(hit, MaxRng(0.0));
 
             Assert.IsTrue(hitReport.climateHit);
             Assert.AreEqual(40, hit.stats.climaticChanges);
 
             var miss = NewWar(WarLevel.Neighbor, 100);
-            miss.war.troops = 1;
-            var missReport = WarRules.ResolveMonthEnd(miss, MinRng(0.99));
+            miss.war.troops = 25;
+            var missReport = WarRules.ResolveMonthEnd(miss, MaxRng(0.99));
 
             Assert.IsFalse(missReport.climateHit);
             Assert.AreEqual(50, miss.stats.climaticChanges);
@@ -230,7 +267,6 @@ namespace Mandato.Run.Tests
             WarRules.ResolveMonthEnd(run, MinRng(0.0));
             Assert.AreEqual(50, run.stats.climaticChanges);
         }
-
         // ---------------------------------------------------------------- Desfechos
 
         [Test]
@@ -238,9 +274,9 @@ namespace Mandato.Run.Tests
         {
             var run = NewWar(WarLevel.Neighbor, 100);
             run.war.progress = 5;
-            run.war.troops = 1;
+            run.war.troops = 25;
 
-            var report = WarRules.ResolveMonthEnd(run, MinRng(0.99));
+            var report = WarRules.ResolveMonthEnd(run, MaxRng(0.99));
 
             Assert.AreEqual(WarOutcome.Defeat, report.outcome);
             Assert.IsTrue(run.termination.IsDefeat);
@@ -260,6 +296,7 @@ namespace Mandato.Run.Tests
             run.stats.climaticChanges = 33;
             run.stats.corruption = 12;
             run.war.progress = 95;
+            MaxOutMilitary(run);
 
             var report = WarRules.ResolveMonthEnd(run, MinRng());
 
@@ -279,6 +316,7 @@ namespace Mandato.Run.Tests
             var run = NewWar(WarLevel.Neighbor, 100);
             run.stats.popularApproval = 90;
             run.war.progress = 95;
+            MaxOutMilitary(run);
 
             WarRules.ResolveMonthEnd(run, MinRng());
 
@@ -286,13 +324,14 @@ namespace Mandato.Run.Tests
         }
 
         [Test]
-        public void NeighborWar_WithoutInvestment_ReachesVictoryInFiveMonths()
+        public void NeighborWar_WithHealthyMilitary_ReachesVictoryInFiveMonths()
         {
-            var run = NewWar(WarLevel.Neighbor, 50); // 25/25
+            var run = NewWar(WarLevel.Neighbor, 100);
 
             int months = 0;
             while (run.war.isActive && months < 20)
             {
+                MaxOutMilitary(run); // simula o jogador mantendo o exército em dia
                 WarRules.ResolveMonthEnd(run, MinRng());
                 months++;
             }
@@ -383,56 +422,122 @@ namespace Mandato.Run.Tests
         // ---------------------------------------------------------------- Investimento
 
         [Test]
-        public void Invest_ConvertsEconomyToTechnologyAndPopularityToTroops_OneToOne_WithMonthlyCap()
+        public void Invest_RaisesOneLevel_AndSpendsFivePointsOfTheSourceStat()
         {
-            var run = NewWar(WarLevel.Neighbor, 50); // tech/troops 25
+            var run = NewWar(WarLevel.Neighbor, 50); // tech/troops iniciam em 50, econ/pop 50
 
-            var result = WarRules.Invest(run, 100, 100);
+            var tech = WarRules.Invest(run, WarAttribute.Technology);
+            var troops = WarRules.Invest(run, WarAttribute.Troops);
 
-            Assert.IsTrue(result.success);
-            Assert.AreEqual(5, result.economySpent);
-            Assert.AreEqual(5, result.popularitySpent);
+            Assert.IsTrue(tech.success);
+            Assert.AreEqual(5, tech.economySpent);
+            Assert.AreEqual(0, tech.popularitySpent);
+            Assert.IsTrue(troops.success);
+            Assert.AreEqual(5, troops.popularitySpent);
             Assert.AreEqual(45, run.stats.economy);
             Assert.AreEqual(45, run.stats.popularApproval);
-            Assert.AreEqual(30, run.war.technology);
-            Assert.AreEqual(30, run.war.troops);
+            Assert.AreEqual(75, run.war.technology);
+            Assert.AreEqual(75, run.war.troops);
+            Assert.AreEqual(1, WarRules.GetRemainingInvestmentClicks(run), "2 cliques consumidos, resta 1.");
         }
 
         [Test]
-        public void Invest_RespectsSafetyFloor_AndIndependentPerStatMonthlyCap()
+        public void Invest_StopsAtMaxLevel()
+        {
+            var run = NewWar(WarLevel.Neighbor, 50); // tech/troops iniciam em 50
+            run.war.technology = 75;
+
+            Assert.IsTrue(WarRules.Invest(run, WarAttribute.Technology).success); // 75 -> 100
+            Assert.AreEqual(100, run.war.technology);
+
+            Assert.IsFalse(WarRules.CanInvest(run, WarAttribute.Technology));
+            var capped = WarRules.Invest(run, WarAttribute.Technology);
+            Assert.IsFalse(capped.success);
+            Assert.AreEqual(100, run.war.technology);
+            Assert.AreEqual(45, run.stats.economy, "Nível máximo não gasta Economia.");
+        }
+
+        [Test]
+        public void Invest_RespectsSafetyFloor_AndThreeClicksMonthlyLimit()
         {
             var run = NewWar();
-            run.stats.economy = 13;
+            run.stats.economy = 15;
+            run.war.troops = 25; // espaço para investir em tropas
 
-            var first = WarRules.Invest(run, 5, 0);
+            var first = WarRules.Invest(run, WarAttribute.Technology);
             Assert.IsTrue(first.success);
-            Assert.AreEqual(3, first.economySpent, "Piso de segurança: Economia nunca cai abaixo de 10.");
+            Assert.AreEqual(10, run.stats.economy);
+            Assert.AreEqual(2, WarRules.GetRemainingInvestmentClicks(run));
+
+            Assert.IsFalse(WarRules.CanInvest(run, WarAttribute.Technology), "Economia no piso.");
+            Assert.IsFalse(WarRules.Invest(run, WarAttribute.Technology).success, "Economia já atingiu o piso.");
             Assert.AreEqual(10, run.stats.economy);
 
-            var secondEcon = WarRules.Invest(run, 5, 0);
-            Assert.IsFalse(secondEcon.success, "Economia já atingiu o piso.");
+            Assert.IsTrue(WarRules.Invest(run, WarAttribute.Troops).success, "Primeiro clique em Tropas consome o 2º clique do mês.");
+            Assert.AreEqual(1, WarRules.GetRemainingInvestmentClicks(run));
 
-            var firstPop = WarRules.Invest(run, 0, 5);
-            Assert.IsTrue(firstPop.success, "Popularidade pode ser investida independentemente no mesmo mês.");
-            Assert.AreEqual(5, firstPop.popularitySpent);
+            Assert.IsTrue(WarRules.Invest(run, WarAttribute.Troops).success, "Segundo clique em Tropas consome o 3º clique do mês.");
+            Assert.AreEqual(0, WarRules.GetRemainingInvestmentClicks(run));
 
-            var secondPop = WarRules.Invest(run, 0, 5);
-            Assert.IsFalse(secondPop.success, "Popularidade já atingiu o limite mensal de 5.");
+            Assert.IsFalse(WarRules.Invest(run, WarAttribute.Troops).success, "4º clique no mês é rejeitado pois o limite mensal é 3 cliques.");
 
+            run.war.troops = 25; // espaço para novo mês
             WarRules.ResolveMonthEnd(run, MinRng());
-            Assert.AreEqual(0, WarRules.GetMaxInvestment(run, StatId.Economy), "Economia já está no piso.");
-            Assert.IsTrue(WarRules.Invest(run, 0, 5).success, "Novo mês, novo investimento em Tropas.");
+            Assert.AreEqual(3, WarRules.GetRemainingInvestmentClicks(run), "Novo mês restaura 3 cliques.");
+            Assert.IsFalse(WarRules.CanInvest(run, WarAttribute.Technology), "Economia continua no piso.");
+            Assert.IsTrue(WarRules.Invest(run, WarAttribute.Troops).success, "Novo mês, novo investimento em Tropas.");
         }
 
         [Test]
-        public void Invest_ZeroOrNoWar_Fails()
+        public void Invest_AllowsThreeClicksPerMonthInAnyCombination_AndResetsNextMonth()
+        {
+            var run = NewWar(WarLevel.Neighbor, 50);
+            run.war.technology = 0;
+            run.war.troops = 0;
+            Assert.AreEqual(3, WarRules.GetRemainingInvestmentClicks(run));
+
+            // Mês 1: todos os 3 cliques em Tecnologia
+            Assert.IsTrue(WarRules.Invest(run, WarAttribute.Technology).success);
+            Assert.IsTrue(WarRules.Invest(run, WarAttribute.Technology).success);
+            Assert.IsTrue(WarRules.Invest(run, WarAttribute.Technology).success);
+            Assert.AreEqual(0, WarRules.GetRemainingInvestmentClicks(run));
+            Assert.AreEqual(75, run.war.technology); // 3 x 25
+            Assert.AreEqual(0, run.war.troops);
+            Assert.AreEqual(35, run.stats.economy); // 50 - 15
+            Assert.IsFalse(WarRules.Invest(run, WarAttribute.Technology).success, "4º clique em tecnologia rejeitado.");
+            Assert.IsFalse(WarRules.Invest(run, WarAttribute.Troops).success, "4º clique em tropas rejeitado.");
+
+            // Avança para Mês 2: reseta para 3 cliques (reseta tech para ter espaço)
+            run.war.technology = 0;
+            WarRules.ResolveMonthEnd(run, MinRng());
+            Assert.AreEqual(3, WarRules.GetRemainingInvestmentClicks(run));
+
+            // Mês 2: 2 cliques em Tecnologia e 1 clique em Tropas
+            Assert.IsTrue(WarRules.Invest(run, WarAttribute.Technology).success);
+            Assert.IsTrue(WarRules.Invest(run, WarAttribute.Technology).success);
+            Assert.IsTrue(WarRules.Invest(run, WarAttribute.Troops).success);
+            Assert.AreEqual(0, WarRules.GetRemainingInvestmentClicks(run));
+            Assert.IsFalse(WarRules.Invest(run, WarAttribute.Troops).success);
+
+            // Avança para Mês 3: reseta para 3 cliques (reseta tropas para ter espaço)
+            run.war.troops = 0;
+            WarRules.ResolveMonthEnd(run, MinRng());
+            Assert.AreEqual(3, WarRules.GetRemainingInvestmentClicks(run));
+
+            // Mês 3: todos os 3 cliques em Tropas
+            Assert.IsTrue(WarRules.Invest(run, WarAttribute.Troops).success);
+            Assert.IsTrue(WarRules.Invest(run, WarAttribute.Troops).success);
+            Assert.IsTrue(WarRules.Invest(run, WarAttribute.Troops).success);
+            Assert.AreEqual(0, WarRules.GetRemainingInvestmentClicks(run));
+            Assert.IsFalse(WarRules.Invest(run, WarAttribute.Troops).success);
+        }
+
+        [Test]
+        public void Invest_WithoutActiveWar_Fails()
         {
             var noWar = NewRun();
-            Assert.IsFalse(WarRules.Invest(noWar, 5, 5).success);
-
-            var run = NewWar();
-            Assert.IsFalse(WarRules.Invest(run, 0, 0).success);
-            Assert.IsFalse(WarRules.Invest(run, -5, -5).success);
+            Assert.IsFalse(WarRules.Invest(noWar, WarAttribute.Technology).success);
+            Assert.IsFalse(WarRules.CanInvest(noWar, WarAttribute.Troops));
         }
 
         [Test]
@@ -441,28 +546,33 @@ namespace Mandato.Run.Tests
             var run = NewWar();
             run.preventStatLossThisMonth = true;
 
-            WarRules.Invest(run, 5, 5);
+            WarRules.Invest(run, WarAttribute.Technology);
+            WarRules.Invest(run, WarAttribute.Troops);
 
             Assert.AreEqual(45, run.stats.economy);
             Assert.AreEqual(45, run.stats.popularApproval);
         }
 
         [Test]
-        public void Snapshot_ExposesBarAndInvestmentLimits_AndWarStats()
+        public void Snapshot_ExposesBarAndInvestmentState_AndWarStats()
         {
             var run = NewWar();
             var snap = run.GetSnapshot().War;
 
             Assert.IsTrue(snap.IsActive);
             Assert.AreEqual(50, snap.Progress);
-            Assert.AreEqual(25, snap.Technology);
-            Assert.AreEqual(25, snap.Troops);
+            Assert.AreEqual(50, snap.Technology);
+            Assert.AreEqual(50, snap.Troops);
+            Assert.AreEqual(2, snap.TechnologyLevel);
+            Assert.AreEqual(2, snap.TroopsLevel);
             Assert.AreEqual(WarLevel.Neighbor, snap.Level);
-            Assert.AreEqual(5, snap.MaxEconomyInvestment);
-            Assert.AreEqual(5, snap.MaxPopularityInvestment);
+            Assert.IsTrue(snap.CanInvestTechnology);
+            Assert.IsTrue(snap.CanInvestTroops);
+            Assert.AreEqual(5, snap.InvestmentCost);
+            Assert.AreEqual(3, snap.RemainingInvestmentClicks);
+            Assert.AreEqual(3, snap.MaxInvestmentClicks);
             Assert.IsFalse(snap.CanSurrender);
         }
-
         [Test]
         public void Snapshot_WithoutWar_IsInactive()
         {
@@ -512,7 +622,7 @@ namespace Mandato.Run.Tests
         // ---------------------------------------------------------------- Gatilhos
 
         [Test]
-        public void HostileCardChoice_DeclaresWar_UsingSovereigntyAfterTheChoiceImpacts()
+        public void HostileCardChoice_SchedulesWar_AndStartsWhenMonthAdvances()
         {
             var run = NewRun();
             var hostile = new ChoiceDefinition("Atacar", new StatBlock(0, -20, 0, 0, 0))
@@ -525,10 +635,16 @@ namespace Mandato.Run.Tests
             var report = DecisionResolver.Resolve(run, null, card, 0);
 
             Assert.AreEqual(WarLevel.Dominant, report.startedWarLevel);
+            Assert.AreEqual(WarLevel.Dominant, run.pendingWarLevel);
+            Assert.IsFalse(run.war.isActive, "Guerra não deve iniciar imediatamente com o NPC na sala.");
+
+            // Quando o mês avança (NPC deixa a sala):
+            run.AdvanceMonth();
+
             Assert.IsTrue(run.war.isActive);
             Assert.AreEqual("Nação Dominante", run.war.targetId);
-            Assert.AreEqual(15, run.war.technology); // (50 - 20) / 2
-            Assert.AreEqual(15, run.war.troops);
+            Assert.AreEqual(25, run.war.technology); // 50 - 20 = 30 -> 30 arredonda para 25
+            Assert.AreEqual(25, run.war.troops);
         }
 
         [Test]
@@ -665,19 +781,19 @@ namespace Mandato.Run.Tests
 
             Assert.IsTrue(b.Validate(out var errors), string.Join("; ", errors));
 
-            var n = b.GetLevel(WarLevel.Neighbor);
-            Assert.AreEqual((1, 3, 3, 9), (n.troopsDrainMin, n.troopsDrainMax, n.technologyDrainMin, n.technologyDrainMax));
-            var d = b.GetLevel(WarLevel.Dominant);
-            Assert.AreEqual((3, 5, 10, 15), (d.troopsDrainMin, d.troopsDrainMax, d.technologyDrainMin, d.technologyDrainMax));
-            var w = b.GetLevel(WarLevel.WorldDomination);
-            Assert.AreEqual((5, 10, 15, 20), (w.troopsDrainMin, w.troopsDrainMax, w.technologyDrainMin, w.technologyDrainMax));
+            Assert.AreEqual(0, b.GetLevel(WarLevel.Neighbor).enemyPressurePerMonth);
+            Assert.AreEqual(0, b.GetLevel(WarLevel.Dominant).enemyPressurePerMonth);
+            Assert.AreEqual(0, b.GetLevel(WarLevel.WorldDomination).enemyPressurePerMonth);
+            Assert.AreEqual(25, b.offensiveThreshold);
+            Assert.AreEqual(5, b.investmentPointsPerClick);
+            Assert.AreEqual(3, b.maxInvestmentClicksPerMonth);
         }
 
         [Test]
-        public void Balance_Validate_FlagsInvertedRangesAndMissingLevels()
+        public void Balance_Validate_FlagsMissingLevelsAndInvalidStartingProgress()
         {
             var b = WarBalance.CreateDefault();
-            b.GetLevel(WarLevel.Dominant).troopsDrainMin = 9;
+            b.startingProgress = 100;
             b.levels.RemoveAll(l => l.level == WarLevel.WorldDomination);
 
             Assert.IsFalse(b.Validate(out var errors));
@@ -694,6 +810,7 @@ namespace Mandato.Run.Tests
             run.stats.internationalRelations = 100;
 
             WarRules.StartWar(run, WarLevel.Neighbor);
+            MaxOutMilitary(run);
             WarRules.ResolveMonthEnd(run, MinRng());
 
             Assert.AreEqual(65, run.war.progress); // 40 + 25

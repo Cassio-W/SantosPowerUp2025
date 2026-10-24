@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.WarEventDefinition
   balance:
     startingProgress: 50
-    technologyDrainIntervalMonths: 3
     offensiveBonusPercent: 10
-    offensiveThreshold: 10
+    offensiveThreshold: 25
     maintenanceFailurePenalty: 8
     climateHitChance: 0.5
     climateHitAmount: 10
-    investmentCapPerStatPerMonth: 5
+    maxInvestmentClicksPerMonth: 3
+    investmentPointsPerClick: 5
     investmentStatFloor: 10
     surrenderProgressBelow: 30
     surrenderMinStat: 50
@@ -28,23 +28,11 @@ MonoBehaviour:
     levels:
     - level: 1
       displayName: "M\xE9dio"
-      troopsDrainMin: 1
-      troopsDrainMax: 3
-      technologyDrainMin: 3
-      technologyDrainMax: 9
       enemyPressurePerMonth: 0
     - level: 2
       displayName: "Dif\xEDcil"
-      troopsDrainMin: 3
-      troopsDrainMax: 5
-      technologyDrainMin: 10
-      technologyDrainMax: 15
       enemyPressurePerMonth: 2
     - level: 3
       displayName: "Imposs\xEDvel"
-      troopsDrainMin: 5
-      troopsDrainMax: 10
-      technologyDrainMin: 15
-      technologyDrainMax: 20
       enemyPressurePerMonth: 4
 

@@ -50,6 +50,10 @@ namespace Mandato.Run
         /// <summary>Estado do Evento de Guerra (inativo até ser declarado).</summary>
         public WarState war = new WarState();
 
+        /// <summary>Guerra agendada para iniciar assim que o mês virar (quando o NPC deixa a sala).</summary>
+        public WarLevel pendingWarLevel = WarLevel.None;
+        public string pendingWarTargetId = string.Empty;
+
         /// <summary>
         /// Balanceamento da guerra (configuração imutável injetada pelo bootstrap a partir do WarEventDefinition).
         /// Não é estado da partida: não é salvo e sobrevive ao Reset().
@@ -103,6 +107,8 @@ namespace Mandato.Run
             scheduledEventsByMonth.Clear();
             activeInvestments.Clear();
             war = new WarState();
+            pendingWarLevel = WarLevel.None;
+            pendingWarTargetId = string.Empty;
         }
 
         public void RecordMonthDecision(MonthDecisionRecord record)

@@ -26,6 +26,13 @@ namespace Mandato.Core
         Defeat = 3
     }
 
+    /// <summary>Atributo militar que pode receber investimento (Tecnologia ← Economia, Tropas ← Popularidade).</summary>
+    public enum WarAttribute
+    {
+        Technology = 0,
+        Troops = 1
+    }
+
     public static class WarLevelExtensions
     {
         public static string DisplayName(this WarLevel level)
@@ -53,22 +60,40 @@ namespace Mandato.Core
         /// <summary>Progresso do "cabo de guerra" em 0..100 (50 = equilíbrio; 0 = derrota; 100 = vitória).</summary>
         public int Progress { get; }
 
-        /// <summary>Nível atual de Tecnologia militar (0..100).</summary>
+        /// <summary>Tecnologia militar em pontos 0..100, sempre múltiplo de 25 (4 níveis: ver <see cref="TechnologyLevel"/>).</summary>
         public int Technology { get; }
 
-        /// <summary>Nível atual de Tropas (0..100).</summary>
+        /// <summary>Tropas em pontos 0..100, sempre múltiplo de 25 (4 níveis: ver <see cref="TroopsLevel"/>).</summary>
         public int Troops { get; }
+
+        /// <summary>Nível de Tecnologia de 0 (zerada) a 4 (máximo).</summary>
+        public int TechnologyLevel => Technology / WarSnapshot.LevelStep;
+
+        /// <summary>Nível de Tropas de 0 (zeradas) a 4 (máximo).</summary>
+        public int TroopsLevel => Troops / WarSnapshot.LevelStep;
 
         public bool CanSurrender { get; }
         public bool HasInvestedThisMonth { get; }
 
-        /// <summary>Máximo de Economia que o jogador ainda pode converter em Tecnologia neste mês.</summary>
-        public int MaxEconomyInvestment { get; }
+        /// <summary>Quantidade de cliques de investimento ainda disponíveis neste mês.</summary>
+        public int RemainingInvestmentClicks { get; }
 
-        /// <summary>Máximo de Popularidade que o jogador ainda pode converter em Tropas neste mês.</summary>
-        public int MaxPopularityInvestment { get; }
+        /// <summary>Total de cliques de investimento por mês.</summary>
+        public int MaxInvestmentClicks { get; }
+
+        /// <summary>Verdadeiro se um clique de investimento em Tecnologia seria aceito agora.</summary>
+        public bool CanInvestTechnology { get; }
+
+        /// <summary>Verdadeiro se um clique de investimento em Tropas seria aceito agora.</summary>
+        public bool CanInvestTroops { get; }
+
+        /// <summary>Pontos de Economia/Popularidade gastos por clique de investimento.</summary>
+        public int InvestmentCost { get; }
 
         public WarOutcome Outcome { get; }
+
+        /// <summary>Pontos de Tecnologia/Tropas que equivalem a 1 nível.</summary>
+        public const int LevelStep = 25;
 
         public WarSnapshot(
             bool isActive,
@@ -77,11 +102,14 @@ namespace Mandato.Core
             int progress,
             bool canSurrender,
             bool hasInvestedThisMonth,
-            int maxEconomyInvestment,
-            int maxPopularityInvestment,
+            bool canInvestTechnology,
+            bool canInvestTroops,
             WarOutcome outcome,
             int technology = 0,
-            int troops = 0)
+            int troops = 0,
+            int remainingInvestmentClicks = 0,
+            int maxInvestmentClicks = 3,
+            int investmentCost = 5)
         {
             IsActive = isActive;
             Level = level;
@@ -91,12 +119,15 @@ namespace Mandato.Core
             Troops = troops < 0 ? 0 : (troops > 100 ? 100 : troops);
             CanSurrender = canSurrender;
             HasInvestedThisMonth = hasInvestedThisMonth;
-            MaxEconomyInvestment = maxEconomyInvestment < 0 ? 0 : maxEconomyInvestment;
-            MaxPopularityInvestment = maxPopularityInvestment < 0 ? 0 : maxPopularityInvestment;
+            CanInvestTechnology = canInvestTechnology;
+            CanInvestTroops = canInvestTroops;
             Outcome = outcome;
+            RemainingInvestmentClicks = remainingInvestmentClicks < 0 ? 0 : remainingInvestmentClicks;
+            MaxInvestmentClicks = maxInvestmentClicks < 1 ? 1 : maxInvestmentClicks;
+            InvestmentCost = investmentCost < 0 ? 0 : investmentCost;
         }
 
-        public static WarSnapshot Inactive => new WarSnapshot(false, WarLevel.None, string.Empty, 50, false, false, 0, 0, WarOutcome.None, 0, 0);
+        public static WarSnapshot Inactive => new WarSnapshot(false, WarLevel.None, string.Empty, 50, false, false, false, false, WarOutcome.None, 0, 0, 0);
     }
 }
 

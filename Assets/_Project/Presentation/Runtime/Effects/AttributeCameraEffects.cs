@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Mandato.Core;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -10,11 +11,23 @@ namespace Mandato.Presentation
     /// Controla efeitos visuais de câmera e ambiente com base nos atributos do jogo.
     /// - Poluição (climaticChanges): Controla o peso do Volume de Poluição e o tom amarelado/smog do céu (CEU.mat: H=58, S=60%).
     /// - Corrupção (corruption): Controla o peso do Volume Retrô/Mórbido e o tom vermelho-sangue do céu (CEU.mat: H=0, S=100%).
+    /// - Guerra (Fogo): Quando em guerra e a barra cai abaixo de 50%, aumenta o peso do Volume "Fogo" até 1.0 em 0% (derrota)
+    ///   e ativa progressivamente as partículas "Fire" em ordem sempre aleatória.
     /// </summary>
     [UnityEngine.Scripting.APIUpdating.MovedFrom(true, null, "Assembly-CSharp", null)]
     public class AttributeCameraEffects : MonoBehaviour
     {
         public static AttributeCameraEffects Instance { get; private set; }
+
+        /// <summary>
+        /// Provedor opcional do StatBlock ativo para sincronização em tempo real de poluição e corrupção.
+        /// </summary>
+        public static Func<StatBlock> ActiveStatsProvider { get; set; }
+
+        /// <summary>
+        /// Provedor opcional do WarSnapshot ativo para sincronização em tempo real de efeitos bélicos (fogo).
+        /// </summary>
+        public static Func<WarSnapshot> ActiveWarProvider { get; set; }
 
         [Header("--- Poluição / Clima (Volume) ---")]
         [Tooltip("Volume de pós-processamento aplicado quando a poluição estiver alta (climaticChanges < 50%). Se vazio, busca automaticamente na cena.")]
@@ -32,6 +45,19 @@ namespace Mandato.Presentation
 
         [Tooltip("Valor de corrupção (0 a 100) no qual o filtro atinge o peso máximo (weight = 1.0).")]
         [Range(0, 100)] [SerializeField] private float corruptionMaxThreshold = 100f;
+
+        [Header("--- Guerra: Fogo (Volume & Partículas) ---")]
+        [Tooltip("Volume de pós-processamento 'Fogo' que aumenta quando a barra de guerra cai abaixo de 50% até o máximo em 0% (derrota).")]
+        [SerializeField] private Volume fireVolume;
+
+        [Tooltip("Limite da barra de guerra (0 a 100) abaixo do qual o volume 'Fogo' e as partículas 'Fire' começam a ser ativados.")]
+        [Range(1f, 100f)] [SerializeField] private float warFireStartThreshold = 50f;
+
+        [Tooltip("Objeto pai ('Fogo') que contém as partículas 'Fire' na cena.")]
+        [SerializeField] private GameObject fireParticlesContainer;
+
+        [Tooltip("Lista de objetos de partículas 'Fire' ativados em ordem aleatória conforme a barra de guerra cai abaixo de 50%.")]
+        [SerializeField] private List<GameObject> fireParticleObjects = new List<GameObject>();
 
         [Header("--- Céu / Skybox (CEU.mat) ---")]
         [Tooltip("Material do céu (CEU.mat). Se deixado vazio, utiliza o RenderSettings.skybox.")]
@@ -71,10 +97,18 @@ namespace Mandato.Presentation
 
         private float _currentClimate = 50f;
         private float _currentCorruption = 0f;
+        private bool _isWarFireActive = false;
+        private float _currentWarProgress = 50f;
+
+        private readonly List<GameObject> _activeFireOrder = new List<GameObject>();
 
         private Coroutine _pollutionRoutine;
         private Coroutine _corruptionRoutine;
+        private Coroutine _fireRoutine;
         private Coroutine _skyRoutine;
+
+        public IReadOnlyList<GameObject> ActiveFireOrder => _activeFireOrder;
+        public float FireVolumeWeight => fireVolume != null ? fireVolume.weight : 0f;
 
         private void Awake()
         {
@@ -88,7 +122,9 @@ namespace Mandato.Presentation
             }
             Instance = this;
 
+            EnsureWarFireReferences();
             SetupSkyMaterial();
+            UpdateWarFireEffect(false, warFireStartThreshold, instant: true);
         }
 
         private void OnDisable()
@@ -102,11 +138,49 @@ namespace Mandato.Presentation
             RestoreOriginalSkyColor();
         }
 
+        private void Update()
+        {
+            if (!Application.isPlaying) return;
+
+            if (ActiveStatsProvider != null)
+            {
+                var stats = ActiveStatsProvider.Invoke();
+                if (stats != null)
+                {
+                    if (Mathf.Abs(stats.climaticChanges - _currentClimate) > 0.01f ||
+                        Mathf.Abs(stats.corruption - _currentCorruption) > 0.01f)
+                    {
+                        ApplyAttributeEffects(stats, instant: false);
+                    }
+                }
+            }
+
+            if (ActiveWarProvider != null)
+            {
+                var war = ActiveWarProvider.Invoke();
+                if (war != null)
+                {
+                    bool activeOrDefeated = war.IsActive || war.Outcome == WarOutcome.Defeat;
+                    float progress = war.Outcome == WarOutcome.Defeat ? 0f : war.Progress;
+                    if (_isWarFireActive != activeOrDefeated || Mathf.Abs(_currentWarProgress - progress) > 0.01f)
+                    {
+                        ApplyWarEffects(war, instant: false);
+                    }
+                }
+                else if (_isWarFireActive)
+                {
+                    ApplyWarEffects(null, instant: false);
+                }
+            }
+        }
+
         private void OnDestroy()
         {
             if (Instance == this)
             {
                 Instance = null;
+                ActiveStatsProvider = null;
+                ActiveWarProvider = null;
             }
         }
 
@@ -130,6 +204,46 @@ namespace Mandato.Presentation
             UpdatePollutionVolume(_currentClimate, instant);
             UpdateCorruptionVolume(_currentCorruption, instant);
             UpdateSkyEffect(instant);
+        }
+
+        /// <summary>
+        /// Aplica os efeitos visuais de fogo (Volume "Fogo" e partículas "Fire") com base no estado da guerra.
+        /// Acima ou igual a 50% (ou fora de guerra), o peso do volume é 0 e nenhuma partícula fica ativa.
+        /// Abaixo de 50%, o volume aumenta até 1.0 em 0% (derrota) e as partículas "Fire" vão ligando em ordem aleatória.
+        /// </summary>
+        public void ApplyWarEffects(WarSnapshot war, bool instant = false)
+        {
+            if (war == null)
+            {
+                UpdateWarFireEffect(false, warFireStartThreshold, instant);
+                return;
+            }
+
+            bool activeOrDefeated = war.IsActive || war.Outcome == WarOutcome.Defeat;
+            float progress = war.Outcome == WarOutcome.Defeat ? 0f : war.Progress;
+            UpdateWarFireEffect(activeOrDefeated, progress, instant);
+        }
+
+        /// <summary>
+        /// Atualiza diretamente o Volume "Fogo" e a ativação aleatória das partículas "Fire".
+        /// </summary>
+        public void UpdateWarFireEffect(bool isWarActive, float warProgress, bool instant = false)
+        {
+            EnsureWarFireReferences();
+
+            _isWarFireActive = isWarActive;
+            _currentWarProgress = Mathf.Clamp(warProgress, 0f, 100f);
+
+            float threshold = Mathf.Max(1f, warFireStartThreshold);
+            float fireFactor = 0f;
+
+            if (isWarActive && _currentWarProgress < threshold)
+            {
+                fireFactor = Mathf.Clamp01((threshold - _currentWarProgress) / threshold);
+            }
+
+            UpdateFireVolume(fireFactor, instant);
+            UpdateFireParticles(isWarActive && _currentWarProgress < threshold, fireFactor, _currentWarProgress <= 0.001f);
         }
 
         /// <summary>
@@ -206,6 +320,201 @@ namespace Mandato.Presentation
             else
             {
                 _corruptionRoutine = StartCoroutine(AnimateVolumeWeight(corruptionVolume, targetWeight));
+            }
+        }
+
+        private void UpdateFireVolume(float fireFactor, bool instant)
+        {
+            if (fireVolume == null) return;
+
+            float targetWeight = Mathf.Clamp01(fireFactor);
+
+            if (_fireRoutine != null)
+            {
+                StopCoroutine(_fireRoutine);
+                _fireRoutine = null;
+            }
+
+            if (instant || !gameObject.activeInHierarchy)
+            {
+                fireVolume.weight = targetWeight;
+            }
+            else
+            {
+                _fireRoutine = StartCoroutine(AnimateVolumeWeight(fireVolume, targetWeight));
+            }
+        }
+
+        private void UpdateFireParticles(bool shouldActivateAny, float fireFactor, bool forceAll)
+        {
+            if (fireParticleObjects == null || fireParticleObjects.Count == 0)
+            {
+                if (fireParticlesContainer != null && !shouldActivateAny)
+                {
+                    fireParticlesContainer.SetActive(false);
+                }
+                return;
+            }
+
+            if (!shouldActivateAny || fireFactor <= 0f)
+            {
+                _activeFireOrder.Clear();
+
+                for (int i = 0; i < fireParticleObjects.Count; i++)
+                {
+                    if (fireParticleObjects[i] != null && fireParticleObjects[i].activeSelf)
+                    {
+                        fireParticleObjects[i].SetActive(false);
+                    }
+                }
+
+                if (fireParticlesContainer != null && fireParticlesContainer.activeSelf)
+                {
+                    fireParticlesContainer.SetActive(false);
+                }
+                return;
+            }
+
+            if (fireParticlesContainer != null && !fireParticlesContainer.activeSelf)
+            {
+                fireParticlesContainer.SetActive(true);
+            }
+
+            // Remove referências nulas caso algum objeto tenha sido destruído
+            for (int i = _activeFireOrder.Count - 1; i >= 0; i--)
+            {
+                if (_activeFireOrder[i] == null || !fireParticleObjects.Contains(_activeFireOrder[i]))
+                {
+                    _activeFireOrder.RemoveAt(i);
+                }
+            }
+
+            int total = fireParticleObjects.Count;
+            int targetCount = forceAll
+                ? total
+                : Mathf.Clamp(Mathf.CeilToInt(Mathf.Clamp01(fireFactor) * total), 1, total);
+
+            // Sorteia novas partículas "Fire" em ordem sempre aleatória até atingir targetCount
+            if (_activeFireOrder.Count < targetCount)
+            {
+                List<GameObject> availableCandidates = new List<GameObject>(total);
+                for (int i = 0; i < total; i++)
+                {
+                    GameObject candidate = fireParticleObjects[i];
+                    if (candidate != null && !_activeFireOrder.Contains(candidate))
+                    {
+                        availableCandidates.Add(candidate);
+                    }
+                }
+
+                while (_activeFireOrder.Count < targetCount && availableCandidates.Count > 0)
+                {
+                    int randomIndex = UnityEngine.Random.Range(0, availableCandidates.Count);
+                    GameObject chosen = availableCandidates[randomIndex];
+                    availableCandidates.RemoveAt(randomIndex);
+                    _activeFireOrder.Add(chosen);
+                }
+            }
+            else if (_activeFireOrder.Count > targetCount)
+            {
+                while (_activeFireOrder.Count > targetCount)
+                {
+                    _activeFireOrder.RemoveAt(_activeFireOrder.Count - 1);
+                }
+            }
+
+            // Sincroniza o estado ativo de cada partícula
+            for (int i = 0; i < total; i++)
+            {
+                GameObject particleObj = fireParticleObjects[i];
+                if (particleObj == null) continue;
+
+                bool shouldBeActive = _activeFireOrder.Contains(particleObj);
+                if (particleObj.activeSelf != shouldBeActive)
+                {
+                    particleObj.SetActive(shouldBeActive);
+                }
+
+                if (shouldBeActive)
+                {
+                    ParticleSystem ps = particleObj.GetComponent<ParticleSystem>();
+                    if (ps != null && !ps.isPlaying)
+                    {
+                        ps.Play(true);
+                    }
+                }
+            }
+        }
+
+        private void EnsureWarFireReferences()
+        {
+            if (fireVolume == null)
+            {
+                Transform childFogo = transform.Find("Fogo");
+                if (childFogo != null)
+                {
+                    fireVolume = childFogo.GetComponent<Volume>();
+                }
+
+                if (fireVolume == null)
+                {
+                    Volume[] volumes = FindObjectsByType<Volume>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+                    for (int i = 0; i < volumes.Length; i++)
+                    {
+                        if (volumes[i] != null && string.Equals(volumes[i].gameObject.name, "Fogo", StringComparison.OrdinalIgnoreCase))
+                        {
+                            fireVolume = volumes[i];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (fireParticleObjects != null)
+            {
+                for (int i = fireParticleObjects.Count - 1; i >= 0; i--)
+                {
+                    if (fireParticleObjects[i] == null)
+                    {
+                        fireParticleObjects.RemoveAt(i);
+                    }
+                }
+            }
+            else
+            {
+                fireParticleObjects = new List<GameObject>();
+            }
+
+            if (fireParticlesContainer == null && gameObject.scene.IsValid())
+            {
+                GameObject[] roots = gameObject.scene.GetRootGameObjects();
+                for (int i = 0; i < roots.Length; i++)
+                {
+                    GameObject root = roots[i];
+                    if (root != null
+                        && (fireVolume == null || root != fireVolume.gameObject)
+                        && string.Equals(root.name, "Fogo", StringComparison.OrdinalIgnoreCase))
+                    {
+                        fireParticlesContainer = root;
+                        break;
+                    }
+                }
+            }
+
+            if (fireParticleObjects.Count == 0 && fireParticlesContainer != null)
+            {
+                Transform containerTransform = fireParticlesContainer.transform;
+                for (int i = 0; i < containerTransform.childCount; i++)
+                {
+                    Transform child = containerTransform.GetChild(i);
+                    if (child == null) continue;
+
+                    if (child.name.StartsWith("Fire", StringComparison.OrdinalIgnoreCase)
+                        || child.GetComponent<ParticleSystem>() != null)
+                    {
+                        fireParticleObjects.Add(child.gameObject);
+                    }
+                }
             }
         }
 
@@ -380,6 +689,11 @@ namespace Mandato.Presentation
                 StopCoroutine(_corruptionRoutine);
                 _corruptionRoutine = null;
             }
+            if (_fireRoutine != null)
+            {
+                StopCoroutine(_fireRoutine);
+                _fireRoutine = null;
+            }
             if (_skyRoutine != null)
             {
                 StopCoroutine(_skyRoutine);
@@ -420,6 +734,15 @@ namespace Mandato.Presentation
 
         [ContextMenu("Test: Corrupção 100% (Corrupção Máxima / Efeito 1.0)")]
         private void TestCorruptionMax() => UpdateCorruptionEffect(100f);
+
+        [ContextMenu("Test: Guerra Fogo >= 50% (Sem Fogo / Efeito 0)")]
+        private void TestWarFireSafe() => UpdateWarFireEffect(true, 50f);
+
+        [ContextMenu("Test: Guerra Fogo 25% (Metade das Partículas / Efeito 0.5)")]
+        private void TestWarFireHalf() => UpdateWarFireEffect(true, 25f);
+
+        [ContextMenu("Test: Guerra Fogo 0% Derrota (Todas as Partículas / Efeito 1.0)")]
+        private void TestWarFireDefeat() => UpdateWarFireEffect(true, 0f);
 
         [ContextMenu("Test: Caos Total (Poluição Máxima + Corrupção Máxima)")]
         private void TestTotalChaos()

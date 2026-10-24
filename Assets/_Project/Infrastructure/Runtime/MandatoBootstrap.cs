@@ -180,7 +180,12 @@ namespace Mandato.Infrastructure
 
         private void Start()
         {
+            AttributeCameraEffects.ActiveStatsProvider = () => StateMachine?.RunState?.stats;
+            AttributeCameraEffects.ActiveWarProvider = () => StateMachine?.RunState?.GetSnapshot()?.War;
+
+            var initialSnapshot = StateMachine?.RunState?.GetSnapshot();
             presentationBindings?.CameraEffects?.ApplyAttributeEffects(StateMachine?.RunState?.stats, instant: true);
+            presentationBindings?.CameraEffects?.ApplyWarEffects(initialSnapshot?.War, instant: true);
             flowCoordinator?.StartFlow();
 
             if (enableDebugOverlay)
@@ -189,6 +194,12 @@ namespace Mandato.Infrastructure
                 overlay.IsVisible = startDebugOverlayOpen;
                 overlay.Initialize(StateMachine, Catalog, flowCoordinator, toggleDebugOverlayKey);
             }
+        }
+
+        private void OnDestroy()
+        {
+            AttributeCameraEffects.ActiveStatsProvider = null;
+            AttributeCameraEffects.ActiveWarProvider = null;
         }
 
         private void Update()

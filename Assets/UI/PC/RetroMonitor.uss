@@ -48,10 +48,10 @@ Label {
     border-left-width: 2px;
     border-right-width: 2px;
     border-bottom-width: 2px;
-    border-top-color: #2b4c6b;
-    border-left-color: #2b4c6b;
-    border-right-color: #04080d;
-    border-bottom-color: #04080d;
+    border-top-color: #3b658d;
+    border-left-color: #3b658d;
+    border-right-color: #102436;
+    border-bottom-color: #102436;
     border-radius: 0;
 
     padding: 0 14px;
@@ -93,14 +93,14 @@ Label {
 .situation-box {
     background-color: #050d14;
     padding: 3px 12px;
-    border-top-width: 1px;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-top-color: #02060a;
-    border-left-color: #02060a;
-    border-right-color: #1a3a54;
-    border-bottom-color: #1a3a54;
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #133924;
+    border-left-color: #133924;
+    border-right-color: #22c55e;
+    border-bottom-color: #22c55e;
     border-radius: 0;
 }
 
@@ -121,14 +121,14 @@ Label {
     color: #99f6e4;
     background-color: #050e17;
 
-    border-top-width: 1px;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-top-color: #02060b;
-    border-left-color: #02060b;
-    border-right-color: #0284c7;
-    border-bottom-color: #0284c7;
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #0d3852;
+    border-left-color: #0d3852;
+    border-right-color: #38bdf8;
+    border-bottom-color: #38bdf8;
     border-radius: 0;
 
     padding: 3px 14px;
@@ -239,10 +239,10 @@ Label {
     border-left-width: 2px;
     border-right-width: 2px;
     border-bottom-width: 2px;
-    border-top-color: #010408;
-    border-left-color: #010408;
-    border-right-color: #1e364e;
-    border-bottom-color: #1e364e;
+    border-top-color: #102436;
+    border-left-color: #102436;
+    border-right-color: #2f567c;
+    border-bottom-color: #2f567c;
     border-radius: 0;
 
     padding: 8px 22px;
@@ -254,47 +254,55 @@ Label {
 .card-nature {
     border-top-color: #4ade80;
     border-left-color: #4ade80;
-    border-right-color: #0f4024;
-    border-bottom-color: #0f4024;
+    border-right-color: #166534;
+    border-bottom-color: #166534;
 }
 .card-nature .giant-value {
     color: #4ade80;
-    border-right-color: #22c55e;
-    border-bottom-color: #22c55e;
+    border-top-color: #14532d;
+    border-left-color: #14532d;
+    border-right-color: #4ade80;
+    border-bottom-color: #4ade80;
 }
 
 .card-economy {
     border-top-color: #facc15;
     border-left-color: #facc15;
-    border-right-color: #52400a;
-    border-bottom-color: #52400a;
+    border-right-color: #854d0e;
+    border-bottom-color: #854d0e;
 }
 .card-economy .giant-value {
     color: #facc15;
-    border-right-color: #eab308;
-    border-bottom-color: #eab308;
+    border-top-color: #713f12;
+    border-left-color: #713f12;
+    border-right-color: #facc15;
+    border-bottom-color: #facc15;
 }
 
 .card-relations {
     border-top-color: #7dd3fc;
     border-left-color: #7dd3fc;
-    border-right-color: #0c3954;
-    border-bottom-color: #0c3954;
+    border-right-color: #0369a1;
+    border-bottom-color: #0369a1;
 }
 .card-relations .giant-value {
     color: #7dd3fc;
-    border-right-color: #38bdf8;
-    border-bottom-color: #38bdf8;
+    border-top-color: #075985;
+    border-left-color: #075985;
+    border-right-color: #7dd3fc;
+    border-bottom-color: #7dd3fc;
 }
 
 .card-people {
     border-top-color: #f472b6;
     border-left-color: #f472b6;
-    border-right-color: #52183c;
-    border-bottom-color: #52183c;
+    border-right-color: #9d174d;
+    border-bottom-color: #9d174d;
 }
 .card-people .giant-value {
     color: #f472b6;
+    border-top-color: #831843;
+    border-left-color: #831843;
     border-right-color: #f472b6;
     border-bottom-color: #f472b6;
 }
@@ -314,8 +322,8 @@ Label {
     border-bottom-width: 2px;
     border-top-color: #ff3344;
     border-left-color: #ff3344;
-    border-right-color: #4a080f;
-    border-bottom-color: #4a080f;
+    border-right-color: #881337;
+    border-bottom-color: #881337;
     border-radius: 0;
 
     overflow: hidden;
@@ -350,10 +358,10 @@ Label {
     border-left-width: 2px;
     border-right-width: 2px;
     border-bottom-width: 2px;
-    border-top-color: #040102;
-    border-left-color: #040102;
-    border-right-color: #ef4444;
-    border-bottom-color: #ef4444;
+    border-top-color: #881337;
+    border-left-color: #881337;
+    border-right-color: #ff4d5e;
+    border-bottom-color: #ff4d5e;
     border-radius: 0;
 
     padding: 6px 18px;
@@ -393,8 +401,8 @@ Label {
     border-bottom-width: 2px;
     border-top-color: #3b5670;
     border-left-color: #3b5670;
-    border-right-color: #020508;
-    border-bottom-color: #020508;
+    border-right-color: #102436;
+    border-bottom-color: #102436;
     border-radius: 0;
 
     justify-content: center;
@@ -502,14 +510,14 @@ Label {
     min-height: 28px;
 
     /* Inset Terminal Bevel */
-    border-top-width: 1px;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-top-color: #03070b;
-    border-left-color: #03070b;
-    border-right-color: #1e364e;
-    border-bottom-color: #1e364e;
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #102436;
+    border-left-color: #102436;
+    border-right-color: #2f567c;
+    border-bottom-color: #2f567c;
     border-radius: 0;
 
     padding: 0 12px;
@@ -584,33 +592,94 @@ Label {
 .giant-card.hovered {
     border-top-color: #ffffff;
     border-left-color: #ffffff;
-    border-right-color: #3b5670;
-    border-bottom-color: #3b5670;
+    border-right-color: #386087;
+    border-bottom-color: #386087;
     background-color: #0f1e2c;
 }
 
 .giant-card.hovered .giant-value {
     background-color: #050f18;
-    border-top-color: #0a1622;
-    border-left-color: #0a1622;
+    border-top-color: #102436;
+    border-left-color: #102436;
     border-right-color: #ffffff;
     border-bottom-color: #ffffff;
 }
 
+/* Hover específico para cada setor com 4 bordas nítidas */
+.card-nature.hovered {
+    border-top-color: #86efac;
+    border-left-color: #86efac;
+    border-right-color: #15803d;
+    border-bottom-color: #15803d;
+    background-color: #0a1f13;
+}
+.card-nature.hovered .giant-value {
+    background-color: #04120a;
+    border-top-color: #166534;
+    border-left-color: #166534;
+    border-right-color: #86efac;
+    border-bottom-color: #86efac;
+}
+
+.card-economy.hovered {
+    border-top-color: #fef08a;
+    border-left-color: #fef08a;
+    border-right-color: #a16207;
+    border-bottom-color: #a16207;
+    background-color: #211603;
+}
+.card-economy.hovered .giant-value {
+    background-color: #120c02;
+    border-top-color: #854d0e;
+    border-left-color: #854d0e;
+    border-right-color: #fef08a;
+    border-bottom-color: #fef08a;
+}
+
+.card-relations.hovered {
+    border-top-color: #bae6fd;
+    border-left-color: #bae6fd;
+    border-right-color: #0284c7;
+    border-bottom-color: #0284c7;
+    background-color: #061826;
+}
+.card-relations.hovered .giant-value {
+    background-color: #030d17;
+    border-top-color: #0369a1;
+    border-left-color: #0369a1;
+    border-right-color: #bae6fd;
+    border-bottom-color: #bae6fd;
+}
+
+.card-people.hovered {
+    border-top-color: #fbcfe8;
+    border-left-color: #fbcfe8;
+    border-right-color: #be185d;
+    border-bottom-color: #be185d;
+    background-color: #240716;
+}
+.card-people.hovered .giant-value {
+    background-color: #12030c;
+    border-top-color: #9d174d;
+    border-left-color: #9d174d;
+    border-right-color: #fbcfe8;
+    border-bottom-color: #fbcfe8;
+}
+
 .giant-corruption-pillar.hovered {
-    border-top-color: #ffffff;
-    border-left-color: #ffffff;
-    border-right-color: #7f1d1d;
-    border-bottom-color: #7f1d1d;
+    border-top-color: #fda4af;
+    border-left-color: #fda4af;
+    border-right-color: #9f1239;
+    border-bottom-color: #9f1239;
     background-color: #2b080c;
 }
 
 .giant-corruption-pillar.hovered .giant-corruption-value {
     background-color: #120306;
-    border-top-color: #1a0609;
-    border-left-color: #1a0609;
-    border-right-color: #ffffff;
-    border-bottom-color: #ffffff;
+    border-top-color: #881337;
+    border-left-color: #881337;
+    border-right-color: #fda4af;
+    border-bottom-color: #fda4af;
 }
 
 /* ============================================================
@@ -641,10 +710,10 @@ Button {
     border-left-width: 2px;
     border-right-width: 2px;
     border-bottom-width: 2px;
-    border-top-color: #1e364e;
-    border-left-color: #1e364e;
-    border-right-color: #020508;
-    border-bottom-color: #020508;
+    border-top-color: #386087;
+    border-left-color: #386087;
+    border-right-color: #102436;
+    border-bottom-color: #102436;
     border-radius: 0;
 }
 
@@ -666,11 +735,12 @@ Button {
     border-bottom-color: #7f1d1d;
 }
 
-.pc-tab-btn.hovered,
-.pc-tab-btn:hover {
+.pc-tab-btn.hovered {
     color: #ffffff;
     border-top-color: #ffffff;
     border-left-color: #ffffff;
+    border-right-color: #38bdf8;
+    border-bottom-color: #38bdf8;
 }
 
 /* ============================================================
@@ -679,16 +749,18 @@ Button {
 .war-workspace {
     flex-direction: column;
     flex-grow: 1;
-    justify-content: space-between;
+    justify-content: flex-start;
     overflow: visible;
 }
 
+/* ---------- BARRA GERAL ---------- */
 .war-general-panel {
     width: 100%;
-    height: 78px;
-    min-height: 78px;
-    background-color: #09131c;
-    padding: 6px 12px;
+    height: 96px;
+    min-height: 96px;
+    max-height: 96px;
+    background-color: #081119;
+    padding: 4px 12px;
     margin-bottom: 8px;
     flex-shrink: 0;
     justify-content: space-between;
@@ -697,76 +769,117 @@ Button {
     border-left-width: 2px;
     border-right-width: 2px;
     border-bottom-width: 2px;
-    border-top-color: #ff3344;
-    border-left-color: #ff3344;
-    border-right-color: #4a080f;
-    border-bottom-color: #4a080f;
+    border-top-color: #386087;
+    border-left-color: #386087;
+    border-right-color: #102436;
+    border-bottom-color: #102436;
     border-radius: 0;
 }
 
-.war-general-header {
+.war-hero-readout-row {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
+    height: 42px;
+    padding: 0 8px;
 }
 
-.war-general-right-box {
+.war-side-box {
     flex-direction: row;
     align-items: center;
 }
 
-.war-pc-title {
-    font-size: 14px;
-    color: #facc15;
-    letter-spacing: 1px;
+.war-side-player {
+    justify-content: flex-start;
+}
+
+.war-side-enemy {
+    justify-content: flex-end;
+}
+
+.war-side-label {
+    font-size: 16px;
+    letter-spacing: 2px;
     -unity-font-style: bold;
 }
 
-.war-pc-percent {
-    font-size: 14px;
-    color: #ffffff;
+.war-label-player {
+    color: #4ade80;
+    margin-right: 10px;
+}
+
+.war-label-enemy {
+    color: #f87171;
+    margin-left: 10px;
+}
+
+.war-giant-percent {
+    font-size: 38px;
+    -unity-font-style: bold;
     letter-spacing: 1px;
+}
+
+.war-percent-player {
+    color: #4ade80;
+}
+
+.war-percent-enemy {
+    color: #ef4444;
+}
+
+.war-center-status-box {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.war-vs-badge {
+    font-size: 18px;
+    color: #facc15;
+    letter-spacing: 2px;
     -unity-font-style: bold;
 }
 
 .war-surrender-pc-btn {
     height: 22px;
-    padding: 0 10px;
-    margin-right: 10px;
+    padding: 0 8px;
+    margin: 0 0 0 10px;
     font-size: 11px;
     -unity-font-style: bold;
     background-color: #3b0a11;
     color: #fca5a5;
     border-width: 2px;
-    border-top-color: #ff3344;
-    border-left-color: #ff3344;
-    border-right-color: #4a080f;
-    border-bottom-color: #4a080f;
+    border-top-color: #ff4d5e;
+    border-left-color: #ff4d5e;
+    border-right-color: #881337;
+    border-bottom-color: #881337;
     border-radius: 0;
 }
 
-.war-surrender-pc-btn.hovered,
-.war-surrender-pc-btn:hover {
+.war-surrender-pc-btn.hovered {
     background-color: #5c101b;
     color: #ffffff;
     border-top-color: #ffffff;
     border-left-color: #ffffff;
+    border-right-color: #ff4d5e;
+    border-bottom-color: #ff4d5e;
 }
 
 .war-pc-bar-track {
     flex-direction: row;
     width: 100%;
     height: 32px;
-    background-color: #03080e;
+    background-color: #020508;
 
     border-top-width: 2px;
     border-left-width: 2px;
     border-right-width: 2px;
     border-bottom-width: 2px;
-    border-top-color: #010408;
-    border-left-color: #010408;
-    border-right-color: #1e364e;
-    border-bottom-color: #1e364e;
+    border-top-color: #102436;
+    border-left-color: #102436;
+    border-right-color: #2f567c;
+    border-bottom-color: #2f567c;
     border-radius: 0;
 }
 
@@ -778,7 +891,7 @@ Button {
 }
 
 .war-pc-bar-divider {
-    width: 3px;
+    width: 6px;
     height: 100%;
     flex-shrink: 0;
     background-color: #ffffff;
@@ -792,147 +905,134 @@ Button {
     background-color: #dc2626;
 }
 
-/* ============================================================
-   CARDS DE TECNOLOGIA & TROPAS NA ABA DE GUERRA
-   ============================================================ */
-.war-cards-row {
+/* ---------- AREA INFERIOR ---------- */
+.war-lower-area {
     flex-direction: row;
-    width: 100%;
     flex-grow: 1;
-    justify-content: space-between;
-    overflow: visible;
-}
-
-.card-war-tech {
-    border-top-color: #38bdf8;
-    border-left-color: #38bdf8;
-    border-right-color: #0c3954;
-    border-bottom-color: #0c3954;
-    overflow: visible;
-}
-
-.card-war-tech .giant-value {
-    color: #7dd3fc;
-    border-right-color: #38bdf8;
-    border-bottom-color: #38bdf8;
-}
-
-.fill-tech-bg {
-    background-color: rgba(56, 189, 248, 0.42);
-    border-top-width: 4px;
-    border-top-color: #7dd3fc;
-}
-
-.ghost-tech {
-    background-color: rgba(56, 189, 248, 0.22);
-    border-top-width: 3px;
-    border-top-color: rgba(125, 211, 252, 0.65);
-}
-
-.card-war-troops {
-    border-top-color: #4ade80;
-    border-left-color: #4ade80;
-    border-right-color: #0f4024;
-    border-bottom-color: #0f4024;
-    overflow: visible;
-}
-
-.card-war-troops .giant-value {
-    color: #4ade80;
-    border-right-color: #22c55e;
-    border-bottom-color: #22c55e;
-}
-
-.fill-troops-bg {
-    background-color: rgba(34, 197, 94, 0.42);
-    border-top-width: 4px;
-    border-top-color: #4ade80;
-}
-
-.ghost-troops {
-    background-color: rgba(34, 197, 94, 0.22);
-    border-top-width: 3px;
-    border-top-color: rgba(74, 222, 128, 0.65);
-}
-
-.war-card-foreground {
     width: 100%;
-    height: 100%;
+    overflow: visible;
+}
+
+.war-attributes-column {
     flex-direction: column;
+    flex-grow: 1;
     justify-content: space-between;
-    padding: 10px 14px;
+    margin-bottom: -8px;
+    overflow: visible;
 }
 
-.war-card-top-info {
+.war-attr-row {
     flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-}
-
-.war-card-title-tech {
-    font-size: 20px;
-    color: #7dd3fc;
-    letter-spacing: 1px;
-    -unity-font-style: bold;
-}
-
-.war-card-title-troops {
-    font-size: 20px;
-    color: #4ade80;
-    letter-spacing: 1px;
-    -unity-font-style: bold;
-}
-
-.war-card-subtitle {
-    font-size: 11px;
-    color: #94a3b8;
-    letter-spacing: 1px;
-    background-color: rgba(3, 8, 14, 0.85);
-    padding: 2px 6px;
-}
-
-.war-card-center-readout {
-    flex-direction: row;
-    justify-content: center;
     align-items: center;
     flex-grow: 1;
+    flex-basis: 0;
+    margin-bottom: 8px;
+    overflow: visible;
 }
 
-.war-giant-value {
-    font-size: 34px;
-    padding: 4px 16px;
-}
-
-.war-card-bottom-bar {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    background-color: rgba(3, 8, 14, 0.9);
-    padding: 4px 10px;
+/* Icone ao lado esquerdo da barra (placeholder: icones de Economia e Povo) */
+.war-attr-icon {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    margin-right: 12px;
+    background-color: #060d14;
+    -unity-background-scale-mode: scale-to-fit;
 
     border-top-width: 2px;
     border-left-width: 2px;
     border-right-width: 2px;
     border-bottom-width: 2px;
-    border-top-color: #010408;
-    border-left-color: #010408;
-    border-right-color: #1e364e;
-    border-bottom-color: #1e364e;
+    border-top-color: #102436;
+    border-left-color: #102436;
+    border-right-color: #2f567c;
+    border-bottom-color: #2f567c;
     border-radius: 0;
 }
 
-.war-invest-caption {
-    font-size: 14px;
-    color: #e2e8f0;
-    letter-spacing: 1px;
+.war-icon-tech {
+    background-image: url('project://database/Assets/Sprites/moneynew.png?fileID=21300000&guid=1ff9b9ecfbad1924eb51f51a6f3863ec&type=3#moneynew');
+}
+
+.war-icon-troops {
+    background-image: url('project://database/Assets/Sprites/peopleSlider.png?fileID=1537655665&guid=f498b99f7dc683646b439a837578e287&type=3#peopleSlider');
+}
+
+/* Barra fina horizontal de 4 niveis: critico (vermelho), baixo (laranja), medio (amarelo), alto (verde) */
+.war-level-bar {
+    flex-direction: row;
+    flex-grow: 1;
+    height: 40px;
+}
+
+.war-level-seg {
+    flex-grow: 1;
+    flex-basis: 0;
+    height: 100%;
+    margin-right: 5px;
+    background-color: #050d17;
+
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #102436;
+    border-left-color: #102436;
+    border-right-color: #2f567c;
+    border-bottom-color: #2f567c;
+    border-radius: 0;
+}
+
+.war-level-seg.war-seg-4 {
+    margin-right: 0;
+}
+
+.war-level-seg-fill {
+    height: 100%;
+    width: 0%;
+}
+
+.war-fill-1 { background-color: #ef4444; }
+.war-fill-2 { background-color: #f97316; }
+.war-fill-3 { background-color: #facc15; }
+.war-fill-4 { background-color: #22c55e; }
+
+/* Seta de variacao (aparece entre a barra e o botao) */
+.war-attr-arrow {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    margin: 0 8px;
+    background-color: #060b12;
+
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #386087;
+    border-left-color: #386087;
+    border-right-color: #102436;
+    border-bottom-color: #102436;
+    border-radius: 0;
+
+    font-size: 22px;
     -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    opacity: 0;
+}
+
+/* ---------- BOTAO DE INVESTIR (+) ---------- */
+.war-btn-slot {
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    overflow: visible;
 }
 
 .war-invest-plus-btn {
-    width: 52px;
-    height: 36px;
-    font-size: 28px;
+    width: 60px;
+    height: 60px;
+    font-size: 36px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
     background-color: #0d2b1d;
@@ -946,117 +1046,159 @@ Button {
     border-bottom-width: 2px;
     border-top-color: #4ade80;
     border-left-color: #4ade80;
-    border-right-color: #05140d;
-    border-bottom-color: #05140d;
+    border-right-color: #166534;
+    border-bottom-color: #166534;
     border-radius: 0;
 }
 
-.war-invest-plus-btn.hovered,
-.war-invest-plus-btn:hover {
+.war-invest-plus-btn.hovered {
     background-color: #194d34;
     color: #ffffff;
     border-top-color: #ffffff;
     border-left-color: #ffffff;
+    border-right-color: #22c55e;
+    border-bottom-color: #22c55e;
 }
 
 .war-invest-plus-btn.btn-disabled {
     background-color: #070d12;
     color: #475569;
-    border-top-color: #1e293b;
-    border-left-color: #1e293b;
-    border-right-color: #020508;
-    border-bottom-color: #020508;
+    border-top-width: 2px;
+    border-left-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-top-color: #334a61;
+    border-left-color: #334a61;
+    border-right-color: #132230;
+    border-bottom-color: #132230;
 }
 
-/* ============================================================
-   TOOLTIP CARD SOBRE O BOTÃO + (MOSTRA BARRA E % DO ATRIBUTO)
-   ============================================================ */
+/* ---------- TOOLTIP DISCRETO SOBRE O BOTAO (ICONE + BARRA + %) ---------- */
 .war-invest-tooltip {
     position: absolute;
-    bottom: 58px;
-    right: 12px;
-    width: 220px;
-    height: 118px;
+    bottom: 100%;
+    right: 0;
+    margin-bottom: 4px;
+    width: 150px;
+    height: 30px;
+    flex-direction: row;
+    align-items: center;
+    padding: 2px 5px;
     background-color: #060d14;
     border-width: 2px;
     border-radius: 0;
-    overflow: hidden;
-    justify-content: flex-end;
 }
 
-.tooltip-foreground {
-    width: 100%;
-    height: 100%;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 8px 10px;
+.tooltip-economy {
+    border-color: #eab308;
 }
 
-.tooltip-header-row {
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
-    background-color: rgba(3, 8, 14, 0.88);
-    padding: 3px 8px;
-}
-
-.tooltip-attr-title {
-    font-size: 13px;
-    color: #ffffff;
-    letter-spacing: 1px;
-    -unity-font-style: bold;
-}
-
-.tooltip-cost-tag {
-    font-size: 12px;
-    color: #ef4444;
-    letter-spacing: 1px;
-    -unity-font-style: bold;
-}
-
-.tooltip-body-row {
-    flex-direction: row;
-    justify-content: space-evenly;
-    align-items: center;
-    flex-grow: 1;
+.tooltip-people {
+    border-color: #f472b6;
 }
 
 .tooltip-mini-icon {
-    width: 44px;
-    height: 44px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
     -unity-background-scale-mode: scale-to-fit;
-    -unity-background-image-tint-color: #ffffff;
+}
+
+.tooltip-icon-economy {
+    background-image: url('project://database/Assets/Sprites/moneynew.png?fileID=21300000&guid=1ff9b9ecfbad1924eb51f51a6f3863ec&type=3#moneynew');
+}
+
+.tooltip-icon-people {
+    background-image: url('project://database/Assets/Sprites/peopleSlider.png?fileID=1537655665&guid=f498b99f7dc683646b439a837578e287&type=3#peopleSlider');
+}
+
+.tooltip-mini-track {
+    flex-grow: 1;
+    height: 10px;
+    margin: 0 5px;
+    background-color: #020508;
+    border-top-width: 1px;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-top-color: #0d2238;
+    border-left-color: #0d2238;
+    border-right-color: #2b5278;
+    border-bottom-color: #2b5278;
+}
+
+.tooltip-mini-fill {
+    height: 100%;
+    width: 50%;
+}
+
+.tooltip-economy .tooltip-mini-fill {
+    background-color: #facc15;
+}
+
+.tooltip-people .tooltip-mini-fill {
+    background-color: #f472b6;
 }
 
 .tooltip-mini-value {
-    font-size: 24px;
+    font-size: 14px;
     color: #ffffff;
-    background-color: #03080e;
-    padding: 4px 10px;
     letter-spacing: 1px;
     -unity-font-style: bold;
+    min-width: 36px;
+    -unity-text-align: middle-right;
+}
+
+/* ---------- BARRA DE INVESTIMENTOS DISPONIVEIS (VERTICAL, DISCRETA) ---------- */
+.war-invest-column {
+    width: 120px;
+    flex-shrink: 0;
+    margin-left: 14px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.war-invest-label {
+    font-size: 11px;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    -unity-font-style: bold;
+    margin-bottom: 6px;
+}
+
+.war-invest-bar {
+    flex-direction: column-reverse;
+    flex-grow: 1;
+    width: 78px;
+    margin-top: -3px;
+}
+
+.war-invest-seg {
+    flex-grow: 1;
+    flex-basis: 0;
+    width: 100%;
+    margin-top: 4px;
+    background-color: #051321;
 
     border-top-width: 2px;
     border-left-width: 2px;
     border-right-width: 2px;
     border-bottom-width: 2px;
-    border-top-color: #010408;
-    border-left-color: #010408;
-    border-right-color: #1e364e;
-    border-bottom-color: #1e364e;
+    border-top-color: #0d2238;
+    border-left-color: #0d2238;
+    border-right-color: #29547d;
+    border-bottom-color: #29547d;
     border-radius: 0;
 }
 
-.card-economy .tooltip-mini-value {
-    color: #facc15;
-    border-right-color: #eab308;
-    border-bottom-color: #eab308;
+.war-invest-seg-fill {
+    width: 100%;
+    height: 0%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #0284c7;
+    border-top-width: 3px;
+    border-top-color: #38bdf8;
 }
-
-.card-people .tooltip-mini-value {
-    color: #f472b6;
-    border-right-color: #f472b6;
-    border-bottom-color: #f472b6;
-}
-
-

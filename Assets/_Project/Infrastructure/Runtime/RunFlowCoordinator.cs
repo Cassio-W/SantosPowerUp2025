@@ -260,6 +260,7 @@ namespace Mandato.Infrastructure
         {
             isPcFocused = (newContext == InteractionContext.PcTerminal);
             isPaperFocused = (newContext == InteractionContext.PaperInspect);
+            bindings?.RetroMonitorPresenter?.SetInteractable(isPcFocused);
 
             switch (newContext)
             {
@@ -513,6 +514,10 @@ namespace Mandato.Infrastructure
                 {
                     DismissCurrentProposal();
                 }
+                else
+                {
+                    SyncPresenters(applyCameraEffects: true, instantCamera: false);
+                }
             }
         }
 
@@ -558,7 +563,7 @@ namespace Mandato.Infrastructure
             if (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory)
                 return;
 
-            SyncPresenters(applyCameraEffects: false);
+            SyncPresenters(applyCameraEffects: true, instantCamera: false);
             isDismissingProposal = false;
 
             if (requireSpaceToCallNextNpc)
@@ -782,12 +787,6 @@ namespace Mandato.Infrastructure
         {
             if (report == null || stateMachine == null) return;
 
-            if (report.startedWarLevel != WarLevel.None && bindings?.RetroMonitorPresenter != null)
-            {
-                bindings.RetroMonitorPresenter.SetLogVariantClass("log-alert");
-                bindings.RetroMonitorPresenter.LogMessage($"> [DEFESA] Resolução hostil deflagrou guerra! {report.startedWarLevel.DisplayName()}");
-            }
-
             bindings?.DecisionOverlayPresenter?.ClearChoices();
             SyncPresenters(report: report, applyCameraEffects: true, instantCamera: false);
 
@@ -808,6 +807,12 @@ namespace Mandato.Infrastructure
             bool hasMoreTutorial = HasRemainingTutorialCards();
 
             var monthlyReport = stateMachine.CompleteTurnAndAdvance(catalog.Perks, catalog.Events, catalog.Investments);
+
+            if (stateMachine.RunState.war != null && stateMachine.RunState.war.isActive && stateMachine.RunState.war.monthsInWar == 0 && bindings?.RetroMonitorPresenter != null)
+            {
+                bindings.RetroMonitorPresenter.SetLogVariantClass("log-alert");
+                bindings.RetroMonitorPresenter.LogMessage($"> [DEFESA] Conflito bélico deflagrado! {stateMachine.RunState.war.level.DisplayName()}");
+            }
 
             if (monthlyReport?.war != null && bindings?.RetroMonitorPresenter != null)
             {
@@ -1037,6 +1042,7 @@ namespace Mandato.Infrastructure
 
             SaveSystem.DeleteRunSave();
 
+            bindings?.CameraEffects?.ApplyWarEffects(finalSnapshot?.War, instant: false);
             bindings?.DecisionOverlayPresenter?.ClearChoices();
             bindings?.EndScreenPresenter?.ShowEndScreen(termination, finalSnapshot);
         }
@@ -1080,6 +1086,7 @@ namespace Mandato.Infrastructure
             if (applyCameraEffects && bindings.CameraEffects != null)
             {
                 bindings.CameraEffects.ApplyAttributeEffects(runState.stats, instant: instantCamera);
+                bindings.CameraEffects.ApplyWarEffects(snapshot?.War, instant: instantCamera);
             }
 
             var calendar = bindings.CalendarPresenter ?? CalendarWallPresenter.Instance;
@@ -1133,27 +1140,26 @@ namespace Mandato.Infrastructure
             }
         }
 
-        public void SubmitWarInvestment(int economy, int popularity)
+        public void SubmitWarInvestment(WarAttribute attribute)
         {
             if (stateMachine?.RunState == null) return;
-            var result = WarRules.Invest(stateMachine.RunState, economy, popularity);
+            var result = WarRules.Invest(stateMachine.RunState, attribute);
             if (result.success)
             {
                 if (bindings?.RetroMonitorPresenter != null)
                 {
                     bindings.RetroMonitorPresenter.SetLogVariantClass("log-positive");
-                    if (result.economySpent > 0 && result.popularitySpent > 0)
-                        bindings.RetroMonitorPresenter.LogMessage($"> [DEFESA] Investimento belico: +{result.economySpent}% TECNOLOGIA, +{result.popularitySpent}% TROPAS.");
-                    else if (result.economySpent > 0)
-                        bindings.RetroMonitorPresenter.LogMessage($"> [DEFESA] Investimento em TECNOLOGIA: +{result.economySpent}% (-{result.economySpent}% Economia).");
-                    else if (result.popularitySpent > 0)
-                        bindings.RetroMonitorPresenter.LogMessage($"> [DEFESA] Investimento em TROPAS: +{result.popularitySpent}% (-{result.popularitySpent}% Populacao).");
+                    int remainingClicks = WarRules.GetRemainingInvestmentClicks(stateMachine.RunState);
+                    string clicksSuffix = $" ({remainingClicks} investimento(s) restante(s) no mes)";
+                    if (attribute == WarAttribute.Technology)
+                        bindings.RetroMonitorPresenter.LogMessage($"> [DEFESA] TECNOLOGIA subiu 1 nivel (-{result.economySpent}% Economia).{clicksSuffix}");
+                    else
+                        bindings.RetroMonitorPresenter.LogMessage($"> [DEFESA] TROPAS subiram 1 nivel (-{result.popularitySpent}% Populacao).{clicksSuffix}");
                 }
                 SyncPresenters();
                 SaveCurrentRunState();
             }
         }
-
         public void SurrenderWar()
         {
             if (stateMachine?.RunState == null) return;
