@@ -30,7 +30,7 @@
                         <ui:Label name="arrow-nature" class="attr-arrow hidden" text="↑" />
                         <!-- Overlay de atributo zerado -->
                         <ui:VisualElement name="dead-overlay-nature" class="dead-overlay hidden">
-                            <ui:Label text="✕" class="dead-x-label" />
+                            <ui:Label text="X" class="dead-x-label" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
@@ -44,7 +44,7 @@
                         </ui:VisualElement>
                         <ui:Label name="arrow-economy" class="attr-arrow hidden" text="↑" />
                         <ui:VisualElement name="dead-overlay-economy" class="dead-overlay hidden">
-                            <ui:Label text="✕" class="dead-x-label" />
+                            <ui:Label text="X" class="dead-x-label" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -61,7 +61,7 @@
                         </ui:VisualElement>
                         <ui:Label name="arrow-relations" class="attr-arrow hidden" text="↑" />
                         <ui:VisualElement name="dead-overlay-relations" class="dead-overlay hidden">
-                            <ui:Label text="✕" class="dead-x-label" />
+                            <ui:Label text="X" class="dead-x-label" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
@@ -75,7 +75,7 @@
                         </ui:VisualElement>
                         <ui:Label name="arrow-people" class="attr-arrow hidden" text="↑" />
                         <ui:VisualElement name="dead-overlay-people" class="dead-overlay hidden">
-                            <ui:Label text="✕" class="dead-x-label" />
+                            <ui:Label text="X" class="dead-x-label" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
