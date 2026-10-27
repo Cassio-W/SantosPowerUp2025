@@ -14,7 +14,6 @@
                 <ui:Label name="endscreen-newspaper-name" text="DIÁRIO DA REPÚBLICA" class="newspaper-name" picking-mode="Ignore" />
                 <ui:VisualElement class="newspaper-subbar" picking-mode="Ignore">
                     <ui:Label name="endscreen-date" text="BRASÍLIA — EDIÇÃO EXTRA" class="newspaper-meta" picking-mode="Ignore" />
-                    <ui:Label name="endscreen-mandate-duration" text="MÊS 48 / 48" class="newspaper-meta newspaper-meta-right" picking-mode="Ignore" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
@@ -42,7 +41,7 @@
                     <ui:VisualElement class="stat-row" picking-mode="Ignore">
                         <ui:Label text="Economia:" class="stat-label" picking-mode="Ignore" />
                         <ui:VisualElement class="stat-bar-bg" picking-mode="Ignore">
-                            <ui:VisualElement name="bar-economy" class="stat-bar-fill bar-economy" style="width: 50%;" picking-mode="Ignore" />
+                            <ui:VisualElement name="bar-economy" class="stat-bar-fill bar-economy" picking-mode="Ignore" />
                         </ui:VisualElement>
                         <ui:Label name="val-economy" text="50%" class="stat-value" picking-mode="Ignore" />
                     </ui:VisualElement>
@@ -50,7 +49,7 @@
                     <ui:VisualElement class="stat-row" picking-mode="Ignore">
                         <ui:Label text="Aprovação Popular:" class="stat-label" picking-mode="Ignore" />
                         <ui:VisualElement class="stat-bar-bg" picking-mode="Ignore">
-                            <ui:VisualElement name="bar-approval" class="stat-bar-fill bar-approval" style="width: 50%;" picking-mode="Ignore" />
+                            <ui:VisualElement name="bar-approval" class="stat-bar-fill bar-approval" picking-mode="Ignore" />
                         </ui:VisualElement>
                         <ui:Label name="val-approval" text="50%" class="stat-value" picking-mode="Ignore" />
                     </ui:VisualElement>
@@ -59,7 +58,7 @@
                     <ui:VisualElement class="stat-row" picking-mode="Ignore">
                         <ui:Label text="Meio Ambiente:" class="stat-label" picking-mode="Ignore" />
                         <ui:VisualElement class="stat-bar-bg" picking-mode="Ignore">
-                            <ui:VisualElement name="bar-climate" class="stat-bar-fill bar-climate" style="width: 50%;" picking-mode="Ignore" />
+                            <ui:VisualElement name="bar-climate" class="stat-bar-fill bar-climate" picking-mode="Ignore" />
                         </ui:VisualElement>
                         <ui:Label name="val-climate" text="50%" class="stat-value" picking-mode="Ignore" />
                     </ui:VisualElement>
@@ -67,23 +66,18 @@
                     <ui:VisualElement class="stat-row" picking-mode="Ignore">
                         <ui:Label text="Relações Internacionais:" class="stat-label" picking-mode="Ignore" />
                         <ui:VisualElement class="stat-bar-bg" picking-mode="Ignore">
-                            <ui:VisualElement name="bar-relations" class="stat-bar-fill bar-relations" style="width: 50%;" picking-mode="Ignore" />
+                            <ui:VisualElement name="bar-relations" class="stat-bar-fill bar-relations" picking-mode="Ignore" />
                         </ui:VisualElement>
                         <ui:Label name="val-relations" text="50%" class="stat-value" picking-mode="Ignore" />
                     </ui:VisualElement>
 
-                    <!-- Linha 3: Corrupção e Quadrante Político -->
+                    <!-- Linha 3: Corrupção -->
                     <ui:VisualElement class="stat-row" picking-mode="Ignore">
                         <ui:Label text="Índice de Corrupção:" class="stat-label" picking-mode="Ignore" />
                         <ui:VisualElement class="stat-bar-bg" picking-mode="Ignore">
-                            <ui:VisualElement name="bar-corruption" class="stat-bar-fill bar-corruption" style="width: 20%;" picking-mode="Ignore" />
+                            <ui:VisualElement name="bar-corruption" class="stat-bar-fill bar-corruption" picking-mode="Ignore" />
                         </ui:VisualElement>
                         <ui:Label name="val-corruption" text="20%" class="stat-value" picking-mode="Ignore" />
-                    </ui:VisualElement>
-
-                    <ui:VisualElement class="stat-row-summary" picking-mode="Ignore">
-                        <ui:Label text="Espectro Político:" class="stat-label-bold" picking-mode="Ignore" />
-                        <ui:Label name="val-political-quadrant" text="Centro Moderado" class="stat-quadrant-badge" picking-mode="Ignore" />
                     </ui:VisualElement>
 
                 </ui:VisualElement>

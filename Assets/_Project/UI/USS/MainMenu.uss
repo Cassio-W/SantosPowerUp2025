@@ -13,12 +13,12 @@
 
 .company-logo {
     position: absolute;
-    bottom: 40px;
-    left: 48px;
-    width: 220px;
-    height: 220px;
+    bottom: 24px;
+    left: 24px;
+    width: 260px;
+    height: 84px;
     -unity-background-scale-mode: scale-to-fit;
-    background-image: url("project://database/Assets/Sprites/logo_branco.png?fileID=21300000&guid=509ec6a80302b1e4683b87844705c751&type=3#logo_branco");
+    background-image: url("project://database/Assets/Sprites/Logo_Branco%201.png?fileID=21300000&guid=2517a1f26be606749909b4917d01211f&type=3#Logo_Branco 1");
     opacity: 0.9;
     transition-property: opacity, scale;
     transition-duration: 0.2s;
@@ -49,12 +49,12 @@
 }
 
 .menu-logo {
-    width: 1100px;
-    height: 266px;
+    width: 800px;
+    height: 300px;
     max-width: 100%;
     -unity-background-scale-mode: scale-to-fit;
-    background-image: url("project://database/Assets/Sprites/LOGO.png?fileID=21300000&guid=40ea74febf0b57946a2a4319bc0ffd19&type=3#LOGO");
-    margin-bottom: 52px;
+    background-image: url("project://database/Assets/Sprites/LOGO_FINAL.png?fileID=21300000&guid=5871de8782bb0a549983f00be15065bf&type=3#LOGO_FINAL");
+    margin-bottom: 32px;
 }
 
 .menu-buttons-container {

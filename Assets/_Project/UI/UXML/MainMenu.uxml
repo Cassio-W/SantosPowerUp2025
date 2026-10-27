@@ -1,10 +1,10 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/_Project/UI/USS/MainMenu.uss?fileID=7433441132597879392&amp;guid=c3966148f77a9b74f813b4714cd1f6e1&amp;type=3#MainMenu"/>
     <ui:VisualElement name="main-menu-root" picking-mode="Position" class="main-menu-root" style="bottom: 1px; top: -1px; right: 2px; left: -1px;">
-        <ui:VisualElement name="company-logo" picking-mode="Ignore" class="company-logo" style="bottom: 6px; left: 20px;"/>
+        <ui:VisualElement name="company-logo" picking-mode="Ignore" class="company-logo" style="height: 174px; width: 444px;"/>
         <ui:VisualElement name="menu-card" picking-mode="Position" class="menu-main-container" style="top: -2%;">
             <ui:VisualElement name="menu-logo" picking-mode="Ignore" class="menu-logo"/>
-            <ui:VisualElement name="buttons-container" picking-mode="Position" class="menu-buttons-container" style="top: -7%;">
+            <ui:VisualElement name="buttons-container" picking-mode="Position" class="menu-buttons-container" style="top: -7%; height: 482px;">
                 <ui:Button name="btn-play" text="" picking-mode="Position" class="menu-btn btn-play" style="margin-bottom: 5px; margin-top: 0;"/>
                 <ui:Button name="btn-credits" text="" picking-mode="Position" class="menu-btn btn-credits" style="margin-top: 0; margin-bottom: 5px;"/>
                 <ui:Button name="btn-quit" text="" picking-mode="Position" class="menu-btn btn-quit" style="margin-top: 0; margin-bottom: 5px;"/>

@@ -74,7 +74,7 @@
 .newspaper-subbar {
     width: 100%;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: center;
     padding-left: 4px;
     padding-right: 4px;
 }
@@ -221,75 +221,46 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
 .stat-label {
     width: 210px;
-    font-size: 14px;
+    font-size: 15px;
     color: rgb(40, 34, 28);
     -unity-font-style: bold;
 }
 
 .stat-bar-bg {
     flex-grow: 1;
-    height: 14px;
-    background-color: rgb(200, 192, 176);
-    border-radius: 7px;
+    flex-direction: row;
+    height: 22px;
+    background-color: rgb(212, 204, 188);
+    border-radius: 11px;
     border-width: 1px;
-    border-color: rgb(150, 142, 128);
-    overflow: hidden;
-    margin-left: 10px;
+    border-color: rgb(165, 155, 140);
+    margin-left: 12px;
     margin-right: 12px;
 }
 
 .stat-bar-fill {
     height: 100%;
-    border-radius: 6px;
-    transition-property: width;
-    transition-duration: 0.5s;
+    border-radius: 10px;
+    flex-shrink: 0;
 }
 
-.bar-economy { background-color: rgb(220, 160, 30); }
-.bar-approval { background-color: rgb(40, 160, 220); }
-.bar-climate { background-color: rgb(40, 180, 80); }
-.bar-relations { background-color: rgb(160, 70, 200); }
-.bar-corruption { background-color: rgb(200, 40, 40); }
+.bar-economy { background-color: rgb(234, 179, 8); }
+.bar-approval { background-color: rgb(244, 114, 182); }
+.bar-climate { background-color: rgb(34, 197, 94); }
+.bar-relations { background-color: rgb(56, 189, 248); }
+.bar-corruption { background-color: rgb(220, 38, 38); }
 
 .stat-value {
-    width: 50px;
-    font-size: 14px;
+    width: 52px;
+    font-size: 15px;
     -unity-font-style: bold;
     color: rgb(30, 24, 18);
     -unity-text-align: middle-right;
-}
-
-.stat-row-summary {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 6px;
-    padding-top: 6px;
-    border-top-width: 1px;
-    border-top-color: rgb(200, 192, 176);
-}
-
-.stat-label-bold {
-    font-size: 14px;
-    -unity-font-style: bold;
-    color: rgb(30, 24, 18);
-}
-
-.stat-quadrant-badge {
-    font-size: 13px;
-    -unity-font-style: bold;
-    color: rgb(240, 235, 225);
-    background-color: rgb(45, 52, 64);
-    padding-top: 4px;
-    padding-bottom: 4px;
-    padding-left: 12px;
-    padding-right: 12px;
-    border-radius: 12px;
 }
 
 /* ==========================================================================

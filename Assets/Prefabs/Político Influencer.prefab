@@ -789,6 +789,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetPosition: {x: 0, y: 0, z: -1.5}
   startPosition: {x: 5.85, y: 0, z: 3.65}
+  walkSpeed: 2.5
   animator: {fileID: 794503472865896689}
   walkAnimation: Walk03
   idleAnimation: Idle01
@@ -1599,7 +1600,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 1843663394568621177, guid: cd8b239e1c1718f459b8e56d8a6a52fe, type: 3}
+  - {fileID: 2100000, guid: ae0dbc8a0a09d67408cb1870c3ade8f6, type: 2}
   - {fileID: 2100000, guid: b152507d5e6cc2b47bf9b336a22ac26d, type: 2}
   - {fileID: 2100000, guid: 235ccd870db15764ebec1d7e5719d6c4, type: 2}
   - {fileID: 6946346709792231093, guid: cd8b239e1c1718f459b8e56d8a6a52fe, type: 3}

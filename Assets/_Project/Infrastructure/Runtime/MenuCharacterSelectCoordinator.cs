@@ -40,6 +40,18 @@ namespace Mandato.Infrastructure
         [SerializeField] private List<GameObject> menuUIObjects = new List<GameObject>();
         [SerializeField] private MainMenuPresenter mainMenuPresenter;
 
+        [Header("Bypass de Seleção de Personagem (Debug / Quick Start)")]
+        [Tooltip("Se ativado, ao clicar em Jogar ignora a tela da urna e vai diretamente para o jogo com o personagem padrão.")]
+        [SerializeField] private bool bypassCharacterSelection = false;
+        [Tooltip("ID do personagem padrão caso a seleção esteja desativada (padrão: 1 = Senhor Centrão).")]
+        [SerializeField] private string defaultCharacterId = "1";
+
+        [Header("Efeitos da Câmera do Menu")]
+        [Tooltip("Script CameraMenu que gira a câmera no menu inicial. Desativado na urna e reativado ao voltar.")]
+        [SerializeField] private CameraMenu cameraRotationScript;
+        [Tooltip("Volume de pós-processamento com Depth of Field (borrado). Desativado na urna e reativado ao voltar.")]
+        [SerializeField] private UnityEngine.Rendering.Volume depthOfFieldVolume;
+
         [Header("Personagens Disponíveis")]
         [SerializeField] private List<CharacterDefinition> availableCharacters = new List<CharacterDefinition>();
 
@@ -76,6 +88,10 @@ namespace Mandato.Infrastructure
         public bool IsInCharacterSelect => CurrentContext == MenuInteractionContext.CharacterSelect;
         public AudioClip ConfirmSound { get => confirmSound; set => confirmSound = value; }
         public float ConfirmDelay { get => confirmDelay; set => confirmDelay = value; }
+        public bool BypassCharacterSelection { get => bypassCharacterSelection; set => bypassCharacterSelection = value; }
+        public string DefaultCharacterId { get => defaultCharacterId; set => defaultCharacterId = value; }
+        public CameraMenu CameraRotationScript { get => cameraRotationScript; set => cameraRotationScript = value; }
+        public UnityEngine.Rendering.Volume DepthOfFieldVolume { get => depthOfFieldVolume; set => depthOfFieldVolume = value; }
 
         public event Action<MenuInteractionContext, MenuInteractionContext> OnContextChanged;
 
@@ -85,6 +101,33 @@ namespace Mandato.Infrastructure
             if (mainMenuPresenter == null)
             {
                 mainMenuPresenter = FindFirstObjectByType<MainMenuPresenter>();
+            }
+
+            if (cameraRotationScript == null)
+            {
+                cameraRotationScript = FindFirstObjectByType<CameraMenu>();
+                if (cameraRotationScript == null && _camera != null)
+                {
+                    cameraRotationScript = _camera.GetComponent<CameraMenu>();
+                }
+            }
+
+            if (depthOfFieldVolume == null)
+            {
+                var volumes = FindObjectsByType<UnityEngine.Rendering.Volume>(FindObjectsSortMode.None);
+                foreach (var v in volumes)
+                {
+                    if (v == null || v.sharedProfile == null || v.sharedProfile.components == null) continue;
+                    foreach (var comp in v.sharedProfile.components)
+                    {
+                        if (comp != null && comp.GetType().Name.Contains("DepthOfField"))
+                        {
+                            depthOfFieldVolume = v;
+                            break;
+                        }
+                    }
+                    if (depthOfFieldVolume != null) break;
+                }
             }
 
             EnsureAudioSource();
@@ -220,14 +263,29 @@ namespace Mandato.Infrastructure
 
         /// <summary>
         /// Chamado ao clicar em "Jogar".
-        /// Transiciona para CharacterSelect: oculta apenas a UI 2D do menu e move a câmera para a cabine 3D.
+        /// Se o bypass estiver ativo, vai diretamente para o jogo com o personagem padrão (Senhor Centrão, id=1).
+        /// Caso contrário, transiciona para CharacterSelect: desativa o giro da câmera e o blur (DOF), oculta a UI 2D e move a câmera para a urna.
         /// </summary>
         public void EnterCharacterSelect()
         {
             if (CurrentContext != MenuInteractionContext.MainMenuOverview) return;
 
+            // Opção no Inspector para desativar a seleção e ir direto para o jogo com o personagem default
+            if (bypassCharacterSelection)
+            {
+                CharacterSelectionPersistence.Save(defaultCharacterId);
+                if (!string.IsNullOrEmpty(gameplaySceneName) && Application.isPlaying)
+                {
+                    SceneManager.LoadScene(gameplaySceneName);
+                }
+                return;
+            }
+
             SetContext(MenuInteractionContext.Transitioning);
             SetPhysicalButtonsInteractable(false);
+
+            // Desativa o script de giro da câmera e o volume com Depth of Field (blur)
+            SetOverviewEffectsActive(false);
 
             // 1. Oculta apenas a UI 2D do Menu Principal
             SetMainMenuUIVisible(false);
@@ -261,7 +319,7 @@ namespace Mandato.Infrastructure
 
         /// <summary>
         /// Chamado ao clicar no botão físico 3D "Voltar/Cancelar" ou pressionar ESC.
-        /// Transiciona de volta para MainMenuOverview: retorna a câmera e reativa a UI 2D do menu.
+        /// Transiciona de volta para MainMenuOverview: retorna a câmera, reativa a UI 2D do menu e reativa o giro e o blur (DOF).
         /// </summary>
         public void ExitCharacterSelect()
         {
@@ -274,10 +332,27 @@ namespace Mandato.Infrastructure
             MoveCameraTo(_menuCameraPosition, _menuCameraRotation, _menuCameraFov, cameraTravelDuration,
                 onComplete: () =>
                 {
-                    // Reativa a UI 2D do Menu Principal após a câmera concluir o movimento
+                    // Reativa a UI 2D do Menu Principal e os efeitos da câmera (giro e DOF)
                     SetMainMenuUIVisible(true);
+                    SetOverviewEffectsActive(true);
                     SetContext(MenuInteractionContext.MainMenuOverview);
                 });
+        }
+
+        /// <summary>
+        /// Ativa ou desativa os efeitos visuais do menu inicial (script de rotação contínua e volume de Depth of Field).
+        /// </summary>
+        public void SetOverviewEffectsActive(bool active)
+        {
+            if (cameraRotationScript != null)
+            {
+                cameraRotationScript.enabled = active;
+            }
+
+            if (depthOfFieldVolume != null)
+            {
+                depthOfFieldVolume.enabled = active;
+            }
         }
 
         /// <summary>

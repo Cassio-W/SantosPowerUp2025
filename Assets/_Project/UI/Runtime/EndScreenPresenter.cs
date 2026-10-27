@@ -25,7 +25,6 @@ namespace Mandato.UI
         private Label stampLabel;
         private Label reasonLabel;
         private Label dateLabel;
-        private Label durationLabel;
 
         // Barras e Valores de Estatísticas
         private VisualElement barEconomy;
@@ -38,7 +37,6 @@ namespace Mandato.UI
         private Label valRelations;
         private VisualElement barCorruption;
         private Label valCorruption;
-        private Label valPoliticalQuadrant;
 
         private Button btnRestart;
         private Button btnMainMenu;
@@ -123,7 +121,6 @@ namespace Mandato.UI
             stampLabel = root.Q<Label>("endscreen-stamp");
             reasonLabel = root.Q<Label>("endscreen-reason") ?? root.Q<Label>("reason-gameover");
             dateLabel = root.Q<Label>("endscreen-date");
-            durationLabel = root.Q<Label>("endscreen-mandate-duration");
 
             barEconomy = root.Q<VisualElement>("bar-economy");
             valEconomy = root.Q<Label>("val-economy");
@@ -135,7 +132,6 @@ namespace Mandato.UI
             valRelations = root.Q<Label>("val-relations");
             barCorruption = root.Q<VisualElement>("bar-corruption");
             valCorruption = root.Q<Label>("val-corruption");
-            valPoliticalQuadrant = root.Q<Label>("val-political-quadrant");
 
             btnRestart = root.Q<Button>("btn-restart") ?? root.Q<Button>("btn-jogar-novamente");
             btnMainMenu = root.Q<Button>("btn-main-menu") ?? root.Q<Button>("btn-menu");
@@ -202,34 +198,35 @@ namespace Mandato.UI
                 dateLabel.text = $"BRASÍLIA — {finalSnapshot.DisplayDate}";
             }
 
-            if (durationLabel != null && finalSnapshot != null)
-            {
-                durationLabel.text = $"MÊS {Mathf.Clamp(finalSnapshot.MonthIndex, 1, 48)} / 48";
-            }
-
             // 4. Barras de Atributos Finais
-            if (finalSnapshot != null && finalSnapshot.Stats != null)
-            {
-                SetStatBar(barEconomy, valEconomy, finalSnapshot.Stats.economy);
-                SetStatBar(barApproval, valApproval, finalSnapshot.Stats.popularApproval);
-                SetStatBar(barClimate, valClimate, finalSnapshot.Stats.climaticChanges);
-                SetStatBar(barRelations, valRelations, finalSnapshot.Stats.internationalRelations);
-                SetStatBar(barCorruption, valCorruption, finalSnapshot.Stats.corruption);
-
-                if (valPoliticalQuadrant != null)
-                {
-                    valPoliticalQuadrant.text = !string.IsNullOrEmpty(finalSnapshot.PoliticalAxis.Quadrant)
-                        ? finalSnapshot.PoliticalAxis.Quadrant
-                        : "Centro Moderado";
-                }
-            }
+            var stats = finalSnapshot?.Stats ?? new StatBlock();
+            SetStatBar(barEconomy, valEconomy, stats.economy);
+            SetStatBar(barApproval, valApproval, stats.popularApproval);
+            SetStatBar(barClimate, valClimate, stats.climaticChanges);
+            SetStatBar(barRelations, valRelations, stats.internationalRelations);
+            SetStatBar(barCorruption, valCorruption, stats.corruption);
         }
 
         private void SetStatBar(VisualElement bar, Label label, int value)
         {
             int clamped = Mathf.Clamp(value, 0, 100);
-            if (bar != null) bar.style.width = new Length(clamped, LengthUnit.Percent);
-            if (label != null) label.text = $"{clamped}%";
+            if (bar != null)
+            {
+                if (clamped <= 0)
+                {
+                    bar.style.display = DisplayStyle.None;
+                    bar.style.width = Length.Percent(0);
+                }
+                else
+                {
+                    bar.style.display = DisplayStyle.Flex;
+                    bar.style.width = Length.Percent(clamped);
+                }
+            }
+            if (label != null)
+            {
+                label.text = $"{clamped}%";
+            }
         }
 
         private string DetermineDefeatStamp(string reason)
