@@ -5,6 +5,10 @@ Shader "ComicVFX/ToonLit"
         [MainColor] _BaseColor ("Base Color", Color) = (1, 1, 1, 1)
         [MainTexture] _BaseMap ("Base Map (Albedo)", 2D) = "white" {}
 
+        [Header(Alpha Cutout)]
+        [Toggle(_ALPHATEST_ON)] _AlphaClip ("Enable Alpha Clipping", Float) = 0
+        _Cutoff ("Alpha Cutoff", Range(0.0, 1.0)) = 0.5
+
         [Header(Cel Shading Settings)]
         _ShadowStep ("Shadow Threshold", Range(0.0, 1.0)) = 0.45
         _ShadowSmoothness ("Shadow Smoothness", Range(0.01, 0.3)) = 0.08
@@ -43,6 +47,7 @@ Shader "ComicVFX/ToonLit"
             #pragma vertex vert
             #pragma fragment frag
             #pragma shader_feature_local _ENABLE_HALFTONE
+            #pragma shader_feature_local _ALPHATEST_ON
 
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
@@ -71,6 +76,7 @@ Shader "ComicVFX/ToonLit"
             CBUFFER_START(UnityPerMaterial)
                 half4 _BaseColor;
                 float4 _BaseMap_ST;
+                half _Cutoff;
                 half _ShadowStep;
                 half _ShadowSmoothness;
                 half4 _ShadowColor;
@@ -117,6 +123,11 @@ Shader "ComicVFX/ToonLit"
             {
                 // Albedo sample
                 half4 albedoTex = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
+
+                #if defined(_ALPHATEST_ON)
+                    clip(albedoTex.a * _BaseColor.a - _Cutoff);
+                #endif
+
                 half3 baseAlbedo = albedoTex.rgb * _BaseColor.rgb;
 
                 // Main light setup
@@ -181,6 +192,7 @@ Shader "ComicVFX/ToonLit"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+            #pragma shader_feature_local _ALPHATEST_ON
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
@@ -189,12 +201,32 @@ Shader "ComicVFX/ToonLit"
             {
                 float4 positionOS   : POSITION;
                 float3 normalOS     : NORMAL;
+                float2 uv           : TEXCOORD0;
             };
 
             struct Varyings
             {
                 float4 positionCS   : SV_POSITION;
+                float2 uv           : TEXCOORD0;
             };
+
+            TEXTURE2D(_BaseMap);
+            SAMPLER(sampler_BaseMap);
+
+            CBUFFER_START(UnityPerMaterial)
+                half4 _BaseColor;
+                float4 _BaseMap_ST;
+                half _Cutoff;
+                half _ShadowStep;
+                half _ShadowSmoothness;
+                half4 _ShadowColor;
+                float _HalftoneScale;
+                float _HalftoneDotSize;
+                half4 _SpecularColor;
+                half _Smoothness;
+                half4 _EmissionColor;
+                float _UVRotationAngle;
+            CBUFFER_END
 
             float3 _LightDirection;
 
@@ -204,11 +236,31 @@ Shader "ComicVFX/ToonLit"
                 float3 positionWS = TransformObjectToWorld(input.positionOS.xyz);
                 float3 normalWS = TransformObjectToWorldNormal(input.normalOS);
                 output.positionCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, _LightDirection));
+
+                #if defined(_ALPHATEST_ON)
+                    float2 uv = input.uv;
+                    if (abs(_UVRotationAngle) > 0.01)
+                    {
+                        float rad = radians(_UVRotationAngle);
+                        float s = sin(rad);
+                        float c = cos(rad);
+                        float2 centered = uv - 0.5;
+                        uv = float2(centered.x * c - centered.y * s, centered.x * s + centered.y * c) + 0.5;
+                    }
+                    output.uv = TRANSFORM_TEX(uv, _BaseMap);
+                #else
+                    output.uv = float2(0, 0);
+                #endif
+
                 return output;
             }
 
-            half4 frag() : SV_Target
+            half4 frag(Varyings input) : SV_Target
             {
+                #if defined(_ALPHATEST_ON)
+                    half4 albedoTex = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, input.uv);
+                    clip(albedoTex.a * _BaseColor.a - _Cutoff);
+                #endif
                 return 0;
             }
             ENDHLSL
