@@ -777,7 +777,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   menuUIObjects: []
   mainMenuPresenter: {fileID: 96259231}
-  bypassCharacterSelection: 1
+  bypassCharacterSelection: 0
   defaultCharacterId: 1
   cameraRotationScript: {fileID: 2012787626}
   depthOfFieldVolume: {fileID: 2012787627}

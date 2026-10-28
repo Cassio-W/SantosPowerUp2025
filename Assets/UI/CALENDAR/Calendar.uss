@@ -852,8 +852,8 @@
 }
 
 .postit-signature-label {
-    -unity-font: url('project://database/Assets/Brother%20Signature.otf?fileID=12800000&guid=5e6a9f7a8b4c3d2e1f0a9b8c7d6e5f4a&type=3#Brother Signature');
-    -unity-font-definition: url('project://database/Assets/Brother%20Signature.otf?fileID=12800000&guid=5e6a9f7a8b4c3d2e1f0a9b8c7d6e5f4a&type=3#Brother Signature');
+    -unity-font: url('project://database/Assets/AlexBrush-Regular.ttf?fileID=12800000&guid=b968cea2c143b374b9ce335b542dcd0a&type=3#AlexBrush-Regular');
+    -unity-font-definition: url('project://database/Assets/AlexBrush-Regular.ttf?fileID=12800000&guid=b968cea2c143b374b9ce335b542dcd0a&type=3#AlexBrush-Regular');
     font-size: 22px;
     color: #172D4D; /* Tinta azul caneta tinteiro */
     margin-top: 4px;

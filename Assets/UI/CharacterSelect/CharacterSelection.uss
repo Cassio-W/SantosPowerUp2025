@@ -1,6 +1,6 @@
 :root {
-    -unity-font: url("project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH");
-    -unity-font-definition: url("project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH");
+    -unity-font: url("project://database/Assets/VT323-Regular.ttf?fileID=12800000&guid=67f3d5d09c281554b8893d9ec2c141a2&type=3#VT323-Regular");
+    -unity-font-definition: url("project://database/Assets/VT323-Regular.ttf?fileID=12800000&guid=67f3d5d09c281554b8893d9ec2c141a2&type=3#VT323-Regular");
     width: 100%;
     height: 100%;
     background-color: rgb(234, 236, 239);
@@ -19,8 +19,8 @@
 }
 
 Label {
-    -unity-font: url("project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH");
-    -unity-font-definition: url("project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH");
+    -unity-font: url("project://database/Assets/VT323-Regular.ttf?fileID=12800000&guid=67f3d5d09c281554b8893d9ec2c141a2&type=3#VT323-Regular");
+    -unity-font-definition: url("project://database/Assets/VT323-Regular.ttf?fileID=12800000&guid=67f3d5d09c281554b8893d9ec2c141a2&type=3#VT323-Regular");
     margin: 0;
     padding: 0;
 }
@@ -67,27 +67,17 @@ Label {
 }
 
 .header-title {
-    font-size: 18px;
+    font-size: 22px;
     -unity-font-style: bold;
-    color: rgb(15, 23, 42);
-    letter-spacing: 1.5px;
-    flex-grow: 1;
+    color: rgb(30, 58, 138);
+    letter-spacing: 1px;
 }
 
 .counter-chip {
-    font-size: 16px;
+    font-size: 20px;
     -unity-font-style: bold;
-    color: rgb(255, 255, 255);
-    background-color: rgb(31, 78, 121);
-    padding: 6px 16px;
-    border-top-width: 1px;
-    border-left-width: 1px;
-    border-right-width: 2px;
-    border-bottom-width: 2px;
-    border-top-color: rgb(45, 104, 156);
-    border-left-color: rgb(45, 104, 156);
-    border-right-color: rgb(14, 41, 64);
-    border-bottom-color: rgb(14, 41, 64);
+    color: rgb(30, 41, 59);
+    letter-spacing: 1px;
 }
 
 .main-body {
@@ -119,16 +109,13 @@ Label {
 }
 
 .column-title {
-    font-size: 16px;
+    font-size: 20px;
     -unity-font-style: bold;
     color: rgb(30, 58, 138);
-    letter-spacing: 1.5px;
-    margin-bottom: 6px;
-    border-bottom-width: 2px;
-    border-bottom-color: rgb(37, 99, 235);
-    padding-bottom: 6px;
-    flex-shrink: 0;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
     -unity-text-align: middle-center;
+    flex-shrink: 0;
 }
 
 .carousel-viewport {
@@ -163,16 +150,10 @@ Label {
 }
 
 .active-badge {
-    font-size: 11px;
+    font-size: 15px;
     -unity-font-style: bold;
-    color: rgb(21, 128, 61);
-    background-color: rgb(220, 252, 231);
-    border-width: 1px;
-    border-color: rgb(134, 239, 172);
-    padding: 2px 10px;
+    color: rgb(245, 158, 11);
     letter-spacing: 1px;
-    margin-bottom: 0;
-    align-self: center;
 }
 
 .nav-indicator {
@@ -303,24 +284,19 @@ Label {
 }
 
 .slot-name-small {
-    font-size: 13px;
-    color: rgb(71, 85, 105);
+    font-size: 18px;
     -unity-font-style: bold;
-    white-space: normal;
+    color: rgb(100, 116, 139);
+    letter-spacing: 0.5px;
     -unity-text-align: middle-center;
-    max-height: 28px;
-    overflow: hidden;
 }
 
 .slot-name-large {
-    font-size: 26px;
+    font-size: 32px;
     -unity-font-style: bold;
     color: rgb(15, 23, 42);
-    letter-spacing: 0.5px;
-    white-space: normal;
+    letter-spacing: 1px;
     -unity-text-align: middle-center;
-    max-height: 48px;
-    overflow: hidden;
 }
 
 .detail-column {
@@ -350,20 +326,18 @@ Label {
 }
 
 .detail-name-label {
-    font-size: 30px;
+    font-size: 36px;
     -unity-font-style: bold;
     color: rgb(15, 23, 42);
-    letter-spacing: 0.8px;
-    white-space: normal;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
 }
 
 .detail-title-label {
-    font-size: 16px;
-    color: rgb(180, 83, 9);
+    font-size: 21px;
     -unity-font-style: bold;
-    letter-spacing: 1.5px;
-    margin-top: 4px;
-    white-space: normal;
+    color: rgb(71, 85, 105);
+    letter-spacing: 0.5px;
 }
 
 .detail-content-row {
@@ -407,7 +381,7 @@ Label {
 }
 
 .section-subtitle {
-    font-size: 13px;
+    font-size: 17px;
     -unity-font-style: bold;
     color: rgb(30, 58, 138);
     letter-spacing: 1px;
@@ -416,8 +390,11 @@ Label {
 }
 
 .detail-bio-label {
-    font-size: 15px;
-    color: rgb(51, 65, 85);
+    font-size: 20px;
+    line-height: 22px;
+    -unity-font-style: bold;
+    color: rgb(15, 23, 42);
+    letter-spacing: 0.5px;
     white-space: normal;
     margin-bottom: 10px;
     flex-shrink: 1;
@@ -519,11 +496,12 @@ Label {
 }
 
 .stat-chip-tag {
-    font-size: 24px;
+    font-size: 26px;
     -unity-font-style: bold;
-    letter-spacing: 0.8px;
-    align-items: stretch;
-    align-self: auto;
+    color: rgb(255, 255, 255);
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
 }
 
 .stat-chip-val {
@@ -555,7 +533,12 @@ Label {
 }
 
 .chip-climate .stat-chip-tag {
-    color: rgb(21, 128, 61);
+    font-size: 26px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
 }
 
 .chip-climate .stat-chip-icon {
@@ -572,7 +555,12 @@ Label {
 }
 
 .chip-economy .stat-chip-tag {
-    color: rgb(133, 77, 14);
+    font-size: 26px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
 }
 
 .chip-economy .stat-chip-icon {
@@ -589,7 +577,12 @@ Label {
 }
 
 .chip-relations .stat-chip-tag {
-    color: rgb(3, 105, 161);
+    font-size: 26px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
 }
 
 .chip-relations .stat-chip-icon {
@@ -606,7 +599,12 @@ Label {
 }
 
 .chip-people .stat-chip-tag {
-    color: rgb(157, 23, 77);
+    font-size: 26px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
 }
 
 .chip-people .stat-chip-icon {
@@ -655,11 +653,12 @@ Label {
 }
 
 .stat-corruption-tag {
-    font-size: 22px;
+    font-size: 24px;
     -unity-font-style: bold;
-    color: rgb(185, 28, 28);
-    letter-spacing: 0.8px;
+    color: rgb(255, 255, 255);
+    letter-spacing: 1px;
     -unity-text-align: middle-center;
+    margin-bottom: 4px;
 }
 
 .stat-corruption-icon {

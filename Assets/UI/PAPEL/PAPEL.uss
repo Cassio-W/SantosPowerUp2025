@@ -1,7 +1,7 @@
 /* ============================================================
    DOCUMENTO OFICIAL - PAPEL DO GABINETE
    - Textos impressos e proposta: BreeSerif-Regular.ttf
-   - Textos manuscritos (Assinatura e Visto): Brother Signature.otf (Caneta azul tinteiro)
+   - Textos manuscritos (Assinatura e Visto): AlexBrush-Regular.ttf (Caneta azul tinteiro)
    ============================================================ */
 
 :root {
@@ -126,8 +126,8 @@
 }
 
 .signature-cursive {
-    -unity-font: url('project://database/Assets/Brother%20Signature.otf?fileID=12800000&guid=5e6a9f7a8b4c3d2e1f0a9b8c7d6e5f4a&type=3#Brother Signature');
-    -unity-font-definition: url('project://database/Assets/Brother%20Signature.otf?fileID=12800000&guid=5e6a9f7a8b4c3d2e1f0a9b8c7d6e5f4a&type=3#Brother Signature');
+    -unity-font: url('project://database/Assets/AlexBrush-Regular.ttf?fileID=12800000&guid=b968cea2c143b374b9ce335b542dcd0a&type=3#AlexBrush-Regular');
+    -unity-font-definition: url('project://database/Assets/AlexBrush-Regular.ttf?fileID=12800000&guid=b968cea2c143b374b9ce335b542dcd0a&type=3#AlexBrush-Regular');
     font-size: 64px; /* Tamanho grande e nítido */
     color: #142846; /* Tinta azul caneta tinteiro clássica */
     margin-bottom: 2px;

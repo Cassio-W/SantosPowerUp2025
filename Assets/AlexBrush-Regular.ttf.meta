@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 72d537b9f5516f4479169baed4c45a90
+guid: b968cea2c143b374b9ce335b542dcd0a
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Nexa Bold
+  - Alex Brush
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

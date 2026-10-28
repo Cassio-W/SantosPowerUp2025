@@ -17,8 +17,8 @@
 /* ========================================================================= */
 
 :root {
-    -unity-font: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
-    -unity-font-definition: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+    -unity-font: url('project://database/Assets/VT323-Regular.ttf?fileID=12800000&guid=67f3d5d09c281554b8893d9ec2c141a2&type=3#VT323-Regular');
+    -unity-font-definition: url('project://database/Assets/VT323-Regular.ttf?fileID=12800000&guid=67f3d5d09c281554b8893d9ec2c141a2&type=3#VT323-Regular');
 
     width: 100%;
     height: 100%;
@@ -27,8 +27,8 @@
 
 Label,
 Button {
-    -unity-font: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
-    -unity-font-definition: url('project://database/Assets/RETROTECH.ttf?fileID=12800000&guid=3d5c7b9b29723fd4cbdc199842b451c8&type=3#RETROTECH');
+    -unity-font: url('project://database/Assets/VT323-Regular.ttf?fileID=12800000&guid=67f3d5d09c281554b8893d9ec2c141a2&type=3#VT323-Regular');
+    -unity-font-definition: url('project://database/Assets/VT323-Regular.ttf?fileID=12800000&guid=67f3d5d09c281554b8893d9ec2c141a2&type=3#VT323-Regular');
 }
 
 /* ========================================================================= */
@@ -134,8 +134,8 @@ Button {
 }
 
 .system-compact-title {
-    font-size: 13px;
-    color: #d7d9c9;
+    font-size: 17px;
+    color: #e2e8f0;
     letter-spacing: 1px;
     -unity-font-style: bold;
 }
@@ -148,20 +148,20 @@ Button {
     padding: 1px 6px;
 
     background-color: #3a4248;
-    color: #e0e3df;
+    color: #ffffff;
 
     border-top-width: 1px;
     border-left-width: 1px;
     border-right-width: 1px;
     border-bottom-width: 1px;
-    border-top-color: #89939a;
-    border-left-color: #89939a;
+    border-top-color: #798790;
+    border-left-color: #798790;
     border-right-color: #111417;
     border-bottom-color: #111417;
 
     border-radius: 0;
 
-    font-size: 10px;
+    font-size: 14px;
     -unity-font-style: bold;
     -unity-text-align: middle-center;
 }
@@ -205,12 +205,12 @@ Button {
 /* ========================================================================= */
 
 .empty-actions-label {
-    color: #78847b;
-    font-size: 12px;
-    -unity-text-align: middle-center;
-    margin-top: 24px;
+    font-size: 16px;
+    color: #94a3b8;
     -unity-font-style: bold;
-    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    letter-spacing: 0.5px;
 }
 
 /* ========================================================================= */
@@ -351,22 +351,19 @@ Button {
 
 .contact-name,
 .app-title {
-    font-size: 13px;
-    color: #d6d9d0;
+    font-size: 17px;
+    color: #f8fafc;
     -unity-font-style: bold;
-    -unity-text-align: middle-left;
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    letter-spacing: 0;
+    letter-spacing: 0.5px;
 }
 
 .contact-tag {
-    font-size: 8px;
-    color: #8c988e;
+    font-size: 13px;
+    color: #4ade80;
     -unity-font-style: bold;
     letter-spacing: 0.5px;
-    margin-top: 1px;
 }
 
 /* ========================================================================= */
@@ -374,18 +371,24 @@ Button {
 /* ========================================================================= */
 
 .contact-call-badge {
-    font-size: 9px;
+    padding: 1px 5px;
+    font-size: 13px;
+    color: #86efac;
     -unity-font-style: bold;
-    padding: 3px 6px;
-    flex-shrink: 0;
-    -unity-text-align: middle-center;
-    letter-spacing: 0;
+    letter-spacing: 0.5px;
+    background-color: #121c13;
 
     border-top-width: 1px;
     border-left-width: 1px;
     border-right-width: 1px;
     border-bottom-width: 1px;
+    border-top-color: #2b3d29;
+    border-left-color: #2b3d29;
+    border-right-color: #0b1209;
+    border-bottom-color: #0b1209;
+
     border-radius: 0;
+    flex-shrink: 0;
 }
 
 .contact-call-badge.badge-call {
@@ -564,31 +567,17 @@ Button {
 }
 
 .modal-system-title {
-    font-size: 14px;
-    color: #cbd0c3;
-    -unity-font-style: bold;
+    font-size: 17px;
+    color: #cbd5e1;
     letter-spacing: 1px;
+    -unity-font-style: bold;
 }
 
 .modal-category-badge {
-    font-size: 13px;
-    color: #d6e2cc;
-
-    background-color: #263324;
-
-    border-top-width: 1px;
-    border-left-width: 1px;
-    border-right-width: 1px;
-    border-bottom-width: 1px;
-    border-top-color: #6b8562;
-    border-left-color: #6b8562;
-    border-right-color: #10150e;
-    border-bottom-color: #10150e;
-
-    border-radius: 0;
-
-    padding: 2px 8px;
+    font-size: 15px;
+    color: #94a3b8;
     -unity-font-style: bold;
+    letter-spacing: 0.5px;
 }
 
 /* ========================================================================= */
@@ -656,11 +645,11 @@ Button {
 }
 
 .modal-action-title {
-    font-size: 23px;
+    font-size: 26px;
     color: #ffffff;
     -unity-font-style: bold;
     white-space: normal;
-    line-height: 27px;
+    line-height: 28px;
     letter-spacing: 0.5px;
 }
 
@@ -692,10 +681,10 @@ Button {
 }
 
 .modal-action-desc {
-    font-size: 22px;
+    font-size: 24px;
     color: #e4eee0;
     white-space: normal;
-    line-height: 30px;
+    line-height: 28px;
     -unity-font-style: bold;
     -unity-text-align: middle-left;
     margin: 0;
@@ -740,7 +729,7 @@ Button {
 
 .modal-back-btn {
     flex-grow: 1;
-    font-size: 18px;
+    font-size: 21px;
 
     background-color: #3b444a;
     color: #dfe3df;
@@ -762,7 +751,7 @@ Button {
 
 .modal-exec-btn {
     flex-grow: 1.5;
-    font-size: 22px;
+    font-size: 24px;
 
     background-color: #3d6333;
     color: #f5fcf0;

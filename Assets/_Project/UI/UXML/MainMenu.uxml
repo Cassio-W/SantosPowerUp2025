@@ -26,6 +26,11 @@
                         <ui:Label text="Animação e Design de Áudio" class="credits-role"/>
                         <ui:Label text="Guilherme Torres" class="credits-names"/>
                     </ui:VisualElement>
+                    <ui:VisualElement class="credits-section" style="margin-top: 10px;">
+                        <ui:Label text="Tipografia (Licença SIL OFL 1.1)" class="credits-role" style="font-size: 16px;"/>
+                        <ui:Label text="Bree Serif (TypeTogether) • Montserrat (Julieta Ulanovsky)" class="credits-names" style="font-size: 14px; margin-bottom: 2px;"/>
+                        <ui:Label text="VT323 (Peter Hull) • Alex Brush (TypeSETit) • Liberation Sans" class="credits-names" style="font-size: 14px;"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement class="credits-footer">
                     <ui:Button name="btn-credits-close" text="" picking-mode="Position" class="btn-credits-close"/>

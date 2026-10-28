@@ -70,6 +70,6 @@ MonoBehaviour:
     scheduleEventId: 
     startInvestment: {fileID: 0}
     startInvestmentId: 
-    triggersWar: 2
+    triggersWar: 0
     warTargetId: 
   conditions: []

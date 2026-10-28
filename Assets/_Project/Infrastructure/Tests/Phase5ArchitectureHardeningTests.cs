@@ -446,5 +446,133 @@ namespace Mandato.Infrastructure.Tests
                 UnityEngine.Object.DestroyImmediate(cityGo);
             }
         }
+
+        [Test]
+        public void EnvironmentPresentation_SpawnInvestmentConstruction_InstantiatesAtTargetPositionAndReplacesOnCompletion()
+        {
+            var cityGo = new GameObject("Cidade");
+            var envGo = new GameObject("EnvironmentPresentation");
+            var envPres = envGo.AddComponent<EnvironmentPresentation>();
+            envPres.cityTransform = cityGo.transform;
+
+            var constructionPrefab = new GameObject("ConstrucaoPrefab");
+            constructionPrefab.transform.localScale = Vector3.one;
+            envPres.constructionPrefab = constructionPrefab;
+
+            var realPropPrefab = new GameObject("RealFactoryProp");
+            realPropPrefab.transform.position = new Vector3(32.28f, 5.68f, 33.51f);
+            realPropPrefab.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
+
+            try
+            {
+                // 1. Spawna a construção no local do prop real
+                var constructionGo = envPres.SpawnInvestmentConstruction("inv_fabrica", realPropPrefab);
+                Assert.IsNotNull(constructionGo, "Construção deve ter sido instanciada.");
+                Assert.IsTrue(envPres.HasActiveConstruction("inv_fabrica"));
+                Assert.AreEqual(cityGo.transform, constructionGo.transform.parent, "Construção deve ser filha da cidade.");
+                Assert.AreEqual(new Vector3(32.28f, 5.68f, 33.51f), constructionGo.transform.localPosition, "Construção deve assumir as coordenadas do prop real.");
+
+                // 2. Conclui o investimento: troca o prefab de construção pela estrutura real
+                var realGo = envPres.CompleteInvestmentConstruction("inv_fabrica", realPropPrefab);
+                Assert.IsNotNull(realGo, "Estrutura real deve ter sido instanciada.");
+                Assert.IsFalse(envPres.HasActiveConstruction("inv_fabrica"), "Construção deve ter sido removida do registro ativo.");
+                Assert.AreEqual(1, cityGo.transform.childCount, "Apenas a estrutura real deve restar na cidade (construção foi destruída).");
+                var child = cityGo.transform.GetChild(0).gameObject;
+                Assert.IsTrue(child.name.StartsWith("RealFactoryProp"));
+            }
+            finally
+            {
+                envPres.ClearSpawnedProps();
+                UnityEngine.Object.DestroyImmediate(realPropPrefab);
+                UnityEngine.Object.DestroyImmediate(constructionPrefab);
+                UnityEngine.Object.DestroyImmediate(envGo);
+                UnityEngine.Object.DestroyImmediate(cityGo);
+            }
+        }
+
+        [Test]
+        public void RunPresentationCoordinator_InvestmentProposalAccepted_SpawnsConstructionAndSwapsToRealStructureOnCompletion()
+        {
+            var cityGo = new GameObject("Cidade");
+            var coordGo = new GameObject("PresentationCoordinator");
+            var envPres = coordGo.AddComponent<EnvironmentPresentation>();
+            envPres.cityTransform = cityGo.transform;
+
+            var constructionPrefab = new GameObject("ConstrucaoPrefab");
+            constructionPrefab.transform.localScale = Vector3.one;
+            envPres.constructionPrefab = constructionPrefab;
+
+            var coord = coordGo.AddComponent<RunPresentationCoordinator>();
+            coord.environment = envPres;
+            coord.constructionPrefab = constructionPrefab;
+
+            var realPropPrefab = new GameObject("RealSolarProp");
+            realPropPrefab.transform.position = new Vector3(10f, 2f, 20f);
+
+            var invDef = LongTermInvestmentDefinition.CreateRuntimeInstance(
+                id: "inv_solar",
+                title: "Investimento Solar",
+                description: "Test",
+                durationMonths: 6
+            );
+            invDef.completionCityPropPrefab = realPropPrefab;
+
+            var leftChoice = new ChoiceDefinition("Sim", new StatBlock(0, 0, 0, 0, 0))
+            {
+                startInvestment = invDef,
+                startInvestmentId = "inv_solar"
+            };
+            var rightChoice = new ChoiceDefinition("Não", new StatBlock(0, 0, 0, 0, 0));
+
+            var card = CardDefinition.CreateRuntimeInstance("card_solar", "Energia Solar", "Construir parque solar?", leftChoice, rightChoice);
+
+            var stateMachine = new RunStateMachine();
+            var cardCatalog = new Dictionary<string, CardDefinition> { { "card_solar", card } };
+            var invCatalog = new Dictionary<string, LongTermInvestmentDefinition> { { "inv_solar", invDef } };
+
+            try
+            {
+                coord.Bind(stateMachine, cardCatalog, invCatalog);
+
+                // 1. Apresenta as consequências da decisão de aceitar a carta (iniciando o investimento)
+                var report = new ResolutionReport
+                {
+                    cardId = "card_solar",
+                    choiceIndex = 0,
+                    startedInvestmentId = "inv_solar"
+                };
+
+                coord.PresentConsequences(report);
+
+                // Verifica que a construção foi instanciada
+                Assert.IsTrue(envPres.HasActiveConstruction("inv_solar"), "Canteiro de obras deve estar ativo após aprovação.");
+                Assert.AreEqual(1, cityGo.transform.childCount, "Construção deve estar na cidade.");
+                Assert.IsTrue(cityGo.transform.GetChild(0).name.StartsWith("ConstrucaoPrefab"));
+
+                // 2. Meses depois, o investimento completa
+                var monthlyReport = new MonthlyEffectsReport
+                {
+                    isSuccess = true,
+                    completedInvestmentIds = new List<string> { "inv_solar" }
+                };
+
+                stateMachine.TriggerMonthAdvanced(monthlyReport);
+
+                // Verifica que a construção foi trocada pela estrutura real
+                Assert.IsFalse(envPres.HasActiveConstruction("inv_solar"), "Canteiro de obras deve ter sido removido.");
+                Assert.AreEqual(1, cityGo.transform.childCount, "Apenas a estrutura real deve estar na cidade.");
+                Assert.IsTrue(cityGo.transform.GetChild(0).name.StartsWith("RealSolarProp"));
+            }
+            finally
+            {
+                envPres.ClearSpawnedProps();
+                UnityEngine.Object.DestroyImmediate(card);
+                UnityEngine.Object.DestroyImmediate(invDef);
+                UnityEngine.Object.DestroyImmediate(realPropPrefab);
+                UnityEngine.Object.DestroyImmediate(constructionPrefab);
+                UnityEngine.Object.DestroyImmediate(coordGo);
+                UnityEngine.Object.DestroyImmediate(cityGo);
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 8442c286baa868843921e18d24614a97
+guid: 8997fcef2d6827d4282f70ca2fbdf7d1
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Nexa
+  - Montserrat
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

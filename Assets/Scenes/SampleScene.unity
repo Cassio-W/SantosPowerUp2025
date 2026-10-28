@@ -1679,8 +1679,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 12 / 2028
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d59872a89853d1a45bede4cfc174709c, type: 2}
-  m_sharedMaterial: {fileID: 5028801748839390269, guid: d59872a89853d1a45bede4cfc174709c, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f30e264ba6754b4fa2e426ab1923116, type: 2}
+  m_sharedMaterial: {fileID: 673619768988871688, guid: 8f30e264ba6754b4fa2e426ab1923116, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1935,8 +1935,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Resposta Direita
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
-  m_sharedMaterial: {fileID: 5665395333817470328, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
+  m_sharedMaterial: {fileID: -1169905613997486614, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2147,7 +2147,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 8442c286baa868843921e18d24614a97, type: 3}
+    m_Font: {fileID: 12800000, guid: 8997fcef2d6827d4282f70ca2fbdf7d1, type: 3}
     m_FontSize: 48
     m_FontStyle: 0
     m_BestFit: 0
@@ -3879,8 +3879,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Resposta Esquerda
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
-  m_sharedMaterial: {fileID: 5665395333817470328, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
+  m_sharedMaterial: {fileID: -1169905613997486614, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -4625,8 +4625,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Proposta aqui
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
-  m_sharedMaterial: {fileID: 5665395333817470328, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
+  m_sharedMaterial: {fileID: -1169905613997486614, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -5256,8 +5256,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Proposta aqui
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
-  m_sharedMaterial: {fileID: 5665395333817470328, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
+  m_sharedMaterial: {fileID: -1169905613997486614, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

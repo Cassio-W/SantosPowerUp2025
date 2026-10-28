@@ -5833,7 +5833,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6119852183486003203, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2142059597}
+    - targetCorrespondingSourceObject: {fileID: 6119852183486003203, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2142059598}
   m_SourcePrefab: {fileID: 100100000, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
+--- !u!23 &372495839 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -1446516740782132657, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
+  m_PrefabInstance: {fileID: 372495838}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &372841034
 GameObject:
   m_ObjectHideFlags: 0
@@ -6122,9 +6130,15 @@ MonoBehaviour:
   hoverScaleMultiplier: 1.08
   hoverLiftOffset: {x: 0, y: 0, z: 0}
   hoverTransitionSpeed: 12
+  enableHoverHop: 1
+  hoverHopIntensity: 1
+  hoverHopOffset: {x: 0, y: 0.035, z: 0}
+  hoverHopDuration: 0.15
+  hoverHopPunchScale: {x: 1.02, y: 1.06, z: 1.02}
   enableOutlineHighlight: 1
   highlightOutlineColor: {r: 1, g: 0.85, b: 0.15, a: 1}
-  targetRenderers: []
+  targetRenderers:
+  - {fileID: 474556742}
   audioSource: {fileID: 0}
   hoverSound: {fileID: 0}
   hoverSoundVolume: 0.8
@@ -6134,6 +6148,7 @@ MonoBehaviour:
   unfocusSoundVolume: 0.8
   allowClickToFocus: 1
   unfocusOnSecondClick: 0
+  allowUnfocusOnClickOutside: 1
   onHoverEnter:
     m_PersistentCalls:
       m_Calls: []
@@ -7198,6 +7213,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WorldSpaceUIInteraction
   uiDocument: {fileID: 641589243}
   interactionCamera: {fileID: 0}
+  interactableLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  maxRaycastDistance: 50
+  flipX: 0
+  flipY: 1
+  swapXY: 0
+  uvOffset: {x: 0, y: 0}
+  uvScale: {x: 1, y: 1}
+  requireFocusWhenFocusablePresent: 1
+  showDebugLogs: 0
+  showOnScreenOverlay: 0
+  drawGizmos: 1
 --- !u!114 &641589242
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7459,8 +7487,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 12 / 2028
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d59872a89853d1a45bede4cfc174709c, type: 2}
-  m_sharedMaterial: {fileID: 5028801748839390269, guid: d59872a89853d1a45bede4cfc174709c, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 8f30e264ba6754b4fa2e426ab1923116, type: 2}
+  m_sharedMaterial: {fileID: 673619768988871688, guid: 8f30e264ba6754b4fa2e426ab1923116, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -7764,8 +7792,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Resposta Direita
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
-  m_sharedMaterial: {fileID: 5665395333817470328, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
+  m_sharedMaterial: {fileID: -1169905613997486614, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -8003,7 +8031,15 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: eb4a7ca3713ca394b844a7238f8482b8, type: 3}
       insertIndex: -1
       addedObject: {fileID: 893990537}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: eb4a7ca3713ca394b844a7238f8482b8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 893990541}
   m_SourcePrefab: {fileID: 100100000, guid: eb4a7ca3713ca394b844a7238f8482b8, type: 3}
+--- !u!23 &753658467 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: eb4a7ca3713ca394b844a7238f8482b8, type: 3}
+  m_PrefabInstance: {fileID: 753658466}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &842853977
 GameObject:
   m_ObjectHideFlags: 0
@@ -8062,7 +8098,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 8442c286baa868843921e18d24614a97, type: 3}
+    m_Font: {fileID: 12800000, guid: 8997fcef2d6827d4282f70ca2fbdf7d1, type: 3}
     m_FontSize: 48
     m_FontStyle: 0
     m_BestFit: 0
@@ -8146,9 +8182,16 @@ MonoBehaviour:
   hoverScaleMultiplier: 1.08
   hoverLiftOffset: {x: 0, y: 0, z: 0}
   hoverTransitionSpeed: 12
+  enableHoverHop: 1
+  hoverHopIntensity: 1
+  hoverHopOffset: {x: 0, y: 0.035, z: 0}
+  hoverHopDuration: 0.15
+  hoverHopPunchScale: {x: 1.02, y: 1.06, z: 1.02}
   enableOutlineHighlight: 1
   highlightOutlineColor: {r: 2, g: 1.7, b: 0.3, a: 1}
-  targetRenderers: []
+  targetRenderers:
+  - {fileID: 753658467}
+  - {fileID: 641589238}
   audioSource: {fileID: 0}
   hoverSound: {fileID: 0}
   hoverSoundVolume: 0.8
@@ -8158,6 +8201,7 @@ MonoBehaviour:
   unfocusSoundVolume: 0.8
   allowClickToFocus: 1
   unfocusOnSecondClick: 1
+  allowUnfocusOnClickOutside: 1
   onHoverEnter:
     m_PersistentCalls:
       m_Calls: []
@@ -8178,6 +8222,28 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: eb4a7ca3713ca394b844a7238f8482b8, type: 3}
   m_PrefabInstance: {fileID: 753658466}
   m_PrefabAsset: {fileID: 0}
+--- !u!64 &893990541
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 893990536}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -5495902117074765545, guid: eb4a7ca3713ca394b844a7238f8482b8, type: 3}
 --- !u!1 &926154383
 GameObject:
   m_ObjectHideFlags: 0
@@ -8461,6 +8527,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CameraFocusManager
   targetCamera: {fileID: 0}
+  screenUIDocuments: []
   defaultCameraAnchor: {fileID: 0}
   autoAdjustNearClipPlane: 1
   targetNearClipPlane: 0.02
@@ -8638,9 +8705,15 @@ MonoBehaviour:
   hoverScaleMultiplier: 1.08
   hoverLiftOffset: {x: 0, y: 0, z: 0}
   hoverTransitionSpeed: 12
+  enableHoverHop: 1
+  hoverHopIntensity: 1
+  hoverHopOffset: {x: 0, y: 0.035, z: 0}
+  hoverHopDuration: 0.15
+  hoverHopPunchScale: {x: 1.02, y: 1.06, z: 1.02}
   enableOutlineHighlight: 0
   highlightOutlineColor: {r: 2, g: 1.7, b: 0.3, a: 1}
-  targetRenderers: []
+  targetRenderers:
+  - {fileID: 1024815127}
   audioSource: {fileID: 0}
   hoverSound: {fileID: 0}
   hoverSoundVolume: 0.8
@@ -8650,6 +8723,7 @@ MonoBehaviour:
   unfocusSoundVolume: 0.8
   allowClickToFocus: 1
   unfocusOnSecondClick: 1
+  allowUnfocusOnClickOutside: 1
   onHoverEnter:
     m_PersistentCalls:
       m_Calls: []
@@ -9513,13 +9587,40 @@ MonoBehaviour:
   corruptionVolume: {fileID: 1402890043}
   corruptionStartThreshold: 0
   corruptionMaxThreshold: 100
+  fireVolume: {fileID: 0}
+  warFireStartThreshold: 50
+  fireParticlesContainer: {fileID: 0}
+  fireParticleObjects: []
   skyMaterial: {fileID: 2100000, guid: 6e3ecc34cbd56824297623dc77531785, type: 2}
   pollutionHue: 58
   maxPollutionSaturation: 60
   corruptionHue: 0
   maxCorruptionSaturation: 100
   transitionDuration: 1.2
-  easeType: 4
+  transitionCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   useUnscaledTime: 1
 --- !u!1001 &1417177513
 PrefabInstance:
@@ -10069,8 +10170,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Resposta Esquerda
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
-  m_sharedMaterial: {fileID: 5665395333817470328, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
+  m_sharedMaterial: {fileID: -1169905613997486614, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -10859,8 +10960,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Proposta aqui
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
-  m_sharedMaterial: {fileID: 5665395333817470328, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
+  m_sharedMaterial: {fileID: -1169905613997486614, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -11568,8 +11669,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Proposta aqui
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
-  m_sharedMaterial: {fileID: 5665395333817470328, guid: aee1472b6b9525047b9f843fb64580ef, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
+  m_sharedMaterial: {fileID: -1169905613997486614, guid: bda5d12f982bfec4b95b54b520480c48, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -11759,9 +11860,16 @@ MonoBehaviour:
   hoverScaleMultiplier: 1.08
   hoverLiftOffset: {x: 0, y: 0, z: 0}
   hoverTransitionSpeed: 12
+  enableHoverHop: 1
+  hoverHopIntensity: 1
+  hoverHopOffset: {x: 0, y: 0.035, z: 0}
+  hoverHopDuration: 0.15
+  hoverHopPunchScale: {x: 1.02, y: 1.06, z: 1.02}
   enableOutlineHighlight: 1
   highlightOutlineColor: {r: 1, g: 0.85, b: 0.15, a: 1}
-  targetRenderers: []
+  targetRenderers:
+  - {fileID: 372495839}
+  - {fileID: 1024815127}
   audioSource: {fileID: 0}
   hoverSound: {fileID: 0}
   hoverSoundVolume: 0.8
@@ -11771,6 +11879,7 @@ MonoBehaviour:
   unfocusSoundVolume: 0.8
   allowClickToFocus: 1
   unfocusOnSecondClick: 1
+  allowUnfocusOnClickOutside: 1
   onHoverEnter:
     m_PersistentCalls:
       m_Calls: []
@@ -11786,6 +11895,28 @@ MonoBehaviour:
   onClicked:
     m_PersistentCalls:
       m_Calls: []
+--- !u!64 &2142059598
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2142059593}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 2876311854728113814, guid: 0ef387cd42d78c54fb41c741a373e452, type: 3}
 --- !u!73398921 &54565597385396501
 VFXRenderer:
   serializedVersion: 1

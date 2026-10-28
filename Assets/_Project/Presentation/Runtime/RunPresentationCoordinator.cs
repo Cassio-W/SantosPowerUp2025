@@ -21,6 +21,10 @@ namespace Mandato.Presentation
         public Vector3 defaultExitPosition = new Vector3(5.85f, 0f, 3.65f);
         public List<GameObject> npcPrefabs = new List<GameObject>();
 
+        [Header("Construções e Investimentos")]
+        [Tooltip("Prefab do canteiro de obras exibido enquanto o investimento estiver sendo construído.")]
+        public GameObject constructionPrefab;
+
         public event Action<CardDefinition> OnProposalOnDesk;
         public event Action<ResolutionReport> OnConsequencesFinished;
 
@@ -43,6 +47,11 @@ namespace Mandato.Presentation
                 {
                     environment = gameObject.AddComponent<EnvironmentPresentation>();
                 }
+            }
+
+            if (environment != null && constructionPrefab != null && environment.constructionPrefab == null)
+            {
+                environment.constructionPrefab = constructionPrefab;
             }
         }
 
@@ -87,7 +96,20 @@ namespace Mandato.Presentation
 
         private void HandleMonthAdvanced(MonthlyEffectsReport report)
         {
-            if (report == null || report.completedInvestmentIds == null || report.completedInvestmentIds.Count == 0)
+            if (report == null) return;
+
+            if (environment != null && report.cancelledInvestmentIds != null)
+            {
+                foreach (var invId in report.cancelledInvestmentIds)
+                {
+                    if (!string.IsNullOrEmpty(invId))
+                    {
+                        environment.CancelInvestmentConstruction(invId);
+                    }
+                }
+            }
+
+            if (report.completedInvestmentIds == null || report.completedInvestmentIds.Count == 0)
                 return;
 
             if (environment == null) return;
@@ -104,7 +126,7 @@ namespace Mandato.Presentation
 
                 if (invDef != null && invDef.completionCityPropPrefab != null)
                 {
-                    environment.SpawnCityProp(invDef.completionCityPropPrefab);
+                    environment.CompleteInvestmentConstruction(invDef.id, invDef.completionCityPropPrefab);
                 }
             }
         }
@@ -268,12 +290,38 @@ namespace Mandato.Presentation
                     cardDef = stateMachine.CurrentCard;
                 }
 
+                ChoiceDefinition chosenChoice = null;
                 if (cardDef != null)
                 {
-                    var chosenChoice = cardDef.GetChoice(report.choiceIndex);
+                    chosenChoice = cardDef.GetChoice(report.choiceIndex);
                     if (chosenChoice != null && chosenChoice.cityPropPrefab != null)
                     {
                         environment.SpawnCityProp(chosenChoice.cityPropPrefab);
+                    }
+                }
+
+                // Se a escolha iniciou um investimento a longo prazo, spawna a construção interpolando no local
+                string startedInvId = report.startedInvestmentId;
+                if (string.IsNullOrEmpty(startedInvId) && chosenChoice != null)
+                {
+                    startedInvId = chosenChoice.GetStartInvestmentId();
+                }
+
+                if (!string.IsNullOrEmpty(startedInvId))
+                {
+                    LongTermInvestmentDefinition invDef = null;
+                    if (investmentCatalog != null)
+                    {
+                        investmentCatalog.TryGetValue(startedInvId, out invDef);
+                    }
+                    if (invDef == null && chosenChoice != null && chosenChoice.startInvestment != null)
+                    {
+                        invDef = chosenChoice.startInvestment;
+                    }
+
+                    if (invDef != null && invDef.completionCityPropPrefab != null)
+                    {
+                        environment.SpawnInvestmentConstruction(invDef.id, invDef.completionCityPropPrefab);
                     }
                 }
             }
