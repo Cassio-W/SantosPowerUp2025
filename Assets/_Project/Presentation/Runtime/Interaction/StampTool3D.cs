@@ -27,8 +27,17 @@ namespace Mandato.Presentation
         [Tooltip("Câmera utilizada para projetar o raio do mouse. Se vazia, utiliza Camera.main.")]
         [SerializeField] private Camera targetCamera;
 
-        [Tooltip("Distância (em metros) que o carimbo flutua acima do colisor/papel enquanto o jogador mira.")]
-        [SerializeField] [Range(0.05f, 0.40f)] private float hoverHeight = 0.15f;
+        [Tooltip("Referência opcional ao papel de proposta para cálculo da superfície de repouso. Se vazio, busca automaticamente na cena.")]
+        [SerializeField] private PaperFocusableObject paperTarget;
+
+        [Tooltip("Distância (em metros) que o carimbo flutua acima da superfície do papel/mesa enquanto o jogador mira.")]
+        [SerializeField] [Range(0.01f, 0.60f)] private float hoverHeight = 0.15f;
+
+        [Tooltip("Se ativo, trava a elevação mundial absoluta do carimbo no valor de 'fixedElevationY' em vez de somar à altura da superfície.")]
+        [SerializeField] private bool useFixedElevation = false;
+
+        [Tooltip("Elevação mundial fixa (Y) do carimbo no espaço da cena (utilizado quando 'useFixedElevation' estiver ativo).")]
+        [SerializeField] private float fixedElevationY = 1.25f;
 
         [Tooltip("Ajuste fino de contato no colisor ao carimbar (0 = toque na superfície exata do ponto de impacto).")]
         [SerializeField] [Range(-0.05f, 0.05f)] private float stampTouchOffset = 0.0f;
@@ -70,6 +79,9 @@ namespace Mandato.Presentation
         public bool IsInspectActive => isInspectActive;
         public bool HasSubmittedDecision => hasSubmittedDecision;
         public float HoverHeight { get => hoverHeight; set => hoverHeight = value; }
+        public bool UseFixedElevation { get => useFixedElevation; set => useFixedElevation = value; }
+        public float FixedElevationY { get => fixedElevationY; set => fixedElevationY = value; }
+        public PaperFocusableObject PaperTarget { get => paperTarget; set => paperTarget = value; }
         public AudioClip StampSuccessSound { get => stampSuccessSound; set => stampSuccessSound = value; }
         public AudioClip StampDrySound { get => stampDrySound; set => stampDrySound = value; }
         public AudioClip DipSound { get => dipSound; set => dipSound = value; }
@@ -79,11 +91,34 @@ namespace Mandato.Presentation
         public event Action<bool, bool, Vector2> OnStampPreviewUpdated;
         public event Action<int> OnStampDecisionSubmitted;
 
+        /// <summary>
+        /// Retorna a elevação mundial consistente (Y) na qual o carimbo deve flutuar durante a mira.
+        /// </summary>
+        public float GetHoverElevation()
+        {
+            if (useFixedElevation)
+            {
+                return fixedElevationY;
+            }
+
+            float surfaceY = workingSurfaceY;
+            if (paperTarget != null)
+            {
+                surfaceY = paperTarget.GetTargetFocusedPosition().y;
+            }
+            return surfaceY + hoverHeight;
+        }
+
         private void Awake()
         {
             if (targetCamera == null)
             {
                 targetCamera = Camera.main;
+            }
+
+            if (paperTarget == null)
+            {
+                paperTarget = FindFirstObjectByType<PaperFocusableObject>(FindObjectsInactive.Exclude);
             }
 
             if (audioSource == null)
@@ -185,12 +220,19 @@ namespace Mandato.Presentation
                     returnRoutine = null;
                 }
 
-                // Inicializa a altura de referência da mesa/papel
-                workingSurfaceY = initialRestPosition.y;
-                var paper = FindFirstObjectByType<PaperFocusableObject>(FindObjectsInactive.Exclude);
-                if (paper != null)
+                if (paperTarget == null)
                 {
-                    workingSurfaceY = paper.GetTargetFocusedPosition().y;
+                    paperTarget = FindFirstObjectByType<PaperFocusableObject>(FindObjectsInactive.Exclude);
+                }
+
+                // Inicializa a altura de referência da mesa/papel
+                if (paperTarget != null)
+                {
+                    workingSurfaceY = paperTarget.GetTargetFocusedPosition().y;
+                }
+                else
+                {
+                    workingSurfaceY = initialRestPosition.y;
                 }
 
                 if (targetCamera == null) targetCamera = Camera.main;
@@ -317,31 +359,45 @@ namespace Mandato.Presentation
 
             if (!isPunching)
             {
-                Vector3 targetPos;
+                float targetHoverY = GetHoverElevation();
                 Vector3 camFwd = targetCamera.transform.forward;
                 Vector3 fwdOnDesk = Vector3.ProjectOnPlane(camFwd, Vector3.up).normalized;
                 if (fwdOnDesk.sqrMagnitude < 0.001f) fwdOnDesk = Vector3.forward;
 
+                Vector3 aimPoint;
+                Vector3 normal = Vector3.up;
+
                 if (hasHit)
                 {
-                    workingSurfaceY = hit.point.y;
-                    Vector3 normal = (hit.normal.y > 0.4f) ? hit.normal : Vector3.up;
-                    targetPos = hit.point + (Vector3.up * hoverHeight);
-                    currentAimRotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(camFwd, normal).normalized, normal);
+                    aimPoint = hit.point;
+                    if (hit.normal.y > 0.4f)
+                    {
+                        normal = hit.normal;
+                    }
                 }
                 else
                 {
-                    Plane deskPlane = new Plane(Vector3.up, new Vector3(0f, workingSurfaceY, 0f));
-                    if (deskPlane.Raycast(ray, out float enter))
+                    float refY = workingSurfaceY;
+                    if (paperTarget != null)
                     {
-                        targetPos = ray.GetPoint(enter) + (Vector3.up * hoverHeight);
+                        refY = paperTarget.GetTargetFocusedPosition().y;
+                    }
+
+                    Plane surfacePlane = new Plane(Vector3.up, new Vector3(0f, refY, 0f));
+                    if (surfacePlane.Raycast(ray, out float enter))
+                    {
+                        aimPoint = ray.GetPoint(enter);
                     }
                     else
                     {
-                        targetPos = transform.position;
+                        aimPoint = transform.position;
                     }
-                    currentAimRotation = Quaternion.LookRotation(fwdOnDesk, Vector3.up);
                 }
+
+                // Posiciona o carimbo exatamente acima do ponto de mira (X e Z alinhados ao papel/colisor),
+                // mantendo a elevação Y travada na altura configurada
+                Vector3 targetPos = new Vector3(aimPoint.x, targetHoverY, aimPoint.z);
+                currentAimRotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(camFwd, normal).normalized, normal);
 
                 transform.position = Vector3.Lerp(transform.position, targetPos, Time.unscaledDeltaTime * followSpeed);
                 transform.rotation = Quaternion.Slerp(transform.rotation, currentAimRotation, Time.unscaledDeltaTime * followSpeed);
@@ -523,9 +579,10 @@ namespace Mandato.Presentation
             transform.position = impactPos;
             onImpact?.Invoke();
 
-            // Retorno para a altura de hover acima da superfície
+            // Retorno para a altura de hover consistente configurada
             elapsed = 0f;
-            Vector3 liftedPos = impactPos + (Vector3.up * hoverHeight);
+            float targetHoverY = GetHoverElevation();
+            Vector3 liftedPos = new Vector3(impactPos.x, targetHoverY, impactPos.z);
             while (elapsed < liftDuration)
             {
                 elapsed += Time.unscaledDeltaTime;

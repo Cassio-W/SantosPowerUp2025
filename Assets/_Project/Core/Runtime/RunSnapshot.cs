@@ -16,14 +16,14 @@ namespace Mandato.Core
         public WarSnapshot War { get; }
 
         public RunSnapshot(
-            StatBlock stats,
-            PoliticalAxis politicalAxis,
-            int monthIndex,
-            string displayDate,
-            bool isOngoing,
-            bool isDefeat,
-            bool isVictory,
-            string terminationReason,
+            StatBlock stats = null,
+            PoliticalAxis politicalAxis = null,
+            int monthIndex = 0,
+            string displayDate = "",
+            bool isOngoing = true,
+            bool isDefeat = false,
+            bool isVictory = false,
+            string terminationReason = "",
             WarSnapshot war = null)
         {
             War = war ?? WarSnapshot.Inactive;

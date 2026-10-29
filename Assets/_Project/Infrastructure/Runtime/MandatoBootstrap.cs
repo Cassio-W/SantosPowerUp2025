@@ -64,6 +64,9 @@ namespace Mandato.Infrastructure
         [SerializeField] private KeyCode toggleDebugOverlayKey = KeyCode.F1;
         [SerializeField] private bool startDebugOverlayOpen = true;
 
+        [Tooltip("Exposição direta de todas as variáveis internas e de runtime da partida para inspeção e debug.")]
+        [SerializeField] private RunInspectorDebug inspectorDebug;
+
         [Header("Amarrações de Apresentação (Obrigatórias)")]
         [SerializeField] private ScenePresentationBindings presentationBindings = new ScenePresentationBindings();
 
@@ -85,6 +88,7 @@ namespace Mandato.Infrastructure
         public FlipPhoneCoordinator FlipPhoneCoordinator => flipPhoneCoordinator;
         public ScenePresentationBindings PresentationBindings => presentationBindings;
         public UIModalCoordinator ModalCoordinator => flowCoordinator?.ModalCoordinator;
+        public RunInspectorDebug InspectorDebug => inspectorDebug;
 
         private RunBootstrapResult bootstrapResult;
         private RunFlowCoordinator flowCoordinator;
@@ -204,6 +208,11 @@ namespace Mandato.Infrastructure
 
         private void Update()
         {
+            if (flowCoordinator != null && inspectorDebug != flowCoordinator.InspectorDebug)
+            {
+                inspectorDebug = flowCoordinator.InspectorDebug;
+            }
+
             var phone = presentationBindings?.FlipPhonePresenter;
             if (phone != null && phone.AllowKeyboardToggle && phone.IsInteractable && Input.GetKeyDown(phone.ToggleKey))
             {

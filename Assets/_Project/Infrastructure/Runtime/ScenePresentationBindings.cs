@@ -47,6 +47,11 @@ namespace Mandato.Infrastructure
         [SerializeField] private CalendarWallPresenter calendarPresenter;
         [SerializeField] private FocusableObject calendarFocusable;
 
+        [Header("Final da Partida / Cerimônia")]
+        [SerializeField] private Transform posCameraPalmas;
+        [SerializeField] private Transform posPalmas;
+        [SerializeField] private GameObject palmasPrefab;
+
         public RunPresentationCoordinator PresentationCoordinator => presentationCoordinator;
         public PaperDocumentPresenter PaperPresenter => paperPresenter;
         public RetroMonitorPresenter RetroMonitorPresenter => retroMonitorPresenter;
@@ -65,6 +70,9 @@ namespace Mandato.Infrastructure
         public InkPad3D RejectInkPad => rejectInkPad;
         public CalendarWallPresenter CalendarPresenter => calendarPresenter;
         public FocusableObject CalendarFocusable => calendarFocusable;
+        public Transform PosCameraPalmas => posCameraPalmas;
+        public Transform PosPalmas => posPalmas;
+        public GameObject PalmasPrefab => palmasPrefab;
 
         public bool Validate(out List<string> missingErrors)
         {

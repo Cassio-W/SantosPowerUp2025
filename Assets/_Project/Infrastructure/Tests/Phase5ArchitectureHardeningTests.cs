@@ -56,6 +56,9 @@ namespace Mandato.Infrastructure.Tests
             Assert.IsNull(bindings.CameraEffects);
             Assert.IsNull(bindings.CameraFocus);
             Assert.IsNull(bindings.DeskCallButton);
+            Assert.IsNull(bindings.PosCameraPalmas);
+            Assert.IsNull(bindings.PosPalmas);
+            Assert.IsNull(bindings.PalmasPrefab);
         }
 
         [Test]

@@ -35,12 +35,33 @@ namespace Mandato.Infrastructure
         [Tooltip("Timeout máximo de espera para a câmera retornar à visão da mesa.")]
         [SerializeField] private float cameraUnfocusWaitTimeout = 1.0f;
 
+        [Header("Final da Partida / Cerimônia")]
+        [Tooltip("Ponto de foco da câmera para a cena final de palmas.")]
+        [SerializeField] private Transform posCameraPalmas;
+        [Tooltip("Ponto de spawn do prefab de palmas na cena.")]
+        [SerializeField] private Transform posPalmas;
+        [Tooltip("Prefab de palmas instanciado ao final da partida.")]
+        [SerializeField] private GameObject palmasPrefab;
+        [Tooltip("Nome do interlocutor no diálogo pré-relatório final.")]
+        [SerializeField] private string endDialogueSpeaker = "ASSESSOR";
+        [Tooltip("Texto do diálogo de encerramento em caso de vitória/mandato cumprido.")]
+        [TextArea(2, 4)]
+        [SerializeField] private string victoryEndDialogueText = "Parabéns, Presidente! Você concluiu seu mandato com sucesso e liderou a nação através de grandes reformas e desafios.";
+        [Tooltip("Texto do diálogo de encerramento em caso de derrota.")]
+        [TextArea(2, 4)]
+        [SerializeField] private string defeatEndDialogueText = "Parabéns pelo empenho e dedicação, Presidente! Governar o país é uma missão árdua e você enfrentou grandes decisões até o fim do mandato.";
+
+        [Header("Telemetria e Debug In-Game (Inspector)")]
+        [Tooltip("Exibição e monitoramento em tempo real de todas as variáveis internas e estado da partida no Inspector.")]
+        [SerializeField] private RunInspectorDebug inspectorDebug = new RunInspectorDebug();
+
         private bool isAwaitingSpaceForNextNpc = false;
         private bool isPlayerHandRaised = false;
         private bool isPaperFocused = false;
         private bool isDismissingProposal = false;
         private bool isPcFocused = false;
         private bool isProcessingDecision = false;
+        private GameObject activePalmasInstance;
 
         public bool IsAwaitingSpaceForNextNpc => isAwaitingSpaceForNextNpc;
         public bool IsPlayerHandRaised => isPlayerHandRaised;
@@ -48,6 +69,37 @@ namespace Mandato.Infrastructure
         public bool IsDismissingProposal => isDismissingProposal;
         public bool IsPcFocused => isPcFocused;
         public bool IsProcessingDecision => isProcessingDecision;
+        public Transform PosCameraPalmas
+        {
+            get => GetPosCameraPalmas();
+            set => posCameraPalmas = value;
+        }
+        public Transform PosPalmas
+        {
+            get => GetPosPalmas();
+            set => posPalmas = value;
+        }
+        public GameObject PalmasPrefab
+        {
+            get => GetPalmasPrefab();
+            set => palmasPrefab = value;
+        }
+        public GameObject ActivePalmasInstance => activePalmasInstance;
+        public string EndDialogueSpeaker
+        {
+            get => endDialogueSpeaker;
+            set => endDialogueSpeaker = value;
+        }
+        public string VictoryEndDialogueText
+        {
+            get => victoryEndDialogueText;
+            set => victoryEndDialogueText = value;
+        }
+        public string DefeatEndDialogueText
+        {
+            get => defeatEndDialogueText;
+            set => defeatEndDialogueText = value;
+        }
         public float PostStampWaitDuration
         {
             get => postStampWaitDuration;
@@ -65,6 +117,7 @@ namespace Mandato.Infrastructure
             get => enableDecisionHoverPreview;
             set => enableDecisionHoverPreview = value;
         }
+        public RunInspectorDebug InspectorDebug => inspectorDebug;
 
         public void Initialize(
             RunStateMachine stateMachine,
@@ -201,6 +254,8 @@ namespace Mandato.Infrastructure
 
         private void OnDestroy()
         {
+            CleanupEndingVisuals();
+
             if (modalCoordinator != null)
                 modalCoordinator.OnContextChanged -= HandleContextChanged;
 
@@ -583,6 +638,16 @@ namespace Mandato.Infrastructure
 
         private void Update()
         {
+            inspectorDebug?.UpdateFrom(
+                stateMachine,
+                catalog,
+                modalCoordinator,
+                isPlayerHandRaised,
+                isAwaitingSpaceForNextNpc,
+                OnInspectorStatsModified,
+                OnInspectorCalendarModified
+            );
+
             bool spaceOrEnterDown = Input.GetKeyDown(callNextNpcKey) ||
                                     Input.GetKeyDown(KeyCode.Space) ||
                                     Input.GetKeyDown(KeyCode.Return) ||
@@ -608,6 +673,130 @@ namespace Mandato.Infrastructure
             else if (spaceOrEnterUp)
             {
                 bindings?.DeskCallButton?.ReleasePress();
+            }
+        }
+
+        private void OnInspectorStatsModified()
+        {
+            SyncPresenters(applyCameraEffects: true, instantCamera: true);
+        }
+
+        private void OnInspectorCalendarModified()
+        {
+            SyncPresenters(applyCameraEffects: false, instantCamera: true);
+        }
+
+        [ContextMenu("Debug/Calendário: Avançar 1 Mês (+1)")]
+        public void DebugAdvanceOneMonth()
+        {
+            if (stateMachine?.RunState?.calendar != null)
+            {
+                SetCalendarMonth(stateMachine.RunState.calendar.currentMonthIndex + 1);
+            }
+        }
+
+        [ContextMenu("Debug/Calendário: Retroceder 1 Mês (-1)")]
+        public void DebugRewindOneMonth()
+        {
+            if (stateMachine?.RunState?.calendar != null)
+            {
+                SetCalendarMonth(stateMachine.RunState.calendar.currentMonthIndex - 1);
+            }
+        }
+
+        [ContextMenu("Debug/Calendário: Avançar 1 Ano (+12)")]
+        public void DebugAdvanceOneYear()
+        {
+            if (stateMachine?.RunState?.calendar != null)
+            {
+                SetCalendarMonth(stateMachine.RunState.calendar.currentMonthIndex + 12);
+            }
+        }
+
+        [ContextMenu("Debug/Calendário: Ir para Último Mês (48)")]
+        public void DebugJumpToLastMonth()
+        {
+            if (stateMachine?.RunState?.calendar != null)
+            {
+                SetCalendarMonth(stateMachine.RunState.calendar.totalMonths);
+            }
+        }
+
+        [ContextMenu("Debug/Calendário: Resetar para Mês 1")]
+        public void DebugResetCalendarToStart()
+        {
+            SetCalendarMonth(1);
+        }
+
+        public void SetCalendarMonth(int targetMonth)
+        {
+            if (stateMachine?.RunState?.calendar == null) return;
+            int clamped = Mathf.Clamp(targetMonth, 1, Math.Max(1, stateMachine.RunState.calendar.totalMonths));
+            stateMachine.RunState.calendar.currentMonthIndex = clamped;
+            if (inspectorDebug != null)
+            {
+                inspectorDebug.Calendar.currentMonthIndex = clamped;
+            }
+            SyncPresenters(applyCameraEffects: false, instantCamera: true);
+            Debug.Log($"[RunFlowCoordinator] Calendário alterado para o mês {clamped} ({stateMachine.RunState.calendar.DisplayDate})");
+        }
+
+        [ContextMenu("Debug/Aplicar Atributos do Inspector")]
+        public void DebugApplyInspectorAttributes()
+        {
+            if (stateMachine?.RunState?.stats != null && inspectorDebug != null)
+            {
+                var stats = stateMachine.RunState.stats;
+                stats.climaticChanges = Mathf.Clamp(inspectorDebug.Stats.climaticChanges, 0, 100);
+                stats.internationalRelations = Mathf.Clamp(inspectorDebug.Stats.internationalRelations, 0, 100);
+                stats.popularApproval = Mathf.Clamp(inspectorDebug.Stats.popularApproval, 0, 100);
+                stats.economy = Mathf.Clamp(inspectorDebug.Stats.economy, 0, 100);
+                stats.corruption = Mathf.Clamp(inspectorDebug.Stats.corruption, 0, 100);
+                SyncPresenters(applyCameraEffects: true, instantCamera: true);
+                Debug.Log("[RunFlowCoordinator] Atributos aplicados a partir do Inspector com sucesso!");
+            }
+        }
+
+        [ContextMenu("Debug/Setar Todos Atributos para 50")]
+        public void DebugSetStatsTo50()
+        {
+            if (stateMachine?.RunState?.stats != null)
+            {
+                var stats = stateMachine.RunState.stats;
+                stats.climaticChanges = 50;
+                stats.internationalRelations = 50;
+                stats.popularApproval = 50;
+                stats.economy = 50;
+                stats.corruption = 0;
+                SyncPresenters(applyCameraEffects: true, instantCamera: true);
+                Debug.Log("[RunFlowCoordinator] Atributos resetados para 50!");
+            }
+        }
+
+        [ContextMenu("Debug/Setar Todos Atributos para 100")]
+        public void DebugSetStatsTo100()
+        {
+            if (stateMachine?.RunState?.stats != null)
+            {
+                var stats = stateMachine.RunState.stats;
+                stats.climaticChanges = 100;
+                stats.internationalRelations = 100;
+                stats.popularApproval = 100;
+                stats.economy = 100;
+                stats.corruption = 0;
+                SyncPresenters(applyCameraEffects: true, instantCamera: true);
+                Debug.Log("[RunFlowCoordinator] Atributos maximizados para 100!");
+            }
+        }
+
+        [ContextMenu("Debug/Zerar Corrupção")]
+        public void DebugZeroCorruption()
+        {
+            if (stateMachine?.RunState?.stats != null)
+            {
+                stateMachine.RunState.stats.corruption = 0;
+                SyncPresenters(applyCameraEffects: true, instantCamera: true);
+                Debug.Log("[RunFlowCoordinator] Corrupção zerada!");
             }
         }
 
@@ -1049,7 +1238,100 @@ namespace Mandato.Infrastructure
 
             bindings?.CameraEffects?.ApplyWarEffects(finalSnapshot?.War, instant: false);
             bindings?.DecisionOverlayPresenter?.ClearChoices();
-            bindings?.EndScreenPresenter?.ShowEndScreen(termination, finalSnapshot);
+            bindings?.DecisionOverlayPresenter?.SetVisible(false);
+            bindings?.PaperPresenter?.SetPaperActive(false);
+            bindings?.PaperPresenter?.SetPaperInteractable(false);
+            bindings?.PresentationCoordinator?.DismissCurrentProposal();
+
+            StartRunEndingSequence(termination, finalSnapshot);
+        }
+
+        public void StartRunEndingSequence(RunTermination termination, RunSnapshot finalSnapshot)
+        {
+            Transform camTarget = GetPosCameraPalmas();
+            Transform spawnTarget = GetPosPalmas();
+            GameObject prefab = GetPalmasPrefab();
+
+            // 1. Move a câmera para a posição do objeto posCameraPalmas
+            var camFocus = bindings?.CameraFocus ?? CameraFocusManager.Instance ?? FindFirstObjectByType<CameraFocusManager>();
+            if (camFocus != null && camTarget != null)
+            {
+                camFocus.FocusPoint(camTarget, targetFov: -1f, duration: 1.0f);
+            }
+            else if (camTarget != null && Camera.main != null)
+            {
+                Camera.main.transform.SetPositionAndRotation(camTarget.position, camTarget.rotation);
+            }
+
+            // 2. Instancia o prefab "Palmas" na posição do objeto posPalmas
+            if (prefab != null && spawnTarget != null && activePalmasInstance == null)
+            {
+                activePalmasInstance = Instantiate(prefab, spawnTarget.position, spawnTarget.rotation);
+            }
+
+            // 3. Exibe o diálogo parabenizando o jogador (mesma UI do tutorial via NpcSpeechBubblePresenter)
+            var speechBubble = bindings?.SpeechBubblePresenter ?? FindFirstObjectByType<NpcSpeechBubblePresenter>(FindObjectsInactive.Include);
+            if (speechBubble != null)
+            {
+                string speaker = !string.IsNullOrWhiteSpace(endDialogueSpeaker)
+                    ? endDialogueSpeaker
+                    : (!string.IsNullOrWhiteSpace(tutorialManager?.TutorialNpcName) ? tutorialManager.TutorialNpcName : "ASSESSOR");
+
+                string dialogueText = termination.IsVictory
+                    ? (!string.IsNullOrWhiteSpace(victoryEndDialogueText) ? victoryEndDialogueText : "Parabéns, Presidente! Você concluiu seu mandato com sucesso e liderou a nação através de grandes reformas e desafios.")
+                    : (!string.IsNullOrWhiteSpace(defeatEndDialogueText) ? defeatEndDialogueText : "Parabéns pelo empenho e dedicação, Presidente! Governar o país é uma missão árdua e você enfrentou grandes decisões até o fim do mandato.");
+
+                speechBubble.Show(speaker, dialogueText, useTypewriter: false, onComplete: () =>
+                {
+                    // 4. Ao clicar em continuar, fecha o diálogo e abre o relatório com as palmas no fundo
+                    speechBubble.Hide();
+                    var endScreen = bindings?.EndScreenPresenter ?? FindFirstObjectByType<EndScreenPresenter>(FindObjectsInactive.Include);
+                    endScreen?.ShowEndScreen(termination, finalSnapshot);
+                });
+            }
+            else
+            {
+                var endScreen = bindings?.EndScreenPresenter ?? FindFirstObjectByType<EndScreenPresenter>(FindObjectsInactive.Include);
+                endScreen?.ShowEndScreen(termination, finalSnapshot);
+            }
+        }
+
+        public Transform GetPosCameraPalmas()
+        {
+            if (posCameraPalmas != null) return posCameraPalmas;
+            if (bindings?.PosCameraPalmas != null) return bindings.PosCameraPalmas;
+            var obj = GameObject.Find("posCameraPalmas");
+            if (obj != null) return obj.transform;
+            return null;
+        }
+
+        public Transform GetPosPalmas()
+        {
+            if (posPalmas != null) return posPalmas;
+            if (bindings?.PosPalmas != null) return bindings.PosPalmas;
+            var obj = GameObject.Find("posPalmas");
+            if (obj != null) return obj.transform;
+            return null;
+        }
+
+        public GameObject GetPalmasPrefab()
+        {
+            if (palmasPrefab != null) return palmasPrefab;
+            if (bindings?.PalmasPrefab != null) return bindings.PalmasPrefab;
+#if UNITY_EDITOR
+            var loaded = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Palmas.prefab");
+            if (loaded != null) return loaded;
+#endif
+            return null;
+        }
+
+        private void CleanupEndingVisuals()
+        {
+            if (activePalmasInstance != null)
+            {
+                Destroy(activePalmasInstance);
+                activePalmasInstance = null;
+            }
         }
 
         private void SaveCurrentRunState()
@@ -1131,6 +1413,7 @@ namespace Mandato.Infrastructure
 
         public void RestartRun()
         {
+            CleanupEndingVisuals();
             if (Application.isPlaying)
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().name);
@@ -1139,6 +1422,7 @@ namespace Mandato.Infrastructure
 
         public void ReturnToMenu()
         {
+            CleanupEndingVisuals();
             if (!string.IsNullOrEmpty(mainMenuSceneName) && Application.isPlaying)
             {
                 SceneManager.LoadScene(mainMenuSceneName);
