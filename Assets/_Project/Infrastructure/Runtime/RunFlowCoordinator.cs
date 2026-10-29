@@ -521,11 +521,14 @@ namespace Mandato.Infrastructure
             }
         }
 
-        public void DismissCurrentProposal()
+        private bool advanceMonthOnCurrentDismissal = true;
+
+        public void DismissCurrentProposal(bool advanceMonth = true)
         {
             if (stateMachine?.CurrentCard == null) return;
 
             isDismissingProposal = true;
+            advanceMonthOnCurrentDismissal = advanceMonth;
             bindings?.StampTool?.SetInspectActive(false);
             modalCoordinator?.SetContext(InteractionContext.DeskOverview);
 
@@ -558,13 +561,15 @@ namespace Mandato.Infrastructure
         {
             if (stateMachine == null) return;
 
-            stateMachine.DismissCurrentProposal(advanceMonth: false, catalog.Perks, catalog.Events);
+            stateMachine.DismissCurrentProposal(advanceMonthOnCurrentDismissal, catalog.Perks, catalog.Events, catalog.Investments);
 
             if (stateMachine.RunState.termination.IsDefeat || stateMachine.RunState.termination.IsVictory)
                 return;
 
             SyncPresenters(applyCameraEffects: true, instantCamera: false);
             isDismissingProposal = false;
+
+            SaveCurrentRunState();
 
             if (requireSpaceToCallNextNpc)
             {

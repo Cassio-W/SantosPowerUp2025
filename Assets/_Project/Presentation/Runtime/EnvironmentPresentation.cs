@@ -15,6 +15,16 @@ namespace Mandato.Presentation
         [Tooltip("Prefab do canteiro de obras instanciado enquanto um investimento estiver em andamento.")]
         public GameObject constructionPrefab;
 
+        [Header("Posicionamento de Estruturas")]
+        [Tooltip("Raiz opcional dos objetos de posicionamento (ex: 'posicaoEstruturas'). Se nulo, procura automaticamente.")]
+        public Transform structurePositionsRoot;
+
+        [Tooltip("Escala final do canteiro de obras. Se Vector3.zero, usa a escala gravada no prefab Construcao.")]
+        public Vector3 constructionCustomScale = Vector3.one;
+
+        [Tooltip("Duração da animação de escala do canteiro de obras em segundos.")]
+        public float constructionAnimationDuration = 2.5f;
+
         private readonly Dictionary<string, GameObject> activeConstructions = new Dictionary<string, GameObject>(StringComparer.OrdinalIgnoreCase);
 
         [Header("Áudios e Efeitos")]
@@ -171,16 +181,34 @@ namespace Mandato.Presentation
 
         public GameObject SpawnCityProp(GameObject propPrefab, Vector3? customTargetScale = null, float duration = 1.5f)
         {
+            return SpawnCityProp(propPrefab, null, customTargetScale, duration);
+        }
+
+        public GameObject SpawnCityProp(GameObject propPrefab, Transform anchor, Vector3? customTargetScale = null, float duration = 1.5f)
+        {
             if (propPrefab == null) return null;
 
-            ResolveCityTransform();
+            GameObject spawned;
+            Vector3 targetScale;
 
-            Transform parentTransform = cityTransform != null ? cityTransform : transform;
-            GameObject spawned = Instantiate(propPrefab, propPrefab.transform.position, propPrefab.transform.rotation);
-            spawned.transform.SetParent(parentTransform, false);
+            if (anchor != null)
+            {
+                spawned = Instantiate(propPrefab, anchor);
+                spawned.transform.localPosition = Vector3.zero;
+                spawned.transform.localRotation = Quaternion.identity;
+                targetScale = customTargetScale ?? (propPrefab.transform.localScale != Vector3.zero ? propPrefab.transform.localScale : Vector3.one);
+            }
+            else
+            {
+                ResolveCityTransform();
+                Transform parentTransform = cityTransform != null ? cityTransform : transform;
+                spawned = Instantiate(propPrefab, propPrefab.transform.position, propPrefab.transform.rotation);
+                spawned.transform.SetParent(parentTransform, false);
+                targetScale = customTargetScale ?? Vector3.one;
+            }
 
-            Vector3 startScale = spawned.transform.localScale;
-            Vector3 targetScale = customTargetScale ?? Vector3.one;
+            Vector3 startScale = Vector3.zero;
+            spawned.transform.localScale = startScale;
 
             if (Application.isPlaying)
             {
@@ -208,6 +236,40 @@ namespace Mandato.Presentation
             activeConstructions.Clear();
         }
 
+        public Transform GetAnchorForInvestment(string investmentId, GameObject targetPropPrefab = null)
+        {
+            if (structurePositionsRoot == null)
+            {
+                var found = GameObject.Find("posicaoEstruturas");
+                if (found != null) structurePositionsRoot = found.transform;
+            }
+
+            if (structurePositionsRoot == null) return null;
+
+            string id = investmentId?.ToLowerInvariant() ?? "";
+            string prefabName = targetPropPrefab != null ? targetPropPrefab.name.ToLowerInvariant() : "";
+
+            for (int i = 0; i < structurePositionsRoot.childCount; i++)
+            {
+                var child = structurePositionsRoot.GetChild(i);
+                string childName = child.name.ToLowerInvariant();
+
+                if (!string.IsNullOrEmpty(id) && (childName.Contains(id) || id.Contains(childName)))
+                    return child;
+
+                if ((id.Contains("fabrica") || prefabName.Contains("fabrica")) && childName.Contains("fabrica"))
+                    return child;
+                if ((id.Contains("eolica") || prefabName.Contains("turbina")) && (childName.Contains("turbina") || childName.Contains("eolica")))
+                    return child;
+                if ((id.Contains("solar") || prefabName.Contains("solar")) && childName.Contains("solar"))
+                    return child;
+                if ((id.Contains("nuclear") || id.Contains("usina") || prefabName.Contains("usina")) && (childName.Contains("usina") || childName.Contains("nuclear")))
+                    return child;
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Instancia o canteiro de obras pequeno e interpola até o tamanho normal no local onde a estrutura final do investimento será construída.
         /// </summary>
@@ -233,31 +295,55 @@ namespace Mandato.Presentation
                 activeConstructions.Remove(investmentId);
             }
 
-            ResolveCityTransform();
-            Transform parentTransform = cityTransform != null ? cityTransform : transform;
+            Transform anchor = GetAnchorForInvestment(investmentId, targetPropPrefab);
+            GameObject spawnedConstruction;
 
-            // Calcula o centro e base exatos para que os andaimes de Construcao envolvam a estrutura real no chão
-            Vector3 constOffset = GetConstructionBaseOffset(constructionPrefab);
-            Vector3 targetWorldBase = GetTargetPlacementWorldBase(targetPropPrefab, parentTransform);
-            Vector3 targetLocalBase = parentTransform != null
-                ? parentTransform.InverseTransformPoint(targetWorldBase)
-                : targetWorldBase;
+            if (anchor != null)
+            {
+                spawnedConstruction = Instantiate(constructionPrefab, anchor);
+                spawnedConstruction.transform.localPosition = Vector3.zero;
+                spawnedConstruction.transform.localRotation = Quaternion.identity;
+            }
+            else
+            {
+                ResolveCityTransform();
+                Transform parentTransform = cityTransform != null ? cityTransform : transform;
 
-            Vector3 spawnLocalPos = targetLocalBase - constOffset;
+                Vector3 spawnPos = targetPropPrefab.transform.position;
+                Quaternion spawnRot = targetPropPrefab.transform.rotation;
 
-            GameObject spawnedConstruction = Instantiate(constructionPrefab, parentTransform);
-            spawnedConstruction.transform.localPosition = spawnLocalPos;
-            spawnedConstruction.transform.localRotation = Quaternion.identity;
+                // Se a raiz do prop estiver em (0,0,0) e os filhos estiverem posicionados no mapa (ex: PaineisSolares ou Turbinas):
+                if (spawnPos.sqrMagnitude < 0.01f && targetPropPrefab.transform.childCount > 0)
+                {
+                    Vector3 sum = Vector3.zero;
+                    for (int i = 0; i < targetPropPrefab.transform.childCount; i++)
+                    {
+                        var child = targetPropPrefab.transform.GetChild(i);
+                        if (child != null)
+                        {
+                            sum += child.localPosition;
+                        }
+                    }
+                    spawnPos = sum / targetPropPrefab.transform.childCount;
+                    spawnRot = Quaternion.identity;
+                }
 
-            Vector3 targetScale = constructionPrefab.transform.localScale;
-            if (targetScale == Vector3.zero) targetScale = Vector3.one;
+                spawnedConstruction = Instantiate(constructionPrefab, spawnPos, spawnRot);
+                spawnedConstruction.transform.SetParent(parentTransform, false);
+            }
 
-            Vector3 startScale = Vector3.one * 0.001f;
+            Vector3 targetScale = constructionCustomScale != Vector3.zero
+                ? constructionCustomScale
+                : (constructionPrefab.transform.localScale != Vector3.zero ? constructionPrefab.transform.localScale : Vector3.one);
+
+            Vector3 startScale = Vector3.zero;
             spawnedConstruction.transform.localScale = startScale;
+
+            float animDuration = duration > 0f ? duration : constructionAnimationDuration;
 
             if (Application.isPlaying)
             {
-                StartCoroutine(AnimatePropScale(spawnedConstruction, startScale, targetScale, duration));
+                StartCoroutine(AnimatePropScale(spawnedConstruction, startScale, targetScale, animDuration));
             }
             else
             {
@@ -270,7 +356,7 @@ namespace Mandato.Presentation
             }
             spawnedProps.Add(spawnedConstruction);
 
-            Debug.Log($"<color=#00ffaa>[EnvironmentPresentation]</color> 🏗️ Canteiro de obras instanciado para investimento '{investmentId}' no local {spawnLocalPos}");
+            Debug.Log($"<color=#00ffaa>[EnvironmentPresentation]</color> 🏗️ Canteiro de obras instanciado para investimento '{investmentId}' no anchor '{(anchor != null ? anchor.name : "fallback")}'");
 
             return spawnedConstruction;
         }
@@ -290,7 +376,8 @@ namespace Mandato.Presentation
                 activeConstructions.Remove(investmentId);
             }
 
-            return SpawnCityProp(realPropPrefab, customTargetScale, duration);
+            Transform anchor = GetAnchorForInvestment(investmentId, realPropPrefab);
+            return SpawnCityProp(realPropPrefab, anchor, customTargetScale, duration);
         }
 
         /// <summary>
@@ -324,123 +411,6 @@ namespace Mandato.Presentation
             return activeConstructions.ContainsKey(investmentId) && activeConstructions[investmentId] != null;
         }
 
-        public static (Vector3 position, Quaternion rotation) GetEffectiveTargetPlacement(GameObject targetPrefab)
-        {
-            if (targetPrefab == null) return (Vector3.zero, Quaternion.identity);
-
-            Vector3 pos = targetPrefab.transform.position;
-            Quaternion rot = targetPrefab.transform.rotation;
-
-            // Se o prefab raiz estiver na origem (ou muito próximo) mas possuir filhos posicionados no mapa,
-            // calcula o centro dos filhos diretos para posicionar a obra no local real.
-            if (pos.sqrMagnitude < 0.01f && targetPrefab.transform.childCount > 0)
-            {
-                Vector3 sum = Vector3.zero;
-                int validCount = 0;
-                for (int i = 0; i < targetPrefab.transform.childCount; i++)
-                {
-                    var child = targetPrefab.transform.GetChild(i);
-                    if (child != null)
-                    {
-                        sum += child.localPosition;
-                        validCount++;
-                    }
-                }
-                if (validCount > 0)
-                {
-                    pos = sum / validCount;
-                }
-            }
-
-            return (pos, rot);
-        }
-
-        private static Vector3 GetChildrenCenterOffset(GameObject prefab)
-        {
-            if (prefab == null || prefab.transform.childCount == 0) return Vector3.zero;
-
-            Vector3 sum = Vector3.zero;
-            int count = 0;
-            for (int i = 0; i < prefab.transform.childCount; i++)
-            {
-                var child = prefab.transform.GetChild(i);
-                if (child != null)
-                {
-                    sum += child.localPosition;
-                    count++;
-                }
-            }
-
-            return count > 0 ? (sum / count) : Vector3.zero;
-        }
-
-        private static Vector3 GetConstructionBaseOffset(GameObject constPrefab)
-        {
-            if (constPrefab == null) return Vector3.zero;
-
-            Renderer[] rends = constPrefab.GetComponentsInChildren<Renderer>();
-            if (rends == null || rends.Length == 0)
-            {
-                return GetChildrenCenterOffset(constPrefab);
-            }
-
-            GameObject temp = Instantiate(constPrefab);
-            temp.transform.position = Vector3.zero;
-            temp.transform.rotation = Quaternion.identity;
-            temp.transform.localScale = Vector3.one;
-
-            Renderer[] tempRends = temp.GetComponentsInChildren<Renderer>();
-            Vector3 offset = Vector3.zero;
-            if (tempRends != null && tempRends.Length > 0)
-            {
-                Bounds b = new Bounds(tempRends[0].bounds.center, Vector3.zero);
-                for (int i = 0; i < tempRends.Length; i++)
-                {
-                    b.Encapsulate(tempRends[i].bounds);
-                }
-                offset = new Vector3(b.center.x, b.min.y, b.center.z);
-            }
-
-            SafeDestroy(temp);
-            return offset;
-        }
-
-        private static Vector3 GetTargetPlacementWorldBase(GameObject targetPrefab, Transform parentTransform)
-        {
-            if (targetPrefab == null) return parentTransform != null ? parentTransform.position : Vector3.zero;
-
-            Renderer[] rends = targetPrefab.GetComponentsInChildren<Renderer>();
-            if (rends == null || rends.Length == 0)
-            {
-                Vector3 fallbackPos = targetPrefab.transform.position;
-                return parentTransform != null ? parentTransform.TransformPoint(fallbackPos) : fallbackPos;
-            }
-
-            GameObject temp = Instantiate(targetPrefab, parentTransform);
-            temp.transform.localPosition = targetPrefab.transform.localPosition;
-            temp.transform.localRotation = targetPrefab.transform.localRotation;
-            temp.transform.localScale = targetPrefab.transform.localScale;
-
-            Renderer[] tempRends = temp.GetComponentsInChildren<Renderer>();
-            Vector3 worldBase;
-            if (tempRends != null && tempRends.Length > 0)
-            {
-                Bounds b = new Bounds(tempRends[0].bounds.center, Vector3.zero);
-                for (int i = 0; i < tempRends.Length; i++)
-                {
-                    b.Encapsulate(tempRends[i].bounds);
-                }
-                worldBase = new Vector3(b.center.x, b.min.y, b.center.z);
-            }
-            else
-            {
-                worldBase = temp.transform.position;
-            }
-
-            SafeDestroy(temp);
-            return worldBase;
-        }
-
         private static void SafeDestroy(GameObject obj)
         {
             if (obj == null) return;
@@ -463,7 +433,7 @@ namespace Mandato.Presentation
 
             while (elapsed < duration && prop != null)
             {
-                elapsed += Time.deltaTime;
+                elapsed += Time.unscaledDeltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
                 // Back ease out: s = 1.70158
                 float s = 1.70158f;
