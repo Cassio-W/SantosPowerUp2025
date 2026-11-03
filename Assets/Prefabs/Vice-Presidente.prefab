@@ -450,7 +450,7 @@ SkinnedMeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: a8bb24ecfb41add479ac171d5ff24641, type: 2}
-  - {fileID: 8103059519067986926, guid: febf6af7d5e49554d82f0112cf7fb9b6, type: 3}
+  - {fileID: 2100000, guid: a7d9052ab14a176408a50fa63a8e9392, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2374,6 +2374,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetPosition: {x: 0, y: 0, z: -1.5}
   startPosition: {x: 5.85, y: 0, z: 3.65}
+  walkSpeed: 2.5
   animator: {fileID: 4918129355175783735}
   walkAnimation: Walk03
   idleAnimation: Idle01
@@ -2757,7 +2758,7 @@ SkinnedMeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 8103059519067986926, guid: febf6af7d5e49554d82f0112cf7fb9b6, type: 3}
+  - {fileID: 2100000, guid: a7d9052ab14a176408a50fa63a8e9392, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -66,7 +66,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -2078137275540597551, guid: 995890ccfd7577243bae2a206f82e53e, type: 3}
+  - {fileID: 2100000, guid: 8b284594ab6d8ac4296abd9138f9d319, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1089,6 +1089,7 @@ MonoBehaviour:
   swapXY: 0
   uvOffset: {x: 0, y: 0}
   uvScale: {x: 1, y: 1}
+  requireFocusWhenFocusablePresent: 1
   showDebugLogs: 0
   showOnScreenOverlay: 0
   drawGizmos: 1
@@ -1474,7 +1475,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31a1e97f8892fc942a80dcf83b108854, type: 2}
+  - {fileID: 2100000, guid: 8b284594ab6d8ac4296abd9138f9d319, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

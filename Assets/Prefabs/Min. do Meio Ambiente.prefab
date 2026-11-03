@@ -2979,6 +2979,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   targetPosition: {x: 0, y: 0, z: -1.5}
   startPosition: {x: 5.85, y: 0, z: 3.65}
+  walkSpeed: 2.5
   animator: {fileID: 7499219289531563385}
   walkAnimation: WalkW
   idleAnimation: IdleW
