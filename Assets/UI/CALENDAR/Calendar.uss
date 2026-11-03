@@ -150,12 +150,14 @@
     transition-duration: 0.12s;
 }
 
+/* [TEMPORÁRIO] Hover desativado a pedido do usuário
 .year-nav-btn:hover,
 .year-nav-btn.hovered {
     background-color: #DCCBB1;
     border-color: #2D2217;
     scale: 1.08;
 }
+*/
 
 .calendar-year-title {
     font-size: 34px;
@@ -242,6 +244,7 @@
     margin-bottom: 10px;
 }
 
+/* [TEMPORÁRIO] Hover desativado a pedido do usuário
 .month-card:hover,
 .month-card.hovered {
     border-color: #94301B;
@@ -249,6 +252,7 @@
     scale: 1.03;
     z-index: 50;
 }
+*/
 
 /* CABEÇALHO DO CARD DO MÊS */
 .month-card-header {

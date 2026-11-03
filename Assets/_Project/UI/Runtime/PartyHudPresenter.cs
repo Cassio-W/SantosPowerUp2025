@@ -99,6 +99,13 @@ namespace Mandato.UI
             if (doc != null)
             {
                 doc.sortingOrder = 500;
+                if (doc.panelSettings != null && doc.panelSettings.targetTexture == null)
+                {
+                    doc.panelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
+                    doc.panelSettings.referenceResolution = new Vector2Int(1920, 1080);
+                    doc.panelSettings.screenMatchMode = PanelScreenMatchMode.MatchWidthOrHeight;
+                    doc.panelSettings.match = 0.5f;
+                }
             }
 
             if (doc == null || doc.rootVisualElement == null) return false;

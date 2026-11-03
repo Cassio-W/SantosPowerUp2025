@@ -235,13 +235,6 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
         }
 
         EnsureAudioSource();
-
-#if UNITY_EDITOR
-        if (typewriterSound == null)
-        {
-            typewriterSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/menu-select-sound-100466 (mp3cut.net).mp3");
-        }
-#endif
     }
 
     public void PlayCharacterChangeSound()

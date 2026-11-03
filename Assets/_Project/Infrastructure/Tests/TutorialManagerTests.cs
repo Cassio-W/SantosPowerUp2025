@@ -162,5 +162,18 @@ namespace Mandato.Infrastructure.Tests
             Assert.IsTrue(decisionOverlay.IsVisible);
             Assert.IsTrue(finishedInvoked);
         }
+
+        [Test]
+        public void TypewriterConfig_DefaultsToActive_AndCanBeConfigured()
+        {
+            Assert.IsTrue(tutorialManager.UseTypewriter);
+            Assert.Greater(tutorialManager.TypewriterCharactersPerSecond, 0f);
+
+            tutorialManager.UseTypewriter = false;
+            tutorialManager.TypewriterCharactersPerSecond = 60f;
+
+            Assert.IsFalse(tutorialManager.UseTypewriter);
+            Assert.AreEqual(60f, tutorialManager.TypewriterCharactersPerSecond);
+        }
     }
 }

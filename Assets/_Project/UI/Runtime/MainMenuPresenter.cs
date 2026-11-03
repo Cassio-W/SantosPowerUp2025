@@ -96,6 +96,14 @@ namespace Mandato.UI
                 }
             }
 
+            if (uiDocument.panelSettings != null && uiDocument.panelSettings.targetTexture == null)
+            {
+                uiDocument.panelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
+                uiDocument.panelSettings.referenceResolution = new Vector2Int(1920, 1080);
+                uiDocument.panelSettings.screenMatchMode = PanelScreenMatchMode.MatchWidthOrHeight;
+                uiDocument.panelSettings.match = 0.5f;
+            }
+
             if (uiDocument.visualTreeAsset == null)
             {
                 if (uxmlAsset != null)
@@ -110,17 +118,6 @@ namespace Mandato.UI
 #endif
                 }
             }
-
-#if UNITY_EDITOR
-            if (hoverSound == null)
-            {
-                hoverSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/menu-select-sound-100466 (mp3cut.net).mp3");
-            }
-            if (clickSound == null)
-            {
-                clickSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/menu-click.mp3");
-            }
-#endif
         }
 
         private void CacheElements()

@@ -62,6 +62,19 @@ namespace Mandato.UI
         [SerializeField] private int currentYear = 2026;
         [SerializeField] private int totalMonthsInMandate = 48;
 
+        [Header("--- Interação / Hover e Foco (Temporário) ---")]
+        [Tooltip("Se falso, desativa temporariamente o efeito hover e clique que muda a posição da câmera.")]
+        [SerializeField] private bool enableCalendarInteraction = false;
+        public bool EnableCalendarInteraction
+        {
+            get => enableCalendarInteraction;
+            set
+            {
+                enableCalendarInteraction = value;
+                ApplyInteractionSettings();
+            }
+        }
+
         private static readonly string[] MonthNames = new string[]
         {
             "JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO",
@@ -121,18 +134,51 @@ namespace Mandato.UI
         {
             if (Instance == null) Instance = this;
             EnsureReferences();
+            ApplyInteractionSettings();
         }
 
         private void OnEnable()
         {
             EnsureReferences();
             BindUI();
+            ApplyInteractionSettings();
         }
 
         private void Start()
         {
             EnsureReferences();
             BindUI();
+            ApplyInteractionSettings();
+        }
+
+        private void OnValidate()
+        {
+            ApplyInteractionSettings();
+        }
+
+        public void ApplyInteractionSettings()
+        {
+            // Desativa/ativa colisor do calendário para impedir raycasts 3D quando desativado
+            var col = GetComponent<Collider>();
+            if (col != null)
+            {
+                col.enabled = enableCalendarInteraction;
+            }
+
+            // Desativa/ativa componentes interativos via tipo
+            var behaviours = GetComponents<Behaviour>();
+            foreach (var b in behaviours)
+            {
+                if (b != null && (b.GetType().Name == "FocusableObject" || b.GetType().Name == "WorldSpaceUIInteraction"))
+                {
+                    b.enabled = enableCalendarInteraction;
+                }
+            }
+
+            if (!enableCalendarInteraction)
+            {
+                HideTooltip();
+            }
         }
 
         public void EnsureReferences()

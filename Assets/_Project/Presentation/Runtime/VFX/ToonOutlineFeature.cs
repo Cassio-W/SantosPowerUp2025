@@ -14,6 +14,7 @@ namespace ComicVFX
         public class Settings
         {
             public Material outlineMaterial = null;
+            public Shader maskShader = null;
             public RenderPassEvent renderPassEvent = RenderPassEvent.BeforeRenderingTransparents;
             public Color outlineColor = new Color(0.04f, 0.04f, 0.07f, 1.0f);
             [Range(0.5f, 5.0f)] public float thickness = 1.25f;
@@ -32,11 +33,11 @@ namespace ComicVFX
         private static readonly int HighlightOutlineColorProp = Shader.PropertyToID("_HighlightOutlineColor");
         private static readonly int HasHighlightProp = Shader.PropertyToID("_HasHighlight");
 
-        public static Material GetMaskMaterial()
+        public static Material GetMaskMaterial(Shader configuredShader = null)
         {
             if (_sharedMaskMaterial == null)
             {
-                Shader maskShader = Shader.Find("Hidden/ComicVFX/UnlitMask");
+                Shader maskShader = configuredShader != null ? configuredShader : Shader.Find("Hidden/ComicVFX/UnlitMask");
                 if (maskShader != null)
                 {
                     _sharedMaskMaterial = new Material(maskShader) { hideFlags = HideFlags.HideAndDontSave };
@@ -71,6 +72,12 @@ namespace ComicVFX
 
             private static int GetSubmeshCount(Renderer r)
             {
+                if (r.isPartOfStaticBatch)
+                {
+                    var batchedMats = r.sharedMaterials;
+                    return batchedMats != null && batchedMats.Length > 0 ? batchedMats.Length : 1;
+                }
+
                 if (r is MeshRenderer mr)
                 {
                     var mf = mr.GetComponent<MeshFilter>();
@@ -204,7 +211,7 @@ namespace ComicVFX
 
                 if (hasHighlight)
                 {
-                    Material maskMat = GetMaskMaterial();
+                    Material maskMat = GetMaskMaterial(settings.maskShader);
                     if (maskMat != null)
                     {
                         RenderTextureDescriptor maskDesc = desc;
@@ -317,7 +324,7 @@ namespace ComicVFX
 
                 if (hasHighlight)
                 {
-                    Material maskMat = GetMaskMaterial();
+                    Material maskMat = GetMaskMaterial(settings.maskShader);
                     if (maskMat != null)
                     {
                         RenderTextureDescriptor desc = renderingData.cameraData.cameraTargetDescriptor;
@@ -373,6 +380,10 @@ namespace ComicVFX
 
         public override void Create()
         {
+            if (settings != null && settings.maskShader == null)
+            {
+                settings.maskShader = Shader.Find("Hidden/ComicVFX/UnlitMask");
+            }
             pass = new ToonOutlinePass(settings);
         }
 

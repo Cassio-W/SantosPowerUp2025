@@ -351,7 +351,7 @@ Label {
 }
 
 /* ============================================================
-   FEEDBACK DE VARIAÇÃO — SETA (▲▼)
+   FEEDBACK DE VARIAÇÃO — SETAS (SPRITE RETRÔ)
    ============================================================ */
 .attr-arrow {
     position: absolute;
@@ -371,32 +371,36 @@ Label {
     border-bottom-color: #102436;
     border-radius: 0;
 
-    justify-content: center;
-    align-items: center;
-    font-size: 30px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
+    -unity-background-scale-mode: scale-to-fit;
     opacity: 0;
 }
 
-.attr-arrow.arrow-up {
+.attr-arrow.arrow-up,
+.war-attr-arrow.arrow-up {
+    background-image: url('project://database/Assets/Sprites/retro-arrow-up.png?fileID=21300000&guid=b8f41e0a293845a7b6c5d1e2f3a4b5c6&type=3#retro-arrow-up');
+    -unity-background-image-tint-color: #22c55e;
     border-color: #22c55e;
-    color: #22c55e;
 }
 
-.attr-arrow.arrow-down {
+.attr-arrow.arrow-down,
+.war-attr-arrow.arrow-down {
+    background-image: url('project://database/Assets/Sprites/retro-arrow-down.png?fileID=21300000&guid=c9a52f1b304956b8c7d6e2f3a4b5c6d7&type=3#retro-arrow-down');
+    -unity-background-image-tint-color: #ef4444;
     border-color: #ef4444;
-    color: #ef4444;
 }
 
-.attr-arrow.arrow-up-bad {
+.attr-arrow.arrow-up-bad,
+.war-attr-arrow.arrow-up-bad {
+    background-image: url('project://database/Assets/Sprites/retro-arrow-up.png?fileID=21300000&guid=b8f41e0a293845a7b6c5d1e2f3a4b5c6&type=3#retro-arrow-up');
+    -unity-background-image-tint-color: #ef4444;
     border-color: #ef4444;
-    color: #ef4444;
 }
 
-.attr-arrow.arrow-down-good {
+.attr-arrow.arrow-down-good,
+.war-attr-arrow.arrow-down-good {
+    background-image: url('project://database/Assets/Sprites/retro-arrow-down.png?fileID=21300000&guid=c9a52f1b304956b8c7d6e2f3a4b5c6d7&type=3#retro-arrow-down');
+    -unity-background-image-tint-color: #22c55e;
     border-color: #22c55e;
-    color: #22c55e;
 }
 
 /* ============================================================
@@ -987,9 +991,7 @@ Button {
     border-bottom-color: #102436;
     border-radius: 0;
 
-    font-size: 22px;
-    -unity-font-style: bold;
-    -unity-text-align: middle-center;
+    -unity-background-scale-mode: scale-to-fit;
     opacity: 0;
 }
 

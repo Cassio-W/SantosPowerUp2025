@@ -8,7 +8,7 @@ namespace Mandato.Presentation
 {
     /// <summary>
     /// Componente que representa o botão físico / campainha na mesa do gabinete presidencial.
-    /// Segue o clique contínuo do jogador: mantém o botão pressionado fisicamente e reproduz o som (buzz.mp3)
+    /// Segue o clique contínuo do jogador: mantém o botão pressionado fisicamente e reproduz o som opcional
     /// em loop contínuo enquanto o jogador mantiver o clique ou tecla pressionada, retornando ao soltar.
     /// </summary>
     [DisallowMultipleComponent]
@@ -41,7 +41,7 @@ namespace Mandato.Presentation
         [Tooltip("AudioSource para tocar os sons do botão. Se nulo, busca automaticamente ou cria em runtime.")]
         [SerializeField] private AudioSource audioSource;
 
-        [Tooltip("Som reproduzido continuamente enquanto o botão estiver pressionado (buzz.mp3).")]
+        [Tooltip("Som reproduzido continuamente enquanto o botão estiver pressionado (opcional).")]
         [SerializeField] private AudioClip pressSound;
 
         [Range(0f, 1f)]
@@ -147,13 +147,6 @@ namespace Mandato.Presentation
                     _cachedFocusable.onClicked.AddListener(Press);
                 }
             }
-
-#if UNITY_EDITOR
-            if (pressSound == null)
-            {
-                pressSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/buzz2.mp3");
-            }
-#endif
         }
 
         public void EnsureAudioSource()

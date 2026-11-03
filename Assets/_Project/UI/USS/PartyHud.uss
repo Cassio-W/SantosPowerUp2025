@@ -33,6 +33,7 @@
 }
 
 .btn-back-conversation {
+    -unity-font-definition: url('project://database/Assets/Bitter-Bold.ttf?fileID=12800000&guid=32d9e41abd45fa44e83666ff94f58cd0&type=3#Bitter-Bold');
     background-color: rgba(28, 24, 21, 0.92);
     color: #f5eedc;
     font-size: 18px;
@@ -51,6 +52,7 @@
 }
 
 .btn-end-party {
+    -unity-font-definition: url('project://database/Assets/Bitter-Bold.ttf?fileID=12800000&guid=32d9e41abd45fa44e83666ff94f58cd0&type=3#Bitter-Bold');
     background-color: rgba(42, 28, 25, 0.9);
     color: #ebd8c8;
     font-size: 18px;
@@ -90,6 +92,7 @@
 }
 
 .gauge-title {
+    -unity-font-definition: url('project://database/Assets/Bitter-Bold.ttf?fileID=12800000&guid=32d9e41abd45fa44e83666ff94f58cd0&type=3#Bitter-Bold');
     color: #d4af37;
     font-size: 14px;
     -unity-font-style: bold;
@@ -199,6 +202,7 @@
 }
 
 .npc-name-label {
+    -unity-font-definition: url('project://database/Assets/Bitter-Bold.ttf?fileID=12800000&guid=32d9e41abd45fa44e83666ff94f58cd0&type=3#Bitter-Bold');
     color: #d4af37;
     font-size: 26px;
     -unity-font-style: bold;
@@ -211,6 +215,7 @@
 }
 
 .bubble-tag-text {
+    -unity-font-definition: url('project://database/Assets/Bitter-Bold.ttf?fileID=12800000&guid=32d9e41abd45fa44e83666ff94f58cd0&type=3#Bitter-Bold');
     color: #c5a059;
     font-size: 13px;
     -unity-font-style: bold;
@@ -218,6 +223,7 @@
 }
 
 .npc-speech-text {
+    -unity-font-definition: url('project://database/Assets/Bitter-Regular.ttf?fileID=12800000&guid=5ac487943d9c3e3428e9f9092a16b21c&type=3#Bitter-Regular');
     color: #f5eedc;
     font-size: 21px;
     white-space: normal;
@@ -287,6 +293,7 @@
 }
 
 .quadrant-title {
+    -unity-font-definition: url('project://database/Assets/Bitter-Bold.ttf?fileID=12800000&guid=32d9e41abd45fa44e83666ff94f58cd0&type=3#Bitter-Bold');
     color: #f5eedc;
     font-size: 16px;
     -unity-font-style: bold;
@@ -318,6 +325,7 @@
 }
 
 .seal-text {
+    -unity-font-definition: url('project://database/Assets/Bitter-Bold.ttf?fileID=12800000&guid=32d9e41abd45fa44e83666ff94f58cd0&type=3#Bitter-Bold');
     color: #d4af37;
     font-size: 13px;
     -unity-font-style: bold;

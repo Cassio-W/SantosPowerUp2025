@@ -203,6 +203,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: urna_cabine
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: d56f47a9cbf576c47bd3ac76dacbc6b9, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7770484631497233083, guid: d56f47a9cbf576c47bd3ac76dacbc6b9, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -300,7 +304,7 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   characterChangeSound: {fileID: 0}
   characterChangeSoundVolume: 0.8
-  typewriterSound: {fileID: 8300000, guid: 424b132081f0d8342a363a636a5df73d, type: 3}
+  typewriterSound: {fileID: 0}
   typewriterSoundVolume: 0.4
   typewriterPitchVariation: {x: 0.96, y: 1.04}
   minTypewriterSoundInterval: 0.03
@@ -777,7 +781,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   menuUIObjects: []
   mainMenuPresenter: {fileID: 96259231}
-  bypassCharacterSelection: 0
+  bypassCharacterSelection: 1
   defaultCharacterId: 1
   cameraRotationScript: {fileID: 2012787626}
   depthOfFieldVolume: {fileID: 2012787627}

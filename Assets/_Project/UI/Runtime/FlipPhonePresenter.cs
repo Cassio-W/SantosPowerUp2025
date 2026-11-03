@@ -112,7 +112,6 @@ namespace Mandato.UI
         private void Awake()
         {
             EnsureDocument();
-            EnsureAudioAssets();
             EnsureAudioSource();
             CacheVisualElements();
         }
@@ -120,14 +119,8 @@ namespace Mandato.UI
         private void OnEnable()
         {
             EnsureDocument();
-            EnsureAudioAssets();
             EnsureAudioSource();
             CacheVisualElements();
-        }
-
-        private void OnValidate()
-        {
-            EnsureAudioAssets();
         }
 
         private void Start()
@@ -199,20 +192,6 @@ namespace Mandato.UI
                     Mathf.Max(0f, scrollView.scrollOffset.y + deltaOffset)
                 );
             }
-        }
-
-        public void EnsureAudioAssets()
-        {
-#if UNITY_EDITOR
-            if (contactHoverSound == null)
-            {
-                contactHoverSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/phone-type3.mp3");
-            }
-            if (buttonClickSound == null)
-            {
-                buttonClickSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/phone-type1.mp3");
-            }
-#endif
         }
 
         public void EnsureAudioSource()

@@ -92,6 +92,29 @@ namespace Mandato.Infrastructure.Tests
         }
 
         [Test]
+        public void StartPress_And_ReleasePress_WithoutSound_WorksWithoutErrorsOrFallback()
+        {
+            Assert.IsNull(deskButton.PressSound, "PressSound deve ser nulo por padrão, sem fallback ou preenchimento automático.");
+
+            bool pressedFired = false;
+            bool releasedFired = false;
+            bool callRequested = false;
+
+            deskButton.onButtonPressed.AddListener(() => pressedFired = true);
+            deskButton.onButtonReleased.AddListener(() => releasedFired = true);
+            deskButton.OnCallRequested += () => callRequested = true;
+
+            Assert.DoesNotThrow(() => deskButton.StartPress());
+            Assert.IsTrue(deskButton.IsHeldDown);
+            Assert.IsTrue(pressedFired);
+            Assert.IsTrue(callRequested);
+
+            Assert.DoesNotThrow(() => deskButton.ReleasePress());
+            Assert.IsFalse(deskButton.IsHeldDown);
+            Assert.IsTrue(releasedFired);
+        }
+
+        [Test]
         public void ScenePresentationBindings_ExposesDeskCallButton()
         {
             var bindings = new ScenePresentationBindings();

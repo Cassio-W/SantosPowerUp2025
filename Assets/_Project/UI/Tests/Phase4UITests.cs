@@ -140,6 +140,8 @@ namespace Mandato.UI.Tests
             var go = new GameObject("MainMenuTest");
             var presenter = go.AddComponent<MainMenuPresenter>();
 
+            Assert.IsNull(presenter.HoverSound);
+            Assert.IsNull(presenter.ClickSound);
             Assert.DoesNotThrow(() => presenter.PlayHoverSound());
             Assert.DoesNotThrow(() => presenter.PlayClickSound());
 
@@ -470,10 +472,13 @@ namespace Mandato.UI.Tests
 
             var goCoord = new GameObject("CoordTest");
             var coord = goCoord.AddComponent<Mandato.Infrastructure.MenuCharacterSelectCoordinator>();
+            Assert.IsNull(coord.ConfirmSound);
             Assert.DoesNotThrow(() => coord.PlayConfirmSound());
 
             var goPhone = new GameObject("PhoneTest");
             var phonePresenter = goPhone.AddComponent<FlipPhonePresenter>();
+            Assert.IsNull(phonePresenter.ContactHoverSound);
+            Assert.IsNull(phonePresenter.ButtonClickSound);
             Assert.DoesNotThrow(() => phonePresenter.PlayContactHoverSound());
             Assert.DoesNotThrow(() => phonePresenter.PlayButtonClickSound());
 

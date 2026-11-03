@@ -114,7 +114,7 @@ namespace Mandato.Presentation
 
         if (_parentFocusable == null)
         {
-            _parentFocusable = GetComponentInParent<FocusableObject>();
+            _parentFocusable = GetComponentInParent<FocusableObject>(true);
         }
 
         if (interactionCamera == null)
@@ -187,7 +187,7 @@ namespace Mandato.Presentation
         // só permite interagir com a UI interna quando estiver em modo foco.
         if (requireFocusWhenFocusablePresent && _parentFocusable != null && CameraFocusManager.Instance != null)
         {
-            bool isFocusedNow = _parentFocusable.IsFocused || CameraFocusManager.Instance.CurrentFocusedObject == _parentFocusable;
+            bool isFocusedNow = _parentFocusable.enabled && (_parentFocusable.IsFocused || CameraFocusManager.Instance.CurrentFocusedObject == _parentFocusable);
             if (!isFocusedNow)
             {
                 ClearHover();

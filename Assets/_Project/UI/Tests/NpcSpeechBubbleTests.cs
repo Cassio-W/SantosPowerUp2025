@@ -102,5 +102,51 @@ namespace Mandato.UI.Tests
             presenter.SetFlipped(false);
             Assert.Pass();
         }
+
+        [Test]
+        public void EnableTypewriter_DefaultsToTrue()
+        {
+            Assert.IsTrue(presenter.EnableTypewriter);
+            Assert.Greater(presenter.CharactersPerSecond, 0f);
+        }
+
+        [Test]
+        public void SkipTypewriter_SetsIsTypingFalse_AndRestoresFullText()
+        {
+            presenter.SetSpeech("Interlocutor", "Texto completo do discurso");
+            presenter.SkipTypewriter();
+            Assert.IsFalse(presenter.IsTyping);
+            Assert.AreEqual("Texto completo do discurso", presenter.CurrentText);
+        }
+
+        [Test]
+        public void PlayTypewriterSound_DoesNotThrow()
+        {
+            Assert.DoesNotThrow(() => presenter.PlayTypewriterSound());
+        }
+
+        [Test]
+        public void StopTypewriterSound_DoesNotThrow()
+        {
+            Assert.DoesNotThrow(() => presenter.StopTypewriterSound());
+        }
+
+        [Test]
+        public void EnsureDocument_ConfiguresScaleWithScreenSize_At1920x1080()
+        {
+            var doc = go.GetComponent<UIDocument>();
+            if (doc != null && doc.panelSettings == null)
+            {
+                doc.panelSettings = ScriptableObject.CreateInstance<PanelSettings>();
+                doc.panelSettings.scaleMode = PanelScaleMode.ConstantPhysicalSize;
+            }
+
+            presenter.EnsureDocument();
+
+            Assert.IsNotNull(doc);
+            Assert.IsNotNull(doc.panelSettings);
+            Assert.AreEqual(PanelScaleMode.ScaleWithScreenSize, doc.panelSettings.scaleMode);
+            Assert.AreEqual(new Vector2Int(1920, 1080), doc.panelSettings.referenceResolution);
+        }
     }
 }

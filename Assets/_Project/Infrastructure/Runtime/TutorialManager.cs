@@ -44,6 +44,9 @@ namespace Mandato.Infrastructure
 
         [Tooltip("Se ativo, habilita o efeito de pós-processamento de foco / blur de borda da câmera.")]
         public bool enableCameraEffect = false;
+
+        [Tooltip("Sobrescreve o uso de typewriter neste passo (-1 usa o padrão do TutorialManager, 0 desativa, 1 ativa).")]
+        public int overrideTypewriter = -1;
     }
 
     /// <summary>
@@ -60,7 +63,7 @@ namespace Mandato.Infrastructure
 
         [Header("--- NPC 3D do Tutorial ---")]
         [Tooltip("Nome do NPC do tutorial exibido no balão de fala (badge do interlocutor).")]
-        [SerializeField] private string tutorialNpcName = "ASSESSOR";
+        [SerializeField] private string tutorialNpcName = "Secretário";
 
         [Tooltip("Prefab do NPC exclusivo que será instanciado no tutorial.")]
         [SerializeField] private GameObject tutorialNpcPrefab;
@@ -96,6 +99,13 @@ namespace Mandato.Infrastructure
         [Tooltip("Lista de configurações de animação e câmera para cada texto/carta de tutorial.")]
         [SerializeField] private List<TutorialStepConfig> stepConfigurations = new List<TutorialStepConfig>();
 
+        [Header("--- Efeito de Digitação (Typewriter) ---")]
+        [Tooltip("Se ativo, o balão de fala do tutorial exibe o texto com efeito de digitação (typewriter).")]
+        [SerializeField] private bool useTypewriter = true;
+
+        [Tooltip("Velocidade do typewriter em caracteres por segundo (0 para usar a velocidade padrão do balão).")]
+        [SerializeField] private float typewriterCharactersPerSecond = 45f;
+
         [Header("--- Apresentadores e UI ---")]
         [SerializeField] private NpcSpeechBubblePresenter speechBubble;
         [SerializeField] private CameraFocusManager cameraFocusManager;
@@ -113,7 +123,7 @@ namespace Mandato.Infrastructure
         private int currentStepIndex = 0;
         private bool isTutorialActive = false;
         private bool isNpcAtTable = false;
-        private string defaultTutorialSpeaker = "GUIA DO MANDATO";
+        private string defaultTutorialSpeaker = "Secretário";
         private Coroutine activeTutorialRoutine;
 
         public string TutorialNpcName
@@ -133,6 +143,18 @@ namespace Mandato.Infrastructure
         public NpcSpeechBubblePresenter SpeechBubble => speechBubble;
         public GameObject ActiveNpcGameObject => activeNpcGameObject;
         public List<TutorialStepConfig> StepConfigurations => stepConfigurations;
+
+        public bool UseTypewriter
+        {
+            get => useTypewriter;
+            set => useTypewriter = value;
+        }
+
+        public float TypewriterCharactersPerSecond
+        {
+            get => typewriterCharactersPerSecond;
+            set => typewriterCharactersPerSecond = value;
+        }
 
         public event Action OnTutorialStarted;
         public event Action<CardDefinition, int> OnTutorialStepStarted;
@@ -370,6 +392,11 @@ namespace Mandato.Infrastructure
             ApplyCameraFocus(config);
 
             // 3. Formata e exibe o balão de fala (usa o nome do NPC configurado no TutorialManager)
+            if (string.Equals(tutorialNpcName, "Lula", StringComparison.OrdinalIgnoreCase))
+            {
+                tutorialNpcName = "Secretário";
+            }
+
             string speaker = !string.IsNullOrWhiteSpace(tutorialNpcName)
                 ? tutorialNpcName
                 : (tutorialNpcPrefab != null ? tutorialNpcPrefab.name : (!string.IsNullOrEmpty(card.title) ? card.title : defaultTutorialSpeaker));
@@ -378,7 +405,18 @@ namespace Mandato.Infrastructure
 
             if (speechBubble != null)
             {
-                speechBubble.Show(speaker, dialogue, useTypewriter: false);
+                if (typewriterCharactersPerSecond > 0f)
+                {
+                    speechBubble.CharactersPerSecond = typewriterCharactersPerSecond;
+                }
+
+                bool shouldType = useTypewriter;
+                if (config != null && config.overrideTypewriter >= 0)
+                {
+                    shouldType = config.overrideTypewriter == 1;
+                }
+
+                speechBubble.Show(speaker, dialogue, useTypewriter: shouldType);
             }
 
             OnTutorialStepStarted?.Invoke(card, stepIndex);

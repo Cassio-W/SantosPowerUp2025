@@ -132,13 +132,6 @@ namespace Mandato.Infrastructure
 
             EnsureAudioSource();
 
-#if UNITY_EDITOR
-            if (confirmSound == null)
-            {
-                confirmSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/urna-move.mp3");
-            }
-#endif
-
             FindAndBindPhysicalButtons();
         }
 

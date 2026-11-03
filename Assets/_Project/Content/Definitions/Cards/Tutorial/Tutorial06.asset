@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -15,7 +15,7 @@ MonoBehaviour:
   id: Tutorial06
   title: Tutorial06
   description: "E se tiver que tirar algo da popula\xE7\xE3o, n\xE3o precisa pensar
-    duas vezes se \xE9 que me entende. S\xF3 toma cuidado com a Pol\xEDcia Federal."
+    duas vezes... se \xE9 que me entende. S\xF3 toma cuidado com a Pol\xEDcia Federal!"
   npc: {fileID: 11400000, guid: c1a000028471ade47bf5fc0f3da00002, type: 2}
   npcId: 
   npcPrefab: {fileID: 0}
@@ -34,10 +34,20 @@ MonoBehaviour:
     deltaPoliticalX: 0
     deltaPoliticalY: 0
     hasCorruptionMods: 0
+    deltaNpcRelation: 0
+    injectCards: []
     injectCardIds: []
+    removeCards: []
     removeCardIds: []
+    grantPerk: {fileID: 0}
     grantPerkId: 
     presentationCue: 
+    cityPropPrefab: {fileID: 0}
+    scheduleEventId: 
+    startInvestment: {fileID: 0}
+    startInvestmentId: 
+    triggersWar: 0
+    warTargetId: 
   rightChoice:
     label: "*Dar risada mal\xE9fica*"
     statImpacts:
@@ -49,9 +59,18 @@ MonoBehaviour:
     deltaPoliticalX: 0
     deltaPoliticalY: 0
     hasCorruptionMods: 0
+    deltaNpcRelation: 0
+    injectCards: []
     injectCardIds: []
+    removeCards: []
     removeCardIds: []
+    grantPerk: {fileID: 0}
     grantPerkId: 
     presentationCue: 
+    cityPropPrefab: {fileID: 0}
+    scheduleEventId: 
+    startInvestment: {fileID: 0}
+    startInvestmentId: 
+    triggersWar: 0
+    warTargetId: 
   conditions: []
-

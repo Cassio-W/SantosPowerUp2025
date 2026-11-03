@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -15,8 +15,8 @@ MonoBehaviour:
   id: Tutorial04
   title: Tutorial04
   description: "No seu computador voc\xEA pode conferir o estado do pa\xEDs, aqui
-    est\xE3o as 4 coisas que precisamos ter mais aten\xE7\xE3o: Meio Ambiente, Rela\xE7\xF5es
-    Internacionais, Aprova\xE7\xE3o Populacional e Economia. "
+    est\xE3o os 4 principais valores que precisamos ter mais aten\xE7\xE3o: Meio
+    Ambiente, Economia, Rela\xE7\xF5es Internacionais, Aprova\xE7\xE3o Populacional."
   npc: {fileID: 11400000, guid: c1a000028471ade47bf5fc0f3da00002, type: 2}
   npcId: 
   npcPrefab: {fileID: 0}
@@ -35,10 +35,20 @@ MonoBehaviour:
     deltaPoliticalX: 0
     deltaPoliticalY: 0
     hasCorruptionMods: 0
+    deltaNpcRelation: 0
+    injectCards: []
     injectCardIds: []
+    removeCards: []
     removeCardIds: []
+    grantPerk: {fileID: 0}
     grantPerkId: 
     presentationCue: 
+    cityPropPrefab: {fileID: 0}
+    scheduleEventId: 
+    startInvestment: {fileID: 0}
+    startInvestmentId: 
+    triggersWar: 0
+    warTargetId: 
   rightChoice:
     label: "Ser presidente n\xE3o \xE9 f\xE1cil"
     statImpacts:
@@ -50,9 +60,18 @@ MonoBehaviour:
     deltaPoliticalX: 0
     deltaPoliticalY: 0
     hasCorruptionMods: 0
+    deltaNpcRelation: 0
+    injectCards: []
     injectCardIds: []
+    removeCards: []
     removeCardIds: []
+    grantPerk: {fileID: 0}
     grantPerkId: 
     presentationCue: 
+    cityPropPrefab: {fileID: 0}
+    scheduleEventId: 
+    startInvestment: {fileID: 0}
+    startInvestmentId: 
+    triggersWar: 0
+    warTargetId: 
   conditions: []
-

@@ -70,8 +70,9 @@ MonoBehaviour:
   m_Active: 1
   settings:
     outlineMaterial: {fileID: 2100000, guid: 958566940288b9d4ba6a9eb1829007bc, type: 2}
+    maskShader: {fileID: 4800000, guid: 12c66f41e050d03419623b1a380e77e7, type: 3}
     renderPassEvent: 450
     outlineColor: {r: 0.04, g: 0.04, b: 0.07, a: 1}
-    thickness: 1.5
+    thickness: 1.4
     depthThreshold: 0.01
     depthSensitivity: 1

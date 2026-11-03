@@ -81,6 +81,14 @@ namespace Mandato.UI
                 }
             }
 
+            if (uiDocument.panelSettings != null && uiDocument.panelSettings.targetTexture == null)
+            {
+                uiDocument.panelSettings.scaleMode = PanelScaleMode.ScaleWithScreenSize;
+                uiDocument.panelSettings.referenceResolution = new Vector2Int(1920, 1080);
+                uiDocument.panelSettings.screenMatchMode = PanelScreenMatchMode.MatchWidthOrHeight;
+                uiDocument.panelSettings.match = 0.5f;
+            }
+
             if (uiDocument.visualTreeAsset == null)
             {
                 if (endScreenUxmlAsset != null)

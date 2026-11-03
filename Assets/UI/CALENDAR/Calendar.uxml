@@ -31,9 +31,9 @@
                     <!-- CENTRO: NOME DO ANO DO MANDATO E NAVEGAÇÃO ANUAL -->
                     <ui:VisualElement class="month-center-box" picking-mode="Ignore">
                         <ui:VisualElement class="year-title-row" picking-mode="Ignore">
-                            <ui:Button name="btn-prev-year" text="◀" class="year-nav-btn" picking-mode="Position" />
+                            <ui:Button name="btn-prev-year" text="◀" class="year-nav-btn" picking-mode="Ignore" />
                             <ui:Label name="year-title" text="1º ANO DO MANDATO" class="calendar-year-title" picking-mode="Ignore" />
-                            <ui:Button name="btn-next-year" text="▶" class="year-nav-btn" picking-mode="Position" />
+                            <ui:Button name="btn-next-year" text="▶" class="year-nav-btn" picking-mode="Ignore" />
                         </ui:VisualElement>
                         <ui:Label name="year-subtitle" text="MESES 01 A 12 DE 48 • CRONOGRAMA ANUAL DO GOVERNO" class="calendar-year-subtitle" picking-mode="Ignore" />
                     </ui:VisualElement>
@@ -55,7 +55,7 @@
                     <ui:VisualElement name="months-grid" class="months-grid" picking-mode="Ignore">
                         
                         <!-- MÊS 01 (JANEIRO) -->
-                        <ui:VisualElement name="month-card-1" class="month-card" picking-mode="Position">
+                        <ui:VisualElement name="month-card-1" class="month-card" picking-mode="Ignore">
                             <ui:VisualElement class="month-card-header" picking-mode="Ignore">
                                 <ui:Label name="month-card-title-1" text="01 JANEIRO" class="month-title-label" picking-mode="Ignore" />
                                 <ui:Label name="month-card-tag-1" text="MÊS 01" class="month-tag-label" picking-mode="Ignore" />
@@ -64,7 +64,7 @@
                         </ui:VisualElement>
 
                         <!-- MÊS 02 (FEVEREIRO) -->
-                        <ui:VisualElement name="month-card-2" class="month-card" picking-mode="Position">
+                        <ui:VisualElement name="month-card-2" class="month-card" picking-mode="Ignore">
                             <ui:VisualElement class="month-card-header" picking-mode="Ignore">
                                 <ui:Label name="month-card-title-2" text="02 FEVEREIRO" class="month-title-label" picking-mode="Ignore" />
                                 <ui:Label name="month-card-tag-2" text="MÊS 02" class="month-tag-label" picking-mode="Ignore" />
@@ -73,7 +73,7 @@
                         </ui:VisualElement>
 
                         <!-- MÊS 03 (MARÇO) -->
-                        <ui:VisualElement name="month-card-3" class="month-card" picking-mode="Position">
+                        <ui:VisualElement name="month-card-3" class="month-card" picking-mode="Ignore">
                             <ui:VisualElement class="month-card-header" picking-mode="Ignore">
                                 <ui:Label name="month-card-title-3" text="03 MARÇO" class="month-title-label" picking-mode="Ignore" />
                                 <ui:Label name="month-card-tag-3" text="MÊS 03" class="month-tag-label" picking-mode="Ignore" />
@@ -82,7 +82,7 @@
                         </ui:VisualElement>
 
                         <!-- MÊS 04 (ABRIL) -->
-                        <ui:VisualElement name="month-card-4" class="month-card" picking-mode="Position">
+                        <ui:VisualElement name="month-card-4" class="month-card" picking-mode="Ignore">
                             <ui:VisualElement class="month-card-header" picking-mode="Ignore">
                                 <ui:Label name="month-card-title-4" text="04 ABRIL" class="month-title-label" picking-mode="Ignore" />
                                 <ui:Label name="month-card-tag-4" text="MÊS 04" class="month-tag-label" picking-mode="Ignore" />
@@ -91,7 +91,7 @@
                         </ui:VisualElement>
 
                         <!-- MÊS 05 (MAIO) -->
-                        <ui:VisualElement name="month-card-5" class="month-card" picking-mode="Position">
+                        <ui:VisualElement name="month-card-5" class="month-card" picking-mode="Ignore">
                             <ui:VisualElement class="month-card-header" picking-mode="Ignore">
                                 <ui:Label name="month-card-title-5" text="05 MAIO" class="month-title-label" picking-mode="Ignore" />
                                 <ui:Label name="month-card-tag-5" text="MÊS 05" class="month-tag-label" picking-mode="Ignore" />
@@ -100,7 +100,7 @@
                         </ui:VisualElement>
 
                         <!-- MÊS 06 (JUNHO) -->
-                        <ui:VisualElement name="month-card-6" class="month-card" picking-mode="Position">
+                        <ui:VisualElement name="month-card-6" class="month-card" picking-mode="Ignore">
                             <ui:VisualElement class="month-card-header" picking-mode="Ignore">
                                 <ui:Label name="month-card-title-6" text="06 JUNHO" class="month-title-label" picking-mode="Ignore" />
                                 <ui:Label name="month-card-tag-6" text="MÊS 06" class="month-tag-label" picking-mode="Ignore" />
@@ -109,7 +109,7 @@
                         </ui:VisualElement>
 
                         <!-- MÊS 07 (JULHO) -->
-                        <ui:VisualElement name="month-card-7" class="month-card" picking-mode="Position">
+                        <ui:VisualElement name="month-card-7" class="month-card" picking-mode="Ignore">
                             <ui:VisualElement class="month-card-header" picking-mode="Ignore">
                                 <ui:Label name="month-card-title-7" text="07 JULHO" class="month-title-label" picking-mode="Ignore" />
                                 <ui:Label name="month-card-tag-7" text="MÊS 07" class="month-tag-label" picking-mode="Ignore" />
@@ -118,7 +118,7 @@
                         </ui:VisualElement>
 
                         <!-- MÊS 08 (AGOSTO) -->
-                        <ui:VisualElement name="month-card-8" class="month-card" picking-mode="Position">
+                        <ui:VisualElement name="month-card-8" class="month-card" picking-mode="Ignore">
                             <ui:VisualElement class="month-card-header" picking-mode="Ignore">
                                 <ui:Label name="month-card-title-8" text="08 AGOSTO" class="month-title-label" picking-mode="Ignore" />
                                 <ui:Label name="month-card-tag-8" text="MÊS 08" class="month-tag-label" picking-mode="Ignore" />
@@ -127,7 +127,7 @@
                         </ui:VisualElement>
 
                         <!-- MÊS 09 (SETEMBRO) -->
-                        <ui:VisualElement name="month-card-9" class="month-card" picking-mode="Position">
+                        <ui:VisualElement name="month-card-9" class="month-card" picking-mode="Ignore">
                             <ui:VisualElement class="month-card-header" picking-mode="Ignore">
                                 <ui:Label name="month-card-title-9" text="09 SETEMBRO" class="month-title-label" picking-mode="Ignore" />
                                 <ui:Label name="month-card-tag-9" text="MÊS 09" class="month-tag-label" picking-mode="Ignore" />
@@ -136,7 +136,7 @@
                         </ui:VisualElement>
 
                         <!-- MÊS 10 (OUTUBRO) -->
-                        <ui:VisualElement name="month-card-10" class="month-card" picking-mode="Position">
+                        <ui:VisualElement name="month-card-10" class="month-card" picking-mode="Ignore">
                             <ui:VisualElement class="month-card-header" picking-mode="Ignore">
                                 <ui:Label name="month-card-title-10" text="10 OUTUBRO" class="month-title-label" picking-mode="Ignore" />
                                 <ui:Label name="month-card-tag-10" text="MÊS 10" class="month-tag-label" picking-mode="Ignore" />
@@ -145,7 +145,7 @@
                         </ui:VisualElement>
 
                         <!-- MÊS 11 (NOVEMBRO) -->
-                        <ui:VisualElement name="month-card-11" class="month-card" picking-mode="Position">
+                        <ui:VisualElement name="month-card-11" class="month-card" picking-mode="Ignore">
                             <ui:VisualElement class="month-card-header" picking-mode="Ignore">
                                 <ui:Label name="month-card-title-11" text="11 NOVEMBRO" class="month-title-label" picking-mode="Ignore" />
                                 <ui:Label name="month-card-tag-11" text="MÊS 11" class="month-tag-label" picking-mode="Ignore" />
@@ -154,7 +154,7 @@
                         </ui:VisualElement>
 
                         <!-- MÊS 12 (DEZEMBRO) -->
-                        <ui:VisualElement name="month-card-12" class="month-card" picking-mode="Position">
+                        <ui:VisualElement name="month-card-12" class="month-card" picking-mode="Ignore">
                             <ui:VisualElement class="month-card-header" picking-mode="Ignore">
                                 <ui:Label name="month-card-title-12" text="12 DEZEMBRO" class="month-title-label" picking-mode="Ignore" />
                                 <ui:Label name="month-card-tag-12" text="MÊS 12" class="month-tag-label" picking-mode="Ignore" />

@@ -212,6 +212,10 @@ namespace Mandato.Infrastructure.Tests
         [Test]
         public void StampAndPaper_AudioClips_DoNotThrow()
         {
+            Assert.IsNull(stampTool.StampSuccessSound);
+            Assert.IsNull(stampTool.DipSound);
+            Assert.IsNull(approvePad.DipSound);
+
             var audioClip = AudioClip.Create("TestAudio", 44100, 1, 44100, false);
 
             stampTool.StampSuccessSound = audioClip;
@@ -224,6 +228,7 @@ namespace Mandato.Infrastructure.Tests
 
             var paperFocusGo = new GameObject("PaperFocusTest");
             var paperFocus = paperFocusGo.AddComponent<PaperFocusableObject>();
+            Assert.IsNull(paperFocus.FocusSound);
             paperFocus.FocusSound = audioClip;
             Assert.AreEqual(audioClip, paperFocus.FocusSound);
 

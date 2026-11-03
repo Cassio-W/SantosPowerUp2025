@@ -453,7 +453,7 @@ namespace Mandato.Presentation
 
         public void Focus(FocusableObject target)
         {
-            if (target == null)
+            if (target == null || !target.enabled || !target.gameObject.activeInHierarchy)
             {
                 Unfocus();
                 return;

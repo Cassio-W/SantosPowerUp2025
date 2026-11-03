@@ -123,15 +123,19 @@ namespace Mandato.Infrastructure.Tests
         }
 
         [Test]
-        public void RunEnding_DefeatTermination_AlsoShowsCongratulationsForEffort()
+        public void RunEnding_DefeatTermination_ShowsOnlyReport_WithoutCameraPalmasOrDialogue()
         {
+            var initialCamPos = targetCamera.transform.position;
             var termination = RunTermination.CreateDefeat("Impeachment");
             var snapshot = CreateTestSnapshot(isVictory: false, reason: "Impeachment");
 
             coordinator.StartRunEndingSequence(termination, snapshot);
 
-            Assert.IsTrue(speechBubble.IsVisible, "Diálogo deve ser exibido mesmo em caso de derrota.");
-            StringAssert.Contains("Parabéns", speechBubble.CurrentText, "O diálogo deve parabenizar o empenho do jogador.");
+            Assert.IsNull(coordinator.ActivePalmasInstance, "Prefab de palmas não deve ser instanciado em caso de derrota.");
+            Assert.IsFalse(speechBubble.IsVisible, "Diálogo não deve ser exibido em caso de derrota.");
+            Assert.IsFalse(cameraFocus.HasActiveFocus, "A câmera não deve mudar de foco em caso de derrota.");
+            Assert.AreEqual(initialCamPos, targetCamera.transform.position, "A posição da câmera não deve mudar em caso de derrota.");
+            Assert.IsTrue(endScreen.IsVisible, "Apenas o relatório final deve ser exibido imediatamente em caso de derrota.");
         }
     }
 }

@@ -132,17 +132,6 @@ namespace Mandato.Presentation
                 audioSource.playOnAwake = false;
             }
 
-#if UNITY_EDITOR
-            if (stampSuccessSound == null)
-            {
-                stampSuccessSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/stamp.mp3");
-            }
-            if (dipSound == null)
-            {
-                dipSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/ink.mp3");
-            }
-#endif
-
             EnsureCollidersIgnored();
             CaptureRestTransform();
             UpdateInkVisual();

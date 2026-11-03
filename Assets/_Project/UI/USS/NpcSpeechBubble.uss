@@ -1,8 +1,8 @@
 /* =========================================================================
    MANDATO — NPC Speech Bubble HUD (UI Toolkit)
    Estilização de balão de fala posicionado como footer (30% altura da tela)
-   com largura total (100%), botão de continuar estilizado do DecisionUI
-   encaixado no canto direito e área de texto delimitada sem sobreposição.
+   com largura de aproximadamente 65% (entre 60% e 70% da tela), centralizado,
+   texto com alinhamento centralizado e botão de avançar no canto direito.
    ========================================================================= */
 
 /* --- ROOT CONTAINER (Tela Toda / HUD) --- */
@@ -15,26 +15,27 @@
     width: 100%;
     height: 100%;
     justify-content: flex-end;
-    align-items: stretch;
+    align-items: center;
     background-color: rgba(0, 0, 0, 0);
-    pointer-events: none;
 }
 
-/* --- FOOTER CONTAINER (30% Altura da Tela, 100% Largura) --- */
+/* --- FOOTER CONTAINER (30% Altura da Tela, ~80% Largura Centralizado) --- */
 .speech-footer-container {
     position: relative;
-    width: 100%;
+    width: 80%;
+    min-width: 75%;
+    max-width: 88%;
     height: 30%;
     min-height: 180px;
     max-height: 360px;
+    align-self: center;
+    margin-bottom: 12px;
     padding: 10px 24px 16px 24px;
-    box-sizing: border-box;
     opacity: 1;
     translate: 0 0;
     transition-property: opacity, translate;
     transition-duration: 0.22s;
     transition-timing-function: ease-out;
-    pointer-events: none;
 }
 
 .speech-footer-container.hidden {
@@ -47,12 +48,11 @@
 .speech-bubble-bg {
     position: absolute;
     top: 0;
-    left: 12px;
-    right: 12px;
-    bottom: 6px;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background-image: url('project://database/Assets/Sprites/papeis-pergunta.png?fileID=21300000&guid=e09be14377a08b64fbba6f4c66361c5d&type=3#papeis-pergunta');
     -unity-background-scale-mode: stretch-to-fill;
-    pointer-events: none;
 }
 
 /* Caso queira inverter horizontalmente via script ou classe */
@@ -66,44 +66,49 @@
     position: relative;
     width: 100%;
     height: 100%;
-    padding-top: 32px;
-    padding-bottom: 26px;
-    padding-left: 56px;
-    padding-right: 56px;
-    box-sizing: border-box;
+    padding-top: 28px;
+    padding-bottom: 24px;
+    padding-left: 36px;
+    padding-right: 36px;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
 }
 
-/* --- ÁREA DE TEXTO (Limitada para nunca colidir com o botão da direita) --- */
+/* --- ÁREA DE TEXTO (Centralizada) --- */
 .speech-text-area {
     flex-grow: 1;
     flex-shrink: 1;
+    width: 100%;
     height: 100%;
-    margin-right: 24px;
     justify-content: center;
+    align-items: center;
     flex-direction: column;
+    padding-left: 48px;
+    padding-right: 48px;
 }
 
 /* --- CABEÇALHO DO INTERLOCUTOR (Nome do NPC / Cargo) --- */
 .speech-header-row {
     flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
-    margin-bottom: 4px;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 10px;
 }
 
 .speaker-badge {
+    -unity-font-definition: url('project://database/Assets/Bitter-Bold.ttf?fileID=12800000&guid=32d9e41abd45fa44e83666ff94f58cd0&type=3#Bitter-Bold');
     background-color: #18181B;
     color: #F4F4F5;
-    padding: 3px 12px;
-    border-radius: 4px;
-    font-size: 13px;
+    padding: 8px 26px;
+    border-radius: 10px;
+    font-size: 36px;
     -unity-font-style: bold;
-    letter-spacing: 1px;
-    border-width: 1px;
+    letter-spacing: 1.5px;
+    border-width: 2px;
     border-color: #27272A;
+    -unity-text-align: middle-center;
 }
 
 .speaker-badge.hidden {
@@ -113,30 +118,59 @@
 /* --- CORPO DO TEXTO DE DIÁLOGO --- */
 .speech-scroll-view {
     flex-grow: 1;
+    width: 100%;
     margin-top: 2px;
     margin-bottom: 2px;
 }
 
+.speech-scroll-view #unity-content-container {
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+/* Oculta completamente a barra de rolagem horizontal */
+.speech-scroll-view #unity-low-button {
+    display: none;
+}
+
+.speech-scroll-view #unity-high-button {
+    display: none;
+}
+
+.speech-scroll-view .unity-scroller--horizontal {
+    display: none;
+    opacity: 0;
+    height: 0;
+}
+
 .speech-text-label {
+    -unity-font-definition: url('project://database/Assets/Bitter-Bold.ttf?fileID=12800000&guid=32d9e41abd45fa44e83666ff94f58cd0&type=3#Bitter-Bold');
     color: #111827;
-    font-size: 20px;
+    font-size: 32px;
     -unity-font-style: bold;
     white-space: normal;
-    -unity-text-align: middle-left;
-    line-height: 26px;
+    -unity-text-align: middle-center;
+    width: 100%;
+    align-self: center;
 }
 
 /* =========================================================================
-   ÁREA DO BOTÃO CONTINUAR — CANTO DIREITO CENTRALIZADO (Estilo DecisionUI)
+   ÁREA DO BOTÃO CONTINUAR — CANTO DIREITO (Estilo DecisionUI)
    ========================================================================= */
 
 .speech-action-area {
+    position: absolute;
+    right: 24px;
+    top: 0;
+    bottom: 0;
     flex-shrink: 0;
     justify-content: center;
     align-items: center;
-    height: 100%;
-    padding-right: 8px;
-    pointer-events: auto;
+}
+
+.speech-advance-btn.hidden {
+    display: none;
 }
 
 .decision-btn {

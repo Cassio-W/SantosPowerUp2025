@@ -1010,21 +1010,28 @@ namespace Mandato.UI
             }
 
             bool isPositive = delta > 0;
-            bool isGood = isCorruption ? !isPositive : isPositive;
 
-            string symbol = isPositive ? "▲" : "▼";
-            Color color = isGood
-                ? new Color(0.133f, 0.773f, 0.369f)   // #22C55E verde
-                : new Color(0.937f, 0.267f, 0.267f);  // #EF4444 vermelho
+            arrow.RemoveFromClassList("arrow-up");
+            arrow.RemoveFromClassList("arrow-down");
+            arrow.RemoveFromClassList("arrow-up-bad");
+            arrow.RemoveFromClassList("arrow-down-good");
 
-            // Só muda text, cor e opacity — sem tocar em display nem visibility
-            arrow.text = symbol;
-            arrow.style.color             = color;
-            arrow.style.borderTopColor    = color;
-            arrow.style.borderRightColor  = color;
-            arrow.style.borderBottomColor = color;
-            arrow.style.borderLeftColor   = color;
-            arrow.style.opacity           = 1f;
+            if (isCorruption)
+            {
+                arrow.AddToClassList(isPositive ? "arrow-up-bad" : "arrow-down-good");
+            }
+            else
+            {
+                arrow.AddToClassList(isPositive ? "arrow-up" : "arrow-down");
+            }
+
+            arrow.text = string.Empty;
+            arrow.style.borderTopColor = StyleKeyword.Null;
+            arrow.style.borderRightColor = StyleKeyword.Null;
+            arrow.style.borderBottomColor = StyleKeyword.Null;
+            arrow.style.borderLeftColor = StyleKeyword.Null;
+            arrow.style.color = StyleKeyword.Null;
+            arrow.style.opacity = 1f;
 
             if (!isPreview && gameObject.activeInHierarchy && isActiveAndEnabled)
             {
@@ -1051,8 +1058,12 @@ namespace Mandato.UI
         private void HideArrowImmediate(Label arrow)
         {
             if (arrow == null) return;
-            arrow.text             = string.Empty; // sem texto = invisível visualmente
-            arrow.style.opacity    = 0f;           // completamente transparente
+            arrow.text = string.Empty;
+            arrow.style.opacity = 0f;
+            arrow.RemoveFromClassList("arrow-up");
+            arrow.RemoveFromClassList("arrow-down");
+            arrow.RemoveFromClassList("arrow-up-bad");
+            arrow.RemoveFromClassList("arrow-down-good");
         }
 
         private void HideArrowImmediate(Label arrow, ref Coroutine fadeRoutine)
@@ -1196,6 +1207,10 @@ namespace Mandato.UI
                 kvp.Value?.Pause();
             }
             _activeTypewriters.Clear();
+            if (audioSource != null)
+            {
+                audioSource.Stop();
+            }
         }
 
         /// <summary>

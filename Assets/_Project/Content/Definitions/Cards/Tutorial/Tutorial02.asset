@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -16,7 +16,7 @@ MonoBehaviour:
   title: Tutorial02
   description: "Parab\xE9ns por ter vencido as elei\xE7\xF5es. Hoje \xE9 seu primeiro
     dia de mandato e o pa\xEDs j\xE1 est\xE1 um caos. Nosso objetivo \xE9 fazer esse
-    pa\xEDs aguentar at\xE9 2030."
+    pa\xEDs aguentar at\xE9 2028."
   npc: {fileID: 11400000, guid: c1a000028471ade47bf5fc0f3da00002, type: 2}
   npcId: 
   npcPrefab: {fileID: 0}
@@ -35,10 +35,20 @@ MonoBehaviour:
     deltaPoliticalX: 0
     deltaPoliticalY: 0
     hasCorruptionMods: 0
+    deltaNpcRelation: 0
+    injectCards: []
     injectCardIds: []
+    removeCards: []
     removeCardIds: []
+    grantPerk: {fileID: 0}
     grantPerkId: 
     presentationCue: 
+    cityPropPrefab: {fileID: 0}
+    scheduleEventId: 
+    startInvestment: {fileID: 0}
+    startInvestmentId: 
+    triggersWar: 0
+    warTargetId: 
   rightChoice:
     label: "Vai ser f\xE1cil"
     statImpacts:
@@ -50,9 +60,18 @@ MonoBehaviour:
     deltaPoliticalX: 0
     deltaPoliticalY: 0
     hasCorruptionMods: 0
+    deltaNpcRelation: 0
+    injectCards: []
     injectCardIds: []
+    removeCards: []
     removeCardIds: []
+    grantPerk: {fileID: 0}
     grantPerkId: 
     presentationCue: 
+    cityPropPrefab: {fileID: 0}
+    scheduleEventId: 
+    startInvestment: {fileID: 0}
+    startInvestmentId: 
+    triggersWar: 0
+    warTargetId: 
   conditions: []
-

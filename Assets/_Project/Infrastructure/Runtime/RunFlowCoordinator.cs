@@ -495,13 +495,18 @@ namespace Mandato.Infrastructure
 
         private void HandleCalendarRequested()
         {
+            var calendar = bindings?.CalendarPresenter ?? CalendarWallPresenter.Instance;
+            if (calendar != null && !calendar.EnableCalendarInteraction)
+            {
+                return;
+            }
+
             if (modalCoordinator != null && modalCoordinator.CurrentContext == InteractionContext.CalendarInspect)
             {
                 HandleDecisionBackRequested();
                 return;
             }
 
-            var calendar = bindings?.CalendarPresenter ?? CalendarWallPresenter.Instance;
             if (calendar != null && stateMachine != null)
             {
                 calendar.SyncWithRun(stateMachine.RunState, catalog?.Events, catalog?.Perks, stateMachine.CurrentCard);
@@ -843,8 +848,8 @@ namespace Mandato.Infrastructure
                     isPlayerHandRaised = false;
                 }
 
+                bindings?.RetroMonitorPresenter?.StopAllTypewriters();
                 tutorialManager.PresentTutorialStep(card);
-                bindings?.RetroMonitorPresenter?.NotifyNewProposal(card);
                 bindings?.RetroMonitorPresenter?.UpdateDateDisplay(displayDate);
                 return;
             }
@@ -1248,6 +1253,16 @@ namespace Mandato.Infrastructure
 
         public void StartRunEndingSequence(RunTermination termination, RunSnapshot finalSnapshot)
         {
+            if (!termination.IsVictory)
+            {
+                var defeatSpeechBubble = bindings?.SpeechBubblePresenter ?? FindFirstObjectByType<NpcSpeechBubblePresenter>(FindObjectsInactive.Include);
+                defeatSpeechBubble?.Hide();
+
+                var defeatEndScreen = bindings?.EndScreenPresenter ?? FindFirstObjectByType<EndScreenPresenter>(FindObjectsInactive.Include);
+                defeatEndScreen?.ShowEndScreen(termination, finalSnapshot);
+                return;
+            }
+
             Transform camTarget = GetPosCameraPalmas();
             Transform spawnTarget = GetPosPalmas();
             GameObject prefab = GetPalmasPrefab();
@@ -1277,9 +1292,9 @@ namespace Mandato.Infrastructure
                     ? endDialogueSpeaker
                     : (!string.IsNullOrWhiteSpace(tutorialManager?.TutorialNpcName) ? tutorialManager.TutorialNpcName : "ASSESSOR");
 
-                string dialogueText = termination.IsVictory
-                    ? (!string.IsNullOrWhiteSpace(victoryEndDialogueText) ? victoryEndDialogueText : "Parabéns, Presidente! Você concluiu seu mandato com sucesso e liderou a nação através de grandes reformas e desafios.")
-                    : (!string.IsNullOrWhiteSpace(defeatEndDialogueText) ? defeatEndDialogueText : "Parabéns pelo empenho e dedicação, Presidente! Governar o país é uma missão árdua e você enfrentou grandes decisões até o fim do mandato.");
+                string dialogueText = !string.IsNullOrWhiteSpace(victoryEndDialogueText)
+                    ? victoryEndDialogueText
+                    : "Parabéns, Presidente! Você concluiu seu mandato com sucesso e liderou a nação através de grandes reformas e desafios.";
 
                 speechBubble.Show(speaker, dialogueText, useTypewriter: false, onComplete: () =>
                 {

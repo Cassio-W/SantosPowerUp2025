@@ -236,11 +236,12 @@ namespace Mandato.Presentation
             return;
         }
 
-        // Tenta usar MeshFilter do próprio GameObject se disponível
+        // Tenta usar MeshFilter do próprio GameObject se disponível e legível em runtime
         var meshFilter = GetComponent<MeshFilter>();
-        if (meshFilter != null && meshFilter.sharedMesh != null)
+        if (meshFilter != null && meshFilter.sharedMesh != null && meshFilter.sharedMesh.isReadable)
         {
             var meshCollider = gameObject.AddComponent<MeshCollider>();
+            meshCollider.sharedMesh = meshFilter.sharedMesh;
             meshCollider.convex = false;
             return;
         }
@@ -380,6 +381,7 @@ namespace Mandato.Presentation
     /// </summary>
     public void NotifyHoverEnter()
     {
+        if (!enabled || !gameObject.activeInHierarchy) return;
         if (_isHovered) return;
         _isHovered = true;
 
@@ -510,6 +512,7 @@ namespace Mandato.Presentation
     /// </summary>
     public void NotifyClicked()
     {
+        if (!enabled || !gameObject.activeInHierarchy) return;
         onClicked?.Invoke();
 
         if (!allowClickToFocus) return;

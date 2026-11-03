@@ -89,17 +89,6 @@ namespace Mandato.Presentation
             _originalLocalScale = movingPart.localScale;
 
             EnsureAudioSource();
-
-#if UNITY_EDITOR
-            if (pressSound == null)
-            {
-                pressSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/urna-click.mp3");
-            }
-            if (hoverSound == null)
-            {
-                hoverSound = UnityEditor.AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/Audios/click-baixo.mp3");
-            }
-#endif
         }
 
         private void EnsureAudioSource()
