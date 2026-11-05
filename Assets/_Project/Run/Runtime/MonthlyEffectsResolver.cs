@@ -82,19 +82,107 @@ namespace Mandato.Run
             }
 
             // 1. Efeitos Mensais de Perks Ativos
-            if (runState.activePerks != null && perkCatalog != null)
+            if (runState.activePerks != null)
             {
                 foreach (var perkState in runState.activePerks)
                 {
                     if (perkState == null || string.IsNullOrEmpty(perkState.perkId)) continue;
 
-                    if (perkCatalog.TryGetValue(perkState.perkId, out var def) && def != null && def.statDeltasPerMonth != null)
+                    PerkDefinition def = null;
+                    if (perkCatalog != null)
+                    {
+                        perkCatalog.TryGetValue(perkState.perkId, out def);
+                    }
+
+                    bool appliedThisPerk = false;
+
+                    // 1a. Condição para efeito mensal (Ex: Tratado com o Oriente: Rel. Int > 50; Movimento Ambientalista: Clima > 50)
+                    bool conditionMet = true;
+                    if (def != null && def.hasMonthlyCondition)
+                    {
+                        conditionMet = runState.stats.Get(def.conditionStat) >= def.conditionMinStatValue;
+                    }
+                    else if (def == null)
+                    {
+                        if (string.Equals(perkState.perkId, "TratadoInternacional", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (runState.stats.internationalRelations > 50)
+                            {
+                                report.impactsApplied.popularApproval += 1;
+                                report.impactsApplied.economy += 1;
+                                appliedThisPerk = true;
+                            }
+                            conditionMet = false;
+                        }
+                        else if (string.Equals(perkState.perkId, "MovimentoAmbientalista", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (runState.stats.climaticChanges > 50)
+                            {
+                                report.impactsApplied.popularApproval += 1;
+                                report.impactsApplied.corruption += 1;
+                                appliedThisPerk = true;
+                            }
+                            conditionMet = false;
+                        }
+                    }
+
+                    // 1b. Deltas mensais fixos (se a condição mensal for satisfeita)
+                    if (def != null && def.statDeltasPerMonth != null && conditionMet)
                     {
                         report.impactsApplied.climaticChanges += def.statDeltasPerMonth.climaticChanges;
                         report.impactsApplied.economy += def.statDeltasPerMonth.economy;
                         report.impactsApplied.internationalRelations += def.statDeltasPerMonth.internationalRelations;
                         report.impactsApplied.popularApproval += def.statDeltasPerMonth.popularApproval;
                         report.impactsApplied.corruption += def.statDeltasPerMonth.corruption;
+                        appliedThisPerk = true;
+                    }
+
+                    // 1c. Variação aleatória mensal (Ex: Criptomoeda do Real -> +3 ou -3 de Economia com 50% de chance)
+                    bool hasRandomSwing = (def != null && def.hasRandomMonthlySwing && def.randomSwingMagnitude > 0) ||
+                                          (def == null && string.Equals(perkState.perkId, "Cripto", StringComparison.OrdinalIgnoreCase));
+                    if (hasRandomSwing)
+                    {
+                        int mag = (def != null && def.randomSwingMagnitude > 0) ? def.randomSwingMagnitude : 3;
+                        StatId targetStat = def != null ? def.randomSwingStat : StatId.Economy;
+                        int swingSeed = (runState.seed != 0 ? runState.seed : Environment.TickCount)
+                                        ^ (runState.calendar.currentMonthIndex * 31337);
+                        int delta = (new Random(swingSeed).Next(0, 2) == 0) ? mag : -mag;
+
+                        switch (targetStat)
+                        {
+                            case StatId.ClimaticChanges: report.impactsApplied.climaticChanges += delta; break;
+                            case StatId.InternationalRelations: report.impactsApplied.internationalRelations += delta; break;
+                            case StatId.PopularApproval: report.impactsApplied.popularApproval += delta; break;
+                            case StatId.Economy: report.impactsApplied.economy += delta; break;
+                            case StatId.Corruption: report.impactsApplied.corruption += delta; break;
+                        }
+                        appliedThisPerk = true;
+                    }
+
+                    // 1d. Gatilho sazonal no 6º mês de cada ano (Ex: Comunicador Nato -> menor atributo não-corrupção +30)
+                    bool hasLowestStatBoost = (def != null && def.boostLowestStatOnMonthOfYear) ||
+                                              (def == null && string.Equals(perkState.perkId, "ComunicadorNato", StringComparison.OrdinalIgnoreCase));
+                    if (hasLowestStatBoost)
+                    {
+                        int triggerMonth = (def != null && def.triggerMonthOfYear > 0) ? def.triggerMonthOfYear : 6;
+                        int boostAmount = (def != null && def.lowestStatBoostAmount > 0) ? def.lowestStatBoostAmount : 30;
+
+                        if (runState.calendar.MonthInYear == triggerMonth)
+                        {
+                            StatId lowestStat = GetLowestNonCorruptionStat(runState.stats);
+                            switch (lowestStat)
+                            {
+                                case StatId.ClimaticChanges: report.impactsApplied.climaticChanges += boostAmount; break;
+                                case StatId.InternationalRelations: report.impactsApplied.internationalRelations += boostAmount; break;
+                                case StatId.PopularApproval: report.impactsApplied.popularApproval += boostAmount; break;
+                                case StatId.Economy: report.impactsApplied.economy += boostAmount; break;
+                            }
+                            appliedThisPerk = true;
+                        }
+                    }
+
+                    if (appliedThisPerk && !report.activePerkIdsApplied.Contains(perkState.perkId))
+                    {
                         report.activePerkIdsApplied.Add(perkState.perkId);
                     }
                 }
@@ -122,7 +210,7 @@ namespace Mandato.Run
             // 3. Aplica impactos acumulados
             if (report.HasAnyImpact)
             {
-                runState.ApplyStatImpacts(report.impactsApplied);
+                runState.ApplyStatImpacts(report.impactsApplied, false, perkCatalog);
             }
 
             // 4. Gatilhos de calendário (Ex.: Campanha Eleitoral no 4º ano, a partir do mês 37)
@@ -136,18 +224,54 @@ namespace Mandato.Run
                 }
             }
 
-            // 5. Expiração de Perks temporários
+            // 5. Expiração de Perks temporários e Recarga de Perks (Ex: Imorrível recarrega a cada 18 meses; Investimento à longo prazo dá +25 Economia após 12 meses)
             for (int i = runState.activePerks.Count - 1; i >= 0; i--)
             {
                 var p = runState.activePerks[i];
+                if (p == null) continue;
+
+                if (p.cooldownMonths > 0)
+                {
+                    p.cooldownMonths--;
+                }
+
                 if (p.remainingMonths > 0)
                 {
                     p.remainingMonths--;
                     if (p.remainingMonths == 0)
                     {
+                        PerkDefinition expDef = null;
+                        if (perkCatalog != null)
+                        {
+                            perkCatalog.TryGetValue(p.perkId, out expDef);
+                        }
+
+                        if (expDef != null && expDef.expirationStatBonus != null &&
+                            (expDef.expirationStatBonus.climaticChanges != 0 ||
+                             expDef.expirationStatBonus.economy != 0 ||
+                             expDef.expirationStatBonus.internationalRelations != 0 ||
+                             expDef.expirationStatBonus.popularApproval != 0 ||
+                             expDef.expirationStatBonus.corruption != 0))
+                        {
+                            runState.ApplyStatImpacts(expDef.expirationStatBonus, false, perkCatalog);
+                            report.impactsApplied.climaticChanges += expDef.expirationStatBonus.climaticChanges;
+                            report.impactsApplied.economy += expDef.expirationStatBonus.economy;
+                            report.impactsApplied.internationalRelations += expDef.expirationStatBonus.internationalRelations;
+                            report.impactsApplied.popularApproval += expDef.expirationStatBonus.popularApproval;
+                            report.impactsApplied.corruption += expDef.expirationStatBonus.corruption;
+                        }
+                        else if (expDef == null && string.Equals(p.perkId, "InvestimentoUsina", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var bonus = new StatBlock(0, 0, 0, 25, 0);
+                            runState.ApplyStatImpacts(bonus, false, perkCatalog);
+                            report.impactsApplied.economy += 25;
+                        }
+
                         report.expiredPerkIds.Add(p.perkId);
                         runState.activePerkIds.Remove(p.perkId);
+                        runState.activePerkIds.RemoveAll(id => string.Equals(id, p.perkId, StringComparison.OrdinalIgnoreCase));
                         runState.activePerks.RemoveAt(i);
+                        runState.RefreshMaxStatBonuses(perkCatalog);
                     }
                 }
             }
@@ -279,6 +403,32 @@ namespace Mandato.Run
             report.resultingTermination = runState.termination;
 
             return report;
+        }
+
+        public static StatId GetLowestNonCorruptionStat(StatBlock stats)
+        {
+            if (stats == null) return StatId.ClimaticChanges;
+
+            StatId lowest = StatId.ClimaticChanges;
+            int minVal = stats.climaticChanges;
+
+            if (stats.economy < minVal)
+            {
+                minVal = stats.economy;
+                lowest = StatId.Economy;
+            }
+            if (stats.popularApproval < minVal)
+            {
+                minVal = stats.popularApproval;
+                lowest = StatId.PopularApproval;
+            }
+            if (stats.internationalRelations < minVal)
+            {
+                minVal = stats.internationalRelations;
+                lowest = StatId.InternationalRelations;
+            }
+
+            return lowest;
         }
     }
 }

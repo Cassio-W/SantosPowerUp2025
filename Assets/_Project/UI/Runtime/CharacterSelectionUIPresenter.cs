@@ -917,7 +917,7 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
         CharacterDefinition character)
     {
         bool hasStats =
-            character.overrideInitialStats &&
+            (character.overrideInitialStats || character.randomizeInitialStats) &&
             character.initialStats != null;
 
         if (_statsContainer != null)
@@ -931,13 +931,13 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
         if (!hasStats)
             return;
 
-        float targetClimate = Mathf.Clamp(character.initialStats.climaticChanges, 0, 100);
-        float targetEconomy = Mathf.Clamp(character.initialStats.economy, 0, 100);
-        float targetRelations = Mathf.Clamp(character.initialStats.internationalRelations, 0, 100);
-        float targetPeople = Mathf.Clamp(character.initialStats.popularApproval, 0, 100);
-        float targetCorruption = Mathf.Clamp(character.initialStats.corruption, 0, 100);
+        float targetClimate = character.randomizeInitialStats ? 50f : Mathf.Clamp(character.initialStats.climaticChanges, 0, 100);
+        float targetEconomy = character.randomizeInitialStats ? 50f : Mathf.Clamp(character.initialStats.economy, 0, 100);
+        float targetRelations = character.randomizeInitialStats ? 50f : Mathf.Clamp(character.initialStats.internationalRelations, 0, 100);
+        float targetPeople = character.randomizeInitialStats ? 50f : Mathf.Clamp(character.initialStats.popularApproval, 0, 100);
+        float targetCorruption = character.randomizeCorruption ? 25f : Mathf.Clamp(character.initialStats.corruption, 0, 100);
 
-        AnimateStatsInterpolation(targetClimate, targetEconomy, targetRelations, targetPeople, targetCorruption, statsInterpolationDuration);
+        AnimateStatsInterpolation(targetClimate, targetEconomy, targetRelations, targetPeople, targetCorruption, statsInterpolationDuration, character.randomizeInitialStats, character.randomizeCorruption);
     }
 
     private void UpdateCarouselSlot(
@@ -1094,7 +1094,9 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
         float targetRelations,
         float targetPeople,
         float targetCorruption,
-        float duration = 0.45f)
+        float duration = 0.45f,
+        bool isRandomStats = false,
+        bool isRandomCorruption = false)
     {
         float startClimate = _displayedClimate;
         float startEconomy = _displayedEconomy;
@@ -1138,11 +1140,11 @@ public class CharacterSelectionUIPresenter : MonoBehaviour
             if (_fillCorruption != null) _fillCorruption.style.height = Length.Percent(_displayedCorruption);
 
             // Atualiza contagem dos valores numéricos
-            if (_statClimate != null) _statClimate.text = $"{Mathf.RoundToInt(_displayedClimate)}%";
-            if (_statEconomy != null) _statEconomy.text = $"{Mathf.RoundToInt(_displayedEconomy)}%";
-            if (_statRelations != null) _statRelations.text = $"{Mathf.RoundToInt(_displayedRelations)}%";
-            if (_statPeople != null) _statPeople.text = $"{Mathf.RoundToInt(_displayedPeople)}%";
-            if (_statCorruption != null) _statCorruption.text = $"{Mathf.RoundToInt(_displayedCorruption)}%";
+            if (_statClimate != null) _statClimate.text = isRandomStats ? "??" : $"{Mathf.RoundToInt(_displayedClimate)}%";
+            if (_statEconomy != null) _statEconomy.text = isRandomStats ? "??" : $"{Mathf.RoundToInt(_displayedEconomy)}%";
+            if (_statRelations != null) _statRelations.text = isRandomStats ? "??" : $"{Mathf.RoundToInt(_displayedRelations)}%";
+            if (_statPeople != null) _statPeople.text = isRandomStats ? "??" : $"{Mathf.RoundToInt(_displayedPeople)}%";
+            if (_statCorruption != null) _statCorruption.text = isRandomCorruption ? "??" : $"{Mathf.RoundToInt(_displayedCorruption)}%";
 
             if (normalized >= 1f)
             {

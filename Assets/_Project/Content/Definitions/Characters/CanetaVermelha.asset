@@ -25,7 +25,7 @@ MonoBehaviour:
     popularApproval: 50
     economy: 50
     corruption: 0
-  overridePoliticalAxis: 0
+  overridePoliticalAxis: 1
   initialPoliticalX: 0
   initialPoliticalY: 0
   lockPoliticalAxis: 0
@@ -35,8 +35,17 @@ MonoBehaviour:
   blockedPerkIds: []
   extraUnlockedActions: []
   extraUnlockedActionIds: []
+  startingActionCharges: []
   lockedActions: []
   lockedActionIds: []
+  randomizeInitialStats: 1
+  minRandomStatValue: 20
+  maxRandomStatValue: 80
+  randomizeCorruption: 1
+  minRandomCorruptionValue: 10
+  maxRandomCorruptionValue: 40
+  randomStartingPerksCount: 1
+  randomStartingActionsCount: 1
   initialNpcRelations: []
   uniqueAbilityIds: []
   uniqueAbilityDescription: 

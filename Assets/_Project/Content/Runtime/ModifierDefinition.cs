@@ -18,11 +18,43 @@ namespace Mandato.Content
 
         // Resgate Emergencial contra Derrota por Atributo
         public bool isEmergencyRescue = false;
+        public bool rescueAnyDepletedStat = false;
         public StatId rescueStat = StatId.ClimaticChanges;
         public int rescueRestoreValue = 35;
+        public int rechargeMonths = 0; // > 0 = entra em recarga por N meses ao invés de ser removido permanentemente
         public string rescueMessage = string.Empty;
 
+        [Header("Efeito Mensal Passivo")]
         public StatBlock statDeltasPerMonth = new StatBlock(0, 0, 0, 0, 0);
+
+        [Header("Condição para Efeito Mensal")]
+        public bool hasMonthlyCondition = false;
+        public StatId conditionStat = StatId.InternationalRelations;
+        public int conditionMinStatValue = 51;
+
+        [Header("Modificadores de Limite Máximo de Atributos")]
+        public StatBlock maxStatBonuses = new StatBlock(0, 0, 0, 0, 0);
+
+        [Header("Bônus ao Concluir Duração (Ex: Investimento à Longo Prazo)")]
+        public StatBlock expirationStatBonus = new StatBlock(0, 0, 0, 0, 0);
+
+        [Header("Variação Aleatória Mensal (Ex: Criptomoeda do Real)")]
+        public bool hasRandomMonthlySwing = false;
+        public StatId randomSwingStat = StatId.Economy;
+        public int randomSwingMagnitude = 3;
+
+        [Header("Gatilho Sazonal no Calendário (Ex: Comunicador Nato)")]
+        public bool boostLowestStatOnMonthOfYear = false;
+        public int triggerMonthOfYear = 6;
+        public int lowestStatBoostAmount = 30;
+
+        [Header("Regras Especiais de Gameplay")]
+        [Tooltip("Sempre que perder Popularidade, metade do valor perdido é obtido em Relação Internacional (O Grande Irmão).")]
+        public bool convertPopularityLossToRelations = false;
+        [Tooltip("Redução percentual (0..1) no custo de Corrupção de consumíveis/contatos do celular (Aliança com o Legislativo = 0.20).")]
+        public float consumableCorruptionDiscount = 0f;
+        [Tooltip("Chance (0..1) de não acontecer mudança alguma ao responder uma proposta (Sempre Aposte em Nada = 0.10).")]
+        public float ignoreProposalImpactsChance = 0f;
 
         public static PerkDefinition CreateRuntimeInstance(
             string id,

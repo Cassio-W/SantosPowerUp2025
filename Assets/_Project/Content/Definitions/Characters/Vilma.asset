@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Vilma
   m_EditorClassIdentifier: Mandato.Content::Mandato.Content.CharacterDefinition
   id: 7
-  displayName: Vilma
+  displayName: Maria Vilma
   title: "A Gerentona do PAC"
   biography: "Adora gráficos complicados, estocar vento e saudar a mandioca. Técnica e teimosa, mas se perder a base aliada, toma impeachment num estalar de dedos."
   portrait: {fileID: 21300000, guid: 8403b0f3a5da6074396e7c22d5db4b6e, type: 3}
@@ -25,20 +25,29 @@ MonoBehaviour:
     popularApproval: 50
     economy: 50
     corruption: 40
-  overridePoliticalAxis: 0
+  overridePoliticalAxis: 1
   initialPoliticalX: -2
   initialPoliticalY: -2
   lockPoliticalAxis: 0
   startingPerks:
   - {fileID: 11400000, guid: f5b7516c34e45cd4badd13d926224979, type: 2}
-  - {fileID: 11400000, guid: f78e90a6cf4113446a02f0ad16e64e53, type: 2}
+  - {fileID: 11400000, guid: c75c0006918319344afb84af7fcc0006, type: 2}
   startingPerkIds: []
   blockedPerks: []
   blockedPerkIds: []
   extraUnlockedActions: []
   extraUnlockedActionIds: []
+  startingActionCharges: []
   lockedActions: []
   lockedActionIds: []
+  randomizeInitialStats: 0
+  minRandomStatValue: 20
+  maxRandomStatValue: 80
+  randomizeCorruption: 0
+  minRandomCorruptionValue: 10
+  maxRandomCorruptionValue: 40
+  randomStartingPerksCount: 0
+  randomStartingActionsCount: 0
   initialNpcRelations: []
   uniqueAbilityIds: []
   uniqueAbilityDescription: 

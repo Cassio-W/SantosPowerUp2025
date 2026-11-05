@@ -302,7 +302,7 @@ MonoBehaviour:
   abilityTypewriterSpeed: 60
   statsInterpolationDuration: 0.45
   audioSource: {fileID: 0}
-  characterChangeSound: {fileID: 0}
+  characterChangeSound: {fileID: 8300000, guid: 424b132081f0d8342a363a636a5df73d, type: 3}
   characterChangeSoundVolume: 0.8
   typewriterSound: {fileID: 0}
   typewriterSoundVolume: 0.4
@@ -781,7 +781,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   menuUIObjects: []
   mainMenuPresenter: {fileID: 96259231}
-  bypassCharacterSelection: 1
+  bypassCharacterSelection: 0
   defaultCharacterId: 1
   cameraRotationScript: {fileID: 2012787626}
   depthOfFieldVolume: {fileID: 2012787627}

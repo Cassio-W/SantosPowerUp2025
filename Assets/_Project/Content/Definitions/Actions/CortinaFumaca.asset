@@ -19,7 +19,7 @@ MonoBehaviour:
   categoryTag: "A\xE7\xF5es"
   cooldownType: 2
   cooldownTurns: 0
-  unlockByDefault: 1
+  unlockByDefault: 0
   conditions: []
   effects:
   - effectType: 7

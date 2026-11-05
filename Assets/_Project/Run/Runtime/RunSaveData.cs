@@ -94,6 +94,7 @@ namespace Mandato.Run
         public List<NpcStateEntry> npcStates = new List<NpcStateEntry>();
         public List<QuestStateEntry> questStates = new List<QuestStateEntry>();
         public List<ActionCooldownEntry> actionCooldowns = new List<ActionCooldownEntry>();
+        public List<ActionCooldownEntry> actionCharges = new List<ActionCooldownEntry>();
 
         public DeckSaveData deck = new DeckSaveData();
 
@@ -122,13 +123,7 @@ namespace Mandato.Run
             {
                 schemaVersion = 2,
                 seed = runState.seed,
-                stats = new StatBlock(
-                    runState.stats.climaticChanges,
-                    runState.stats.internationalRelations,
-                    runState.stats.popularApproval,
-                    runState.stats.economy,
-                    runState.stats.corruption
-                ),
+                stats = runState.stats != null ? runState.stats.Clone() : new StatBlock(),
                 politicalAxis = runState.politicalAxis != null
                     ? new PoliticalAxis(runState.politicalAxis.x, runState.politicalAxis.y, runState.politicalAxis.isLocked)
                     : new PoliticalAxis(),
@@ -174,6 +169,14 @@ namespace Mandato.Run
                 }
             }
 
+            if (runState.actionCharges != null)
+            {
+                foreach (var kvp in runState.actionCharges)
+                {
+                    save.actionCharges.Add(new ActionCooldownEntry(kvp.Key, kvp.Value));
+                }
+            }
+
             if (runState.scheduledEventsByMonth != null)
             {
                 foreach (var kvp in runState.scheduledEventsByMonth)
@@ -190,13 +193,7 @@ namespace Mandato.Run
             if (runState == null) return;
 
             runState.seed = seed;
-            runState.stats = new StatBlock(
-                stats.climaticChanges,
-                stats.internationalRelations,
-                stats.popularApproval,
-                stats.economy,
-                stats.corruption
-            );
+            runState.stats = stats != null ? stats.Clone() : new StatBlock();
             runState.politicalAxis = politicalAxis != null
                 ? new PoliticalAxis(politicalAxis.x, politicalAxis.y, politicalAxis.isLocked)
                 : new PoliticalAxis();
@@ -250,6 +247,20 @@ namespace Mandato.Run
                     }
                 }
             }
+
+            runState.actionCharges.Clear();
+            if (actionCharges != null)
+            {
+                foreach (var entry in actionCharges)
+                {
+                    if (!string.IsNullOrEmpty(entry.key))
+                    {
+                        runState.actionCharges[entry.key] = entry.value;
+                    }
+                }
+            }
+
+            runState.RefreshMaxStatBonuses();
 
             runState.scheduledEventsByMonth.Clear();
             if (scheduledEventsByMonth != null)

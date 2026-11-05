@@ -18,6 +18,7 @@ namespace Mandato.UI
         public bool isOnCooldown = false;
         public int cooldownTurnsRemaining = 0;
         public bool isConsumed = false;
+        public int remainingCharges = -1;
         public string statusText = string.Empty;
         public List<string> impactTags = new List<string>();
     }
@@ -468,7 +469,8 @@ namespace Mandato.UI
 
             if (modalCategoryBadge != null)
             {
-                modalCategoryBadge.text = !string.IsNullOrEmpty(vm.categoryTag) ? vm.categoryTag.ToUpper() : "CONTATO";
+                string catBase = !string.IsNullOrEmpty(vm.categoryTag) ? vm.categoryTag.ToUpper() : "CONTATO";
+                modalCategoryBadge.text = vm.remainingCharges > 0 ? $"{catBase} • {vm.remainingCharges}x" : catBase;
             }
 
             if (modalAppIcon != null)
@@ -645,7 +647,8 @@ namespace Mandato.UI
             titleLabel.pickingMode = PickingMode.Ignore;
             infoBox.Add(titleLabel);
 
-            string tagText = !string.IsNullOrEmpty(vm.categoryTag) ? vm.categoryTag.ToUpper() : "CONTATO";
+            string tagBase = !string.IsNullOrEmpty(vm.categoryTag) ? vm.categoryTag.ToUpper() : "CONTATO";
+            string tagText = vm.remainingCharges > 0 ? $"{tagBase} • {vm.remainingCharges}x" : tagBase;
             var tagLabel = new Label(tagText);
             tagLabel.AddToClassList("contact-tag");
             tagLabel.pickingMode = PickingMode.Ignore;
@@ -675,7 +678,7 @@ namespace Mandato.UI
             }
             else
             {
-                callBadge.text = "LIGAR 📞";
+                callBadge.text = vm.remainingCharges > 1 ? $"LIGAR ({vm.remainingCharges}x) 📞" : "LIGAR 📞";
                 callBadge.AddToClassList("badge-call");
             }
             row.Add(callBadge);

@@ -50,7 +50,7 @@ namespace Mandato.Run
             if (stats.internationalRelations <= StatBlock.MinValue)
                 return RunTermination.CreateDefeat("Isolamento Internacional: O país sofreu sanções e perdeu apoio externo.");
 
-            if (stats.corruption >= StatBlock.MaxValue)
+            if (stats.corruption >= stats.GetMax(StatId.Corruption))
                 return RunTermination.CreateDefeat("Escândalo de Corrupção: O governo ruiu diante de escândalos sistemáticos.");
 
             // Derrota na Guerra (barra do evento chegou a 0%)

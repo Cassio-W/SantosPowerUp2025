@@ -85,7 +85,7 @@ namespace Mandato.Infrastructure
             // Aplica overrides do personagem escolhido após a inicialização padrão
             if (selectedCharacter != null)
             {
-                CharacterApplicator.Apply(selectedCharacter, stateMachine.RunState);
+                CharacterApplicator.Apply(selectedCharacter, stateMachine.RunState, catalog.Perks, catalog.Actions);
             }
 
             return new RunBootstrapResult(catalog, profileService, stateMachine, seed);

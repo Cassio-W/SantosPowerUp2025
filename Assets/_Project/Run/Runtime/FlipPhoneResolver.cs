@@ -159,12 +159,19 @@ namespace Mandato.Run
                         case FlipPhoneEffectType.StatImpact:
                             if (effect.statImpacts != null)
                             {
-                                runState.ApplyStatImpacts(effect.statImpacts);
-                                report.impactsApplied.climaticChanges += effect.statImpacts.climaticChanges;
-                                report.impactsApplied.economy += effect.statImpacts.economy;
-                                report.impactsApplied.internationalRelations += effect.statImpacts.internationalRelations;
-                                report.impactsApplied.popularApproval += effect.statImpacts.popularApproval;
-                                report.impactsApplied.corruption += effect.statImpacts.corruption;
+                                var effectiveImpacts = effect.statImpacts.Clone();
+                                float corruptionDiscount = GetConsumableCorruptionDiscount(runState, perkCatalog);
+                                if (corruptionDiscount > 0f && effectiveImpacts.corruption > 0)
+                                {
+                                    effectiveImpacts.corruption = UnityEngine.Mathf.RoundToInt(effectiveImpacts.corruption * (1f - corruptionDiscount));
+                                }
+
+                                runState.ApplyStatImpacts(effectiveImpacts, false, perkCatalog);
+                                report.impactsApplied.climaticChanges += effectiveImpacts.climaticChanges;
+                                report.impactsApplied.economy += effectiveImpacts.economy;
+                                report.impactsApplied.internationalRelations += effectiveImpacts.internationalRelations;
+                                report.impactsApplied.popularApproval += effectiveImpacts.popularApproval;
+                                report.impactsApplied.corruption += effectiveImpacts.corruption;
                             }
                             break;
 
@@ -305,7 +312,7 @@ namespace Mandato.Run
                                 {
                                     duration = pDef.durationMonths;
                                 }
-                                runState.GrantPerk(effTargetId, duration);
+                                runState.GrantPerk(effTargetId, duration, perkCatalog);
                                 report.grantedPerkIds.Add(effTargetId);
                             }
                             break;
@@ -343,6 +350,28 @@ namespace Mandato.Run
             report.resultingTermination = runState.termination;
 
             return report;
+        }
+
+        public static float GetConsumableCorruptionDiscount(RunState runState, IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null)
+        {
+            if (runState == null || runState.activePerkIds == null) return 0f;
+
+            float maxDiscount = 0f;
+            foreach (var perkId in runState.activePerkIds)
+            {
+                if (string.IsNullOrEmpty(perkId)) continue;
+                if (perkCatalog != null && perkCatalog.TryGetValue(perkId, out var def) && def != null && def.consumableCorruptionDiscount > 0f)
+                {
+                    if (def.consumableCorruptionDiscount > maxDiscount)
+                        maxDiscount = def.consumableCorruptionDiscount;
+                }
+                else if (string.Equals(perkId, "AliancaLegislativo", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (0.20f > maxDiscount)
+                        maxDiscount = 0.20f;
+                }
+            }
+            return UnityEngine.Mathf.Clamp01(maxDiscount);
         }
     }
 }

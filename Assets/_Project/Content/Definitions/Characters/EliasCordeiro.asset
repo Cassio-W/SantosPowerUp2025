@@ -20,12 +20,12 @@ MonoBehaviour:
   modelPrefab: {fileID: 4047350394622487709, guid: 16e4de0f62729694eb1a5ff97f31af79, type: 3}
   overrideInitialStats: 1
   initialStats:
-    climaticChanges: 50
+    climaticChanges: 80
     internationalRelations: 80
-    popularApproval: 45
-    economy: 75
+    popularApproval: 80
+    economy: 80
     corruption: 0
-  overridePoliticalAxis: 0
+  overridePoliticalAxis: 1
   initialPoliticalX: 1
   initialPoliticalY: 1
   lockPoliticalAxis: 0
@@ -35,8 +35,17 @@ MonoBehaviour:
   blockedPerkIds: []
   extraUnlockedActions: []
   extraUnlockedActionIds: []
+  startingActionCharges: []
   lockedActions: []
   lockedActionIds: []
+  randomizeInitialStats: 0
+  minRandomStatValue: 20
+  maxRandomStatValue: 80
+  randomizeCorruption: 0
+  minRandomCorruptionValue: 10
+  maxRandomCorruptionValue: 40
+  randomStartingPerksCount: 0
+  randomStartingActionsCount: 0
   initialNpcRelations: []
   uniqueAbilityIds: []
   uniqueAbilityDescription: 

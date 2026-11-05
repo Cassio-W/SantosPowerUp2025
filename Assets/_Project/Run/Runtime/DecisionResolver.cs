@@ -66,6 +66,9 @@ namespace Mandato.Run
         /// <summary>Nível da guerra declarada por esta decisão. None se nenhuma.</summary>
         public WarLevel startedWarLevel = WarLevel.None;
 
+        /// <summary>Se verdadeiro, o perk "Sempre Aposte em Nada" anulou as mudanças desta proposta.</summary>
+        public bool impactsIgnoredByPerk = false;
+
         public bool IsRunTerminated => resultingTermination.IsDefeat || resultingTermination.IsVictory;
     }
 
@@ -76,6 +79,28 @@ namespace Mandato.Run
         public const int DefaultProposalPoliticalStep = PoliticalAxis.DefaultProposalStep;
         public const int DefaultRelationPoliticalStep = PoliticalAxis.DefaultRelationStep;
 
+        public static float GetIgnoreProposalImpactsChance(RunState runState, IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null)
+        {
+            if (runState == null || runState.activePerkIds == null) return 0f;
+
+            float maxChance = 0f;
+            foreach (var perkId in runState.activePerkIds)
+            {
+                if (string.IsNullOrEmpty(perkId)) continue;
+                if (perkCatalog != null && perkCatalog.TryGetValue(perkId, out var def) && def != null && def.ignoreProposalImpactsChance > 0f)
+                {
+                    if (def.ignoreProposalImpactsChance > maxChance)
+                        maxChance = def.ignoreProposalImpactsChance;
+                }
+                else if (string.Equals(perkId, "SempreAposteEmNada", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (0.10f > maxChance)
+                        maxChance = 0.10f;
+                }
+            }
+            return maxChance;
+        }
+
         public static ResolutionReport Resolve(
             RunState runState,
             DeckState deckState,
@@ -83,7 +108,8 @@ namespace Mandato.Run
             int choiceIndex,
             IReadOnlyDictionary<string, QuestDefinition> questCatalog = null,
             IReadOnlyDictionary<string, PerkDefinition> perkCatalog = null,
-            IReadOnlyDictionary<string, NpcDefinition> npcCatalog = null)
+            IReadOnlyDictionary<string, NpcDefinition> npcCatalog = null,
+            float? customIgnoreRoll = null)
         {
             if (runState == null || card == null) return null;
             if (choiceIndex < 0 || choiceIndex > 1) return null;
@@ -107,44 +133,81 @@ namespace Mandato.Run
                 npcId = resolvedNpcId
             };
 
-            // 1. Aplica impactos em atributos
-            runState.ApplyStatImpacts(choice.statImpacts, choice.hasCorruptionMods);
-            report.statsAfter = runState.stats.Clone();
-            report.impactsApplied = choice.statImpacts?.Clone() ?? new StatBlock(0, 0, 0, 0, 0);
-
-            // 2. Aplica deslocamento do eixo político da escolha
-            if (choice.deltaPoliticalX != 0 || choice.deltaPoliticalY != 0)
+            // Verifica o perk "Sempre Aposte em Nada" (10% de chance de não acontecer mudança alguma)
+            float ignoreChance = GetIgnoreProposalImpactsChance(runState, perkCatalog);
+            bool ignoreImpacts = false;
+            if (ignoreChance > 0f)
             {
-                runState.ApplyPoliticalDelta(choice.deltaPoliticalX, choice.deltaPoliticalY);
-            }
-
-            // Deslocamento na direção do eixo político do NPC (ao aceitar proposta)
-            int npcPolDeltaX = 0;
-            int npcPolDeltaY = 0;
-            if (choiceIndex == 0) // Apenas aceitar proposta desloca em direção ao viés do NPC
-            {
-                NpcDefinition resolvedNpc = card.npc;
-                if (resolvedNpc == null && !string.IsNullOrEmpty(resolvedNpcId) && npcCatalog != null)
+                float roll;
+                if (customIgnoreRoll.HasValue)
                 {
-                    npcCatalog.TryGetValue(resolvedNpcId, out resolvedNpc);
+                    roll = customIgnoreRoll.Value;
+                }
+                else
+                {
+                    int hashSeed = (runState.seed != 0 ? runState.seed : Environment.TickCount)
+                                   ^ (runState.calendar.currentMonthIndex * 7919)
+                                   ^ ((runState.decisionHistory?.Count ?? 0) * 104729);
+                    roll = (float)new Random(hashSeed).NextDouble();
                 }
 
-                if (resolvedNpc != null)
+                if (roll < ignoreChance)
                 {
-                    var (pDx, pDy) = runState.MovePoliticalAxisTowards(
-                        resolvedNpc.politicalBiasX,
-                        resolvedNpc.politicalBiasY,
-                        DefaultProposalPoliticalStep
-                    );
-                    npcPolDeltaX = pDx;
-                    npcPolDeltaY = pDy;
+                    ignoreImpacts = true;
+                    report.impactsIgnoredByPerk = true;
                 }
             }
 
-            report.deltaPoliticalX = choice.deltaPoliticalX + npcPolDeltaX;
-            report.deltaPoliticalY = choice.deltaPoliticalY + npcPolDeltaY;
-            report.npcPoliticalDeltaX = npcPolDeltaX;
-            report.npcPoliticalDeltaY = npcPolDeltaY;
+            if (ignoreImpacts)
+            {
+                report.statsAfter = runState.stats.Clone();
+                report.impactsApplied = new StatBlock(0, 0, 0, 0, 0);
+                report.deltaPoliticalX = 0;
+                report.deltaPoliticalY = 0;
+                report.npcPoliticalDeltaX = 0;
+                report.npcPoliticalDeltaY = 0;
+            }
+            else
+            {
+                // 1. Aplica impactos em atributos
+                runState.ApplyStatImpacts(choice.statImpacts, choice.hasCorruptionMods, perkCatalog);
+                report.statsAfter = runState.stats.Clone();
+                report.impactsApplied = choice.statImpacts?.Clone() ?? new StatBlock(0, 0, 0, 0, 0);
+
+                // 2. Aplica deslocamento do eixo político da escolha
+                if (choice.deltaPoliticalX != 0 || choice.deltaPoliticalY != 0)
+                {
+                    runState.ApplyPoliticalDelta(choice.deltaPoliticalX, choice.deltaPoliticalY);
+                }
+
+                // Deslocamento na direção do eixo político do NPC (ao aceitar proposta)
+                int npcPolDeltaX = 0;
+                int npcPolDeltaY = 0;
+                if (choiceIndex == 0) // Apenas aceitar proposta desloca em direção ao viés do NPC
+                {
+                    NpcDefinition resolvedNpc = card.npc;
+                    if (resolvedNpc == null && !string.IsNullOrEmpty(resolvedNpcId) && npcCatalog != null)
+                    {
+                        npcCatalog.TryGetValue(resolvedNpcId, out resolvedNpc);
+                    }
+
+                    if (resolvedNpc != null)
+                    {
+                        var (pDx, pDy) = runState.MovePoliticalAxisTowards(
+                            resolvedNpc.politicalBiasX,
+                            resolvedNpc.politicalBiasY,
+                            DefaultProposalPoliticalStep
+                        );
+                        npcPolDeltaX = pDx;
+                        npcPolDeltaY = pDy;
+                    }
+                }
+
+                report.deltaPoliticalX = choice.deltaPoliticalX + npcPolDeltaX;
+                report.deltaPoliticalY = choice.deltaPoliticalY + npcPolDeltaY;
+                report.npcPoliticalDeltaX = npcPolDeltaX;
+                report.npcPoliticalDeltaY = npcPolDeltaY;
+            }
 
             // 3. Atualiza o baralho (injeção e remoção)
             if (deckState != null)
@@ -177,7 +240,7 @@ namespace Mandato.Run
                 {
                     duration = perkDef.durationMonths;
                 }
-                runState.GrantPerk(perkToGrant, duration);
+                runState.GrantPerk(perkToGrant, duration, perkCatalog);
             }
 
             // 5. Agenda evento interativo se a escolha definir um

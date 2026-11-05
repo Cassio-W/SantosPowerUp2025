@@ -15,14 +15,19 @@ MonoBehaviour:
   id: AliancaEUA
   title: "Alian\xE7a Estrat\xE9gica com os EUA"
   description: "Acordo diplomático bilateral. Se as Relações Internacionais chegarem a 0, restaura para 30 e consome o acordo."
+  title: "Alian\xE7a com os EUA"
+  description: "Em vez de Game Over, zerar Rela\xE7\xF5es Internacionais consome seu perk e restaura o valor para 30."
   icon: {fileID: 21300000, guid: 1f1011ece3d947243b0d8cd77a437885, type: 3}
   isPassive: 0
   isOneTimeUse: 1
   durationMonths: 0
   isEmergencyRescue: 1
+  rescueAnyDepletedStat: 0
   rescueStat: 1
   rescueRestoreValue: 30
   rescueMessage: "Aliança com os EUA ativada! Relações internacionais restauradas para 30."
+  rechargeMonths: 0
+  rescueMessage: "Alian\xE7a com os EUA ativada! Rela\xE7\xF5es internacionais restauradas para 30."
   statDeltasPerMonth:
     climaticChanges: 0
     internationalRelations: 0
@@ -30,3 +35,27 @@ MonoBehaviour:
     economy: 0
     corruption: 0
   corruptionImmunity: 0
+  hasMonthlyCondition: 0
+  conditionStat: 1
+  conditionMinStatValue: 51
+  maxStatBonuses:
+    climaticChanges: 0
+    internationalRelations: 0
+    popularApproval: 0
+    economy: 0
+    corruption: 0
+  expirationStatBonus:
+    climaticChanges: 0
+    internationalRelations: 0
+    popularApproval: 0
+    economy: 0
+    corruption: 0
+  hasRandomMonthlySwing: 0
+  randomSwingStat: 3
+  randomSwingMagnitude: 3
+  boostLowestStatOnMonthOfYear: 0
+  triggerMonthOfYear: 6
+  lowestStatBoostAmount: 30
+  convertPopularityLossToRelations: 0
+  consumableCorruptionDiscount: 0
+  ignoreProposalImpactsChance: 0

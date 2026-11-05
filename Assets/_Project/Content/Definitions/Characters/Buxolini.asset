@@ -25,25 +25,41 @@ MonoBehaviour:
     popularApproval: 35
     economy: 50
     corruption: 50
-  overridePoliticalAxis: 0
+  overridePoliticalAxis: 1
   initialPoliticalX: 0
   initialPoliticalY: 4
   lockPoliticalAxis: 0
-  startingPerks: []
+  startingPerks:
+  - {fileID: 11400000, guid: c75c0001918319344afb84af7fcc0001, type: 2}
+  - {fileID: 11400000, guid: c75c0005918319344afb84af7fcc0005, type: 2}
   startingPerkIds: []
   blockedPerks: []
   blockedPerkIds: []
   extraUnlockedActions:
-  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00002, type: 2}
-  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00005, type: 2}
-  - {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0002b, type: 2}
-  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00001, type: 2}
-  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00004, type: 2}
   - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00003, type: 2}
-  - {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0001a, type: 2}
+  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00002, type: 2}
+  - {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0002b, type: 2}
   extraUnlockedActionIds: []
+  startingActionCharges:
+  - action: {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00003, type: 2}
+    actionId: 
+    charges: 3
+  - action: {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00002, type: 2}
+    actionId: 
+    charges: 1
+  - action: {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0002b, type: 2}
+    actionId: 
+    charges: 1
   lockedActions: []
   lockedActionIds: []
+  randomizeInitialStats: 0
+  minRandomStatValue: 20
+  maxRandomStatValue: 80
+  randomizeCorruption: 0
+  minRandomCorruptionValue: 10
+  maxRandomCorruptionValue: 40
+  randomStartingPerksCount: 0
+  randomStartingActionsCount: 0
   initialNpcRelations: []
   uniqueAbilityIds: []
   uniqueAbilityDescription: 

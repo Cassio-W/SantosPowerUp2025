@@ -152,12 +152,52 @@ namespace Mandato.Infrastructure
                 }
             }
 
-            // 9. Personagens
+            // 9. Personagens (e garante registro de perks/ações referenciados diretamente no personagem)
             if (charactersList != null)
             {
                 foreach (var ch in charactersList)
                 {
-                    if (ch != null && !string.IsNullOrEmpty(ch.id)) characters[ch.id] = ch;
+                    if (ch == null) continue;
+                    if (!string.IsNullOrEmpty(ch.id)) characters[ch.id] = ch;
+
+                    if (ch.startingPerks != null)
+                    {
+                        foreach (var sp in ch.startingPerks)
+                        {
+                            if (sp != null)
+                            {
+                                string pKey = !string.IsNullOrEmpty(sp.id) ? sp.id : sp.name;
+                                if (!string.IsNullOrEmpty(pKey) && !perks.ContainsKey(pKey))
+                                    perks[pKey] = sp;
+                            }
+                        }
+                    }
+
+                    if (ch.extraUnlockedActions != null)
+                    {
+                        foreach (var act in ch.extraUnlockedActions)
+                        {
+                            if (act != null)
+                            {
+                                string aKey = !string.IsNullOrEmpty(act.id) ? act.id : act.name;
+                                if (!string.IsNullOrEmpty(aKey) && !actions.ContainsKey(aKey))
+                                    actions[aKey] = act;
+                            }
+                        }
+                    }
+
+                    if (ch.startingActionCharges != null)
+                    {
+                        foreach (var entry in ch.startingActionCharges)
+                        {
+                            if (entry.action != null)
+                            {
+                                string aKey = !string.IsNullOrEmpty(entry.action.id) ? entry.action.id : entry.action.name;
+                                if (!string.IsNullOrEmpty(aKey) && !actions.ContainsKey(aKey))
+                                    actions[aKey] = entry.action;
+                            }
+                        }
+                    }
                 }
             }
 

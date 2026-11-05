@@ -15,18 +15,48 @@ MonoBehaviour:
   id: TratadoInternacional
   title: Tratado Comercial do Oriente
   description: "Abertura de novos mercados bilaterais e fluxos de com\xE9rcio exterior."
+  title: Tratado com o Oriente
+  description: "Com Rela\xE7\xE3o Internacional acima de 50, Popularidade e Economia aumentam em 1 por m\xEAs."
   icon: {fileID: 21300000, guid: 4a04876d9abd37745933edd9355bc8be, type: 3}
   isPassive: 1
   isOneTimeUse: 0
   durationMonths: 0
   isEmergencyRescue: 0
+  rescueAnyDepletedStat: 0
   rescueStat: 0
   rescueRestoreValue: 35
+  rechargeMonths: 0
   rescueMessage: 
   statDeltasPerMonth:
     climaticChanges: 0
     internationalRelations: 4
+    internationalRelations: 0
+    popularApproval: 1
+    economy: 1
+    corruption: 0
+  hasMonthlyCondition: 1
+  conditionStat: 1
+  conditionMinStatValue: 51
+  maxStatBonuses:
+    climaticChanges: 0
+    internationalRelations: 0
     popularApproval: 0
     economy: 2
+    economy: 0
     corruption: 0
   corruptionImmunity: 0
+  expirationStatBonus:
+    climaticChanges: 0
+    internationalRelations: 0
+    popularApproval: 0
+    economy: 0
+    corruption: 0
+  hasRandomMonthlySwing: 0
+  randomSwingStat: 3
+  randomSwingMagnitude: 3
+  boostLowestStatOnMonthOfYear: 0
+  triggerMonthOfYear: 6
+  lowestStatBoostAmount: 30
+  convertPopularityLossToRelations: 0
+  consumableCorruptionDiscount: 0
+  ignoreProposalImpactsChance: 0

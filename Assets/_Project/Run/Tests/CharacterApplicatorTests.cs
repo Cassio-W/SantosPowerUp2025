@@ -140,5 +140,78 @@ namespace Mandato.Run.Tests
 
             Assert.AreEqual("char_leader", restoredState.activeCharacterId);
         }
+
+        [Test]
+        public void Apply_WithStartingActionCharges_SetsMultiChargeSupport()
+        {
+            var character = CharacterDefinition.CreateRuntimeInstance("char_buxo", "Buxollini");
+            character.startingActionCharges = new List<StartingActionCharge>
+            {
+                new StartingActionCharge { actionId = "action_policia_federal", charges = 3 },
+                new StartingActionCharge { actionId = "action_assassino_aluguel", charges = 1 }
+            };
+
+            var state = new RunState();
+            CharacterApplicator.Apply(character, state);
+
+            Assert.IsTrue(state.IsActionUnlocked("action_policia_federal"));
+            Assert.AreEqual(3, state.GetActionCharges("action_policia_federal"));
+            Assert.IsTrue(state.IsActionUnlocked("action_assassino_aluguel"));
+            Assert.AreEqual(1, state.GetActionCharges("action_assassino_aluguel"));
+        }
+
+        [Test]
+        public void Apply_WithRandomization_RandomizesStatsPerksAndActions()
+        {
+            var character = CharacterDefinition.CreateRuntimeInstance("char_caneta", "Caneta Vermelha");
+            character.randomizeInitialStats = true;
+            character.minRandomStatValue = 30;
+            character.maxRandomStatValue = 70;
+            character.initialStats.corruption = 0;
+            character.randomStartingPerksCount = 1;
+            character.randomStartingActionsCount = 1;
+
+            var perkCatalog = new Dictionary<string, PerkDefinition>
+            {
+                { "Cripto", PerkDefinition.CreateRuntimeInstance("Cripto", "Cripto", "Desc") },
+                { "Imorrivel", PerkDefinition.CreateRuntimeInstance("Imorrivel", "Imorrível", "Desc") }
+            };
+            var actionCatalog = new Dictionary<string, FlipPhoneActionDefinition>
+            {
+                { "action_pf", FlipPhoneActionDefinition.CreateRuntimeInstance("action_pf", "PF", "Desc", unlockByDefault: false) },
+                { "action_influencers", FlipPhoneActionDefinition.CreateRuntimeInstance("action_influencers", "Influencers", "Desc", unlockByDefault: false) }
+            };
+
+            var state = new RunState(seed: 999);
+            CharacterApplicator.Apply(character, state, perkCatalog, actionCatalog);
+
+            Assert.GreaterOrEqual(state.stats.climaticChanges, 30);
+            Assert.LessOrEqual(state.stats.climaticChanges, 70);
+            Assert.GreaterOrEqual(state.stats.economy, 30);
+            Assert.LessOrEqual(state.stats.economy, 70);
+            Assert.AreEqual(0, state.stats.corruption);
+            Assert.AreEqual(1, state.activePerks.Count);
+            Assert.AreEqual(1, state.unlockedActionIds.Count);
+        }
+
+        [Test]
+        public void Apply_WithRandomCorruption_RandomizesCorruptionInRange()
+        {
+            var character = CharacterDefinition.CreateRuntimeInstance("char_caneta_corrupt", "Caneta Vermelha");
+            character.randomizeInitialStats = true;
+            character.minRandomStatValue = 20;
+            character.maxRandomStatValue = 80;
+            character.randomizeCorruption = true;
+            character.minRandomCorruptionValue = 10;
+            character.maxRandomCorruptionValue = 40;
+
+            var state = new RunState(seed: 12345);
+            CharacterApplicator.Apply(character, state);
+
+            Assert.GreaterOrEqual(state.stats.climaticChanges, 20);
+            Assert.LessOrEqual(state.stats.climaticChanges, 80);
+            Assert.GreaterOrEqual(state.stats.corruption, 10);
+            Assert.LessOrEqual(state.stats.corruption, 40);
+        }
     }
 }

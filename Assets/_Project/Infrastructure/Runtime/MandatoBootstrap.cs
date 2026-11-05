@@ -109,6 +109,8 @@ namespace Mandato.Infrastructure
                 ? presentationBindings.TutorialManager.GetConfiguredCards()
                 : new List<CardDefinition>();
 
+            EnsureCatalogsPopulated();
+
             // 1. Resolve o personagem selecionado no menu (pode ser null se nenhum foi escolhido)
             var selectedCharacter = ResolveSelectedCharacter();
 
@@ -221,6 +223,61 @@ namespace Mandato.Infrastructure
             else if (phone != null && phone.IsOpen && Input.GetKeyDown(KeyCode.Escape))
             {
                 CloseFlipPhone();
+            }
+        }
+
+        private void EnsureCatalogsPopulated()
+        {
+            if (startingActions == null || startingActions.Count == 0)
+            {
+                startingActions = new List<FlipPhoneActionDefinition>();
+                var loadedActions = Resources.LoadAll<FlipPhoneActionDefinition>("");
+                if (loadedActions != null && loadedActions.Length > 0)
+                {
+                    startingActions.AddRange(loadedActions);
+                }
+
+#if UNITY_EDITOR
+                if (startingActions.Count == 0)
+                {
+                    string[] guids = UnityEditor.AssetDatabase.FindAssets("t:FlipPhoneActionDefinition");
+                    foreach (var g in guids)
+                    {
+                        string path = UnityEditor.AssetDatabase.GUIDToAssetPath(g);
+                        var act = UnityEditor.AssetDatabase.LoadAssetAtPath<FlipPhoneActionDefinition>(path);
+                        if (act != null && !startingActions.Contains(act))
+                        {
+                            startingActions.Add(act);
+                        }
+                    }
+                }
+#endif
+            }
+
+            if (perksCatalog == null || perksCatalog.Count == 0)
+            {
+                perksCatalog = new List<PerkDefinition>();
+                var loadedPerks = Resources.LoadAll<PerkDefinition>("");
+                if (loadedPerks != null && loadedPerks.Length > 0)
+                {
+                    perksCatalog.AddRange(loadedPerks);
+                }
+
+#if UNITY_EDITOR
+                if (perksCatalog.Count == 0)
+                {
+                    string[] guids = UnityEditor.AssetDatabase.FindAssets("t:PerkDefinition");
+                    foreach (var g in guids)
+                    {
+                        string path = UnityEditor.AssetDatabase.GUIDToAssetPath(g);
+                        var p = UnityEditor.AssetDatabase.LoadAssetAtPath<PerkDefinition>(path);
+                        if (p != null && !perksCatalog.Contains(p))
+                        {
+                            perksCatalog.Add(p);
+                        }
+                    }
+                }
+#endif
             }
         }
 

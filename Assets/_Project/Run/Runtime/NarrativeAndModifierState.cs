@@ -89,8 +89,10 @@ namespace Mandato.Run
         public string perkId = string.Empty;
         public int remainingMonths = 0; // 0 = permanente
         public int timesUsed = 0;
+        public int cooldownMonths = 0; // > 0 = em recarga (ex: Imorrível recarrega a cada 18 meses)
 
         public bool IsExpired => remainingMonths < 0;
+        public bool IsOnCooldown => cooldownMonths > 0;
 
         public ActivePerkState() { }
 
@@ -99,6 +101,7 @@ namespace Mandato.Run
             perkId = id ?? string.Empty;
             remainingMonths = duration;
             timesUsed = 0;
+            cooldownMonths = 0;
         }
 
         public void TickMonth()
@@ -106,6 +109,10 @@ namespace Mandato.Run
             if (remainingMonths > 0)
             {
                 remainingMonths--;
+            }
+            if (cooldownMonths > 0)
+            {
+                cooldownMonths--;
             }
         }
     }

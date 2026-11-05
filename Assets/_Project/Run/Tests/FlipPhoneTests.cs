@@ -740,5 +740,64 @@ namespace Mandato.Run.Tests
                 "Ação mista com efeito de NPC aplicável deve ficar disponível na festa"
             );
         }
+
+        [Test]
+        public void MultiCharge_SingleUseAction_CanBeUsedThreeTimesBeforeConsumed()
+        {
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_policia_federal",
+                "Polícia Federal",
+                "Uso múltiplo (3x)",
+                cooldownType: FlipPhoneCooldownType.SingleUse,
+                unlockByDefault: false
+            );
+            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 0, 0, 10)));
+
+            runState.UnlockAction(action.id, charges: 3);
+            Assert.AreEqual(3, runState.GetActionCharges(action.id));
+
+            // 1º uso: restam 2 cargas
+            var r1 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsTrue(r1.success);
+            Assert.IsFalse(runState.IsActionConsumed(action.id));
+            Assert.AreEqual(2, runState.GetActionCharges(action.id));
+
+            // 2º uso: resta 1 carga
+            var r2 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsTrue(r2.success);
+            Assert.IsFalse(runState.IsActionConsumed(action.id));
+            Assert.AreEqual(1, runState.GetActionCharges(action.id));
+
+            // 3º uso: 0 cargas restantes -> consumida!
+            var r3 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsTrue(r3.success);
+            Assert.IsTrue(runState.IsActionConsumed(action.id));
+            Assert.AreEqual(0, runState.GetActionCharges(action.id));
+
+            // 4º uso: falha
+            var r4 = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsFalse(r4.success);
+        }
+
+        [Test]
+        public void AliancaLegislativo_ReducesPositiveCorruptionFromActionBy20Percent()
+        {
+            var action = FlipPhoneActionDefinition.CreateRuntimeInstance(
+                "action_pf",
+                "Polícia Federal",
+                "+20 Corrupção",
+                cooldownType: FlipPhoneCooldownType.None,
+                unlockByDefault: true
+            );
+            action.effects.Add(FlipPhoneEffect.CreateStatImpact(new StatBlock(0, 0, 0, 0, 20)));
+
+            runState.GrantPerk("AliancaLegislativo", duration: 48);
+            runState.stats.corruption = 10;
+
+            var report = FlipPhoneResolver.ResolveUse(runState, deckState, action, catalog);
+            Assert.IsTrue(report.success);
+            // 20 * 0.8 = 16 -> 10 + 16 = 26
+            Assert.AreEqual(26, runState.stats.corruption);
+        }
     }
 }

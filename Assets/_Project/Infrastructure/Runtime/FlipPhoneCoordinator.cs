@@ -82,6 +82,11 @@ namespace Mandato.Infrastructure
                     stateMachine.RunState.GetNpcRelation
                 );
                 bool isUnlocked = stateMachine.RunState.IsActionUnlocked(action.id) || action.unlockByDefault;
+                if (!isUnlocked) continue;
+
+                int remainingCharges = action.cooldownType == FlipPhoneCooldownType.SingleUse
+                    ? stateMachine.RunState.GetActionCharges(action.id)
+                    : -1;
 
                 string statusText = string.Empty;
                 if (!isNpcAvailable)
@@ -96,7 +101,7 @@ namespace Mandato.Infrastructure
                 {
                     statusText = $"{cooldownTurns}T RECARGA";
                 }
-                else if (!conditionsMet || !isUnlocked)
+                else if (!conditionsMet)
                 {
                     statusText = "BLOQUEADO";
                 }
@@ -113,6 +118,7 @@ namespace Mandato.Infrastructure
                     isOnCooldown = onCooldown,
                     cooldownTurnsRemaining = cooldownTurns,
                     isConsumed = isConsumed,
+                    remainingCharges = remainingCharges,
                     statusText = statusText
                 };
 

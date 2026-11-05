@@ -19,7 +19,7 @@ MonoBehaviour:
   categoryTag: Especiais
   cooldownType: 2
   cooldownTurns: 6
-  unlockByDefault: 1
+  unlockByDefault: 0
   conditions: []
   effects:
   - effectType: 0

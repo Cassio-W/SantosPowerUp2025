@@ -21959,6 +21959,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f78e90a6cf4113446a02f0ad16e64e53, type: 2}
   - {fileID: 11400000, guid: f5b7516c34e45cd4badd13d926224979, type: 2}
   - {fileID: 11400000, guid: e7c78e7a20fb5d343b7a60e1688b05d2, type: 2}
+  - {fileID: 11400000, guid: c75c0001918319344afb84af7fcc0001, type: 2}
+  - {fileID: 11400000, guid: c75c0002918319344afb84af7fcc0002, type: 2}
+  - {fileID: 11400000, guid: c75c0003918319344afb84af7fcc0003, type: 2}
+  - {fileID: 11400000, guid: c75c0004918319344afb84af7fcc0004, type: 2}
+  - {fileID: 11400000, guid: c75c0005918319344afb84af7fcc0005, type: 2}
+  - {fileID: 11400000, guid: c75c0006918319344afb84af7fcc0006, type: 2}
+  - {fileID: 11400000, guid: c75c0007918319344afb84af7fcc0007, type: 2}
+  - {fileID: 11400000, guid: c75c0008918319344afb84af7fcc0008, type: 2}
   eventsCatalog: []
   questsCatalog: []
   npcsCatalog: []
@@ -21968,7 +21976,14 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a10100038471ade47bf5fc0f3da00003, type: 2}
   - {fileID: 11400000, guid: a10100048471ade47bf5fc0f3da00004, type: 2}
   warEventDefinition: {fileID: 11400000, guid: bc778674003dffc4c95391a2c9b91584, type: 2}
-  startingActions: []
+  startingActions:
+  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00001, type: 2}
+  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00002, type: 2}
+  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00003, type: 2}
+  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00004, type: 2}
+  - {fileID: 11400000, guid: a11f84b68471ade47bf5fc0f3da00005, type: 2}
+  - {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0001a, type: 2}
+  - {fileID: 11400000, guid: e51f84b68471ade47bf5fc0f3da0002b, type: 2}
   availableCharacters:
   - {fileID: 11400000, guid: 4178fee9e90677a43a93f283b4a5cd33, type: 2}
   - {fileID: 11400000, guid: 6ba95eca0554d864b8b12aeabea1d4bf, type: 2}
@@ -37723,7 +37738,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c50161e3910afac4e874d6fedfd65776, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Mandato.Infrastructure::Mandato.Infrastructure.TutorialManager
-  playTutorial: 1
+  playTutorial: 0
   tutorialNpcName: "Secret\xE1rio"
   tutorialNpcPrefab: {fileID: 3285974473764398035, guid: d9af8c14a7526b24ba69d557da661a27, type: 3}
   spawnPoint: {fileID: 0}

@@ -37,6 +37,12 @@ namespace Mandato.Core
         [Range(MinDelta, MaxDelta)]
         public int corruption = DefaultInitialCorruption;
 
+        [HideInInspector] public int maxClimaticChangesBonus = 0;
+        [HideInInspector] public int maxInternationalRelationsBonus = 0;
+        [HideInInspector] public int maxPopularApprovalBonus = 0;
+        [HideInInspector] public int maxEconomyBonus = 0;
+        [HideInInspector] public int maxCorruptionBonus = 0;
+
         public StatBlock()
         {
             ResetToDefaults();
@@ -44,11 +50,11 @@ namespace Mandato.Core
 
         public StatBlock(int climate, int relations, int approval, int eco, int corrupt, bool clamp = false)
         {
-            climaticChanges = clamp ? Clamp(climate) : climate;
-            internationalRelations = clamp ? Clamp(relations) : relations;
-            popularApproval = clamp ? Clamp(approval) : approval;
-            economy = clamp ? Clamp(eco) : eco;
-            corruption = clamp ? Clamp(corrupt) : corrupt;
+            climaticChanges = clamp ? Clamp(climate, MaxValue + maxClimaticChangesBonus) : climate;
+            internationalRelations = clamp ? Clamp(relations, MaxValue + maxInternationalRelationsBonus) : relations;
+            popularApproval = clamp ? Clamp(approval, MaxValue + maxPopularApprovalBonus) : approval;
+            economy = clamp ? Clamp(eco, MaxValue + maxEconomyBonus) : eco;
+            corruption = clamp ? Clamp(corrupt, MaxValue + maxCorruptionBonus) : corrupt;
         }
 
         public void ResetToDefaults()
@@ -58,6 +64,62 @@ namespace Mandato.Core
             popularApproval = DefaultInitialValue;
             economy = DefaultInitialValue;
             corruption = DefaultInitialCorruption;
+            ResetMaxBonuses();
+        }
+
+        public void ResetMaxBonuses()
+        {
+            maxClimaticChangesBonus = 0;
+            maxInternationalRelationsBonus = 0;
+            maxPopularApprovalBonus = 0;
+            maxEconomyBonus = 0;
+            maxCorruptionBonus = 0;
+        }
+
+        public int GetMaxBonus(StatId id)
+        {
+            return id switch
+            {
+                StatId.ClimaticChanges => maxClimaticChangesBonus,
+                StatId.InternationalRelations => maxInternationalRelationsBonus,
+                StatId.PopularApproval => maxPopularApprovalBonus,
+                StatId.Economy => maxEconomyBonus,
+                StatId.Corruption => maxCorruptionBonus,
+                _ => 0
+            };
+        }
+
+        public void SetMaxBonus(StatId id, int bonus)
+        {
+            int safeBonus = Math.Max(0, bonus);
+            switch (id)
+            {
+                case StatId.ClimaticChanges:
+                    maxClimaticChangesBonus = safeBonus;
+                    climaticChanges = Clamp(climaticChanges, GetMax(StatId.ClimaticChanges));
+                    break;
+                case StatId.InternationalRelations:
+                    maxInternationalRelationsBonus = safeBonus;
+                    internationalRelations = Clamp(internationalRelations, GetMax(StatId.InternationalRelations));
+                    break;
+                case StatId.PopularApproval:
+                    maxPopularApprovalBonus = safeBonus;
+                    popularApproval = Clamp(popularApproval, GetMax(StatId.PopularApproval));
+                    break;
+                case StatId.Economy:
+                    maxEconomyBonus = safeBonus;
+                    economy = Clamp(economy, GetMax(StatId.Economy));
+                    break;
+                case StatId.Corruption:
+                    maxCorruptionBonus = safeBonus;
+                    corruption = Clamp(corruption, GetMax(StatId.Corruption));
+                    break;
+            }
+        }
+
+        public int GetMax(StatId id)
+        {
+            return MaxValue + Math.Max(0, GetMaxBonus(id));
         }
 
         public int Get(StatId id)
@@ -75,7 +137,7 @@ namespace Mandato.Core
 
         public void Set(StatId id, int value)
         {
-            int clamped = Clamp(value);
+            int clamped = Clamp(value, GetMax(id));
             switch (id)
             {
                 case StatId.ClimaticChanges:
@@ -108,31 +170,39 @@ namespace Mandato.Core
             if (hasCorruptionMods)
             {
                 int corruptionBonus = Mathf.RoundToInt(impacts.corruption * 0.2f);
-                climaticChanges = Clamp(climaticChanges + impacts.climaticChanges);
-                internationalRelations = Clamp(internationalRelations + impacts.internationalRelations + corruptionBonus);
-                popularApproval = Clamp(popularApproval + impacts.popularApproval + corruptionBonus);
-                economy = Clamp(economy + impacts.economy);
-                corruption = Clamp(corruption + impacts.corruption);
+                climaticChanges = Clamp(climaticChanges + impacts.climaticChanges, GetMax(StatId.ClimaticChanges));
+                internationalRelations = Clamp(internationalRelations + impacts.internationalRelations + corruptionBonus, GetMax(StatId.InternationalRelations));
+                popularApproval = Clamp(popularApproval + impacts.popularApproval + corruptionBonus, GetMax(StatId.PopularApproval));
+                economy = Clamp(economy + impacts.economy, GetMax(StatId.Economy));
+                corruption = Clamp(corruption + impacts.corruption, GetMax(StatId.Corruption));
             }
             else
             {
-                climaticChanges = Clamp(climaticChanges + impacts.climaticChanges);
-                internationalRelations = Clamp(internationalRelations + impacts.internationalRelations);
-                popularApproval = Clamp(popularApproval + impacts.popularApproval);
-                economy = Clamp(economy + impacts.economy);
-                corruption = Clamp(corruption + impacts.corruption);
+                climaticChanges = Clamp(climaticChanges + impacts.climaticChanges, GetMax(StatId.ClimaticChanges));
+                internationalRelations = Clamp(internationalRelations + impacts.internationalRelations, GetMax(StatId.InternationalRelations));
+                popularApproval = Clamp(popularApproval + impacts.popularApproval, GetMax(StatId.PopularApproval));
+                economy = Clamp(economy + impacts.economy, GetMax(StatId.Economy));
+                corruption = Clamp(corruption + impacts.corruption, GetMax(StatId.Corruption));
             }
         }
 
         public StatBlock Clone()
         {
-            return new StatBlock(climaticChanges, internationalRelations, popularApproval, economy, corruption);
+            var copy = new StatBlock(climaticChanges, internationalRelations, popularApproval, economy, corruption)
+            {
+                maxClimaticChangesBonus = maxClimaticChangesBonus,
+                maxInternationalRelationsBonus = maxInternationalRelationsBonus,
+                maxPopularApprovalBonus = maxPopularApprovalBonus,
+                maxEconomyBonus = maxEconomyBonus,
+                maxCorruptionBonus = maxCorruptionBonus
+            };
+            return copy;
         }
 
-        public static int Clamp(int value)
+        public static int Clamp(int value, int max = MaxValue)
         {
             if (value < MinValue) return MinValue;
-            if (value > MaxValue) return MaxValue;
+            if (value > max) return max;
             return value;
         }
     }
